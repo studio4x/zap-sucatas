@@ -1,13 +1,39 @@
+import nodemailer from 'npm:nodemailer@6.10.1'
 import { createAdminClient } from './supabase.ts'
 import { insertIntegrationLog } from './logging.ts'
 
 type ListingStatus = 'approved' | 'pending_review' | 'rejected'
 
-function getEmailProviderConfig() {
+type SmtpConfig = {
+  emailFrom: string
+  emailFromName: string
+  host: string
+  password: string
+  port: number
+  secure: boolean
+  user: string
+}
+
+function getSmtpConfig(): SmtpConfig | null {
+  const host = Deno.env.get('SMTP_HOST')
+  const password = Deno.env.get('SMTP_PASSWORD')
+  const emailFrom = Deno.env.get('EMAIL_FROM')
+
+  if (!host || !password || !emailFrom) {
+    return null
+  }
+
+  const port = Number(Deno.env.get('SMTP_PORT') ?? '465')
+  const secure = (Deno.env.get('SMTP_SECURE') ?? 'true').toLowerCase() === 'true'
+
   return {
-    resendApiKey: Deno.env.get('RESEND_API_KEY'),
-    emailFrom: Deno.env.get('EMAIL_FROM'),
-    emailFromName: Deno.env.get('EMAIL_FROM_NAME') ?? 'Zap Sucatas',
+    host,
+    password,
+    emailFrom,
+    emailFromName: Deno.env.get('EMAIL_FROM_NAME') ?? emailFrom,
+    port: Number.isNaN(port) ? 465 : port,
+    secure,
+    user: Deno.env.get('SMTP_USER') ?? emailFrom,
   }
 }
 
@@ -78,33 +104,30 @@ function renderListingStatusEmail(input: {
   }
 }
 
-async function sendWithResend(input: {
+async function sendWithSmtp(input: {
   from: string
   html: string
   subject: string
   text: string
   to: string
-}, resendApiKey: string) {
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${resendApiKey}`,
-      'Content-Type': 'application/json',
+}, config: SmtpConfig) {
+  const transporter = nodemailer.createTransport({
+    host: config.host,
+    port: config.port,
+    secure: config.secure,
+    auth: {
+      user: config.user,
+      pass: config.password,
     },
-    body: JSON.stringify({
-      from: input.from,
-      to: [input.to],
-      subject: input.subject,
-      html: input.html,
-      text: input.text,
-    }),
   })
 
-  if (!response.ok) {
-    throw new Error(`Resend request failed with status ${response.status}`)
-  }
-
-  return response.json()
+  return transporter.sendMail({
+    from: input.from,
+    to: input.to,
+    subject: input.subject,
+    html: input.html,
+    text: input.text,
+  })
 }
 
 export async function notifyListingStatus(input: {
@@ -112,7 +135,7 @@ export async function notifyListingStatus(input: {
   reason?: string | null
   status: ListingStatus
 }) {
-  const { resendApiKey, emailFrom, emailFromName } = getEmailProviderConfig()
+  const smtpConfig = getSmtpConfig()
   const recipient = await resolveListingOwnerEmail(input.listingId)
   const email = renderListingStatusEmail({
     listingTitle: recipient.listingTitle,
@@ -121,11 +144,11 @@ export async function notifyListingStatus(input: {
     status: input.status,
   })
 
-  if (!resendApiKey || !emailFrom) {
+  if (!smtpConfig) {
     await insertIntegrationLog({
       integrationName: 'email',
       status: 'skipped',
-      message: 'Email provider is not configured.',
+      message: 'SMTP is not configured.',
       payload: {
         listingId: input.listingId,
         recipient: recipient.email,
@@ -136,8 +159,8 @@ export async function notifyListingStatus(input: {
     return { delivered: false, provider: 'none' }
   }
 
-  const from = `${emailFromName} <${emailFrom}>`
-  const providerResponse = await sendWithResend(
+  const from = `${smtpConfig.emailFromName} <${smtpConfig.emailFrom}>`
+  const providerResponse = await sendWithSmtp(
     {
       from,
       to: recipient.email,
@@ -145,7 +168,7 @@ export async function notifyListingStatus(input: {
       html: email.html,
       text: email.text,
     },
-    resendApiKey,
+    smtpConfig,
   )
 
   await insertIntegrationLog({
@@ -156,9 +179,11 @@ export async function notifyListingStatus(input: {
       listingId: input.listingId,
       recipient: recipient.email,
       status: input.status,
-      providerResponse,
+      provider: 'smtp',
+      messageId: providerResponse.messageId ?? null,
+      response: providerResponse.response ?? null,
     },
   })
 
-  return { delivered: true, provider: 'resend' }
+  return { delivered: true, provider: 'smtp' }
 }

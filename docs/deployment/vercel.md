@@ -50,5 +50,15 @@ Estes valores ficam apenas no Supabase ou em execucao administrativa local:
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `SUPABASE_SECRET_KEY`
 - `SUPABASE_ACCESS_TOKEN`
-- `RESEND_API_KEY`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASSWORD`
+- `SMTP_SECURE`
 - `LME_API_KEY`
+
+## SMTP
+
+Os e-mails do produto enviados pelas Edge Functions usam SMTP configurado nos secrets do Supabase.
+
+Os e-mails de autenticacao do Supabase Auth tambem devem usar SMTP customizado no proprio projeto Supabase.
