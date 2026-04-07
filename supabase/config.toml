@@ -18,12 +18,20 @@ sql_paths = ["./seed.sql"]
 
 [auth]
 enabled = true
-site_url = "http://localhost:5173"
+site_url = "https://zap-sucatas.vercel.app"
 additional_redirect_urls = [
   "http://localhost:5173",
   "http://localhost:5173/login",
   "http://localhost:5173/cadastro",
-  "http://localhost:5173/recuperar-senha"
+  "http://localhost:5173/recuperar-senha",
+  "https://zap-sucatas.vercel.app",
+  "https://zap-sucatas.vercel.app/login",
+  "https://zap-sucatas.vercel.app/cadastro",
+  "https://zap-sucatas.vercel.app/recuperar-senha",
+  "https://zapsucatas.com.br",
+  "https://zapsucatas.com.br/login",
+  "https://zapsucatas.com.br/cadastro",
+  "https://zapsucatas.com.br/recuperar-senha"
 ]
 jwt_expiry = 3600
 enable_signup = true

@@ -1,5 +1,5 @@
 import type { Session } from '@supabase/supabase-js'
-import type { AuthRole, SessionUser } from '@/domains/auth/types'
+import type { AuthRole, ProfileStatus, SessionUser } from '@/domains/auth/types'
 import { supabase } from '@/integrations/supabase/client'
 import { env } from '@/lib/env'
 
@@ -37,13 +37,14 @@ type ProfileRow = {
   full_name: string | null
   id: string
   role: AuthRole
+  status: ProfileStatus
 }
 
 async function fetchProfileByAuthUserId(authUserId: string) {
   const client = ensureSupabase()
   const { data, error } = await client
     .from('profiles')
-    .select('id, auth_user_id, full_name, role')
+    .select('id, auth_user_id, full_name, role, status')
     .eq('auth_user_id', authUserId)
     .maybeSingle()
 
@@ -71,6 +72,7 @@ export async function resolveSessionUser(session: Session | null): Promise<Sessi
         ? session.user.user_metadata.full_name
         : null),
     role: profile?.role ?? 'user',
+    status: profile?.status ?? 'under_review',
   }
 }
 
