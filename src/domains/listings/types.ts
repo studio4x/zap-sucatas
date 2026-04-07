@@ -13,6 +13,7 @@ export type ListingImage = {
   id: string
   isCover: boolean
   listingId: string
+  publicUrl: string
   sortOrder: number
   storagePath: string
 }
@@ -28,6 +29,8 @@ export type ListingAttribute = {
 
 export type Listing = {
   categoryId: string
+  categoryName: string | null
+  categorySlug: string | null
   city: string
   conditionType: string | null
   contactName: string | null
@@ -36,7 +39,10 @@ export type Listing = {
   description: string
   expiresAt: string | null
   id: string
+  images: ListingImage[]
   isFeatured: boolean
+  materialName: string | null
+  materialSlug: string | null
   primaryMaterialId: string | null
   priceLabel: string | null
   publishedAt: string | null
@@ -48,4 +54,53 @@ export type Listing = {
   title: string
   updatedAt: string
   userId: string
+}
+
+export type ListingCategory = {
+  description: string | null
+  id: string
+  name: string
+  slug: string
+}
+
+export type ListingMaterial = {
+  id: string
+  name: string
+  slug: string
+}
+
+export type ListingDetails = Listing & {
+  attributes: ListingAttribute[]
+}
+
+export type ListingFormAttribute = {
+  attributeLabel: string
+  attributeValue: string
+}
+
+export type ListingFormValues = {
+  attributes: ListingFormAttribute[]
+  categoryId: string
+  city: string
+  conditionType: string
+  contactName: string
+  contactPhone: string
+  description: string
+  priceLabel: string
+  primaryMaterialId: string
+  state: string
+  summary: string
+  title: string
+}
+
+export type ListingListFilters = {
+  query?: string
+  status?: ListingStatus | 'all'
+}
+
+export type PublicListingFilters = {
+  categoryId?: string
+  city?: string
+  query?: string
+  state?: string
 }

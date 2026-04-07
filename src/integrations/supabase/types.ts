@@ -12,6 +12,216 @@ export type Database = {
     Enums: Record<string, never>
     Functions: Record<string, never>
     Tables: {
+      listing_attributes: {
+        Row: {
+          attribute_key: string
+          attribute_label: string
+          attribute_value: string
+          created_at: string
+          id: string
+          listing_id: string
+        }
+        Insert: {
+          attribute_key: string
+          attribute_label: string
+          attribute_value: string
+          created_at?: string
+          id?: string
+          listing_id: string
+        }
+        Update: {
+          attribute_key?: string
+          attribute_label?: string
+          attribute_value?: string
+          created_at?: string
+          id?: string
+          listing_id?: string
+        }
+        Relationships: []
+      }
+      listing_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      listing_images: {
+        Row: {
+          alt_text: string | null
+          created_at: string
+          id: string
+          is_cover: boolean
+          listing_id: string
+          sort_order: number
+          storage_path: string
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string
+          id?: string
+          is_cover?: boolean
+          listing_id: string
+          sort_order?: number
+          storage_path: string
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string
+          id?: string
+          is_cover?: boolean
+          listing_id?: string
+          sort_order?: number
+          storage_path?: string
+        }
+        Relationships: []
+      }
+      listing_materials: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      listings: {
+        Row: {
+          category_id: string
+          city: string
+          condition_type: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string
+          expires_at: string | null
+          id: string
+          is_featured: boolean
+          price_label: string | null
+          primary_material_id: string | null
+          published_at: string | null
+          rejection_reason: string | null
+          slug: string | null
+          state: string
+          status:
+            | 'approved'
+            | 'archived'
+            | 'draft'
+            | 'expired'
+            | 'paused'
+            | 'pending_review'
+            | 'rejected'
+          summary: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category_id: string
+          city: string
+          condition_type?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description: string
+          expires_at?: string | null
+          id?: string
+          is_featured?: boolean
+          price_label?: string | null
+          primary_material_id?: string | null
+          published_at?: string | null
+          rejection_reason?: string | null
+          slug?: string | null
+          state: string
+          status?:
+            | 'approved'
+            | 'archived'
+            | 'draft'
+            | 'expired'
+            | 'paused'
+            | 'pending_review'
+            | 'rejected'
+          summary?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category_id?: string
+          city?: string
+          condition_type?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string
+          expires_at?: string | null
+          id?: string
+          is_featured?: boolean
+          price_label?: string | null
+          primary_material_id?: string | null
+          published_at?: string | null
+          rejection_reason?: string | null
+          slug?: string | null
+          state?: string
+          status?:
+            | 'approved'
+            | 'archived'
+            | 'draft'
+            | 'expired'
+            | 'paused'
+            | 'pending_review'
+            | 'rejected'
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           auth_user_id: string

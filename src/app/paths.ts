@@ -4,6 +4,7 @@ export const paths = {
   public: {
     home: '/',
     listings: '/anuncios',
+    listingDetails: (slug: string) => `/anuncios/${slug}`,
     categories: '/categorias',
     pricing: '/tabela-de-precos',
     blog: '/blog',
@@ -19,6 +20,7 @@ export const paths = {
     root: '/app',
     listings: '/app/anuncios',
     newListing: '/app/anuncios/novo',
+    editListing: (id: string) => `/app/anuncios/${id}/editar`,
     questions: '/app/perguntas',
     profile: '/app/perfil',
     settings: '/app/configuracoes',
@@ -26,6 +28,7 @@ export const paths = {
   admin: {
     root: '/admin',
     listings: '/admin/anuncios',
+    listingDetails: (id: string) => `/admin/anuncios/${id}`,
     questions: '/admin/perguntas',
     users: '/admin/usuarios',
     categories: '/admin/categorias',
