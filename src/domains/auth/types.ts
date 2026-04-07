@@ -4,14 +4,17 @@ export type AuthStatus = 'authenticated' | 'loading' | 'unauthenticated'
 
 export type SessionUser = {
   email: string
+  fullName: string | null
   id: string
+  profileId: string | null
   role: AuthRole
 }
 
 export type AuthContextValue = {
   isAuthenticated: boolean
-  signInAs: (role: AuthRole) => void
-  signOut: () => void
+  isSupabaseConfigured: boolean
+  refreshUser: () => Promise<void>
+  signOut: () => Promise<void>
   status: AuthStatus
   user: SessionUser | null
 }

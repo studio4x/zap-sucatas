@@ -103,11 +103,7 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'recuperar-senha',
-        element: (
-          <GuestGuard>
-            <ForgotPasswordPage />
-          </GuestGuard>
-        ),
+        element: <ForgotPasswordPage />,
       },
     ],
   },

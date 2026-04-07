@@ -1,34 +1,7 @@
 import { createContext, useEffect, useState, type PropsWithChildren } from 'react'
-import type { AuthContextValue, AuthRole, AuthStatus, SessionUser } from '@/domains/auth/types'
-
-const STORAGE_KEY = 'zap-sucatas:role'
-
-const mockUsers: Record<AuthRole, SessionUser> = {
-  user: {
-    id: 'mock-user',
-    email: 'cliente@zapsucatas.local',
-    role: 'user',
-  },
-  admin: {
-    id: 'mock-admin',
-    email: 'admin@zapsucatas.local',
-    role: 'admin',
-  },
-}
-
-function readStoredUser() {
-  if (typeof window === 'undefined') {
-    return null
-  }
-
-  const storedRole = window.localStorage.getItem(STORAGE_KEY)
-
-  if (storedRole === 'user' || storedRole === 'admin') {
-    return mockUsers[storedRole]
-  }
-
-  return null
-}
+import { loadCurrentSessionUser, resolveSessionUser, signOutFromSupabase } from '@/domains/auth/api'
+import type { AuthContextValue, AuthStatus, SessionUser } from '@/domains/auth/types'
+import { supabase } from '@/integrations/supabase/client'
 
 export const AuthContext = createContext<AuthContextValue | null>(null)
 
@@ -36,34 +9,61 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [status, setStatus] = useState<AuthStatus>('loading')
   const [user, setUser] = useState<SessionUser | null>(null)
 
+  async function refreshUser() {
+    if (!supabase) {
+      setUser(null)
+      setStatus('unauthenticated')
+      return
+    }
+
+    try {
+      setStatus('loading')
+      const currentUser = await loadCurrentSessionUser()
+      setUser(currentUser)
+      setStatus(currentUser ? 'authenticated' : 'unauthenticated')
+    } catch {
+      setUser(null)
+      setStatus('unauthenticated')
+    }
+  }
+
   useEffect(() => {
-    const storedUser = readStoredUser()
-    setUser(storedUser)
-    setStatus(storedUser ? 'authenticated' : 'unauthenticated')
+    if (!supabase) {
+      setStatus('unauthenticated')
+      return
+    }
+
+    void refreshUser()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      void (async () => {
+        const sessionUser = await resolveSessionUser(session)
+        setUser(sessionUser)
+        setStatus(sessionUser ? 'authenticated' : 'unauthenticated')
+      })()
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || status === 'loading') {
-      return
-    }
-
-    if (user) {
-      window.localStorage.setItem(STORAGE_KEY, user.role)
-      return
-    }
-
-    window.localStorage.removeItem(STORAGE_KEY)
-  }, [status, user])
 
   const value: AuthContextValue = {
     status,
     user,
     isAuthenticated: status === 'authenticated',
-    signInAs(role) {
-      setUser(mockUsers[role])
-      setStatus('authenticated')
-    },
-    signOut() {
+    isSupabaseConfigured: Boolean(supabase),
+    refreshUser,
+    async signOut() {
+      if (!supabase) {
+        setUser(null)
+        setStatus('unauthenticated')
+        return
+      }
+
+      await signOutFromSupabase()
       setUser(null)
       setStatus('unauthenticated')
     },
