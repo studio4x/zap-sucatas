@@ -1,13 +1,20 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { RefreshCcw, Upload } from 'lucide-react'
+import { AdminDataTable } from '@/components/admin/admin-data-table'
+import { AdminFilterCard } from '@/components/admin/admin-filter-card'
+import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { AdminPagination } from '@/components/admin/admin-pagination'
+import { AdminRowActions } from '@/components/admin/admin-row-actions'
+import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { PricingChart } from '@/components/pricing/pricing-chart'
 import { PricingHistoryTable } from '@/components/pricing/pricing-history-table'
 import { PricingManualPriceForm } from '@/components/pricing/pricing-manual-price-form'
 import { PricingManualSnapshotForm } from '@/components/pricing/pricing-manual-snapshot-form'
 import { PricingUpdateOverview } from '@/components/pricing/pricing-update-overview'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
 import {
   deleteScrapPriceEntry,
   fetchAdminPricingDashboard,
@@ -16,8 +23,11 @@ import {
   upsertScrapPriceEntry,
 } from '@/domains/pricing/api'
 import type { ManualSnapshotFormValues, ScrapPriceEntryFormValues } from '@/domains/pricing/schemas'
-import type { ScrapPriceEntry } from '@/domains/pricing/types'
+import type { LmePriceSnapshot, ScrapPriceEntry } from '@/domains/pricing/types'
 import { formatPricingDate, formatPricingNumber } from '@/domains/pricing/utils'
+
+const MANUAL_PAGE_SIZE = 8
+const SNAPSHOT_PAGE_SIZE = 10
 
 function toEntryFormValues(entry?: ScrapPriceEntry): ScrapPriceEntryFormValues {
   return {
@@ -25,7 +35,8 @@ function toEntryFormValues(entry?: ScrapPriceEntry): ScrapPriceEntryFormValues {
     isActive: entry?.isActive ?? true,
     materialName: entry?.materialName ?? '',
     priceLabel: entry?.priceLabel ?? '',
-    priceNumeric: typeof entry?.priceNumeric === 'number' ? String(entry.priceNumeric).replace('.', ',') : '',
+    priceNumeric:
+      typeof entry?.priceNumeric === 'number' ? String(entry.priceNumeric).replace('.', ',') : '',
     priceUnit: entry?.priceUnit ?? '',
     regionName: entry?.regionName ?? '',
   }
@@ -51,6 +62,11 @@ export function AdminPricingPage() {
   const queryClient = useQueryClient()
   const [feedback, setFeedback] = useState<string | null>(null)
   const [editingEntry, setEditingEntry] = useState<ScrapPriceEntry | null>(null)
+  const [manualQuery, setManualQuery] = useState('')
+  const [manualStatusFilter, setManualStatusFilter] = useState<'active' | 'all' | 'inactive'>('all')
+  const [providerFilter, setProviderFilter] = useState('all')
+  const [manualPage, setManualPage] = useState(1)
+  const [snapshotPage, setSnapshotPage] = useState(1)
 
   const pricingQuery = useQuery({
     queryKey: ['pricing', 'admin'],
@@ -122,54 +138,57 @@ export function AdminPricingPage() {
     [editingEntry],
   )
   const manualSnapshotDefaults = useMemo(() => toSnapshotFormValues(), [])
-  const sortedManualEntries = useMemo(
-    () =>
-      [...(pricingQuery.data?.manualEntries ?? [])].sort((left, right) =>
-        left.effectiveDate < right.effectiveDate ? 1 : left.effectiveDate > right.effectiveDate ? -1 : 0,
-      ),
-    [pricingQuery.data?.manualEntries],
-  )
 
   if (pricingQuery.isLoading) {
     return (
-      <Card>
-        <CardContent className="p-6 text-sm text-muted-foreground">
-          Carregando gestao de precos...
-        </CardContent>
-      </Card>
+      <div className="rounded-lg border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
+        Carregando gestao de precos...
+      </div>
     )
   }
 
   if (pricingQuery.isError || !pricingQuery.data) {
     return (
-      <Card className="border-rose-200/70 bg-rose-50">
-        <CardContent className="p-6 text-sm text-rose-900">
-          Nao foi possivel carregar o modulo de precos.
-        </CardContent>
-      </Card>
+      <div className="rounded-lg border border-rose-200 bg-rose-50 px-6 py-8 text-sm text-rose-700 shadow-sm">
+        Nao foi possivel carregar o modulo de precos.
+      </div>
     )
   }
 
   const data = pricingQuery.data
+  const providerOptions = ['all', ...new Set(data.recentSnapshots.map((snapshot) => snapshot.providerName))]
+  const filteredManualEntries = data.manualEntries.filter((entry) => {
+    const normalizedQuery = manualQuery.trim().toLowerCase()
+    const matchesQuery =
+      normalizedQuery.length === 0
+        ? true
+        : `${entry.materialName} ${entry.regionName ?? ''} ${entry.priceLabel}`.toLowerCase().includes(normalizedQuery)
+    const matchesStatus =
+      manualStatusFilter === 'all'
+        ? true
+        : manualStatusFilter === 'active'
+          ? entry.isActive
+          : !entry.isActive
+
+    return matchesQuery && matchesStatus
+  })
+  const filteredSnapshots = data.recentSnapshots.filter((snapshot) =>
+    providerFilter === 'all' ? true : snapshot.providerName === providerFilter,
+  )
+  const paginatedManualEntries = filteredManualEntries.slice(
+    (manualPage - 1) * MANUAL_PAGE_SIZE,
+    manualPage * MANUAL_PAGE_SIZE,
+  )
+  const paginatedSnapshots = filteredSnapshots.slice(
+    (snapshotPage - 1) * SNAPSHOT_PAGE_SIZE,
+    snapshotPage * SNAPSHOT_PAGE_SIZE,
+  )
 
   return (
     <section className="space-y-6">
-      <div className="rounded-[1.75rem] border border-border/70 bg-card/90 p-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-              Admin / precos
-            </p>
-            <h1 className="mt-4 font-display text-4xl tracking-tight text-foreground">
-              Operacao da tabela de precos
-            </h1>
-            <p className="mt-3 max-w-4xl text-sm leading-6 text-muted-foreground">
-              Gerencie referencias manuais de sucata, snapshots diarios LME, backfill historico e a
-              sincronizacao com providers publicos.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
+      <AdminPageHeader
+        actions={
+          <>
             <Button disabled={isBusy} onClick={() => latestSyncMutation.mutate()} type="button">
               <RefreshCcw className="size-4" />
               {latestSyncMutation.isPending ? 'Sincronizando...' : 'Sincronizar agora'}
@@ -183,14 +202,17 @@ export function AdminPricingPage() {
               <Upload className="size-4" />
               {backfillMutation.isPending ? 'Importando...' : 'Backfill historico'}
             </Button>
-          </div>
-        </div>
-      </div>
+          </>
+        }
+        description="Gerencie referencias publicas, snapshots diarios, sincronizacao e fallback manual sem depender de plugins externos."
+        eyebrow="Admin / precos"
+        title="Operacao da tabela de precos"
+      />
 
       {feedback ? (
-        <Card className="border-emerald-200/70 bg-emerald-50">
-          <CardContent className="p-5 text-sm text-emerald-900">{feedback}</CardContent>
-        </Card>
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 shadow-sm">
+          {feedback}
+        </div>
       ) : null}
 
       <PricingUpdateOverview
@@ -201,46 +223,212 @@ export function AdminPricingPage() {
         latestValues={data.latestValues}
       />
 
-      <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
+      <AdminFilterCard
+        actions={
+          <Button
+            onClick={() => {
+              setManualQuery('')
+              setManualStatusFilter('all')
+              setProviderFilter('all')
+              setManualPage(1)
+              setSnapshotPage(1)
+            }}
+            type="button"
+            variant="outline"
+          >
+            Limpar filtros
+          </Button>
+        }
+        description="Os filtros controlam tanto a tabela manual quanto a lista de snapshots recentes."
+      >
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_200px_220px]">
+          <Input
+            onChange={(event) => {
+              setManualPage(1)
+              setManualQuery(event.target.value)
+            }}
+            placeholder="Buscar entrada manual por material, regiao ou rotulo"
+            value={manualQuery}
+          />
+          <Select
+            onChange={(event) => {
+              setManualPage(1)
+              setManualStatusFilter(event.target.value as typeof manualStatusFilter)
+            }}
+            value={manualStatusFilter}
+          >
+            <option value="all">Todas as entradas</option>
+            <option value="active">Apenas ativas</option>
+            <option value="inactive">Apenas inativas</option>
+          </Select>
+          <Select
+            onChange={(event) => {
+              setSnapshotPage(1)
+              setProviderFilter(event.target.value)
+            }}
+            value={providerFilter}
+          >
+            {providerOptions.map((provider) => (
+              <option key={provider} value={provider}>
+                {provider === 'all' ? 'Todos os providers' : provider}
+              </option>
+            ))}
+          </Select>
+        </div>
+      </AdminFilterCard>
+
+      <AdminDataTable
+        columns={[
+          {
+            header: 'Material',
+            cell: (entry) => (
+              <div className="space-y-1">
+                <p className="font-medium text-foreground">{entry.materialName}</p>
+                <p className="text-xs text-muted-foreground">{entry.regionName ?? 'Brasil'}</p>
+              </div>
+            ),
+          },
+          {
+            header: 'Preco',
+            cell: (entry) => (
+              <div className="space-y-1">
+                <p className="font-medium text-foreground">{entry.priceLabel}</p>
+                <p className="text-xs text-muted-foreground">
+                  {typeof entry.priceNumeric === 'number'
+                    ? `${formatPricingNumber(entry.priceNumeric, 2)} ${entry.priceUnit ?? ''}`
+                    : 'Sem valor numerico'}
+                </p>
+              </div>
+            ),
+          },
+          {
+            header: 'Vigencia',
+            cell: (entry) => (
+              <span className="text-sm text-muted-foreground">{formatPricingDate(entry.effectiveDate)}</span>
+            ),
+          },
+          {
+            header: 'Status',
+            cell: (entry) => (
+              <AdminStatusBadge tone={entry.isActive ? 'success' : 'neutral'}>
+                {entry.isActive ? 'Ativa' : 'Inativa'}
+              </AdminStatusBadge>
+            ),
+          },
+          {
+            header: 'Acoes',
+            className: 'w-[200px] text-right',
+            cell: (entry) => (
+              <AdminRowActions
+                actions={[
+                  {
+                    label: 'Editar',
+                    onClick: () => setEditingEntry(entry),
+                  },
+                  {
+                    disabled: deletePriceMutation.isPending,
+                    label: 'Remover',
+                    onClick: () => deletePriceMutation.mutate(entry.id),
+                    variant: 'destructive',
+                  },
+                ]}
+              />
+            ),
+          },
+        ]}
+        data={paginatedManualEntries}
+        emptyDescription="Nenhuma entrada manual foi encontrada com os filtros atuais."
+        emptyTitle="Sem referencias manuais"
+        getRowKey={(entry) => entry.id}
+      />
+
+      <AdminPagination
+        currentPage={manualPage}
+        onPageChange={setManualPage}
+        pageSize={MANUAL_PAGE_SIZE}
+        totalItems={filteredManualEntries.length}
+      />
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_360px]">
         <PricingChart series={data.chartSeries} />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Janela analisada</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-[1.25rem] border border-border/70 bg-muted/35 p-4 text-sm leading-6 text-muted-foreground">
-              <p>
-                <span className="font-medium text-foreground">Tabela historica:</span>{' '}
-                {data.historyWindowLabel}
-              </p>
-              <p>
-                <span className="font-medium text-foreground">Grafico:</span> {data.chartWindowLabel}
-              </p>
-              <p>
-                <span className="font-medium text-foreground">Ultima data consolidada:</span>{' '}
-                {formatPricingDate(data.latestQuotedDate)}
-              </p>
-              <p>
-                <span className="font-medium text-foreground">Snapshots na tabela:</span>{' '}
-                {data.historySnapshotCount}
-              </p>
-              <p>
-                <span className="font-medium text-foreground">Snapshots no grafico:</span>{' '}
-                {data.chartSnapshotCount}
-              </p>
-              <p>
-                <span className="font-medium text-foreground">Provider atual:</span> Westmetall +
-                Banco Central PTAX
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="rounded-lg border border-border bg-card p-5 shadow-sm">
+          <p className="text-sm font-semibold text-foreground">Janela operacional</p>
+          <div className="mt-4 grid gap-3 text-sm text-muted-foreground">
+            <p>
+              <span className="font-medium text-foreground">Tabela historica:</span> {data.historyWindowLabel}
+            </p>
+            <p>
+              <span className="font-medium text-foreground">Grafico:</span> {data.chartWindowLabel}
+            </p>
+            <p>
+              <span className="font-medium text-foreground">Ultima data consolidada:</span>{' '}
+              {formatPricingDate(data.latestQuotedDate)}
+            </p>
+            <p>
+              <span className="font-medium text-foreground">Providers atuais:</span> Westmetall e Banco Central PTAX
+            </p>
+          </div>
+        </div>
       </div>
 
-      <PricingHistoryTable rows={data.historyRows} title="Historico consolidado dos ultimos 6 meses" />
+      <PricingHistoryTable
+        rows={data.historyRows}
+        title="Historico consolidado dos ultimos 6 meses"
+      />
 
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+      <AdminDataTable
+        columns={[
+          {
+            header: 'Data',
+            cell: (snapshot: LmePriceSnapshot) => (
+              <span className="text-sm text-muted-foreground">{formatPricingDate(snapshot.quotedDate)}</span>
+            ),
+          },
+          {
+            header: 'Serie',
+            cell: (snapshot: LmePriceSnapshot) => (
+              <div className="space-y-1">
+                <p className="font-medium text-foreground">{snapshot.metalName}</p>
+                <p className="text-xs text-muted-foreground">{snapshot.metalCode}</p>
+              </div>
+            ),
+          },
+          {
+            header: 'Valor',
+            cell: (snapshot: LmePriceSnapshot) => (
+              <span className="text-sm text-foreground">
+                {formatPricingNumber(snapshot.priceValue, 2)}
+              </span>
+            ),
+          },
+          {
+            header: 'Moeda',
+            cell: (snapshot: LmePriceSnapshot) => (
+              <span className="text-sm text-muted-foreground">{snapshot.currencyCode}</span>
+            ),
+          },
+          {
+            header: 'Provider',
+            cell: (snapshot: LmePriceSnapshot) => (
+              <AdminStatusBadge tone="info">{snapshot.providerName}</AdminStatusBadge>
+            ),
+          },
+        ]}
+        data={paginatedSnapshots}
+        emptyDescription="Ainda nao existem snapshots recentes para o provider selecionado."
+        emptyTitle="Sem snapshots recentes"
+        getRowKey={(snapshot) => snapshot.id}
+      />
+
+      <AdminPagination
+        currentPage={snapshotPage}
+        onPageChange={setSnapshotPage}
+        pageSize={SNAPSHOT_PAGE_SIZE}
+        totalItems={filteredSnapshots.length}
+      />
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <PricingManualPriceForm
           defaultValues={manualPriceDefaults}
           isPending={savePriceMutation.isPending}
@@ -254,121 +442,6 @@ export function AdminPricingPage() {
           isPending={saveSnapshotMutation.isPending}
           onSubmit={(values) => saveSnapshotMutation.mutate(values)}
         />
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <Card className="overflow-hidden">
-          <CardHeader className="border-b border-border/70">
-            <CardTitle>Entradas manuais publicas</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {sortedManualEntries.length === 0 ? (
-              <div className="p-6 text-sm text-muted-foreground">
-                Nenhuma entrada manual cadastrada ainda.
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-[780px] border-collapse text-sm">
-                  <thead>
-                    <tr className="bg-emerald-600 text-left text-white">
-                      <th className="px-4 py-3 font-semibold">Material</th>
-                      <th className="px-4 py-3 font-semibold">Preco</th>
-                      <th className="px-4 py-3 font-semibold">Vigencia</th>
-                      <th className="px-4 py-3 font-semibold">Status</th>
-                      <th className="px-4 py-3 font-semibold">Acoes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sortedManualEntries.map((entry) => (
-                      <tr key={entry.id} className="border-b border-border/60">
-                        <td className="px-4 py-3">
-                          <div className="flex flex-col">
-                            <span className="font-medium text-foreground">{entry.materialName}</span>
-                            <span className="text-xs text-muted-foreground">{entry.regionName ?? 'Brasil'}</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex flex-col">
-                            <span className="font-medium text-foreground">{entry.priceLabel}</span>
-                            {typeof entry.priceNumeric === 'number' ? (
-                              <span className="text-xs text-muted-foreground">
-                                {formatPricingNumber(entry.priceNumeric, 2)} {entry.priceUnit ?? ''}
-                              </span>
-                            ) : null}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">
-                          {formatPricingDate(entry.effectiveDate)}
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">
-                          {entry.isActive ? 'Ativo' : 'Inativo'}
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex flex-wrap gap-2">
-                            <Button onClick={() => setEditingEntry(entry)} size="sm" type="button" variant="outline">
-                              Editar
-                            </Button>
-                            <Button
-                              disabled={deletePriceMutation.isPending}
-                              onClick={() => deletePriceMutation.mutate(entry.id)}
-                              size="sm"
-                              type="button"
-                              variant="destructive"
-                            >
-                              Remover
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="overflow-hidden">
-          <CardHeader className="border-b border-border/70">
-            <CardTitle>Snapshots recentes</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {data.recentSnapshots.length === 0 ? (
-              <div className="p-6 text-sm text-muted-foreground">
-                Ainda nao existem snapshots LME gravados.
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-[720px] border-collapse text-sm">
-                  <thead>
-                    <tr className="bg-emerald-600 text-left text-white">
-                      <th className="px-4 py-3 font-semibold">Data</th>
-                      <th className="px-4 py-3 font-semibold">Serie</th>
-                      <th className="px-4 py-3 font-semibold">Valor</th>
-                      <th className="px-4 py-3 font-semibold">Moeda</th>
-                      <th className="px-4 py-3 font-semibold">Provider</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.recentSnapshots.map((snapshot) => (
-                      <tr key={snapshot.id} className="border-b border-border/60">
-                        <td className="px-4 py-3 text-muted-foreground">
-                          {formatPricingDate(snapshot.quotedDate)}
-                        </td>
-                        <td className="px-4 py-3 font-medium text-foreground">{snapshot.metalName}</td>
-                        <td className="px-4 py-3 text-foreground">
-                          {formatPricingNumber(snapshot.priceValue, 2)}
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">{snapshot.currencyCode}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{snapshot.providerName}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </div>
     </section>
   )

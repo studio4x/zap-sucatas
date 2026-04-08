@@ -44,7 +44,13 @@ export function Button({
 }: ButtonProps) {
   const Comp = asChild ? Slot : 'button'
 
-  return <Comp className={cn(buttonVariants({ className, size, variant }))} {...props} />
+  return (
+    <Comp
+      className={cn(buttonVariants({ className, size, variant }))}
+      data-slot="button"
+      {...props}
+    />
+  )
 }
 
 export { buttonVariants }

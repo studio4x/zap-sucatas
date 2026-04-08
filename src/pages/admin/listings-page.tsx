@@ -1,18 +1,48 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { Search } from 'lucide-react'
+import { Eye, FileSearch } from 'lucide-react'
 import { paths } from '@/app/paths'
-import { ListingStatusBadge } from '@/components/listings/listing-status-badge'
+import { AdminDataTable } from '@/components/admin/admin-data-table'
+import { AdminFilterCard } from '@/components/admin/admin-filter-card'
+import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { AdminPagination } from '@/components/admin/admin-pagination'
+import { AdminRowActions } from '@/components/admin/admin-row-actions'
+import { AdminStatCard } from '@/components/admin/admin-stat-card'
+import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
 import { fetchAdminListings } from '@/domains/listings/api'
 import { formatListingDate, listingStatusFilterOptions } from '@/domains/listings/utils'
 
+const PAGE_SIZE = 12
+
+function getListingStatusMeta(status: string) {
+  switch (status) {
+    case 'approved':
+      return { label: 'Aprovado', tone: 'success' as const }
+    case 'pending_review':
+      return { label: 'Em revisao', tone: 'info' as const }
+    case 'rejected':
+      return { label: 'Rejeitado', tone: 'danger' as const }
+    case 'paused':
+      return { label: 'Pausado', tone: 'warning' as const }
+    case 'draft':
+      return { label: 'Rascunho', tone: 'neutral' as const }
+    case 'expired':
+      return { label: 'Expirado', tone: 'warning' as const }
+    default:
+      return { label: 'Arquivado', tone: 'neutral' as const }
+    }
+}
+
 export function AdminListingsPage() {
   const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<(typeof listingStatusFilterOptions)[number]['value']>('all')
+  const [statusFilter, setStatusFilter] =
+    useState<(typeof listingStatusFilterOptions)[number]['value']>('all')
+  const [stateFilter, setStateFilter] = useState('all')
+  const [page, setPage] = useState(1)
 
   const listingsQuery = useQuery({
     queryKey: ['listings', 'admin'],
@@ -20,17 +50,27 @@ export function AdminListingsPage() {
   })
 
   const listings = listingsQuery.data ?? []
-
+  const stateOptions = useMemo(
+    () => ['all', ...new Set(listings.map((listing) => listing.state).filter(Boolean))],
+    [listings],
+  )
   const filteredListings = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase()
+
     return listings.filter((listing) => {
       const matchesStatus = statusFilter === 'all' ? true : listing.status === statusFilter
-      const normalizedQuery = query.trim().toLowerCase()
-      const haystack = `${listing.title} ${listing.summary ?? ''} ${listing.city} ${listing.state}`.toLowerCase()
+      const matchesState = stateFilter === 'all' ? true : listing.state === stateFilter
+      const haystack =
+        `${listing.title} ${listing.summary ?? ''} ${listing.city} ${listing.state} ${listing.categoryName ?? ''} ${listing.materialName ?? ''}`.toLowerCase()
       const matchesQuery = normalizedQuery.length === 0 ? true : haystack.includes(normalizedQuery)
 
-      return matchesStatus && matchesQuery
+      return matchesStatus && matchesState && matchesQuery
     })
-  }, [listings, query, statusFilter])
+  }, [listings, query, stateFilter, statusFilter])
+  const paginatedListings = useMemo(
+    () => filteredListings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filteredListings, page],
+  )
 
   const stats = useMemo(
     () => ({
@@ -44,50 +84,63 @@ export function AdminListingsPage() {
 
   return (
     <section className="space-y-6">
-      <div className="rounded-[1.75rem] border border-border/70 bg-card/90 p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-          Admin / anuncios
-        </p>
-        <h1 className="mt-4 font-display text-4xl tracking-tight text-foreground">
-          Fila de moderacao e catalogo interno
-        </h1>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-          Revise anuncios pendentes, acompanhe aprovacoes e abra o detalhe operacional de cada
-          item.
-        </p>
+      <AdminPageHeader
+        actions={
+          <>
+            <Button asChild type="button">
+              <Link to={paths.admin.root}>Visao geral</Link>
+            </Button>
+            <Button asChild type="button" variant="outline">
+              <Link to={paths.public.listings}>
+                <Eye className="size-4" />
+                Catalogo publico
+              </Link>
+            </Button>
+          </>
+        }
+        description="Revise a fila, acompanhe status editoriais e abra o detalhe operacional de cada anuncio."
+        eyebrow="Admin / anuncios"
+        title="Gestao de anuncios"
+      />
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <AdminStatCard label="Total" value={stats.total} />
+        <AdminStatCard label="Pendentes" value={stats.pending} />
+        <AdminStatCard label="Aprovados" value={stats.approved} />
+        <AdminStatCard label="Rejeitados" value={stats.rejected} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        {[
-          ['Total', stats.total],
-          ['Pendentes', stats.pending],
-          ['Aprovados', stats.approved],
-          ['Rejeitados', stats.rejected],
-        ].map(([label, value]) => (
-          <Card key={label}>
-            <CardContent className="p-5">
-              <p className="text-sm text-muted-foreground">{label}</p>
-              <p className="mt-2 font-display text-3xl">{value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <Card>
-        <CardContent className="grid gap-4 p-5 md:grid-cols-[1fr_240px]">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              className="pl-11"
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Buscar anuncio"
-              value={query}
-            />
-          </div>
-
-          <select
-            className="flex h-11 w-full rounded-2xl border border-input bg-background/80 px-4 py-2 text-sm text-foreground shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
-            onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}
+      <AdminFilterCard
+        actions={
+          <Button
+            onClick={() => {
+              setPage(1)
+              setQuery('')
+              setStateFilter('all')
+              setStatusFilter('all')
+            }}
+            type="button"
+            variant="outline"
+          >
+            Limpar filtros
+          </Button>
+        }
+        description="Filtros estruturais sempre antecedem o dataset principal de moderacao."
+      >
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_180px]">
+          <Input
+            onChange={(event) => {
+              setPage(1)
+              setQuery(event.target.value)
+            }}
+            placeholder="Buscar por titulo, resumo, localidade ou taxonomia"
+            value={query}
+          />
+          <Select
+            onChange={(event) => {
+              setPage(1)
+              setStatusFilter(event.target.value as typeof statusFilter)
+            }}
             value={statusFilter}
           >
             {listingStatusFilterOptions.map((option) => (
@@ -95,79 +148,115 @@ export function AdminListingsPage() {
                 {option.label}
               </option>
             ))}
-          </select>
-        </CardContent>
-      </Card>
+          </Select>
+          <Select
+            onChange={(event) => {
+              setPage(1)
+              setStateFilter(event.target.value)
+            }}
+            value={stateFilter}
+          >
+            {stateOptions.map((state) => (
+              <option key={state} value={state}>
+                {state === 'all' ? 'Todos os estados' : state}
+              </option>
+            ))}
+          </Select>
+        </div>
+      </AdminFilterCard>
 
-      {listingsQuery.isLoading ? (
-        <Card>
-          <CardContent className="p-6 text-sm text-muted-foreground">
-            Carregando fila administrativa...
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {listingsQuery.isError ? (
-        <Card className="border-rose-200/70 bg-rose-50">
-          <CardContent className="p-6 text-sm text-rose-900">
-            Nao foi possivel carregar os anuncios administrativos.
-          </CardContent>
-        </Card>
-      ) : null}
-
-      <div className="grid gap-4">
-        {filteredListings.map((listing) => (
-          <Card key={listing.id}>
-            <CardContent className="flex flex-col gap-4 p-6">
-              <div className="flex flex-wrap items-center gap-3">
-                <ListingStatusBadge status={listing.status} />
-                {listing.categoryName ? (
-                  <span className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                    {listing.categoryName}
-                  </span>
-                ) : null}
+      <AdminDataTable
+        columns={[
+          {
+            header: 'Anuncio',
+            cell: (listing) => (
+              <div className="space-y-1">
+                <p className="font-medium text-foreground">{listing.title}</p>
+                <p className="text-xs text-muted-foreground">{listing.summary || listing.description}</p>
               </div>
-
-              <div className="space-y-2">
-                <h2 className="font-display text-2xl text-foreground">{listing.title}</h2>
-                <p className="text-sm leading-6 text-muted-foreground">
-                  {listing.summary || listing.description}
-                </p>
+            ),
+          },
+          {
+            header: 'Taxonomia',
+            cell: (listing) => (
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <p className="text-sm font-medium text-foreground">{listing.categoryName ?? 'Sem categoria'}</p>
+                <p>{listing.materialName ?? 'Material nao informado'}</p>
               </div>
-
-              <div className="grid gap-2 text-sm text-muted-foreground md:grid-cols-4">
+            ),
+          },
+          {
+            header: 'Localidade',
+            cell: (listing) => (
+              <div className="space-y-1 text-sm text-muted-foreground">
                 <p>
-                  <span className="font-medium text-foreground">Local:</span> {listing.city} -{' '}
-                  {listing.state}
+                  {listing.city} - {listing.state}
                 </p>
-                <p>
-                  <span className="font-medium text-foreground">Atualizado:</span>{' '}
-                  {formatListingDate(listing.updatedAt)}
-                </p>
-                <p>
-                  <span className="font-medium text-foreground">Publicado:</span>{' '}
-                  {formatListingDate(listing.publishedAt)}
-                </p>
-                <p>
-                  <span className="font-medium text-foreground">Material:</span>{' '}
-                  {listing.materialName ?? 'Nao informado'}
-                </p>
+                <p>{listing.contactPhone ?? 'Telefone nao informado'}</p>
               </div>
+            ),
+          },
+          {
+            header: 'Status',
+            cell: (listing) => {
+              const meta = getListingStatusMeta(listing.status)
+              return <AdminStatusBadge tone={meta.tone}>{meta.label}</AdminStatusBadge>
+            },
+          },
+          {
+            header: 'Atualizado',
+            cell: (listing) => (
+              <span className="text-sm text-muted-foreground">{formatListingDate(listing.updatedAt)}</span>
+            ),
+          },
+          {
+            header: 'Acoes',
+            className: 'w-[220px] text-right',
+            cell: (listing) => (
+              <AdminRowActions
+                actions={[
+                  {
+                    icon: FileSearch,
+                    label: 'Detalhe',
+                    to: paths.admin.listingDetails(listing.id),
+                  },
+                  ...(listing.slug
+                    ? [
+                        {
+                          icon: Eye,
+                          label: 'Publico',
+                          to: paths.public.listingDetails(listing.slug),
+                          variant: 'ghost' as const,
+                        },
+                      ]
+                    : []),
+                ]}
+              />
+            ),
+          },
+        ]}
+        data={paginatedListings}
+        emptyDescription="Nenhum anuncio corresponde aos filtros aplicados."
+        emptyTitle="Sem anuncios no recorte atual"
+        errorMessage="Nao foi possivel carregar os anuncios administrativos."
+        getRowKey={(listing) => listing.id}
+        isError={listingsQuery.isError}
+        isLoading={listingsQuery.isLoading}
+        rowClassName={(listing) =>
+          listing.status === 'pending_review' ? 'bg-sky-50/30' : undefined
+        }
+      />
 
-              <div className="flex flex-wrap gap-3">
-                <Button asChild>
-                  <Link to={paths.admin.listingDetails(listing.id)}>Abrir moderacao</Link>
-                </Button>
+      <AdminPagination
+        currentPage={page}
+        onPageChange={setPage}
+        pageSize={PAGE_SIZE}
+        totalItems={filteredListings.length}
+      />
 
-                {listing.slug ? (
-                  <Button asChild variant="outline">
-                    <Link to={paths.public.listingDetails(listing.slug)}>Ver publico</Link>
-                  </Button>
-                ) : null}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-sm">
+        A fila administrativa esta orientada por tabela para leitura rapida, com filtros acima do
+        dataset e detalhe separado por anuncio.
       </div>
     </section>
   )

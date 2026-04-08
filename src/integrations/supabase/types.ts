@@ -12,6 +12,141 @@ export type Database = {
     Enums: Record<string, never>
     Functions: Record<string, never>
     Tables: {
+      admin_audit_logs: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          after_data: Json | null
+          before_data: Json | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      blog_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      blog_posts: {
+        Row: {
+          author_user_id: string | null
+          category_id: string | null
+          content: Json
+          cover_image_path: string | null
+          created_at: string
+          excerpt: string | null
+          id: string
+          published_at: string | null
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          status: 'archived' | 'draft' | 'published'
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_user_id?: string | null
+          category_id?: string | null
+          content?: Json
+          cover_image_path?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          status?: 'archived' | 'draft' | 'published'
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_user_id?: string | null
+          category_id?: string | null
+          content?: Json
+          cover_image_path?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          status?: 'archived' | 'draft' | 'published'
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      integration_logs: {
+        Row: {
+          created_at: string
+          id: string
+          integration_name: string
+          message: string | null
+          payload: Json | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          integration_name: string
+          message?: string | null
+          payload?: Json | null
+          status: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          integration_name?: string
+          message?: string | null
+          payload?: Json | null
+          status?: string
+        }
+        Relationships: []
+      }
       listing_attributes: {
         Row: {
           attribute_key: string

@@ -1,19 +1,50 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Search } from 'lucide-react'
-import { QuestionThreadCard } from '@/components/questions/question-thread-card'
+import { Link } from 'react-router-dom'
+import { Eye, MessageSquareReply } from 'lucide-react'
+import { paths } from '@/app/paths'
+import { AdminDataTable } from '@/components/admin/admin-data-table'
+import { AdminFilterCard } from '@/components/admin/admin-filter-card'
+import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { AdminPagination } from '@/components/admin/admin-pagination'
+import { AdminRowActions } from '@/components/admin/admin-row-actions'
+import { AdminStatCard } from '@/components/admin/admin-stat-card'
+import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { answerListingQuestion, fetchAdminQuestions, updateQuestionStatus } from '@/domains/questions/api'
 import type { QuestionStatus } from '@/domains/questions/types'
 import { questionStatusOptions } from '@/domains/questions/utils'
 
+const PAGE_SIZE = 10
+
+function getQuestionStatusMeta(status: QuestionStatus) {
+  switch (status) {
+    case 'published':
+      return { label: 'Publicada', tone: 'success' as const }
+    case 'hidden':
+      return { label: 'Oculta', tone: 'warning' as const }
+    default:
+      return { label: 'Bloqueada', tone: 'danger' as const }
+  }
+}
+
+function formatQuestionDate(value: string) {
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(value))
+}
+
 export function AdminQuestionsPage() {
   const queryClient = useQueryClient()
   const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<(typeof questionStatusOptions)[number]['value']>('all')
+  const [statusFilter, setStatusFilter] =
+    useState<(typeof questionStatusOptions)[number]['value']>('all')
+  const [page, setPage] = useState(1)
+  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null)
   const [drafts, setDrafts] = useState<Record<string, string>>({})
   const [feedback, setFeedback] = useState<string | null>(null)
 
@@ -25,7 +56,7 @@ export function AdminQuestionsPage() {
   const answerMutation = useMutation({
     mutationFn: answerListingQuestion,
     onSuccess: async () => {
-      setFeedback('Thread atualizada com sucesso.')
+      setFeedback('Resposta administrativa registrada com sucesso.')
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['questions', 'admin'] }),
         queryClient.invalidateQueries({ queryKey: ['questions', 'owner'] }),
@@ -46,15 +77,47 @@ export function AdminQuestionsPage() {
     },
   })
 
+  const questions = questionsQuery.data ?? []
   const filteredQuestions = useMemo(() => {
-    return (questionsQuery.data ?? []).filter((question) => {
+    const normalizedQuery = query.trim().toLowerCase()
+
+    return questions.filter((question) => {
       const matchesStatus = statusFilter === 'all' ? true : question.status === statusFilter
       const haystack =
         `${question.questionText} ${question.listingTitle ?? ''} ${question.guestName ?? ''} ${question.guestEmail ?? ''}`.toLowerCase()
-      const matchesQuery = query.trim().length === 0 ? true : haystack.includes(query.trim().toLowerCase())
+      const matchesQuery = normalizedQuery.length === 0 ? true : haystack.includes(normalizedQuery)
+
       return matchesStatus && matchesQuery
     })
-  }, [questionsQuery.data, query, statusFilter])
+  }, [questions, query, statusFilter])
+  const paginatedQuestions = useMemo(
+    () => filteredQuestions.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filteredQuestions, page],
+  )
+  const selectedQuestion =
+    filteredQuestions.find((question) => question.id === selectedQuestionId) ??
+    paginatedQuestions[0] ??
+    null
+
+  useEffect(() => {
+    if (!selectedQuestion && filteredQuestions.length > 0) {
+      setSelectedQuestionId(filteredQuestions[0].id)
+    }
+
+    if (selectedQuestion && selectedQuestion.id !== selectedQuestionId) {
+      setSelectedQuestionId(selectedQuestion.id)
+    }
+  }, [filteredQuestions, selectedQuestion, selectedQuestionId])
+
+  const stats = useMemo(
+    () => ({
+      blocked: questions.filter((question) => question.status === 'blocked').length,
+      hidden: questions.filter((question) => question.status === 'hidden').length,
+      published: questions.filter((question) => question.status === 'published').length,
+      total: questions.length,
+    }),
+    [questions],
+  )
 
   function mutateStatus(questionId: string, questionStatus: QuestionStatus) {
     statusMutation.mutate({ questionId, questionStatus })
@@ -62,33 +125,59 @@ export function AdminQuestionsPage() {
 
   return (
     <section className="space-y-6">
-      <div className="rounded-[1.75rem] border border-border/70 bg-card/90 p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-          Admin / perguntas
-        </p>
-        <h1 className="mt-4 font-display text-4xl tracking-tight text-foreground">
-          Moderacao de perguntas e respostas
-        </h1>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-          Publique, oculte ou bloqueie perguntas e registre respostas quando necessario.
-        </p>
+      <AdminPageHeader
+        actions={
+          <>
+            <Button asChild type="button">
+              <Link to={paths.admin.listings}>Anuncios</Link>
+            </Button>
+            <Button asChild type="button" variant="outline">
+              <Link to={paths.app.questions}>Inbox do anunciante</Link>
+            </Button>
+          </>
+        }
+        description="Publique, oculte ou bloqueie threads e registre respostas de apoio quando necessario."
+        eyebrow="Admin / perguntas"
+        title="Moderacao de perguntas"
+      />
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <AdminStatCard label="Total" value={stats.total} />
+        <AdminStatCard label="Publicadas" value={stats.published} />
+        <AdminStatCard label="Ocultas" value={stats.hidden} />
+        <AdminStatCard label="Bloqueadas" value={stats.blocked} />
       </div>
 
-      <Card>
-        <CardContent className="grid gap-4 p-5 md:grid-cols-[1fr_240px]">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              className="pl-11"
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Buscar por pergunta, anuncio ou autor"
-              value={query}
-            />
-          </div>
-
-          <select
-            className="flex h-11 w-full rounded-2xl border border-input bg-background/80 px-4 py-2 text-sm text-foreground shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
-            onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}
+      <AdminFilterCard
+        actions={
+          <Button
+            onClick={() => {
+              setPage(1)
+              setQuery('')
+              setStatusFilter('all')
+            }}
+            type="button"
+            variant="outline"
+          >
+            Limpar filtros
+          </Button>
+        }
+        description="Filtre por status ou texto antes de abrir o detalhe operacional da thread."
+      >
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
+          <Input
+            onChange={(event) => {
+              setPage(1)
+              setQuery(event.target.value)
+            }}
+            placeholder="Buscar por pergunta, anuncio ou autor"
+            value={query}
+          />
+          <Select
+            onChange={(event) => {
+              setPage(1)
+              setStatusFilter(event.target.value as typeof statusFilter)
+            }}
             value={statusFilter}
           >
             {questionStatusOptions.map((option) => (
@@ -96,101 +185,238 @@ export function AdminQuestionsPage() {
                 {option.label}
               </option>
             ))}
-          </select>
-        </CardContent>
-      </Card>
+          </Select>
+        </div>
+      </AdminFilterCard>
 
       {feedback ? (
-        <Card className="border-emerald-200/70 bg-emerald-50">
-          <CardContent className="p-5 text-sm text-emerald-900">{feedback}</CardContent>
-        </Card>
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 shadow-sm">
+          {feedback}
+        </div>
       ) : null}
 
-      <div className="grid gap-4">
-        {filteredQuestions.map((question) => {
-          const draft = drafts[question.id] ?? question.answer?.answerText ?? ''
+      <AdminDataTable
+        columns={[
+          {
+            header: 'Pergunta',
+            cell: (question) => (
+              <div className="space-y-1">
+                <p className="font-medium text-foreground">{question.questionText}</p>
+                <p className="text-xs text-muted-foreground">
+                  {question.guestName ?? 'Usuario autenticado'}
+                  {question.guestEmail ? ` / ${question.guestEmail}` : ''}
+                </p>
+              </div>
+            ),
+          },
+          {
+            header: 'Anuncio',
+            cell: (question) => (
+              <div className="space-y-1">
+                <p className="font-medium text-foreground">
+                  {question.listingTitle ?? 'Anuncio removido'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {formatQuestionDate(question.createdAt)}
+                </p>
+              </div>
+            ),
+          },
+          {
+            header: 'Status',
+            cell: (question) => {
+              const meta = getQuestionStatusMeta(question.status)
+              return <AdminStatusBadge tone={meta.tone}>{meta.label}</AdminStatusBadge>
+            },
+          },
+          {
+            header: 'Resposta',
+            cell: (question) => (
+              <span className="text-sm text-muted-foreground">
+                {question.answer ? 'Registrada' : 'Pendente'}
+              </span>
+            ),
+          },
+          {
+            header: 'Acoes',
+            className: 'w-[180px] text-right',
+            cell: (question) => (
+              <AdminRowActions
+                actions={[
+                  {
+                    icon: MessageSquareReply,
+                    label: 'Abrir thread',
+                    onClick: () => setSelectedQuestionId(question.id),
+                  },
+                  ...(question.listingSlug
+                    ? [
+                        {
+                          icon: Eye,
+                          label: 'Publico',
+                          to: paths.public.listingDetails(question.listingSlug),
+                          variant: 'ghost' as const,
+                        },
+                      ]
+                    : []),
+                ]}
+              />
+            ),
+          },
+        ]}
+        data={paginatedQuestions}
+        emptyDescription="Nenhuma thread encontrada com os filtros atuais."
+        emptyTitle="Sem perguntas neste recorte"
+        errorMessage="Nao foi possivel carregar as perguntas do admin."
+        getRowKey={(question) => question.id}
+        isError={questionsQuery.isError}
+        isLoading={questionsQuery.isLoading}
+        rowClassName={(question) =>
+          question.id === selectedQuestion?.id ? 'bg-sky-50/40' : undefined
+        }
+      />
 
-          return (
-            <QuestionThreadCard
-              key={question.id}
-              question={question}
-              showListingLink
-              actions={
-                <>
-                  <Button
-                    disabled={statusMutation.isPending || question.status === 'published'}
-                    onClick={() => mutateStatus(question.id, 'published')}
-                    type="button"
-                    variant="outline"
-                  >
-                    Publicar
-                  </Button>
-                  <Button
-                    disabled={statusMutation.isPending || question.status === 'hidden'}
-                    onClick={() => mutateStatus(question.id, 'hidden')}
-                    type="button"
-                    variant="outline"
-                  >
-                    Ocultar
-                  </Button>
-                  <Button
-                    disabled={statusMutation.isPending || question.status === 'blocked'}
-                    onClick={() => mutateStatus(question.id, 'blocked')}
-                    type="button"
-                    variant="destructive"
-                  >
-                    Bloquear
-                  </Button>
-                </>
-              }
-              answerComposer={
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-foreground">
-                    {question.answer ? 'Atualizar resposta administrativa' : 'Responder thread'}
-                  </label>
-                  <Textarea
-                    onChange={(event) =>
-                      setDrafts((current) => ({ ...current, [question.id]: event.target.value }))
-                    }
-                    placeholder="Escreva a resposta administrativa ou de apoio ao anunciante."
-                    value={draft}
-                  />
-                  <div className="flex flex-wrap gap-3">
-                    <Button
-                      disabled={answerMutation.isPending || draft.trim().length < 2}
-                      onClick={() =>
-                        answerMutation.mutate({
-                          answerText: draft,
-                          questionId: question.id,
-                          questionStatus: question.status,
-                        })
-                      }
-                      type="button"
-                    >
-                      {question.answer ? 'Atualizar resposta' : 'Salvar resposta'}
-                    </Button>
-                  </div>
+      <AdminPagination
+        currentPage={page}
+        onPageChange={setPage}
+        pageSize={PAGE_SIZE}
+        totalItems={filteredQuestions.length}
+      />
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_360px]">
+        <div className="rounded-lg border border-border bg-card p-5 shadow-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Thread selecionada</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Abra a thread para inspecionar o contexto e responder com clareza.
+              </p>
+            </div>
+            {selectedQuestion ? (
+              <AdminStatusBadge tone={getQuestionStatusMeta(selectedQuestion.status).tone}>
+                {getQuestionStatusMeta(selectedQuestion.status).label}
+              </AdminStatusBadge>
+            ) : null}
+          </div>
+
+          {!selectedQuestion ? (
+            <p className="mt-6 text-sm text-muted-foreground">
+              Selecione uma linha da tabela para moderar a thread.
+            </p>
+          ) : (
+            <div className="mt-6 space-y-5">
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                  Anuncio
+                </p>
+                <p className="text-sm font-medium text-foreground">
+                  {selectedQuestion.listingTitle ?? 'Anuncio removido'}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                  Pergunta
+                </p>
+                <p className="text-sm leading-7 text-foreground">
+                  {selectedQuestion.questionText}
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                    Autor
+                  </p>
+                  <p className="text-sm text-foreground">
+                    {selectedQuestion.guestName ?? 'Usuario autenticado'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedQuestion.guestEmail ?? 'Sem email informado'}
+                  </p>
                 </div>
-              }
-            />
-          )
-        })}
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                    Criada em
+                  </p>
+                  <p className="text-sm text-foreground">
+                    {formatQuestionDate(selectedQuestion.createdAt)}
+                  </p>
+                </div>
+              </div>
 
-        {questionsQuery.isLoading ? (
-          <Card>
-            <CardContent className="p-6 text-sm text-muted-foreground">
-              Carregando threads para moderacao...
-            </CardContent>
-          </Card>
-        ) : null}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground" htmlFor="admin-answer">
+                  Resposta administrativa
+                </label>
+                <Textarea
+                  id="admin-answer"
+                  onChange={(event) =>
+                    setDrafts((current) => ({
+                      ...current,
+                      [selectedQuestion.id]: event.target.value,
+                    }))
+                  }
+                  placeholder="Escreva a resposta que sera associada a esta thread."
+                  value={drafts[selectedQuestion.id] ?? selectedQuestion.answer?.answerText ?? ''}
+                />
+              </div>
 
-        {!questionsQuery.isLoading && filteredQuestions.length === 0 ? (
-          <Card>
-            <CardContent className="p-6 text-sm text-muted-foreground">
-              Nenhuma thread encontrada com os filtros atuais.
-            </CardContent>
-          </Card>
-        ) : null}
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  disabled={
+                    answerMutation.isPending ||
+                    (drafts[selectedQuestion.id] ?? selectedQuestion.answer?.answerText ?? '').trim()
+                      .length < 2
+                  }
+                  onClick={() =>
+                    answerMutation.mutate({
+                      answerText:
+                        drafts[selectedQuestion.id] ?? selectedQuestion.answer?.answerText ?? '',
+                      questionId: selectedQuestion.id,
+                      questionStatus: selectedQuestion.status,
+                    })
+                  }
+                  type="button"
+                >
+                  {answerMutation.isPending ? 'Salvando...' : 'Salvar resposta'}
+                </Button>
+                <Button
+                  disabled={statusMutation.isPending || selectedQuestion.status === 'published'}
+                  onClick={() => mutateStatus(selectedQuestion.id, 'published')}
+                  type="button"
+                  variant="outline"
+                >
+                  Publicar
+                </Button>
+                <Button
+                  disabled={statusMutation.isPending || selectedQuestion.status === 'hidden'}
+                  onClick={() => mutateStatus(selectedQuestion.id, 'hidden')}
+                  type="button"
+                  variant="outline"
+                >
+                  Ocultar
+                </Button>
+                <Button
+                  disabled={statusMutation.isPending || selectedQuestion.status === 'blocked'}
+                  onClick={() => mutateStatus(selectedQuestion.id, 'blocked')}
+                  type="button"
+                  variant="destructive"
+                >
+                  Bloquear
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-lg border border-border bg-card p-5 shadow-sm">
+          <p className="text-sm font-semibold text-foreground">Regras operacionais</p>
+          <ul className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
+            <li>A thread publica deve ter texto claro e sem ruido comercial indevido.</li>
+            <li>Use "Ocultar" para casos reversiveis e "Bloquear" para abuso ou conteudo inadequado.</li>
+            <li>As respostas administrativas ficam registradas no mesmo historico do anunciante.</li>
+          </ul>
+        </div>
       </div>
     </section>
   )

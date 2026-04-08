@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client'
-import type { Profile } from '@/domains/profiles/types'
+import type { AdminProfileSummary, Profile } from '@/domains/profiles/types'
 
 type ProfileRow = {
   auth_user_id: string
@@ -77,4 +77,59 @@ export async function updateCurrentProfile(input: {
   }
 
   return fetchCurrentProfile(input.profileId)
+}
+
+export async function fetchAdminProfiles() {
+  const client = ensureSupabase()
+  const [{ data: profiles, error: profilesError }, { data: listings, error: listingsError }, { data: questions, error: questionsError }] =
+    await Promise.all([
+      client
+        .from('profiles')
+        .select('id, auth_user_id, full_name, phone, role, is_admin, status, created_at, updated_at')
+        .order('created_at', { ascending: false }),
+      client.from('listings').select('user_id, status'),
+      client.from('listing_questions').select('author_user_id'),
+    ])
+
+  if (profilesError) {
+    throw profilesError
+  }
+
+  if (listingsError) {
+    throw listingsError
+  }
+
+  if (questionsError) {
+    throw questionsError
+  }
+
+  const listingCounts = new Map<string, { approved: number; total: number }>()
+  ;((listings ?? []) as Array<{ status: string; user_id: string }>).forEach((row) => {
+    const current = listingCounts.get(row.user_id) ?? { approved: 0, total: 0 }
+    current.total += 1
+    if (row.status === 'approved') {
+      current.approved += 1
+    }
+    listingCounts.set(row.user_id, current)
+  })
+
+  const questionCounts = new Map<string, number>()
+  ;((questions ?? []) as Array<{ author_user_id: string | null }>).forEach((row) => {
+    if (!row.author_user_id) {
+      return
+    }
+    questionCounts.set(row.author_user_id, (questionCounts.get(row.author_user_id) ?? 0) + 1)
+  })
+
+  return (profiles ?? []).map((row) => {
+    const profile = mapProfile(row as ProfileRow)
+    const counts = listingCounts.get(profile.id) ?? { approved: 0, total: 0 }
+
+    return {
+      ...profile,
+      approvedListings: counts.approved,
+      authoredQuestions: questionCounts.get(profile.id) ?? 0,
+      totalListings: counts.total,
+    } satisfies AdminProfileSummary
+  })
 }

@@ -17,3 +17,15 @@ export type ListingMaterial = {
   slug: string
   updatedAt: string
 }
+
+export type AdminListingCategory = ListingCategory & {
+  approvedListings: number
+  pendingListings: number
+  totalListings: number
+}
+
+export type AdminListingMaterial = ListingMaterial & {
+  approvedListings: number
+  pendingListings: number
+  totalListings: number
+}

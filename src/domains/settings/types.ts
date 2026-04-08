@@ -30,3 +30,13 @@ export type IntegrationLog = {
   payload: unknown
   status: string
 }
+
+export type UpdateSystemSettingsInput = {
+  allowGuestQuestions: boolean
+  maintenanceMode: boolean
+  seoDescriptionDefault: string
+  seoTitleDefault: string
+  siteName: string
+  supportEmail: string
+  supportPhone: string
+}

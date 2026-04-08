@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client'
-import type { SystemSettings } from '@/domains/settings/types'
+import type { SystemSettings, UpdateSystemSettingsInput } from '@/domains/settings/types'
 
 type SystemSettingsRow = {
   allow_guest_questions: boolean
@@ -51,4 +51,24 @@ export async function fetchSystemSettings() {
   }
 
   return mapSystemSettings(data as SystemSettingsRow)
+}
+
+export async function updateSystemSettings(input: UpdateSystemSettingsInput) {
+  const payload = {
+    allow_guest_questions: input.allowGuestQuestions,
+    maintenance_mode: input.maintenanceMode,
+    seo_description_default: input.seoDescriptionDefault.trim() || null,
+    seo_title_default: input.seoTitleDefault.trim() || null,
+    site_name: input.siteName.trim(),
+    support_email: input.supportEmail.trim() || null,
+    support_phone: input.supportPhone.trim() || null,
+  }
+
+  const { error } = await ensureSupabase().from('system_settings').update(payload).neq('id', '')
+
+  if (error) {
+    throw error
+  }
+
+  return fetchSystemSettings()
 }

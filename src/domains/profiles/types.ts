@@ -13,3 +13,9 @@ export type Profile = {
   status: ProfileStatus
   updatedAt: string
 }
+
+export type AdminProfileSummary = Profile & {
+  approvedListings: number
+  authoredQuestions: number
+  totalListings: number
+}

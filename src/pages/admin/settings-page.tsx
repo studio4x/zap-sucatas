@@ -1,16 +1,253 @@
-import { PagePlaceholder } from '@/components/shared/page-placeholder'
+import { useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
+import { paths } from '@/app/paths'
+import { AdminFilterCard } from '@/components/admin/admin-filter-card'
+import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { AdminStatCard } from '@/components/admin/admin-stat-card'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
+import { fetchSystemSettings, updateSystemSettings } from '@/domains/settings/api'
+import type { UpdateSystemSettingsInput } from '@/domains/settings/types'
+
+type SettingsFormState = UpdateSystemSettingsInput
 
 export function AdminSettingsPage() {
+  const queryClient = useQueryClient()
+  const [feedback, setFeedback] = useState<string | null>(null)
+  const [formState, setFormState] = useState<SettingsFormState>({
+    allowGuestQuestions: false,
+    maintenanceMode: false,
+    seoDescriptionDefault: '',
+    seoTitleDefault: '',
+    siteName: '',
+    supportEmail: '',
+    supportPhone: '',
+  })
+
+  const settingsQuery = useQuery({
+    queryKey: ['system-settings'],
+    queryFn: fetchSystemSettings,
+  })
+
+  useEffect(() => {
+    if (!settingsQuery.data) {
+      return
+    }
+
+    setFormState({
+      allowGuestQuestions: settingsQuery.data.allowGuestQuestions,
+      maintenanceMode: settingsQuery.data.maintenanceMode,
+      seoDescriptionDefault: settingsQuery.data.seoDescriptionDefault ?? '',
+      seoTitleDefault: settingsQuery.data.seoTitleDefault ?? '',
+      siteName: settingsQuery.data.siteName,
+      supportEmail: settingsQuery.data.supportEmail ?? '',
+      supportPhone: settingsQuery.data.supportPhone ?? '',
+    })
+  }, [settingsQuery.data])
+
+  const updateMutation = useMutation({
+    mutationFn: updateSystemSettings,
+    onSuccess: async () => {
+      setFeedback('Configuracoes globais atualizadas com sucesso.')
+      await queryClient.invalidateQueries({ queryKey: ['system-settings'] })
+    },
+  })
+
+  if (settingsQuery.isLoading) {
+    return (
+      <div className="rounded-lg border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
+        Carregando configuracoes globais...
+      </div>
+    )
+  }
+
+  if (settingsQuery.isError || !settingsQuery.data) {
+    return (
+      <div className="rounded-lg border border-rose-200 bg-rose-50 px-6 py-8 text-sm text-rose-700 shadow-sm">
+        Nao foi possivel carregar as configuracoes do sistema.
+      </div>
+    )
+  }
+
   return (
-    <PagePlaceholder
-      description="Configuracoes globais do site, contatos institucionais, SEO padrao e toggles operacionais."
-      eyebrow="Admin / configuracoes"
-      highlights={[
-        'Site name e contatos',
-        'SEO default e maintenance mode',
-        'Allow guest questions como toggle central',
-      ]}
-      title="Configuracoes globais"
-    />
+    <section className="space-y-6">
+      <AdminPageHeader
+        actions={
+          <>
+            <Button
+              disabled={updateMutation.isPending}
+              onClick={() => updateMutation.mutate(formState)}
+              type="button"
+            >
+              {updateMutation.isPending ? 'Salvando...' : 'Salvar configuracoes'}
+            </Button>
+            <Button asChild type="button" variant="outline">
+              <Link to={paths.public.home}>Ver site</Link>
+            </Button>
+          </>
+        }
+        description="Parametros globais do produto, contatos institucionais e toggles operacionais do MVP."
+        eyebrow="Admin / configuracoes"
+        title="Configuracoes globais"
+      />
+
+      {feedback ? (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 shadow-sm">
+          {feedback}
+        </div>
+      ) : null}
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <AdminStatCard label="Site" value={settingsQuery.data.siteName} />
+        <AdminStatCard
+          label="Perguntas anonimas"
+          value={settingsQuery.data.allowGuestQuestions ? 'Ativas' : 'Desativadas'}
+        />
+        <AdminStatCard
+          label="Manutencao"
+          value={settingsQuery.data.maintenanceMode ? 'Ativa' : 'Desativada'}
+        />
+        <AdminStatCard
+          label="Suporte"
+          value={settingsQuery.data.supportEmail ?? 'Sem email'}
+        />
+      </div>
+
+      <AdminFilterCard
+        description="Escopo global do site e toggles que impactam operacao, suporte e experiencia publica."
+        title="Escopo operacional"
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+            Ajustes aqui afetam o comportamento publico e autenticado do MVP.
+          </div>
+          <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+            Regra critica continua no backend com RLS e funcoes sensiveis no Supabase.
+          </div>
+        </div>
+      </AdminFilterCard>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <Card>
+          <CardHeader>
+            <CardTitle>Operacao do produto</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground" htmlFor="site-name">
+                Nome do site
+              </label>
+              <Input
+                id="site-name"
+                onChange={(event) =>
+                  setFormState((current) => ({ ...current, siteName: event.target.value }))
+                }
+                value={formState.siteName}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground" htmlFor="support-email">
+                Email de suporte
+              </label>
+              <Input
+                id="support-email"
+                onChange={(event) =>
+                  setFormState((current) => ({ ...current, supportEmail: event.target.value }))
+                }
+                value={formState.supportEmail}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground" htmlFor="support-phone">
+                Telefone de suporte
+              </label>
+              <Input
+                id="support-phone"
+                onChange={(event) =>
+                  setFormState((current) => ({ ...current, supportPhone: event.target.value }))
+                }
+                value={formState.supportPhone}
+              />
+            </div>
+
+            <div className="rounded-lg border border-border bg-muted/25 px-4 py-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Perguntas anonimas</p>
+                  <p className="text-sm text-muted-foreground">
+                    Libera envio de perguntas sem login no detalhe do anuncio.
+                  </p>
+                </div>
+                <Switch
+                  checked={formState.allowGuestQuestions}
+                  onCheckedChange={(checked) =>
+                    setFormState((current) => ({ ...current, allowGuestQuestions: checked }))
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-border bg-muted/25 px-4 py-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Modo manutencao</p>
+                  <p className="text-sm text-muted-foreground">
+                    Toggle operacional para contingencia global do site.
+                  </p>
+                </div>
+                <Switch
+                  checked={formState.maintenanceMode}
+                  onCheckedChange={(checked) =>
+                    setFormState((current) => ({ ...current, maintenanceMode: checked }))
+                  }
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>SEO padrao</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground" htmlFor="seo-title">
+                Titulo SEO padrao
+              </label>
+              <Input
+                id="seo-title"
+                onChange={(event) =>
+                  setFormState((current) => ({ ...current, seoTitleDefault: event.target.value }))
+                }
+                value={formState.seoTitleDefault}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground" htmlFor="seo-description">
+                Descricao SEO padrao
+              </label>
+              <Textarea
+                id="seo-description"
+                onChange={(event) =>
+                  setFormState((current) => ({
+                    ...current,
+                    seoDescriptionDefault: event.target.value,
+                  }))
+                }
+                value={formState.seoDescriptionDefault}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
   )
 }

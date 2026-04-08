@@ -24,3 +24,7 @@ export type BlogPost = {
   title: string
   updatedAt: string
 }
+
+export type AdminBlogPost = BlogPost & {
+  categoryName: string | null
+}

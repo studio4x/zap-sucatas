@@ -21,5 +21,5 @@ const badgeVariants = cva(
 type BadgeProps = HTMLAttributes<HTMLDivElement> & VariantProps<typeof badgeVariants>
 
 export function Badge({ className, variant, ...props }: BadgeProps) {
-  return <div className={cn(badgeVariants({ className, variant }))} {...props} />
+  return <div className={cn(badgeVariants({ className, variant }))} data-slot="badge" {...props} />
 }

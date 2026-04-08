@@ -1,123 +1,286 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import { Eye, FileClock, MessageSquare, ShieldCheck, SlidersHorizontal } from 'lucide-react'
 import { paths } from '@/app/paths'
-import { ListingStatusBadge } from '@/components/listings/listing-status-badge'
+import { AdminDataTable } from '@/components/admin/admin-data-table'
+import { AdminFilterCard } from '@/components/admin/admin-filter-card'
+import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { AdminPagination } from '@/components/admin/admin-pagination'
+import { AdminRowActions } from '@/components/admin/admin-row-actions'
+import { AdminStatCard } from '@/components/admin/admin-stat-card'
+import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
 import { fetchAdminListings } from '@/domains/listings/api'
 import { formatListingDate } from '@/domains/listings/utils'
+import { fetchAdminProfiles } from '@/domains/profiles/api'
+import { fetchAdminQuestions } from '@/domains/questions/api'
+
+const PAGE_SIZE = 8
+
+function getListingStatusMeta(status: string) {
+  switch (status) {
+    case 'approved':
+      return { label: 'Aprovado', tone: 'success' as const }
+    case 'pending_review':
+      return { label: 'Em revisao', tone: 'info' as const }
+    case 'rejected':
+      return { label: 'Rejeitado', tone: 'danger' as const }
+    case 'paused':
+      return { label: 'Pausado', tone: 'warning' as const }
+    case 'draft':
+      return { label: 'Rascunho', tone: 'neutral' as const }
+    default:
+      return { label: 'Arquivado', tone: 'neutral' as const }
+  }
+}
 
 export function AdminOverviewPage() {
+  const [focusFilter, setFocusFilter] = useState<'all' | 'approved' | 'pending_review' | 'rejected'>('pending_review')
+  const [query, setQuery] = useState('')
+  const [page, setPage] = useState(1)
+
   const listingsQuery = useQuery({
     queryKey: ['listings', 'admin'],
     queryFn: () => fetchAdminListings(),
   })
+  const questionsQuery = useQuery({
+    queryKey: ['questions', 'admin'],
+    queryFn: fetchAdminQuestions,
+  })
+  const profilesQuery = useQuery({
+    queryKey: ['profiles', 'admin'],
+    queryFn: fetchAdminProfiles,
+  })
 
   const listings = listingsQuery.data ?? []
-  const pendingListings = listings.filter((listing) => listing.status === 'pending_review').slice(0, 5)
+  const filteredListings = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase()
+
+    return listings.filter((listing) => {
+      const matchesFilter = focusFilter === 'all' ? true : listing.status === focusFilter
+      const haystack =
+        `${listing.title} ${listing.categoryName ?? ''} ${listing.city} ${listing.state}`.toLowerCase()
+      const matchesQuery = normalizedQuery.length === 0 ? true : haystack.includes(normalizedQuery)
+
+      return matchesFilter && matchesQuery
+    })
+  }, [focusFilter, listings, query])
+  const paginatedListings = useMemo(
+    () => filteredListings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filteredListings, page],
+  )
 
   const stats = useMemo(
     () => ({
-      approved: listings.filter((listing) => listing.status === 'approved').length,
-      pending: listings.filter((listing) => listing.status === 'pending_review').length,
-      rejected: listings.filter((listing) => listing.status === 'rejected').length,
+      pendingListings: listings.filter((listing) => listing.status === 'pending_review').length,
+      publishedQuestions: (questionsQuery.data ?? []).filter((question) => question.status === 'published').length,
+      totalAdmins: (profilesQuery.data ?? []).filter((profile) => profile.role === 'admin').length,
+      totalUsers: profilesQuery.data?.length ?? 0,
     }),
-    [listings],
+    [listings, profilesQuery.data, questionsQuery.data],
   )
 
   return (
     <section className="space-y-6">
-      <div className="rounded-[1.75rem] border border-border/70 bg-card/90 p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-          Admin
-        </p>
-        <h1 className="mt-4 font-display text-4xl tracking-tight text-foreground">
-          Visao geral administrativa
-        </h1>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-          Acompanhe a fila critica de anuncios e entre rapidamente na moderacao do MVP.
-        </p>
+      <AdminPageHeader
+        actions={
+          <>
+            <Button asChild type="button">
+              <Link to={paths.admin.listings}>Fila de anuncios</Link>
+            </Button>
+            <Button asChild type="button" variant="outline">
+              <Link to={paths.admin.pricing}>
+                <SlidersHorizontal className="size-4" />
+                Precos
+              </Link>
+            </Button>
+          </>
+        }
+        description="Acompanhe a fila prioritaria do MVP e entre rapido nos modulos de moderacao e operacao."
+        eyebrow="Admin / visao geral"
+        title="Operacao administrativa"
+      />
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <AdminStatCard
+          description="Itens que exigem decisao editorial imediata."
+          label="Anuncios pendentes"
+          value={stats.pendingListings}
+        />
+        <AdminStatCard
+          description="Threads atualmente visiveis na area publica."
+          label="Perguntas publicadas"
+          value={stats.publishedQuestions}
+        />
+        <AdminStatCard
+          description="Perfis com acesso administrativo ativo."
+          label="Admins"
+          value={stats.totalAdmins}
+        />
+        <AdminStatCard
+          description="Base autenticada do marketplace no momento."
+          label="Usuarios"
+          value={stats.totalUsers}
+        />
       </div>
+
+      <AdminFilterCard
+        actions={
+          <Button
+            onClick={() => {
+              setFocusFilter('pending_review')
+              setQuery('')
+              setPage(1)
+            }}
+            type="button"
+            variant="outline"
+          >
+            Limpar filtros
+          </Button>
+        }
+        description="Use esta fila como entrada principal para moderacao e triagem."
+        title="Fila prioritaria"
+      >
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
+          <Input
+            onChange={(event) => {
+              setPage(1)
+              setQuery(event.target.value)
+            }}
+            placeholder="Buscar por titulo, categoria ou localidade"
+            value={query}
+          />
+          <Select
+            onChange={(event) => {
+              setFocusFilter(event.target.value as typeof focusFilter)
+              setPage(1)
+            }}
+            value={focusFilter}
+          >
+            <option value="pending_review">Pendentes</option>
+            <option value="approved">Aprovados</option>
+            <option value="rejected">Rejeitados</option>
+            <option value="all">Todos</option>
+          </Select>
+        </div>
+      </AdminFilterCard>
+
+      <AdminDataTable
+        columns={[
+          {
+            header: 'Anuncio',
+            cell: (listing) => (
+              <div className="space-y-1">
+                <p className="font-medium text-foreground">{listing.title}</p>
+                <p className="text-xs text-muted-foreground">{listing.summary || listing.description}</p>
+              </div>
+            ),
+          },
+          {
+            header: 'Categoria',
+            cell: (listing) => (
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <p className="text-sm font-medium text-foreground">{listing.categoryName ?? 'Sem categoria'}</p>
+                <p>{listing.materialName ?? 'Material nao informado'}</p>
+              </div>
+            ),
+          },
+          {
+            header: 'Localidade',
+            cell: (listing) => (
+              <span className="text-sm text-muted-foreground">
+                {listing.city} - {listing.state}
+              </span>
+            ),
+          },
+          {
+            header: 'Status',
+            cell: (listing) => {
+              const meta = getListingStatusMeta(listing.status)
+
+              return <AdminStatusBadge tone={meta.tone}>{meta.label}</AdminStatusBadge>
+            },
+          },
+          {
+            header: 'Atualizado',
+            cell: (listing) => <span className="text-sm text-muted-foreground">{formatListingDate(listing.updatedAt)}</span>,
+          },
+          {
+            header: 'Acoes',
+            className: 'w-[210px] text-right',
+            cell: (listing) => (
+              <AdminRowActions
+                actions={[
+                  {
+                    icon: FileClock,
+                    label: 'Moderar',
+                    to: paths.admin.listingDetails(listing.id),
+                  },
+                  ...(listing.slug
+                    ? [
+                        {
+                          icon: Eye,
+                          label: 'Publico',
+                          to: paths.public.listingDetails(listing.slug),
+                          variant: 'ghost' as const,
+                        },
+                      ]
+                    : []),
+                ]}
+              />
+            ),
+          },
+        ]}
+        data={paginatedListings}
+        emptyDescription="Nenhum anuncio encontrado para os filtros atuais."
+        emptyTitle="Fila vazia"
+        errorMessage="Nao foi possivel carregar a fila administrativa."
+        getRowKey={(listing) => listing.id}
+        isError={listingsQuery.isError}
+        isLoading={listingsQuery.isLoading}
+      />
+
+      <AdminPagination
+        currentPage={page}
+        onPageChange={setPage}
+        pageSize={PAGE_SIZE}
+        totalItems={filteredListings.length}
+      />
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardContent className="p-5">
-            <p className="text-sm text-muted-foreground">Pendentes</p>
-            <p className="mt-2 font-display text-3xl">{stats.pending}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-5">
-            <p className="text-sm text-muted-foreground">Aprovados</p>
-            <p className="mt-2 font-display text-3xl">{stats.approved}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-5">
-            <p className="text-sm text-muted-foreground">Rejeitados</p>
-            <p className="mt-2 font-display text-3xl">{stats.rejected}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <Card>
-          <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-1.5">
-              <CardTitle>Fila prioritaria</CardTitle>
-              <CardDescription>Anuncios aguardando decisao administrativa.</CardDescription>
-            </div>
-            <Button asChild variant="outline">
-              <Link to={paths.admin.listings}>Abrir fila completa</Link>
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {listingsQuery.isLoading ? (
-              <p className="text-sm text-muted-foreground">Carregando fila...</p>
-            ) : null}
-
-            {pendingListings.map((listing) => (
-              <div key={listing.id} className="flex flex-col gap-3 rounded-3xl border border-border/70 p-4 md:flex-row md:items-center md:justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <ListingStatusBadge status={listing.status} />
-                    <p className="text-xs text-muted-foreground">{formatListingDate(listing.updatedAt)}</p>
-                  </div>
-                  <p className="font-medium text-foreground">{listing.title}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {listing.city} - {listing.state}
-                  </p>
-                </div>
-
-                <Button asChild variant="outline">
-                  <Link to={paths.admin.listingDetails(listing.id)}>Moderar</Link>
-                </Button>
-              </div>
-            ))}
-
-            {!listingsQuery.isLoading && pendingListings.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Nenhum anuncio pendente no momento.
-              </p>
-            ) : null}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Atalhos</CardTitle>
-            <CardDescription>Entradas principais do backoffice inicial.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            <Button asChild>
-              <Link to={paths.admin.listings}>Moderar anuncios</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link to={paths.public.listings}>Ver catalogo publico</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <AdminStatCard
+          description="Atalho rapido para threads pendentes de moderacao."
+          helper={
+            <Link className="text-primary hover:underline" to={paths.admin.questions}>
+              Abrir perguntas
+            </Link>
+          }
+          label="Moderacao de perguntas"
+          value={<MessageSquare className="size-6" />}
+        />
+        <AdminStatCard
+          description="Estado geral de controle e governanca da operacao."
+          helper={
+            <Link className="text-primary hover:underline" to={paths.admin.settings}>
+              Ver configuracoes
+            </Link>
+          }
+          label="Governanca"
+          value={<ShieldCheck className="size-6" />}
+        />
+        <AdminStatCard
+          description="Catalogo interno pronto para ajustes e moderacao."
+          helper={
+            <Link className="text-primary hover:underline" to={paths.admin.listings}>
+              Ir para anuncios
+            </Link>
+          }
+          label="Moderacao ativa"
+          value={<FileClock className="size-6" />}
+        />
       </div>
     </section>
   )
