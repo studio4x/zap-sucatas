@@ -110,7 +110,12 @@ export function AdminUserForm(props: AdminUserFormProps) {
                 <label className="text-sm font-medium text-foreground" htmlFor="create-password">
                   Senha inicial
                 </label>
-                <Input id="create-password" type="password" {...form.register('password')} />
+                <Input
+                  autoComplete="new-password"
+                  id="create-password"
+                  type="password"
+                  {...form.register('password')}
+                />
                 {'password' in form.formState.errors && form.formState.errors.password ? (
                   <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
                 ) : null}
@@ -120,7 +125,12 @@ export function AdminUserForm(props: AdminUserFormProps) {
                 <label className="text-sm font-medium text-foreground" htmlFor="create-confirm-password">
                   Confirmar senha
                 </label>
-                <Input id="create-confirm-password" type="password" {...form.register('confirmPassword')} />
+                <Input
+                  autoComplete="new-password"
+                  id="create-confirm-password"
+                  type="password"
+                  {...form.register('confirmPassword')}
+                />
                 {'confirmPassword' in form.formState.errors && form.formState.errors.confirmPassword ? (
                   <p className="text-sm text-destructive">
                     {form.formState.errors.confirmPassword.message}

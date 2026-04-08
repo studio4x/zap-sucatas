@@ -22,6 +22,34 @@ function ensureSupabase() {
   return supabase
 }
 
+async function unwrapFunctionError(error: unknown) {
+  if (typeof error !== 'object' || error === null || !('context' in error)) {
+    throw error
+  }
+
+  const context = (error as { context?: Response }).context
+
+  if (!context) {
+    throw error
+  }
+
+  try {
+    const payload = (await context.json()) as { error?: string }
+
+    if (payload.error) {
+      throw new Error(payload.error)
+    }
+  } catch (parseError) {
+    if (parseError instanceof Error && parseError.message) {
+      throw parseError
+    }
+
+    throw error
+  }
+
+  throw error
+}
+
 function mapProfile(row: ProfileRow): Profile {
   return {
     authUserId: row.auth_user_id,
@@ -65,7 +93,7 @@ export async function updateCurrentProfile(input: {
   const { error } = await client.from('profiles').update(payload).eq('id', input.profileId)
 
   if (error) {
-    throw error
+    await unwrapFunctionError(error)
   }
 
   const { error: authError } = await client.auth.updateUser({
@@ -157,7 +185,7 @@ export async function createAdminUser(input: {
   })
 
   if (error) {
-    throw error
+    await unwrapFunctionError(error)
   }
 
   return data as { profileId: string; success: boolean }

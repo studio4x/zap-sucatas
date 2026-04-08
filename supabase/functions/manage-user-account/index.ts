@@ -1,6 +1,6 @@
 /// <reference types="jsr:@supabase/functions-js/edge-runtime.d.ts" />
 
-import { requireAdminProfile } from '../_shared/auth.ts'
+import { getBearerToken } from '../_shared/auth.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertAdminAuditLog } from '../_shared/logging.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
@@ -123,13 +123,70 @@ function validateUpdatePayload(payload: RequestBody) {
   }
 }
 
+async function requireVerifiedAdminProfile(request: Request) {
+  let token = ''
+
+  try {
+    token = getBearerToken(request)
+  } catch {
+    return {
+      error: jsonResponse({ error: 'Missing bearer token.' }, 401),
+      profile: null,
+    }
+  }
+
+  const admin = createAdminClient()
+  const {
+    data: { user },
+    error: userError,
+  } = await admin.auth.getUser(token)
+
+  if (userError || !user) {
+    return {
+      error: jsonResponse({ error: 'Invalid or expired session.' }, 401),
+      profile: null,
+    }
+  }
+
+  const { data: profile, error: profileError } = await admin
+    .from('profiles')
+    .select('id, auth_user_id, role, status')
+    .eq('auth_user_id', user.id)
+    .single()
+
+  if (profileError || !profile || profile.status !== 'active') {
+    return {
+      error: jsonResponse({ error: 'Active profile not found.' }, 403),
+      profile: null,
+    }
+  }
+
+  if (profile.role !== 'admin') {
+    return {
+      error: jsonResponse({ error: 'Admin access required.' }, 403),
+      profile: null,
+    }
+  }
+
+  return {
+    error: null,
+    profile,
+  }
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const actor = await requireAdminProfile(request)
+    const auth = await requireVerifiedAdminProfile(request)
+
+    if (auth.error || !auth.profile) {
+      return auth.error ?? jsonResponse({ error: 'Unauthorized.' }, 401)
+    }
+
+    const actor = auth.profile
     const payload = (await request.json()) as RequestBody
     const admin = createAdminClient()
 
