@@ -4,9 +4,10 @@
 
 Zap Sucatas é uma plataforma web de classificados e marketplace de sucatas e maquinários.
 
-Este repositório deve seguir o blueprint funcional e arquitetural definido no arquivo:
+Este repositório deve seguir os documentos-base abaixo:
 
-- `zapsucatas_blueprint_execucao_mvp`
+- `docs/architecture/zapsucatas-blueprint-mvp.md`
+- `docs/architecture/admin-spec.md`
 
 Esse arquivo é a principal fonte de verdade do MVP.
 
@@ -14,7 +15,12 @@ Esse arquivo é a principal fonte de verdade do MVP.
 
 ## Regra principal
 
-Antes de implementar qualquer módulo, leia integralmente `zapsucatas_blueprint_execucao_mvp` e use-o como referência para:
+Antes de implementar qualquer módulo, leia integralmente:
+
+- `docs/architecture/zapsucatas-blueprint-mvp.md`
+- `docs/architecture/admin-spec.md`
+
+Use esses arquivos como referência para:
 
 - escopo do MVP;
 - mapa de páginas;
@@ -22,7 +28,8 @@ Antes de implementar qualquer módulo, leia integralmente `zapsucatas_blueprint_
 - modelagem inicial do banco;
 - Edge Functions;
 - regras de segurança;
-- ordem de implementação.
+- ordem de implementação;
+- direção visual e estrutural do admin.
 
 Não invente módulos fora do escopo sem sinalizar isso claramente.
 
