@@ -217,3 +217,18 @@ export async function updateAdminUser(input: {
 
   return data as { profileId: string; success: boolean }
 }
+
+export async function deleteAdminUser(profileId: string) {
+  const { data, error } = await ensureSupabase().functions.invoke('manage-user-account', {
+    body: {
+      mode: 'delete',
+      profileId,
+    },
+  })
+
+  if (error) {
+    await unwrapFunctionError(error)
+  }
+
+  return data as { profileId: string; success: boolean }
+}

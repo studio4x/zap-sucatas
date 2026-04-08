@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import {
   createAdminUser,
+  deleteAdminUser,
   fetchAdminProfiles,
   updateAdminUser,
 } from '@/domains/profiles/api'
@@ -82,6 +83,18 @@ export function AdminUsersPage() {
     },
     onSuccess: async () => {
       setFeedback('Usuario atualizado com sucesso.')
+      setEditingProfile(null)
+      await queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] })
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteAdminUser,
+    onError: (error) => {
+      setFeedback(error instanceof Error ? error.message : 'Nao foi possivel excluir o usuario.')
+    },
+    onSuccess: async () => {
+      setFeedback('Usuario excluido com sucesso.')
       setEditingProfile(null)
       await queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] })
     },
@@ -252,7 +265,7 @@ export function AdminUsersPage() {
 
         <AdminUserForm
           defaultValues={editDefaults}
-          isPending={updateMutation.isPending}
+          isPending={updateMutation.isPending || deleteMutation.isPending}
           mode="edit"
           onCancel={() => setEditingProfile(null)}
           onSubmit={(values) => {
@@ -334,6 +347,23 @@ export function AdminUsersPage() {
                       setFeedback(null)
                       setEditingProfile(profile)
                     },
+                  },
+                  {
+                    disabled: deleteMutation.isPending,
+                    label: 'Excluir',
+                    onClick: () => {
+                      const confirmed = window.confirm(
+                        `Excluir o usuario ${profile.fullName}? Essa acao so funciona quando nao existem dados vinculados.`,
+                      )
+
+                      if (!confirmed) {
+                        return
+                      }
+
+                      setFeedback(null)
+                      deleteMutation.mutate(profile.id)
+                    },
+                    variant: 'destructive',
                   },
                 ]}
               />

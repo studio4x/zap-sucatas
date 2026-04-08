@@ -26,7 +26,12 @@ type UpdatePayload = BasePayload & {
   profileId?: string
 }
 
-type RequestBody = CreatePayload | UpdatePayload
+type DeletePayload = {
+  mode: 'delete'
+  profileId?: string
+}
+
+type RequestBody = CreatePayload | DeletePayload | UpdatePayload
 
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase()
@@ -121,6 +126,20 @@ function validateUpdatePayload(payload: RequestBody) {
     role,
     status,
   }
+}
+
+function validateDeletePayload(payload: RequestBody) {
+  if (payload.mode !== 'delete') {
+    throw new Error('Invalid mode for delete.')
+  }
+
+  const profileId = typeof payload.profileId === 'string' ? payload.profileId.trim() : ''
+
+  if (profileId.length === 0) {
+    throw new Error('profileId is required.')
+  }
+
+  return { profileId }
 }
 
 async function requireVerifiedAdminProfile(request: Request) {
@@ -243,6 +262,105 @@ Deno.serve(async (request) => {
 
       return jsonResponse({
         profileId: profile.id,
+        success: true,
+      })
+    }
+
+    if (payload.mode === 'delete') {
+      const input = validateDeletePayload(payload)
+      const { data: existingProfile, error: existingProfileError } = await admin
+        .from('profiles')
+        .select('id, auth_user_id, email, full_name, phone, role, status')
+        .eq('id', input.profileId)
+        .single()
+
+      if (existingProfileError || !existingProfile) {
+        return jsonResponse({ error: 'Profile not found.' }, 404)
+      }
+
+      if (existingProfile.auth_user_id === actor.auth_user_id) {
+        return jsonResponse({ error: 'You cannot delete your own admin account.' }, 409)
+      }
+
+      const [
+        { count: listingCount, error: listingsError },
+        { count: questionCount, error: questionsError },
+        { count: answerCount, error: answersError },
+        { count: blogCount, error: blogError },
+        { count: auditCount, error: auditError },
+      ] = await Promise.all([
+        admin
+          .from('listings')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', existingProfile.id),
+        admin
+          .from('listing_questions')
+          .select('id', { count: 'exact', head: true })
+          .eq('author_user_id', existingProfile.id),
+        admin
+          .from('listing_answers')
+          .select('id', { count: 'exact', head: true })
+          .eq('responder_user_id', existingProfile.id),
+        admin
+          .from('blog_posts')
+          .select('id', { count: 'exact', head: true })
+          .eq('author_user_id', existingProfile.id),
+        admin
+          .from('admin_audit_logs')
+          .select('id', { count: 'exact', head: true })
+          .eq('actor_user_id', existingProfile.id),
+      ])
+
+      if (listingsError || questionsError || answersError || blogError || auditError) {
+        throw (
+          listingsError ??
+          questionsError ??
+          answersError ??
+          blogError ??
+          auditError ??
+          new Error('Unable to inspect user dependencies.')
+        )
+      }
+
+      const dependencies = [
+        listingCount ? `${listingCount} anuncios` : null,
+        questionCount ? `${questionCount} perguntas` : null,
+        answerCount ? `${answerCount} respostas` : null,
+        blogCount ? `${blogCount} posts de blog` : null,
+        auditCount ? `${auditCount} logs administrativos` : null,
+      ].filter(Boolean)
+
+      if (dependencies.length > 0) {
+        return jsonResponse(
+          {
+            error: `Nao e possivel excluir este usuario porque ele possui dados vinculados: ${dependencies.join(', ')}.`,
+          },
+          409,
+        )
+      }
+
+      await insertAdminAuditLog({
+        action: 'delete_user_account',
+        actorUserId: actor.id,
+        beforeData: {
+          email: existingProfile.email,
+          fullName: existingProfile.full_name,
+          phone: existingProfile.phone,
+          role: existingProfile.role,
+          status: existingProfile.status,
+        },
+        entityId: existingProfile.id,
+        entityType: 'profile',
+      })
+
+      const { error: deleteAuthError } = await admin.auth.admin.deleteUser(existingProfile.auth_user_id)
+
+      if (deleteAuthError) {
+        throw deleteAuthError
+      }
+
+      return jsonResponse({
+        profileId: existingProfile.id,
         success: true,
       })
     }
