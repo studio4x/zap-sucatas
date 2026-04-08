@@ -35,7 +35,7 @@ export function AppEditListingPage() {
   const updateMutation = useMutation({
     mutationFn: async (payload: ListingEditorSubmitPayload) => {
       if (!user?.id) {
-        throw new Error('Sessao invalida.')
+        throw new Error('Sessão inválida.')
       }
 
       await updateListingDraft({
@@ -77,7 +77,7 @@ export function AppEditListingPage() {
   if (referencesQuery.isLoading || listingQuery.isLoading) {
     return (
       <div className="rounded-2xl border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
-        Carregando dados do anuncio...
+        Carregando dados do anúncio...
       </div>
     )
   }
@@ -90,8 +90,8 @@ export function AppEditListingPage() {
   ) {
     return (
       <DashboardAlertCard
-        description="Nao foi possivel carregar este anuncio para edicao."
-        title="Falha ao abrir anuncio"
+        description="Não foi possível carregar este anúncio para edição."
+        title="Falha ao abrir anúncio"
         tone="error"
       />
     )

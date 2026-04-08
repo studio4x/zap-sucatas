@@ -21,13 +21,13 @@ import { Button } from '@/components/ui/button'
 const adminNavItems = [
   {
     to: paths.admin.root,
-    label: 'Visao geral',
+    label: 'Visão geral',
     icon: LayoutDashboard,
     end: true,
   },
   {
     to: paths.admin.listings,
-    label: 'Anuncios',
+    label: 'Anúncios',
     icon: Boxes,
   },
   {
@@ -37,7 +37,7 @@ const adminNavItems = [
   },
   {
     to: paths.admin.users,
-    label: 'Usuarios',
+    label: 'Usuários',
     icon: UsersRound,
   },
   {
@@ -62,12 +62,12 @@ const adminNavItems = [
   },
   {
     to: paths.admin.pricing,
-    label: 'Precos',
+    label: 'Preços',
     icon: SlidersHorizontal,
   },
   {
     to: paths.admin.settings,
-    label: 'Configuracoes',
+    label: 'Configurações',
     icon: ShieldCheck,
   },
   {

@@ -69,22 +69,22 @@ export function AdminCategoriesPage() {
         actions={
           <>
             <Button asChild type="button">
-              <Link to={paths.admin.listings}>Anuncios</Link>
+              <Link to={paths.admin.listings}>Anúncios</Link>
             </Button>
             <Button asChild type="button" variant="outline">
-              <Link to={paths.public.categories}>Categorias publicas</Link>
+              <Link to={paths.public.categories}>Categorias públicas</Link>
             </Button>
           </>
         }
-        description="Base taxonomica que sustenta o catalogo, filtros publicos e organizacao editorial do marketplace."
+        description="Base taxonômica que sustenta o catálogo, filtros públicos e organização editorial do marketplace."
         eyebrow="Admin / categorias"
-        title="Gestao de categorias"
+        title="Gestão de categorias"
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard label="Total" value={stats.total} />
         <AdminStatCard label="Ativas" value={stats.active} />
-        <AdminStatCard label="Com anuncios" value={stats.withListings} />
+        <AdminStatCard label="Com anúncios" value={stats.withListings} />
         <AdminStatCard label="Com pendencias" value={stats.pending} />
       </div>
 
@@ -109,7 +109,7 @@ export function AdminCategoriesPage() {
               setPage(1)
               setQuery(event.target.value)
             }}
-            placeholder="Buscar por nome, slug ou descricao"
+            placeholder="Buscar por nome, slug ou descrição"
             value={query}
           />
           <Select
@@ -138,7 +138,7 @@ export function AdminCategoriesPage() {
             cell: (category) => (
               <div className="space-y-1">
                 <p className="font-medium text-foreground">{category.name}</p>
-                <p className="text-xs text-muted-foreground">{category.description ?? 'Sem descricao'}</p>
+                <p className="text-xs text-muted-foreground">{category.description ?? 'Sem descrição'}</p>
               </div>
             ),
           },
@@ -158,7 +158,7 @@ export function AdminCategoriesPage() {
             header: 'Uso',
             cell: (category) => (
               <div className="space-y-1 text-xs text-muted-foreground">
-                <p>{category.totalListings} anuncios</p>
+                <p>{category.totalListings} anúncios</p>
                 <p>{category.approvedListings} aprovados</p>
                 <p>{category.pendingListings} pendentes</p>
               </div>
@@ -172,7 +172,7 @@ export function AdminCategoriesPage() {
         data={paginatedCategories}
         emptyDescription="Nenhuma categoria corresponde aos filtros atuais."
         emptyTitle="Sem categorias neste recorte"
-        errorMessage="Nao foi possivel carregar as categorias."
+        errorMessage="Não foi possível carregar as categorias."
         getRowKey={(category) => category.id}
         isError={categoriesQuery.isError}
         isLoading={categoriesQuery.isLoading}

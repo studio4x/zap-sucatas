@@ -66,9 +66,9 @@ export function QuestionThreadCard({
 
         {showListingLink && question.listingSlug ? (
           <p className="text-sm text-muted-foreground">
-            Link publico:{' '}
+            Link público:{' '}
             <Link className="font-medium text-primary underline-offset-4 hover:underline" to={`/anuncios/${question.listingSlug}`}>
-              abrir anuncio
+              abrir anúncio
             </Link>
           </p>
         ) : null}

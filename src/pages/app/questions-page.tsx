@@ -74,15 +74,15 @@ export function AppQuestionsPage() {
       <DashboardSectionHeader
         action={
           <Button asChild type="button" variant="outline">
-            <Link to={paths.app.listings}>Ver anuncios</Link>
+            <Link to={paths.app.listings}>Ver anúncios</Link>
           </Button>
         }
-        description="Responda rapido aos interessados e acompanhe o status publico de cada thread."
+        description="Responda rápido aos interessados e acompanhe o status público de cada thread."
         title="Perguntas recebidas"
       />
 
       <DashboardAlertCard
-        description="Responder com clareza ajuda a reduzir friccao comercial e aumenta a confianca no seu anuncio."
+        description="Responder com clareza ajuda a reduzir fricção comercial e aumenta a confiança no seu anúncio."
         title="Mantenha sua inbox em dia"
         tone={stats.open > 0 ? 'warning' : 'info'}
       />
@@ -123,7 +123,7 @@ export function AppQuestionsPage() {
             <Input
               className="pl-11"
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Buscar por pergunta ou anuncio"
+              placeholder="Buscar por pergunta ou anúncio"
               value={query}
             />
           </div>
@@ -152,7 +152,7 @@ export function AppQuestionsPage() {
 
       {questionsQuery.isError ? (
         <DashboardAlertCard
-          description="Nao foi possivel carregar as perguntas neste momento."
+          description="Não foi possível carregar as perguntas neste momento."
           title="Falha ao carregar inbox"
           tone="error"
         />
@@ -160,7 +160,7 @@ export function AppQuestionsPage() {
 
       {!questionsQuery.isLoading && !questionsQuery.isError && filteredQuestions.length === 0 ? (
         <DashboardEmptyState
-          description="Quando os interessados enviarem perguntas nos seus anuncios, elas aparecerao aqui."
+          description="Quando os interessados enviarem perguntas nos seus anúncios, elas aparecerão aqui."
           title="Nenhuma pergunta encontrada"
         />
       ) : null}
@@ -230,7 +230,7 @@ export function AppQuestionsPage() {
                       className="text-sm font-medium text-primary hover:underline"
                       to={paths.public.listingDetails(question.listingSlug)}
                     >
-                      Abrir anuncio publico
+                      Abrir anúncio público
                     </Link>
                   ) : (
                     <span />

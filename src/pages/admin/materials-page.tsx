@@ -69,22 +69,22 @@ export function AdminMaterialsPage() {
         actions={
           <>
             <Button asChild type="button">
-              <Link to={paths.admin.listings}>Anuncios</Link>
+              <Link to={paths.admin.listings}>Anúncios</Link>
             </Button>
             <Button asChild type="button" variant="outline">
               <Link to={paths.admin.pricing}>Precos</Link>
             </Button>
           </>
         }
-        description="Materiais centrais do dominio, usados em anuncios, filtros e referencias comerciais."
+        description="Materiais centrais do domínio, usados em anúncios, filtros e referências comerciais."
         eyebrow="Admin / materiais"
-        title="Gestao de materiais"
+        title="Gestão de materiais"
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard label="Total" value={stats.total} />
         <AdminStatCard label="Ativos" value={stats.active} />
-        <AdminStatCard label="Com anuncios" value={stats.withListings} />
+        <AdminStatCard label="Com anúncios" value={stats.withListings} />
         <AdminStatCard label="Com pendencias" value={stats.pending} />
       </div>
 
@@ -149,7 +149,7 @@ export function AdminMaterialsPage() {
             header: 'Uso',
             cell: (material) => (
               <div className="space-y-1 text-xs text-muted-foreground">
-                <p>{material.totalListings} anuncios</p>
+                <p>{material.totalListings} anúncios</p>
                 <p>{material.approvedListings} aprovados</p>
                 <p>{material.pendingListings} pendentes</p>
               </div>
@@ -163,7 +163,7 @@ export function AdminMaterialsPage() {
         data={paginatedMaterials}
         emptyDescription="Nenhum material corresponde aos filtros atuais."
         emptyTitle="Sem materiais neste recorte"
-        errorMessage="Nao foi possivel carregar os materiais."
+        errorMessage="Não foi possível carregar os materiais."
         getRowKey={(material) => material.id}
         isError={materialsQuery.isError}
         isLoading={materialsQuery.isLoading}

@@ -30,7 +30,7 @@ export function DashboardTableCard<T>({
   description,
   emptyDescription,
   emptyTitle,
-  errorMessage = 'Nao foi possivel carregar os dados.',
+  errorMessage = 'Não foi possível carregar os dados.',
   getRowKey,
   isError,
   isLoading,

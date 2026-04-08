@@ -2,47 +2,47 @@
 
 ## Projeto
 
-Zap Sucatas é uma plataforma web de classificados e marketplace de sucatas e maquinários.
+Zap Sucatas e uma plataforma web de classificados e marketplace de sucatas e maquinarios.
 
-Este repositório deve seguir os documentos-base abaixo:
+Este repositorio deve seguir os documentos-base abaixo:
 
 - `docs/architecture/zapsucatas-blueprint-mvp.md`
 - `docs/architecture/admin-spec.md`
 
-Esse arquivo é a principal fonte de verdade do MVP.
+Esse arquivo e a principal fonte de verdade do MVP.
 
 ---
 
 ## Regra principal
 
-Antes de implementar qualquer módulo, leia integralmente:
+Antes de implementar qualquer modulo, leia integralmente:
 
 - `docs/architecture/zapsucatas-blueprint-mvp.md`
 - `docs/architecture/admin-spec.md`
 
-Use esses arquivos como referência para:
+Use esses arquivos como referencia para:
 
 - escopo do MVP;
-- mapa de páginas;
-- domínios do sistema;
+- mapa de paginas;
+- dominios do sistema;
 - modelagem inicial do banco;
 - Edge Functions;
-- regras de segurança;
-- ordem de implementação;
-- direção visual e estrutural do admin.
+- regras de seguranca;
+- ordem de implementacao;
+- direcao visual e estrutural do admin.
 
-Não invente módulos fora do escopo sem sinalizar isso claramente.
+Nao invente modulos fora do escopo sem sinalizar isso claramente.
 
 Quando houver lacuna no blueprint:
-- adote a opção mais segura e escalável;
+- adote a opcao mais segura e escalavel;
 - explicite a premissa adotada;
-- mantenha aderência ao MVP.
+- mantenha aderencia ao MVP.
 
 ---
 
-## Stack obrigatória
+## Stack obrigatoria
 
-Salvo instrução contrária explícita, usar:
+Salvo instrucao contraria explicita, usar:
 
 - React
 - TypeScript
@@ -60,14 +60,14 @@ Salvo instrução contrária explícita, usar:
 
 ---
 
-## Arquitetura obrigatória
+## Arquitetura obrigatoria
 
 Separar claramente:
 
-- área pública;
-- dashboard do usuário;
+- area publica;
+- dashboard do usuario;
 - painel admin;
-- backend sensível em Edge Functions;
+- backend sensivel em Edge Functions;
 - banco como fonte central da regra persistida;
 - storage organizado por contexto.
 
@@ -83,7 +83,7 @@ Estrutura alvo:
 - `supabase/functions`
 - `supabase/migrations`
 
-Preferir organização por domínio para regras, hooks, queries, mutations, tipos e componentes específicos.
+Preferir organizacao por dominio para regras, hooks, queries, mutations, tipos e componentes especificos.
 
 ---
 
@@ -92,33 +92,33 @@ Preferir organização por domínio para regras, hooks, queries, mutations, tipo
 Antes de sair criando arquivos, sempre:
 
 1. ler o blueprint;
-2. resumir o que será implementado;
+2. resumir o que sera implementado;
 3. identificar entidades afetadas;
-4. identificar impacto em frontend, backend, banco e segurança;
+4. identificar impacto em frontend, backend, banco e seguranca;
 5. implementar por etapas pequenas e coerentes.
 
 Sempre que a tarefa for ampla, primeiro produzir:
-- plano curto de execução;
+- plano curto de execucao;
 - lista dos arquivos a criar/alterar;
-- dependências técnicas da etapa.
+- dependencias tecnicas da etapa.
 
 ---
 
-## Segurança obrigatória
+## Seguranca obrigatoria
 
-Nunca concentrar regra crítica apenas no frontend.
+Nunca concentrar regra critica apenas no frontend.
 
 Sempre considerar:
 
-- autenticação obrigatória em áreas privadas;
-- autorização por `role`, `is_admin` e status operacional;
-- RLS em tabelas sensíveis;
-- validação dupla em fluxos críticos;
-- Edge Functions para ações administrativas e integrações externas;
+- autenticacao obrigatoria em areas privadas;
+- autorizacao por `role`, `is_admin` e status operacional;
+- RLS em tabelas sensiveis;
+- validacao dupla em fluxos criticos;
+- Edge Functions para acoes administrativas e integracoes externas;
 - segredos nunca expostos no cliente;
-- logs/auditoria para ações críticas.
+- logs/auditoria para acoes criticas.
 
-Leitura pública só quando realmente necessária.
+Leitura publica so quando realmente necessaria.
 
 ---
 
@@ -126,23 +126,23 @@ Leitura pública só quando realmente necessária.
 
 O banco deve ser mantido por migrations SQL versionadas.
 
-Toda mudança estrutural relevante deve gerar migration.
+Toda mudanca estrutural relevante deve gerar migration.
 
 Sempre prever quando fizer sentido:
 
 - foreign keys;
-- índices;
+- indices;
 - constraints;
 - `created_at`;
 - `updated_at`;
-- status explícitos;
+- status explicitos;
 - trigger de `updated_at`;
 - RLS;
 - policies;
 - logs de auditoria;
-- idempotência para automações.
+- idempotencia para automacoes.
 
-Não depender de configuração manual no painel como fonte oficial da estrutura.
+Nao depender de configuracao manual no painel como fonte oficial da estrutura.
 
 ---
 
@@ -150,73 +150,73 @@ Não depender de configuração manual no painel como fonte oficial da estrutura
 
 Usar Edge Functions para:
 
-- aprovação/reprovação administrativa;
-- notificações;
-- integrações externas;
-- sincronizações;
+- aprovacao/reprovacao administrativa;
+- notificacoes;
+- integracoes externas;
+- sincronizacoes;
 - rotinas agendadas;
-- qualquer operação que exija service role ou segredo.
+- qualquer operacao que exija service role ou segredo.
 
-Cada função deve ter responsabilidade clara, validação explícita e logs úteis.
+Cada funcao deve ter responsabilidade clara, validacao explicita e logs uteis.
 
 ---
 
 ## UI/UX
 
-A interface deve seguir padrão profissional, limpo, comercial e escalável.
+A interface deve seguir padrao profissional, limpo, comercial e escalavel.
 
 Prioridades:
 
 - responsividade real;
-- clareza de navegação;
+- clareza de navegacao;
 - estados de loading, erro, vazio e sucesso;
-- consistência entre público, dashboard e admin;
-- formulários bem agrupados;
+- consistencia entre publico, dashboard e admin;
+- formularios bem agrupados;
 - tabelas e filtros operacionais no admin;
-- foco em ação no dashboard.
+- foco em acao no dashboard.
 
-Evitar aparência genérica e improvisada.
+Evitar aparencia generica e improvisada.
 
 ---
 
-## Sequência preferida de implementação
+## Sequencia preferida de implementacao
 
 Seguir preferencialmente esta ordem:
 
-1. fundação do projeto;
+1. fundacao do projeto;
 2. auth e perfis;
-3. catálogo e anúncios;
-4. moderação admin;
+3. catalogo e anuncios;
+4. moderacao admin;
 5. perguntas e respostas;
 6. blog;
-7. tabela de preços;
-8. integrações e automações;
-9. hardening de segurança, SEO e UX final.
+7. tabela de precos;
+8. integracoes e automacoes;
+9. hardening de seguranca, SEO e UX final.
 
 ---
 
-## Regras para implementação
+## Regras para implementacao
 
 Ao implementar:
 
-- não apagar estrutura existente sem motivo claro;
-- não introduzir dependência desnecessária;
-- não criar abstração excessiva cedo demais;
-- não deixar TODO genérico sem contexto;
-- não usar mocks permanentes em fluxo real.
+- nao apagar estrutura existente sem motivo claro;
+- nao introduzir dependencia desnecessaria;
+- nao criar abstracao excessiva cedo demais;
+- nao deixar TODO generico sem contexto;
+- nao usar mocks permanentes em fluxo real.
 
-Se criar placeholder, ele deve ser curto, explícito e fácil de substituir.
+Se criar placeholder, ele deve ser curto, explicito e facil de substituir.
 
 ---
 
-## Regras para resposta dentro do repositório
+## Regras para resposta dentro do repositorio
 
-Quando receber uma tarefa, responder de forma objetiva e técnica.
+Quando receber uma tarefa, responder de forma objetiva e tecnica.
 
-Sempre que útil, informar:
+Sempre que util, informar:
 - o que foi entendido;
-- o que será alterado;
-- quais arquivos serão criados/editados;
+- o que sera alterado;
+- quais arquivos serao criados/editados;
 - quais premissas foram assumidas;
 - quais riscos ou lacunas existem.
 
@@ -224,9 +224,16 @@ Sempre que útil, informar:
 
 ## Fonte de verdade do MVP
 
-Se houver conflito entre implementação ad hoc e o blueprint:
+Se houver conflito entre implementacao ad hoc e o blueprint:
 
 - priorizar `zapsucatas_blueprint_execucao_mvp`;
-- se o blueprint estiver insuficiente, registrar a premissa adotada no código ou na resposta;
-- não expandir escopo sem avisar.
+- se o blueprint estiver insuficiente, registrar a premissa adotada no codigo ou na resposta;
+- nao expandir escopo sem avisar.
 
+---
+
+## Revisao textual obrigatoria
+
+Antes de concluir qualquer entrega que altere interface visivel, sempre revisar os textos das areas afetadas para corrigir acentuacao, ortografia e microcopy.
+
+Essa revisao deve acontecer obrigatoriamente no dashboard do usuario e no painel admin antes de considerar a tarefa pronta.

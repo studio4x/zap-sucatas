@@ -21,7 +21,7 @@ function getStatusLabel(status: 'active' | 'suspended' | 'under_review') {
     return 'Perfil suspenso'
   }
 
-  return 'Perfil em analise'
+  return 'Perfil em análise'
 }
 
 export function AppProfilePage() {
@@ -80,7 +80,7 @@ export function AppProfilePage() {
   if (profileQuery.isError || !profileQuery.data) {
     return (
       <DashboardAlertCard
-        description="Nao foi possivel carregar seus dados nesta tentativa."
+        description="Não foi possível carregar seus dados nesta tentativa."
         title="Falha ao carregar perfil"
         tone="error"
       />
@@ -95,8 +95,8 @@ export function AppProfilePage() {
       />
 
       <DashboardAlertCard
-        description="Seu perfil e usado para identificar a conta autenticada e apoiar os contatos exibidos nos seus anuncios."
-        title="Mantenha estas informacoes sempre atualizadas"
+        description="Seu perfil é usado para identificar a conta autenticada e apoiar os contatos exibidos nos seus anúncios."
+        title="Mantenha estas informações sempre atualizadas"
         tone="info"
       />
 
@@ -106,12 +106,12 @@ export function AppProfilePage() {
           label="Papel"
           value={profileQuery.data.role === 'admin' ? 'Administrador' : 'Anunciante'}
         />
-        <DashboardStatCard label="Email" value={user?.email ?? 'Sem email'} />
+        <DashboardStatCard label="E-mail" value={user?.email ?? 'Sem e-mail'} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
         <DashboardFormSection
-          description="Esses dados alimentam sua area autenticada e ajudam o time a reconhecer sua conta."
+          description="Esses dados alimentam sua área autenticada e ajudam o time a reconhecer sua conta."
           title="Dados cadastrais"
         >
           <form
@@ -157,7 +157,7 @@ export function AppProfilePage() {
 
         <div className="space-y-6">
           <DashboardFormSection
-            description="Os controles sensiveis de papel e liberacao da conta continuam protegidos no backend e no admin."
+            description="Os controles sensíveis de papel e liberação da conta continuam protegidos no backend e no admin."
             title="Contexto da conta"
           >
             <div className="space-y-3 text-sm text-muted-foreground">
@@ -170,14 +170,14 @@ export function AppProfilePage() {
                 {profileQuery.data.role === 'admin' ? 'Administrador' : 'Anunciante'}
               </p>
               <p>
-                <span className="font-medium text-foreground">Email:</span> {user?.email}
+                <span className="font-medium text-foreground">E-mail:</span> {user?.email}
               </p>
             </div>
           </DashboardFormSection>
 
           <DashboardAlertCard
-            description="Se houver mudanca de status da conta, o time administrativo trata esse fluxo fora desta tela."
-            title="Alteracoes administrativas"
+            description="Se houver mudança de status da conta, o time administrativo trata esse fluxo fora desta tela."
+            title="Alterações administrativas"
             tone="warning"
           />
         </div>

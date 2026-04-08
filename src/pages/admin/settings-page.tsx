@@ -52,7 +52,7 @@ export function AdminSettingsPage() {
   const updateMutation = useMutation({
     mutationFn: updateSystemSettings,
     onSuccess: async () => {
-      setFeedback('Configuracoes globais atualizadas com sucesso.')
+      setFeedback('Configurações globais atualizadas com sucesso.')
       await queryClient.invalidateQueries({ queryKey: ['system-settings'] })
     },
   })
@@ -60,7 +60,7 @@ export function AdminSettingsPage() {
   if (settingsQuery.isLoading) {
     return (
       <div className="rounded-lg border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
-        Carregando configuracoes globais...
+        Carregando configurações globais...
       </div>
     )
   }
@@ -68,7 +68,7 @@ export function AdminSettingsPage() {
   if (settingsQuery.isError || !settingsQuery.data) {
     return (
       <div className="rounded-lg border border-rose-200 bg-rose-50 px-6 py-8 text-sm text-rose-700 shadow-sm">
-        Nao foi possivel carregar as configuracoes do sistema.
+        Não foi possível carregar as configurações do sistema.
       </div>
     )
   }
@@ -83,7 +83,7 @@ export function AdminSettingsPage() {
               onClick={() => updateMutation.mutate(formState)}
               type="button"
             >
-              {updateMutation.isPending ? 'Salvando...' : 'Salvar configuracoes'}
+              {updateMutation.isPending ? 'Salvando...' : 'Salvar configurações'}
             </Button>
             <Button asChild type="button" variant="outline">
               <Link to={paths.public.home}>Ver site</Link>
@@ -91,8 +91,8 @@ export function AdminSettingsPage() {
           </>
         }
         description="Parametros globais do produto, contatos institucionais e toggles operacionais do MVP."
-        eyebrow="Admin / configuracoes"
-        title="Configuracoes globais"
+        eyebrow="Admin / configurações"
+        title="Configurações globais"
       />
 
       {feedback ? (
@@ -108,22 +108,22 @@ export function AdminSettingsPage() {
           value={settingsQuery.data.allowGuestQuestions ? 'Ativas' : 'Desativadas'}
         />
         <AdminStatCard
-          label="Manutencao"
+          label="Manutenção"
           value={settingsQuery.data.maintenanceMode ? 'Ativa' : 'Desativada'}
         />
         <AdminStatCard
           label="Suporte"
-          value={settingsQuery.data.supportEmail ?? 'Sem email'}
+          value={settingsQuery.data.supportEmail ?? 'Sem e-mail'}
         />
       </div>
 
       <AdminFilterCard
-        description="Escopo global do site e toggles que impactam operacao, suporte e experiencia publica."
+        description="Escopo global do site e toggles que impactam operação, suporte e experiência pública."
         title="Escopo operacional"
       >
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-            Ajustes aqui afetam o comportamento publico e autenticado do MVP.
+            Ajustes aqui afetam o comportamento público e autenticado do MVP.
           </div>
           <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
             Regra critica continua no backend com RLS e funcoes sensiveis no Supabase.
@@ -134,7 +134,7 @@ export function AdminSettingsPage() {
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <Card>
           <CardHeader>
-            <CardTitle>Operacao do produto</CardTitle>
+            <CardTitle>Operação do produto</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -181,7 +181,7 @@ export function AdminSettingsPage() {
                 <div>
                   <p className="text-sm font-medium text-foreground">Perguntas anonimas</p>
                   <p className="text-sm text-muted-foreground">
-                    Libera envio de perguntas sem login no detalhe do anuncio.
+                    Libera envio de perguntas sem login no detalhe do anúncio.
                   </p>
                 </div>
                 <Switch
@@ -196,7 +196,7 @@ export function AdminSettingsPage() {
             <div className="rounded-lg border border-border bg-muted/25 px-4 py-4">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-medium text-foreground">Modo manutencao</p>
+                  <p className="text-sm font-medium text-foreground">Modo manutenção</p>
                   <p className="text-sm text-muted-foreground">
                     Toggle operacional para contingencia global do site.
                   </p>

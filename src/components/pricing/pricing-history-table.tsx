@@ -28,7 +28,7 @@ export function PricingHistoryTable({ rows, title = 'Tabela historica' }: Pricin
       <CardContent className="p-0">
         {rows.length === 0 ? (
           <div className="p-6 text-sm text-muted-foreground">
-            Ainda nao ha historico suficiente para montar a tabela.
+            Ainda não há histórico suficiente para montar a tabela.
           </div>
         ) : (
           <div className="overflow-x-auto">

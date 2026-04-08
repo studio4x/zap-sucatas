@@ -39,7 +39,7 @@ export function AdminPagination({
           Anterior
         </Button>
         <span className="px-2 text-sm font-medium text-foreground">
-          Pagina {currentPage} de {totalPages}
+          Página {currentPage} de {totalPages}
         </span>
         <Button
           disabled={currentPage === totalPages}
@@ -48,7 +48,7 @@ export function AdminPagination({
           type="button"
           variant="outline"
         >
-          Proxima
+          Próxima
           <ChevronRight className="size-4" />
         </Button>
       </div>

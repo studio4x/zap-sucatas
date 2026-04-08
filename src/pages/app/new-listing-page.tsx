@@ -26,7 +26,7 @@ export function AppNewListingPage() {
   const createMutation = useMutation({
     mutationFn: async (payload: ListingEditorSubmitPayload) => {
       if (!user?.profileId) {
-        throw new Error('Perfil do usuario nao encontrado.')
+        throw new Error('Perfil do usuário não encontrado.')
       }
 
       const listingId = await createListingDraft({
@@ -69,8 +69,8 @@ export function AppNewListingPage() {
   if (referencesQuery.isError || !referencesQuery.data) {
     return (
       <DashboardAlertCard
-        description="Nao foi possivel carregar categorias e materiais para o formulario."
-        title="Falha ao carregar referencias"
+        description="Não foi possível carregar categorias e materiais para o formulário."
+        title="Falha ao carregar referências"
         tone="error"
       />
     )

@@ -76,30 +76,30 @@ export function AppListingsPage() {
           <Button asChild type="button">
             <Link to={paths.app.newListing}>
               <FilePlus2 className="size-4" />
-              Novo anuncio
+              Novo anúncio
             </Link>
           </Button>
         }
-        description="Gerencie seus anuncios em um unico lugar, acompanhe os status e envie itens prontos para revisao."
-        title="Meus anuncios"
+        description="Gerencie seus anúncios em um único lugar, acompanhe os status e envie itens prontos para revisão."
+        title="Meus anúncios"
       />
 
       {requiresAttention ? (
         <DashboardAlertCard
           action={
             <Button asChild size="sm" type="button" variant="outline">
-              <Link to={paths.app.editListing(requiresAttention.id)}>Abrir anuncio</Link>
+              <Link to={paths.app.editListing(requiresAttention.id)}>Abrir anúncio</Link>
             </Button>
           }
           description={
             requiresAttention.status === 'rejected'
-              ? 'Existe um anuncio rejeitado aguardando ajuste. Revise o motivo, corrija o conteudo e reenvie.'
-              : 'Voce ainda tem rascunhos sem envio para revisao. Complete o que faltar e publique quando estiver pronto.'
+              ? 'Existe um anúncio rejeitado aguardando ajuste. Revise o motivo, corrija o conteúdo e reenvie.'
+              : 'Você ainda tem rascunhos sem envio para revisão. Complete o que faltar e publique quando estiver pronto.'
           }
           title={
             requiresAttention.status === 'rejected'
-              ? 'Existe um anuncio com correcao pendente'
-              : 'Voce tem rascunhos para concluir'
+              ? 'Existe um anúncio com correção pendente'
+              : 'Você tem rascunhos para concluir'
           }
           tone="warning"
         />
@@ -109,7 +109,7 @@ export function AppListingsPage() {
         <DashboardStatCard label="Total" value={stats.total} />
         <DashboardStatCard label="Rascunhos" value={stats.drafts} />
         <DashboardStatCard
-          label="Em revisao"
+          label="Em revisão"
           tone={stats.pending > 0 ? 'warning' : 'default'}
           value={stats.pending}
         />
@@ -138,12 +138,12 @@ export function AppListingsPage() {
             Limpar filtros
           </Button>
         }
-        description="Use os filtros para localizar rapido um lote especifico ou acompanhar um status."
+        description="Use os filtros para localizar rápido um lote específico ou acompanhar um status."
       >
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
           <Input
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Buscar por titulo, cidade ou resumo"
+            placeholder="Buscar por título, cidade ou resumo"
             value={query}
           />
           <Select
@@ -161,14 +161,14 @@ export function AppListingsPage() {
 
       {listingsQuery.isLoading ? (
         <div className="rounded-2xl border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
-          Carregando anuncios do dashboard...
+          Carregando anúncios do dashboard...
         </div>
       ) : null}
 
       {listingsQuery.isError ? (
         <DashboardAlertCard
-          description="Nao foi possivel carregar seus anuncios nesta tentativa."
-          title="Falha ao carregar anuncios"
+          description="Não foi possível carregar seus anúncios nesta tentativa."
+          title="Falha ao carregar anúncios"
           tone="error"
         />
       ) : null}
@@ -177,11 +177,11 @@ export function AppListingsPage() {
         <DashboardEmptyState
           action={
             <Button asChild type="button">
-              <Link to={paths.app.newListing}>Criar anuncio</Link>
+              <Link to={paths.app.newListing}>Criar anúncio</Link>
             </Button>
           }
-          description="Ajuste os filtros ou crie seu primeiro anuncio para começar a publicar no marketplace."
-          title="Nenhum anuncio encontrado"
+          description="Ajuste os filtros ou crie seu primeiro anúncio para começar a publicar no marketplace."
+          title="Nenhum anúncio encontrado"
         />
       ) : null}
 
@@ -189,7 +189,7 @@ export function AppListingsPage() {
         <DashboardTableCard
           columns={[
             {
-              header: 'Anuncio',
+              header: 'Anúncio',
               cell: (listing) => (
                 <div className="space-y-1">
                   <p className="font-medium text-foreground">{listing.title}</p>
@@ -217,7 +217,7 @@ export function AppListingsPage() {
               ),
             },
             {
-              header: 'Acoes',
+              header: 'Ações',
               className: 'w-[260px] text-right',
               cell: (listing) => {
                 const canSubmit =
@@ -248,7 +248,7 @@ export function AppListingsPage() {
                         type="button"
                       >
                         <SendHorizontal className="size-4" />
-                        {submitMutation.isPending ? 'Enviando...' : 'Revisao'}
+                        {submitMutation.isPending ? 'Enviando...' : 'Revisão'}
                       </Button>
                     ) : null}
                   </div>
@@ -257,12 +257,12 @@ export function AppListingsPage() {
             },
           ]}
           data={filteredListings}
-          description="Tabela operacional com seus anuncios, status atuais e atalhos de edicao."
-          emptyDescription="Nenhum anuncio encontrado."
-          emptyTitle="Sem anuncios"
+          description="Tabela operacional com seus anúncios, status atuais e atalhos de edição."
+          emptyDescription="Nenhum anúncio encontrado."
+          emptyTitle="Sem anúncios"
           getRowKey={(listing) => listing.id}
           minWidth="min-w-[940px]"
-          title="Lista de anuncios"
+          title="Lista de anúncios"
         />
       ) : null}
 
@@ -273,7 +273,7 @@ export function AppListingsPage() {
               <Link to={paths.app.profile}>Atualizar dados de contato</Link>
             </Button>
           }
-          description="Mantenha nome, telefone e dados da conta sempre atualizados para facilitar a negociacao."
+          description="Mantenha nome, telefone e dados da conta sempre atualizados para facilitar a negociação."
           title="Perfil e dados comerciais"
         />
 

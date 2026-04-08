@@ -41,13 +41,13 @@ export function AppSettingsPage() {
   return (
     <section className="space-y-6">
       <DashboardSectionHeader
-        description="Gerencie a seguranca basica da conta e acompanhe as informacoes operacionais da plataforma."
-        title="Configuracoes"
+        description="Gerencie a segurança básica da conta e acompanhe as informações operacionais da plataforma."
+        title="Configurações"
       />
 
       <DashboardAlertCard
-        description="Preferencias individuais mais avancadas ainda nao entram neste MVP. Esta tela cobre seguranca e referencia institucional."
-        title="Configuracoes essenciais da conta"
+        description="Preferências individuais mais avançadas ainda não entram neste MVP. Esta tela cobre segurança e referência institucional."
+        title="Configurações essenciais da conta"
         tone="info"
       />
 
@@ -58,22 +58,22 @@ export function AppSettingsPage() {
         />
         <DashboardStatCard
           label="Suporte"
-          value={settingsQuery.data?.supportEmail ?? 'Nao informado'}
+          value={settingsQuery.data?.supportEmail ?? 'Não informado'}
         />
         <DashboardStatCard
-          label="Perguntas anonimas"
+          label="Perguntas anônimas"
           value={settingsQuery.data?.allowGuestQuestions ? 'Ativas' : 'Desativadas'}
         />
         <DashboardStatCard
-          label="Manutencao"
+          label="Manutenção"
           value={settingsQuery.data?.maintenanceMode ? 'Ativa' : 'Desativada'}
         />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
         <DashboardFormSection
-          description="Atualize sua senha sempre que precisar reforcar a seguranca da conta."
-          title="Seguranca"
+          description="Atualize sua senha sempre que precisar reforçar a segurança da conta."
+          title="Segurança"
         >
           <form
             className="space-y-4"
@@ -126,8 +126,8 @@ export function AppSettingsPage() {
 
         <div className="space-y-6">
           <DashboardFormSection
-            description="Referencias institucionais e operacionais do marketplace neste momento."
-            title="Informacoes da plataforma"
+            description="Referências institucionais e operacionais do marketplace neste momento."
+            title="Informações da plataforma"
           >
             <div className="space-y-3 text-sm text-muted-foreground">
               <p>
@@ -136,22 +136,22 @@ export function AppSettingsPage() {
               </p>
               <p>
                 <span className="font-medium text-foreground">Suporte por e-mail:</span>{' '}
-                {settingsQuery.data?.supportEmail ?? 'Nao informado'}
+                {settingsQuery.data?.supportEmail ?? 'Não informado'}
               </p>
               <p>
                 <span className="font-medium text-foreground">Suporte por telefone:</span>{' '}
-                {settingsQuery.data?.supportPhone ?? 'Nao informado'}
+                {settingsQuery.data?.supportPhone ?? 'Não informado'}
               </p>
               <p>
-                <span className="font-medium text-foreground">Perguntas anonimas:</span>{' '}
+                <span className="font-medium text-foreground">Perguntas anônimas:</span>{' '}
                 {settingsQuery.data?.allowGuestQuestions ? 'Habilitadas' : 'Desabilitadas'}
               </p>
             </div>
           </DashboardFormSection>
 
           <DashboardAlertCard
-            description="Mudancas globais de comportamento do site ficam sob controle administrativo."
-            title="Preferencias do produto"
+            description="Mudanças globais de comportamento do site ficam sob controle administrativo."
+            title="Preferências do produto"
             tone="warning"
           />
         </div>

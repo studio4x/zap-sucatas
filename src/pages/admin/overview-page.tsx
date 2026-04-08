@@ -25,7 +25,7 @@ function getListingStatusMeta(status: string) {
     case 'approved':
       return { label: 'Aprovado', tone: 'success' as const }
     case 'pending_review':
-      return { label: 'Em revisao', tone: 'info' as const }
+      return { label: 'Em revisão', tone: 'info' as const }
     case 'rejected':
       return { label: 'Rejeitado', tone: 'danger' as const }
     case 'paused':
@@ -89,7 +89,7 @@ export function AdminOverviewPage() {
         actions={
           <>
             <Button asChild type="button">
-              <Link to={paths.admin.listings}>Fila de anuncios</Link>
+              <Link to={paths.admin.listings}>Fila de anúncios</Link>
             </Button>
             <Button asChild type="button" variant="outline">
               <Link to={paths.admin.pricing}>
@@ -99,19 +99,19 @@ export function AdminOverviewPage() {
             </Button>
           </>
         }
-        description="Acompanhe a fila prioritaria do MVP e entre rapido nos modulos de moderacao e operacao."
-        eyebrow="Admin / visao geral"
-        title="Operacao administrativa"
+        description="Acompanhe a fila prioritária do MVP e entre rápido nos módulos de moderação e operação."
+        eyebrow="Admin / visão geral"
+        title="Operação administrativa"
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard
           description="Itens que exigem decisao editorial imediata."
-          label="Anuncios pendentes"
+          label="Anúncios pendentes"
           value={stats.pendingListings}
         />
         <AdminStatCard
-          description="Threads atualmente visiveis na area publica."
+          description="Threads atualmente visíveis na área pública."
           label="Perguntas publicadas"
           value={stats.publishedQuestions}
         />
@@ -122,7 +122,7 @@ export function AdminOverviewPage() {
         />
         <AdminStatCard
           description="Base autenticada do marketplace no momento."
-          label="Usuarios"
+          label="Usuários"
           value={stats.totalUsers}
         />
       </div>
@@ -141,8 +141,8 @@ export function AdminOverviewPage() {
             Limpar filtros
           </Button>
         }
-        description="Use esta fila como entrada principal para moderacao e triagem."
-        title="Fila prioritaria"
+        description="Use esta fila como entrada principal para moderação e triagem."
+        title="Fila prioritária"
       >
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
           <Input
@@ -150,7 +150,7 @@ export function AdminOverviewPage() {
               setPage(1)
               setQuery(event.target.value)
             }}
-            placeholder="Buscar por titulo, categoria ou localidade"
+            placeholder="Buscar por título, categoria ou localidade"
             value={query}
           />
           <Select
@@ -171,7 +171,7 @@ export function AdminOverviewPage() {
       <AdminDataTable
         columns={[
           {
-            header: 'Anuncio',
+            header: 'Anúncio',
             cell: (listing) => (
               <div className="space-y-1">
                 <p className="font-medium text-foreground">{listing.title}</p>
@@ -184,7 +184,7 @@ export function AdminOverviewPage() {
             cell: (listing) => (
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p className="text-sm font-medium text-foreground">{listing.categoryName ?? 'Sem categoria'}</p>
-                <p>{listing.materialName ?? 'Material nao informado'}</p>
+                <p>{listing.materialName ?? 'Material não informado'}</p>
               </div>
             ),
           },
@@ -209,7 +209,7 @@ export function AdminOverviewPage() {
             cell: (listing) => <span className="text-sm text-muted-foreground">{formatListingDate(listing.updatedAt)}</span>,
           },
           {
-            header: 'Acoes',
+            header: 'Ações',
             className: 'w-[210px] text-right',
             cell: (listing) => (
               <AdminRowActions
@@ -235,9 +235,9 @@ export function AdminOverviewPage() {
           },
         ]}
         data={paginatedListings}
-        emptyDescription="Nenhum anuncio encontrado para os filtros atuais."
+        emptyDescription="Nenhum anúncio encontrado para os filtros atuais."
         emptyTitle="Fila vazia"
-        errorMessage="Nao foi possivel carregar a fila administrativa."
+        errorMessage="Não foi possível carregar a fila administrativa."
         getRowKey={(listing) => listing.id}
         isError={listingsQuery.isError}
         isLoading={listingsQuery.isLoading}
@@ -252,33 +252,33 @@ export function AdminOverviewPage() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <AdminStatCard
-          description="Atalho rapido para threads pendentes de moderacao."
+          description="Atalho rápido para threads pendentes de moderação."
           helper={
             <Link className="text-primary hover:underline" to={paths.admin.questions}>
               Abrir perguntas
             </Link>
           }
-          label="Moderacao de perguntas"
+          label="Moderação de perguntas"
           value={<MessageSquare className="size-6" />}
         />
         <AdminStatCard
-          description="Estado geral de controle e governanca da operacao."
+          description="Estado geral de controle e governança da operação."
           helper={
             <Link className="text-primary hover:underline" to={paths.admin.settings}>
-              Ver configuracoes
+              Ver configurações
             </Link>
           }
-          label="Governanca"
+          label="Governança"
           value={<ShieldCheck className="size-6" />}
         />
         <AdminStatCard
-          description="Catalogo interno pronto para ajustes e moderacao."
+          description="Catálogo interno pronto para ajustes e moderação."
           helper={
             <Link className="text-primary hover:underline" to={paths.admin.listings}>
-              Ir para anuncios
+              Ir para anúncios
             </Link>
           }
-          label="Moderacao ativa"
+          label="Moderação ativa"
           value={<FileClock className="size-6" />}
         />
       </div>

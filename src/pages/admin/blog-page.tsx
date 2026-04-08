@@ -30,7 +30,7 @@ function getStatusMeta(status: 'archived' | 'draft' | 'published') {
 
 function formatDate(value: string | null) {
   if (!value) {
-    return 'Nao publicado'
+    return 'Não publicado'
   }
 
   return new Intl.DateTimeFormat('pt-BR', {
@@ -87,16 +87,16 @@ export function AdminBlogPage() {
         actions={
           <>
             <Button asChild type="button">
-              <Link to={paths.public.blog}>Blog publico</Link>
+              <Link to={paths.public.blog}>Blog público</Link>
             </Button>
             <Button asChild type="button" variant="outline">
-              <Link to={paths.admin.settings}>Configuracoes</Link>
+              <Link to={paths.admin.settings}>Configurações</Link>
             </Button>
           </>
         }
-        description="Painel editorial do MVP com foco em status, slug, categoria e publicacao."
+        description="Painel editorial do MVP com foco em status, slug, categoria e publicação."
         eyebrow="Admin / blog"
-        title="Gestao do blog"
+        title="Gestão do blog"
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -128,7 +128,7 @@ export function AdminBlogPage() {
               setPage(1)
               setQuery(event.target.value)
             }}
-            placeholder="Buscar por titulo, slug ou excerpt"
+            placeholder="Buscar por título, slug ou excerpt"
             value={query}
           />
           <Select
@@ -183,7 +183,7 @@ export function AdminBlogPage() {
             ),
           },
           {
-            header: 'Publicacao',
+            header: 'Publicação',
             cell: (post) => (
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>{formatDate(post.publishedAt)}</p>
@@ -192,7 +192,7 @@ export function AdminBlogPage() {
             ),
           },
           {
-            header: 'Acoes',
+            header: 'Ações',
             className: 'w-[150px] text-right',
             cell: (post) => (
               <AdminRowActions
@@ -201,7 +201,7 @@ export function AdminBlogPage() {
                     ? [
                         {
                           icon: Eye,
-                          label: 'Publico',
+                          label: 'Público',
                           to: `/blog/${post.slug}`,
                           variant: 'ghost',
                         },
@@ -215,7 +215,7 @@ export function AdminBlogPage() {
         data={paginatedPosts}
         emptyDescription="Nenhum post corresponde ao recorte atual."
         emptyTitle="Sem posts neste filtro"
-        errorMessage="Nao foi possivel carregar os posts do blog."
+        errorMessage="Não foi possível carregar os posts do blog."
         getRowKey={(post) => post.id}
         isError={blogQuery.isError}
         isLoading={blogQuery.isLoading}

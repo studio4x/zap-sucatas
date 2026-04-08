@@ -23,7 +23,7 @@ function getListingStatusMeta(status: string) {
     case 'approved':
       return { label: 'Aprovado', tone: 'success' as const }
     case 'pending_review':
-      return { label: 'Em revisao', tone: 'info' as const }
+      return { label: 'Em revisão', tone: 'info' as const }
     case 'rejected':
       return { label: 'Rejeitado', tone: 'danger' as const }
     case 'paused':
@@ -88,19 +88,19 @@ export function AdminListingsPage() {
         actions={
           <>
             <Button asChild type="button">
-              <Link to={paths.admin.root}>Visao geral</Link>
+              <Link to={paths.admin.root}>Visão geral</Link>
             </Button>
             <Button asChild type="button" variant="outline">
               <Link to={paths.public.listings}>
                 <Eye className="size-4" />
-                Catalogo publico
+                Catálogo público
               </Link>
             </Button>
           </>
         }
-        description="Revise a fila, acompanhe status editoriais e abra o detalhe operacional de cada anuncio."
-        eyebrow="Admin / anuncios"
-        title="Gestao de anuncios"
+        description="Revise a fila, acompanhe status editoriais e abra o detalhe operacional de cada anúncio."
+        eyebrow="Admin / anúncios"
+        title="Gestão de anúncios"
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -125,7 +125,7 @@ export function AdminListingsPage() {
             Limpar filtros
           </Button>
         }
-        description="Filtros estruturais sempre antecedem o dataset principal de moderacao."
+        description="Filtros estruturais sempre antecedem o dataset principal de moderação."
       >
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_180px]">
           <Input
@@ -133,7 +133,7 @@ export function AdminListingsPage() {
               setPage(1)
               setQuery(event.target.value)
             }}
-            placeholder="Buscar por titulo, resumo, localidade ou taxonomia"
+            placeholder="Buscar por título, resumo, localidade ou taxonomia"
             value={query}
           />
           <Select
@@ -181,7 +181,7 @@ export function AdminListingsPage() {
             cell: (listing) => (
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p className="text-sm font-medium text-foreground">{listing.categoryName ?? 'Sem categoria'}</p>
-                <p>{listing.materialName ?? 'Material nao informado'}</p>
+                <p>{listing.materialName ?? 'Material não informado'}</p>
               </div>
             ),
           },
@@ -192,7 +192,7 @@ export function AdminListingsPage() {
                 <p>
                   {listing.city} - {listing.state}
                 </p>
-                <p>{listing.contactPhone ?? 'Telefone nao informado'}</p>
+                <p>{listing.contactPhone ?? 'Telefone não informado'}</p>
               </div>
             ),
           },
@@ -210,7 +210,7 @@ export function AdminListingsPage() {
             ),
           },
           {
-            header: 'Acoes',
+            header: 'Ações',
             className: 'w-[220px] text-right',
             cell: (listing) => (
               <AdminRowActions
@@ -224,7 +224,7 @@ export function AdminListingsPage() {
                     ? [
                         {
                           icon: Eye,
-                          label: 'Publico',
+                          label: 'Público',
                           to: paths.public.listingDetails(listing.slug),
                           variant: 'ghost' as const,
                         },
@@ -236,9 +236,9 @@ export function AdminListingsPage() {
           },
         ]}
         data={paginatedListings}
-        emptyDescription="Nenhum anuncio corresponde aos filtros aplicados."
-        emptyTitle="Sem anuncios no recorte atual"
-        errorMessage="Nao foi possivel carregar os anuncios administrativos."
+        emptyDescription="Nenhum anúncio corresponde aos filtros aplicados."
+        emptyTitle="Sem anúncios no recorte atual"
+        errorMessage="Não foi possível carregar os anúncios administrativos."
         getRowKey={(listing) => listing.id}
         isError={listingsQuery.isError}
         isLoading={listingsQuery.isLoading}
@@ -256,7 +256,7 @@ export function AdminListingsPage() {
 
       <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-sm">
         A fila administrativa esta orientada por tabela para leitura rapida, com filtros acima do
-        dataset e detalhe separado por anuncio.
+        dataset e detalhe separado por anúncio.
       </div>
     </section>
   )

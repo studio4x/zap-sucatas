@@ -38,7 +38,7 @@ export function PricingManualPriceForm({
       <CardHeader>
         <CardTitle>Preco manual de sucata</CardTitle>
         <CardDescription>
-          Cadastre entradas publicas por material, regiao e vigencia. Esse bloco alimenta a tabela
+          Cadastre entradas públicas por material, região e vigência. Esse bloco alimenta a tabela
           comercial exibida ao mercado.
         </CardDescription>
       </CardHeader>
@@ -100,7 +100,7 @@ export function PricingManualPriceForm({
 
           <label className="flex items-center gap-3 rounded-[1.25rem] border border-border/70 px-4 py-3 text-sm font-medium text-foreground">
             <input className="size-4" type="checkbox" {...form.register('isActive')} />
-            Entrada publica ativa
+            Entrada pública ativa
           </label>
 
           <div className="md:col-span-2 flex flex-wrap gap-3">
@@ -109,7 +109,7 @@ export function PricingManualPriceForm({
             </Button>
             {onCancel ? (
               <Button disabled={isPending} onClick={onCancel} type="button" variant="outline">
-                Cancelar edicao
+                Cancelar edição
               </Button>
             ) : null}
           </div>

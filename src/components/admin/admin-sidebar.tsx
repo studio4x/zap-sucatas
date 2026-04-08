@@ -19,7 +19,7 @@ type AdminSidebarProps = {
 }
 
 function getRoleLabel(role: 'admin' | 'user') {
-  return role === 'admin' ? 'Administrador' : 'Usuario'
+  return role === 'admin' ? 'Administrador' : 'Usuário'
 }
 
 export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
@@ -45,7 +45,7 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
           Painel admin
         </p>
         <p className="mt-2 text-sm leading-6 text-foreground">
-          Moderacao, catalogo, operacao de precos, conteudo e trilha tecnica do MVP.
+          Moderação, catálogo, operação de preços, conteúdo e trilha técnica do MVP.
         </p>
       </div>
 
@@ -73,12 +73,12 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
 
       <div className="mt-4 rounded-lg border border-sidebar-border bg-background px-3 py-3">
         <p className="text-sm font-semibold text-foreground">
-          {user?.fullName?.trim() || 'Sessao administrativa'}
+          {user?.fullName?.trim() || 'Sessão administrativa'}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
           {getRoleLabel(user?.role ?? 'user')} {user?.status === 'active' ? 'ativo' : user?.status}
         </p>
-        <p className="mt-1 truncate text-xs text-muted-foreground">{user?.email ?? 'Sem email'}</p>
+        <p className="mt-1 truncate text-xs text-muted-foreground">{user?.email ?? 'Sem e-mail'}</p>
         <Button className="mt-4 w-full justify-center" onClick={signOut} type="button" variant="outline">
           <LogOut className="size-4" />
           Sair

@@ -170,7 +170,7 @@ export function AdminQuestionsPage() {
               setPage(1)
               setQuery(event.target.value)
             }}
-            placeholder="Buscar por pergunta, anuncio ou autor"
+            placeholder="Buscar por pergunta, anúncio ou autor"
             value={query}
           />
           <Select
@@ -238,7 +238,7 @@ export function AdminQuestionsPage() {
             ),
           },
           {
-            header: 'Acoes',
+            header: 'Ações',
             className: 'w-[180px] text-right',
             cell: (question) => (
               <AdminRowActions
@@ -266,7 +266,7 @@ export function AdminQuestionsPage() {
         data={paginatedQuestions}
         emptyDescription="Nenhuma thread encontrada com os filtros atuais."
         emptyTitle="Sem perguntas neste recorte"
-        errorMessage="Nao foi possivel carregar as perguntas do admin."
+        errorMessage="Não foi possível carregar as perguntas do admin."
         getRowKey={(question) => question.id}
         isError={questionsQuery.isError}
         isLoading={questionsQuery.isLoading}
@@ -331,7 +331,7 @@ export function AdminQuestionsPage() {
                     {selectedQuestion.guestName ?? 'Usuario autenticado'}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {selectedQuestion.guestEmail ?? 'Sem email informado'}
+                    {selectedQuestion.guestEmail ?? 'Sem e-mail informado'}
                   </p>
                 </div>
                 <div className="space-y-1">
@@ -412,9 +412,9 @@ export function AdminQuestionsPage() {
         <div className="rounded-lg border border-border bg-card p-5 shadow-sm">
           <p className="text-sm font-semibold text-foreground">Regras operacionais</p>
           <ul className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
-            <li>A thread publica deve ter texto claro e sem ruido comercial indevido.</li>
-            <li>Use "Ocultar" para casos reversiveis e "Bloquear" para abuso ou conteudo inadequado.</li>
-            <li>As respostas administrativas ficam registradas no mesmo historico do anunciante.</li>
+            <li>A thread pública deve ter texto claro e sem ruído comercial indevido.</li>
+            <li>Use "Ocultar" para casos reversíveis e "Bloquear" para abuso ou conteúdo inadequado.</li>
+            <li>As respostas administrativas ficam registradas no mesmo histórico do anunciante.</li>
           </ul>
         </div>
       </div>

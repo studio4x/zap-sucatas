@@ -26,7 +26,7 @@ export function AdminDataTable<T>({
   data,
   emptyDescription,
   emptyTitle,
-  errorMessage = 'Nao foi possivel carregar os dados desta tela.',
+  errorMessage = 'Não foi possível carregar os dados desta tela.',
   getRowKey,
   isError,
   isLoading,

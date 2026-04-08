@@ -22,7 +22,7 @@ function getStatusText(status: 'active' | 'suspended' | 'under_review') {
     return 'Conta suspensa'
   }
 
-  return 'Conta em analise'
+  return 'Conta em análise'
 }
 
 export function DashboardSidebar({
@@ -34,7 +34,7 @@ export function DashboardSidebar({
   return (
     <aside className="flex h-full flex-col bg-card px-4 py-5">
       <div className="border-b border-border pb-4">
-        <Brand subtitle="Area do anunciante" />
+        <Brand subtitle="Área do anunciante" />
       </div>
 
       <div className="mt-5 rounded-2xl border border-border bg-background px-4 py-4 shadow-sm">
@@ -42,10 +42,10 @@ export function DashboardSidebar({
           {user?.fullName?.trim() || 'Conta autenticada'}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          {user?.email || 'Sessao autenticada'}
+          {user?.email || 'Sessão autenticada'}
         </p>
         <div className="mt-3 inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-          {user ? getStatusText(user.status) : 'Aguardando sessao'}
+          {user ? getStatusText(user.status) : 'Aguardando sessão'}
         </div>
       </div>
 
@@ -79,7 +79,7 @@ export function DashboardSidebar({
           <div className="space-y-1">
             <p className="text-sm font-semibold text-foreground">Precisa de ajuda?</p>
             <p className="text-sm leading-6 text-muted-foreground">
-              Atualize seus anuncios, acompanhe perguntas e use a configuracao da conta quando precisar.
+              Atualize seus anúncios, acompanhe perguntas e use a configuração da conta quando precisar.
             </p>
           </div>
         </div>

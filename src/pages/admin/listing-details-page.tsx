@@ -17,7 +17,7 @@ function getListingStatusMeta(status: string) {
     case 'approved':
       return { label: 'Aprovado', tone: 'success' as const }
     case 'pending_review':
-      return { label: 'Em revisao', tone: 'info' as const }
+      return { label: 'Em revisão', tone: 'info' as const }
     case 'rejected':
       return { label: 'Rejeitado', tone: 'danger' as const }
     case 'paused':
@@ -78,7 +78,7 @@ export function AdminListingDetailsPage() {
   if (listingQuery.isError || !listingQuery.data) {
     return (
       <div className="rounded-lg border border-rose-200 bg-rose-50 px-6 py-8 text-sm text-rose-700 shadow-sm">
-        Nao foi possivel carregar o detalhe do anuncio.
+        Não foi possível carregar o detalhe do anúncio.
       </div>
     )
   }
@@ -92,13 +92,13 @@ export function AdminListingDetailsPage() {
         actions={
           <>
             <Button asChild type="button" variant="outline">
-              <Link to={paths.admin.listings}>Voltar para anuncios</Link>
+              <Link to={paths.admin.listings}>Voltar para anúncios</Link>
             </Button>
             {listing.slug ? (
               <Button asChild type="button" variant="outline">
                 <Link to={paths.public.listingDetails(listing.slug)}>
                   <Eye className="size-4" />
-                  Ver publico
+                  Ver público
                 </Link>
               </Button>
             ) : null}
@@ -106,16 +106,16 @@ export function AdminListingDetailsPage() {
         }
         description={
           listing.summary ||
-          'Detalhe operacional do anuncio para moderacao, validacao e decisao editorial.'
+          'Detalhe operacional do anúncio para moderação, validação e decisão editorial.'
         }
-        eyebrow="Admin / anuncios / detalhe"
+        eyebrow="Admin / anúncios / detalhe"
         title={listing.title}
       />
 
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 shadow-sm">
         <AdminStatusBadge tone={statusMeta.tone}>{statusMeta.label}</AdminStatusBadge>
         <span className="text-sm text-muted-foreground">
-          {listing.categoryName ?? 'Sem categoria'} / {listing.materialName ?? 'Material nao informado'}
+          {listing.categoryName ?? 'Sem categoria'} / {listing.materialName ?? 'Material não informado'}
         </span>
         <span className="text-sm text-muted-foreground">
           {listing.city} - {listing.state}
@@ -186,7 +186,7 @@ export function AdminListingDetailsPage() {
               },
             ]}
             data={listing.attributes}
-            emptyDescription="O anuncio nao possui atributos estruturados cadastrados."
+            emptyDescription="O anúncio não possui atributos estruturados cadastrados."
             emptyTitle="Sem atributos adicionais"
             getRowKey={(attribute) => attribute.id}
           />
@@ -206,15 +206,15 @@ export function AdminListingDetailsPage() {
               </div>
               <div>
                 <p className="font-medium text-foreground">Contato</p>
-                <p className="text-muted-foreground">{listing.contactName ?? 'Nao informado'}</p>
+                <p className="text-muted-foreground">{listing.contactName ?? 'Não informado'}</p>
               </div>
               <div>
                 <p className="font-medium text-foreground">Telefone</p>
-                <p className="text-muted-foreground">{listing.contactPhone ?? 'Nao informado'}</p>
+                <p className="text-muted-foreground">{listing.contactPhone ?? 'Não informado'}</p>
               </div>
               <div>
                 <p className="font-medium text-foreground">Preco</p>
-                <p className="text-muted-foreground">{listing.priceLabel ?? 'Nao informado'}</p>
+                <p className="text-muted-foreground">{listing.priceLabel ?? 'Não informado'}</p>
               </div>
               <div>
                 <p className="font-medium text-foreground">Criado em</p>
@@ -229,14 +229,14 @@ export function AdminListingDetailsPage() {
 
           {listing.rejectionReason ? (
             <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-700 shadow-sm">
-              <p className="font-semibold text-rose-800">Ultima rejeicao</p>
+              <p className="font-semibold text-rose-800">Última rejeição</p>
               <p className="mt-1 leading-6">{listing.rejectionReason}</p>
             </div>
           ) : null}
 
           <Card>
             <CardHeader>
-              <CardTitle>Decisao de moderacao</CardTitle>
+              <CardTitle>Decisão de moderação</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Button
@@ -245,7 +245,7 @@ export function AdminListingDetailsPage() {
                 onClick={() => approveMutation.mutate()}
                 type="button"
               >
-                {approveMutation.isPending ? 'Aprovando...' : 'Aprovar anuncio'}
+                {approveMutation.isPending ? 'Aprovando...' : 'Aprovar anúncio'}
               </Button>
 
               <div className="space-y-2">
@@ -269,7 +269,7 @@ export function AdminListingDetailsPage() {
                 type="button"
                 variant="destructive"
               >
-                {rejectMutation.isPending ? 'Rejeitando...' : 'Rejeitar anuncio'}
+                {rejectMutation.isPending ? 'Rejeitando...' : 'Rejeitar anúncio'}
               </Button>
             </CardContent>
           </Card>

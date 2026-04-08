@@ -48,8 +48,8 @@ export function AppOverviewPage() {
     if (stats.rejected > 0) {
       return {
         description:
-          'Voce tem anuncios rejeitados. Revise o motivo, ajuste os dados e envie novamente para analise.',
-        title: 'Existem anuncios que precisam de correcao',
+          'Você tem anúncios rejeitados. Revise o motivo, ajuste os dados e envie novamente para análise.',
+        title: 'Existem anúncios que precisam de correção',
         tone: 'warning' as const,
       }
     }
@@ -57,8 +57,8 @@ export function AppOverviewPage() {
     if (stats.pending > 0) {
       return {
         description:
-          'Seus anuncios em revisao aguardam liberacao do time administrativo. Voce pode acompanhar os status na lista completa.',
-        title: 'Seus anuncios estao em analise',
+          'Seus anúncios em revisão aguardam liberação do time administrativo. Você pode acompanhar os status na lista completa.',
+        title: 'Seus anúncios estão em análise',
         tone: 'info' as const,
       }
     }
@@ -66,15 +66,15 @@ export function AppOverviewPage() {
     if (listings.length === 0) {
       return {
         description:
-          'Seu dashboard esta pronto. O primeiro passo e criar um anuncio com fotos, localidade e descricao completa.',
-        title: 'Comece publicando o primeiro anuncio',
+          'Seu dashboard está pronto. O primeiro passo é criar um anúncio com fotos, localidade e descrição completa.',
+        title: 'Comece publicando o primeiro anúncio',
         tone: 'success' as const,
       }
     }
 
     return {
       description:
-        'Sua area esta operando normalmente. Continue acompanhando perguntas e mantendo os anuncios atualizados.',
+        'Sua área está operando normalmente. Continue acompanhando perguntas e mantendo os anúncios atualizados.',
       title: 'Tudo certo por aqui',
       tone: 'success' as const,
     }
@@ -87,18 +87,18 @@ export function AppOverviewPage() {
           <Button asChild type="button">
             <Link to={paths.app.newListing}>
               <FilePlus2 className="size-4" />
-              Criar anuncio
+              Criar anúncio
             </Link>
           </Button>
         }
-        description="Acompanhe seus anuncios, veja o que exige atencao agora e entre rapido nas acoes principais da conta."
-        title="Visao geral"
+        description="Acompanhe seus anúncios, veja o que exige atenção agora e entre rápido nas ações principais da conta."
+        title="Visão geral"
       />
 
       <DashboardAlertCard
         action={
           <Button asChild size="sm" type="button" variant="outline">
-            <Link to={paths.app.listings}>Abrir meus anuncios</Link>
+            <Link to={paths.app.listings}>Abrir meus anúncios</Link>
           </Button>
         }
         description={nextStepAlert.description}
@@ -113,13 +113,13 @@ export function AppOverviewPage() {
           value={stats.drafts}
         />
         <DashboardStatCard
-          description="Anuncios aguardando moderacao da plataforma."
-          label="Em revisao"
+          description="Anúncios aguardando moderação da plataforma."
+          label="Em revisão"
           tone={stats.pending > 0 ? 'warning' : 'default'}
           value={stats.pending}
         />
         <DashboardStatCard
-          description="Publicacoes ja liberadas para o catalogo publico."
+          description="Publicações já liberadas para o catálogo público."
           label="Aprovados"
           tone={stats.approved > 0 ? 'success' : 'default'}
           value={stats.approved}
@@ -169,14 +169,14 @@ export function AppOverviewPage() {
             },
           ]}
           data={recentListings}
-          description="Seus anuncios mais recentes com acesso rapido para revisar ou editar."
-          emptyDescription="Quando voce criar o primeiro anuncio, ele vai aparecer aqui com o status mais recente."
-          emptyTitle="Nenhum anuncio ainda"
-          errorMessage="Nao foi possivel carregar seus anuncios."
+          description="Seus anúncios mais recentes com acesso rápido para revisar ou editar."
+          emptyDescription="Quando você criar o primeiro anúncio, ele vai aparecer aqui com o status mais recente."
+          emptyTitle="Nenhum anúncio ainda"
+          errorMessage="Não foi possível carregar seus anúncios."
           getRowKey={(listing) => listing.id}
           isError={listingsQuery.isError}
           isLoading={listingsQuery.isLoading}
-          title="Ultimos anuncios"
+          title="Últimos anúncios"
         />
 
         <div className="grid gap-4">
@@ -185,11 +185,11 @@ export function AppOverviewPage() {
               <Button asChild className="w-full" type="button">
                 <Link to={paths.app.newListing}>
                   <FilePlus2 className="size-4" />
-                  Criar novo anuncio
+                  Criar novo anúncio
                 </Link>
               </Button>
             }
-            description="Comece um novo anuncio com descricao, localidade, fotos e dados comerciais."
+            description="Comece um novo anúncio com descrição, localidade, fotos e dados comerciais."
             icon={<FilePlus2 className="size-5" />}
             title="Publicar novo lote"
             tone="primary"
@@ -214,13 +214,13 @@ export function AppOverviewPage() {
               <Button asChild className="w-full" type="button" variant="outline">
                 <Link to={paths.app.listings}>
                   <Rows4 className="size-4" />
-                  Gerenciar anuncios
+                  Gerenciar anúncios
                 </Link>
               </Button>
             }
-            description="Revise rascunhos, corrija rejeicoes e acompanhe a fila de revisao."
+            description="Revise rascunhos, corrija rejeições e acompanhe a fila de revisão."
             icon={<FileClock className="size-5" />}
-            title="Organizar publicacoes"
+            title="Organizar publicações"
             tone={stats.rejected > 0 || stats.pending > 0 ? 'warning' : 'default'}
           />
         </div>

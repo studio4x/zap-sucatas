@@ -25,7 +25,7 @@ const statusMap: Record<ListingStatus, { className: string; label: string }> = {
   },
   pending_review: {
     className: 'border-sky-300/50 bg-sky-100 text-sky-800',
-    label: 'Em revisao',
+    label: 'Em revisão',
   },
   rejected: {
     className: 'border-rose-300/50 bg-rose-100 text-rose-800',

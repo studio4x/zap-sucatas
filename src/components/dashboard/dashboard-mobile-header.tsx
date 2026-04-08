@@ -19,7 +19,7 @@ export function DashboardMobileHeader({
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-foreground">{currentLabel}</p>
           <p className="truncate text-xs text-muted-foreground">
-            {user?.fullName?.trim() || user?.email || 'Area do anunciante'}
+            {user?.fullName?.trim() || user?.email || 'Área do anunciante'}
           </p>
         </div>
         <Button onClick={onMenuOpen} size="icon" type="button" variant="outline">

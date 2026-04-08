@@ -113,7 +113,7 @@ export function AdminPricingPage() {
   const latestSyncMutation = useMutation({
     mutationFn: () => runPricingSync('latest'),
     onSuccess: async (result) => {
-      setFeedback(`Sincronizacao concluida com ${result.inserted} snapshots.`)
+      setFeedback(`Sincronização concluída com ${result.inserted} snapshots.`)
       await invalidatePricing()
     },
   })
@@ -121,7 +121,7 @@ export function AdminPricingPage() {
   const backfillMutation = useMutation({
     mutationFn: () => runPricingSync('backfill'),
     onSuccess: async (result) => {
-      setFeedback(`Backfill historico concluido com ${result.inserted} snapshots.`)
+      setFeedback(`Backfill histórico concluído com ${result.inserted} snapshots.`)
       await invalidatePricing()
     },
   })
@@ -142,7 +142,7 @@ export function AdminPricingPage() {
   if (pricingQuery.isLoading) {
     return (
       <div className="rounded-lg border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
-        Carregando gestao de precos...
+        Carregando gestão de preços...
       </div>
     )
   }
@@ -150,7 +150,7 @@ export function AdminPricingPage() {
   if (pricingQuery.isError || !pricingQuery.data) {
     return (
       <div className="rounded-lg border border-rose-200 bg-rose-50 px-6 py-8 text-sm text-rose-700 shadow-sm">
-        Nao foi possivel carregar o modulo de precos.
+        Não foi possível carregar o módulo de preços.
       </div>
     )
   }
@@ -200,13 +200,13 @@ export function AdminPricingPage() {
               variant="outline"
             >
               <Upload className="size-4" />
-              {backfillMutation.isPending ? 'Importando...' : 'Backfill historico'}
+              {backfillMutation.isPending ? 'Importando...' : 'Backfill histórico'}
             </Button>
           </>
         }
-        description="Gerencie referencias publicas, snapshots diarios, sincronizacao e fallback manual sem depender de plugins externos."
-        eyebrow="Admin / precos"
-        title="Operacao da tabela de precos"
+        description="Gerencie referências públicas, snapshots diários, sincronização e fallback manual sem depender de plugins externos."
+        eyebrow="Admin / preços"
+        title="Operação da tabela de preços"
       />
 
       {feedback ? (
@@ -247,7 +247,7 @@ export function AdminPricingPage() {
               setManualPage(1)
               setManualQuery(event.target.value)
             }}
-            placeholder="Buscar entrada manual por material, regiao ou rotulo"
+            placeholder="Buscar entrada manual por material, região ou rótulo"
             value={manualQuery}
           />
           <Select
@@ -316,7 +316,7 @@ export function AdminPricingPage() {
             ),
           },
           {
-            header: 'Acoes',
+            header: 'Ações',
             className: 'w-[200px] text-right',
             cell: (entry) => (
               <AdminRowActions
@@ -338,7 +338,7 @@ export function AdminPricingPage() {
         ]}
         data={paginatedManualEntries}
         emptyDescription="Nenhuma entrada manual foi encontrada com os filtros atuais."
-        emptyTitle="Sem referencias manuais"
+        emptyTitle="Sem referências manuais"
         getRowKey={(entry) => entry.id}
       />
 
@@ -362,7 +362,7 @@ export function AdminPricingPage() {
               <span className="font-medium text-foreground">Grafico:</span> {data.chartWindowLabel}
             </p>
             <p>
-              <span className="font-medium text-foreground">Ultima data consolidada:</span>{' '}
+              <span className="font-medium text-foreground">Última data consolidada:</span>{' '}
               {formatPricingDate(data.latestQuotedDate)}
             </p>
             <p>
@@ -374,7 +374,7 @@ export function AdminPricingPage() {
 
       <PricingHistoryTable
         rows={data.historyRows}
-        title="Historico consolidado dos ultimos 6 meses"
+        title="Histórico consolidado dos últimos 6 meses"
       />
 
       <AdminDataTable
@@ -416,7 +416,7 @@ export function AdminPricingPage() {
           },
         ]}
         data={paginatedSnapshots}
-        emptyDescription="Ainda nao existem snapshots recentes para o provider selecionado."
+        emptyDescription="Ainda não existem snapshots recentes para o provider selecionado."
         emptyTitle="Sem snapshots recentes"
         getRowKey={(snapshot) => snapshot.id}
       />

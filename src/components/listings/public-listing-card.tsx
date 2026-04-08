@@ -59,7 +59,7 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
 
         <Button asChild className="w-full" disabled={!listing.slug}>
           <Link to={listing.slug ? paths.public.listingDetails(listing.slug) : paths.public.listings}>
-            Ver anuncio
+            Ver anúncio
           </Link>
         </Button>
       </CardContent>

@@ -74,11 +74,11 @@ export function AdminLocationsPage() {
               <Link to={paths.admin.listings}>Anuncios</Link>
             </Button>
             <Button asChild type="button" variant="outline">
-              <Link to={paths.public.listings}>Catalogo publico</Link>
+              <Link to={paths.public.listings}>Catálogo público</Link>
             </Button>
           </>
         }
-        description="Visao operacional das localidades derivadas do proprio catalogo do MVP, sem normalizacao extra fora de escopo."
+        description="Visão operacional das localidades derivadas do próprio catálogo do MVP, sem normalização extra fora de escopo."
         eyebrow="Admin / localidades"
         title="Mapa operacional de localidades"
       />
@@ -152,14 +152,14 @@ export function AdminLocationsPage() {
             ),
           },
           {
-            header: 'Ultima movimentacao',
+            header: 'Última movimentação',
             cell: (location) => <span className="text-sm text-muted-foreground">{formatDate(location.lastUpdatedAt)}</span>,
           },
         ]}
         data={paginatedLocations}
         emptyDescription="Nenhuma localidade corresponde aos filtros atuais."
         emptyTitle="Sem localidades neste recorte"
-        errorMessage="Nao foi possivel carregar as localidades."
+        errorMessage="Não foi possível carregar as localidades."
         getRowKey={(location) => `${location.state}-${location.city}`}
         isError={locationsQuery.isError}
         isLoading={locationsQuery.isLoading}

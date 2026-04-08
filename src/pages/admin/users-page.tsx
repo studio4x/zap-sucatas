@@ -38,7 +38,7 @@ function getProfileStatusMeta(status: 'active' | 'suspended' | 'under_review') {
     case 'active':
       return { label: 'Ativo', tone: 'success' as const }
     case 'under_review':
-      return { label: 'Em analise', tone: 'warning' as const }
+      return { label: 'Em análise', tone: 'warning' as const }
     default:
       return { label: 'Suspenso', tone: 'danger' as const }
   }
@@ -68,7 +68,7 @@ export function AdminUsersPage() {
   const createMutation = useMutation({
     mutationFn: createAdminUser,
     onError: (error) => {
-      setFeedback(error instanceof Error ? error.message : 'Nao foi possivel criar o usuario.')
+      setFeedback(error instanceof Error ? error.message : 'Não foi possível criar o usuário.')
     },
     onSuccess: async () => {
       setFeedback('Usuario criado com sucesso.')
@@ -79,7 +79,7 @@ export function AdminUsersPage() {
   const updateMutation = useMutation({
     mutationFn: updateAdminUser,
     onError: (error) => {
-      setFeedback(error instanceof Error ? error.message : 'Nao foi possivel atualizar o usuario.')
+      setFeedback(error instanceof Error ? error.message : 'Não foi possível atualizar o usuário.')
     },
     onSuccess: async () => {
       setFeedback('Usuario atualizado com sucesso.')
@@ -91,7 +91,7 @@ export function AdminUsersPage() {
   const deleteMutation = useMutation({
     mutationFn: deleteAdminUser,
     onError: (error) => {
-      setFeedback(error instanceof Error ? error.message : 'Nao foi possivel excluir o usuario.')
+      setFeedback(error instanceof Error ? error.message : 'Não foi possível excluir o usuário.')
     },
     onSuccess: async () => {
       setFeedback('Usuario excluido com sucesso.')
@@ -164,7 +164,7 @@ export function AdminUsersPage() {
               }}
               type="button"
             >
-              Novo usuario
+              Novo usuário
             </Button>
             <Button asChild type="button">
               <Link to={paths.admin.listings}>Anuncios</Link>
@@ -175,8 +175,8 @@ export function AdminUsersPage() {
           </>
         }
         description="Base autenticada do marketplace, com foco em papel, status e atividade operacional."
-        eyebrow="Admin / usuarios"
-        title="Gestao de usuarios"
+        eyebrow="Admin / usuários"
+        title="Gestão de usuários"
       />
 
       {feedback ? (
@@ -188,7 +188,7 @@ export function AdminUsersPage() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard label="Total" value={stats.total} />
         <AdminStatCard label="Admins" value={stats.admins} />
-        <AdminStatCard label="Em analise" value={stats.underReview} />
+        <AdminStatCard label="Em análise" value={stats.underReview} />
         <AdminStatCard label="Suspensos" value={stats.suspended} />
       </div>
 
@@ -238,7 +238,7 @@ export function AdminUsersPage() {
           >
             <option value="all">Todos os status</option>
             <option value="active">Ativos</option>
-            <option value="under_review">Em analise</option>
+            <option value="under_review">Em análise</option>
             <option value="suspended">Suspensos</option>
           </Select>
         </div>
@@ -260,7 +260,7 @@ export function AdminUsersPage() {
               status: values.status,
             })
           }}
-          submitLabel="Criar usuario"
+          submitLabel="Criar usuário"
         />
 
         <AdminUserForm
@@ -284,7 +284,7 @@ export function AdminUsersPage() {
             })
           }}
           submitDisabled={!editingProfile}
-          submitLabel={editingProfile ? 'Salvar ajustes' : 'Selecione um usuario'}
+          submitLabel={editingProfile ? 'Salvar ajustes' : 'Selecione um usuário'}
         />
       </div>
 
@@ -329,14 +329,14 @@ export function AdminUsersPage() {
             header: 'Atividade',
             cell: (profile) => (
               <div className="space-y-1 text-xs text-muted-foreground">
-                <p>{profile.totalListings} anuncios</p>
+                <p>{profile.totalListings} anúncios</p>
                 <p>{profile.authoredQuestions} perguntas</p>
                 <p>{profile.approvedListings} aprovados</p>
               </div>
             ),
           },
           {
-            header: 'Acoes',
+            header: 'Ações',
             className: 'w-[150px] text-right',
             cell: (profile) => (
               <AdminRowActions
@@ -353,7 +353,7 @@ export function AdminUsersPage() {
                     label: 'Excluir',
                     onClick: () => {
                       const confirmed = window.confirm(
-                        `Excluir o usuario ${profile.fullName}? Essa acao so funciona quando nao existem dados vinculados.`,
+                        `Excluir o usuário ${profile.fullName}? Essa ação só funciona quando não existem dados vinculados.`,
                       )
 
                       if (!confirmed) {
@@ -372,8 +372,8 @@ export function AdminUsersPage() {
         ]}
         data={paginatedProfiles}
         emptyDescription="Nenhum perfil corresponde ao recorte atual."
-        emptyTitle="Sem usuarios no filtro"
-        errorMessage="Nao foi possivel carregar os usuarios administrativos."
+        emptyTitle="Sem usuários no filtro"
+        errorMessage="Não foi possível carregar os usuários administrativos."
         getRowKey={(profile) => profile.id}
         isError={profilesQuery.isError}
         isLoading={profilesQuery.isLoading}

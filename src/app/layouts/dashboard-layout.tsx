@@ -13,18 +13,18 @@ import { DashboardShell } from '@/components/dashboard/dashboard-shell'
 const dashboardNavItems = [
   {
     to: paths.app.root,
-    label: 'Visao geral',
+    label: 'Visão geral',
     icon: House,
     end: true,
   },
   {
     to: paths.app.listings,
-    label: 'Anuncios',
+    label: 'Anúncios',
     icon: Rows4,
   },
   {
     to: paths.app.newListing,
-    label: 'Novo anuncio',
+    label: 'Novo anúncio',
     icon: FilePlus2,
   },
   {
@@ -39,7 +39,7 @@ const dashboardNavItems = [
   },
   {
     to: paths.app.settings,
-    label: 'Configuracoes',
+    label: 'Configurações',
     icon: Settings2,
   },
 ]

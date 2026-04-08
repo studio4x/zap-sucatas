@@ -134,7 +134,7 @@ export function ListingEditor({
         setFeedback('Rascunho salvo com sucesso.')
       }
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : 'Falha ao salvar o anuncio.')
+      setFeedback(error instanceof Error ? error.message : 'Falha ao salvar o anúncio.')
     }
   }
 
@@ -194,8 +194,8 @@ export function ListingEditor({
             </Button>
           </div>
         }
-        description="Preencha os dados do lote, revise fotos e escolha se quer apenas salvar ou enviar para moderacao."
-        title={mode === 'create' ? 'Criar anuncio' : 'Editar anuncio'}
+        description="Preencha os dados do lote, revise fotos e escolha se quer apenas salvar ou enviar para moderação."
+        title={mode === 'create' ? 'Criar anúncio' : 'Editar anúncio'}
       />
 
       {rejectionReason ? (
@@ -209,7 +209,7 @@ export function ListingEditor({
       <div className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
         <div className="space-y-6">
           <DashboardFormSection
-            description="Esses campos entram no card do catalogo e na validacao da moderacao."
+            description="Esses campos entram no card do catálogo e na validação da moderação."
             title="Dados principais"
           >
             <div className="grid gap-4">
@@ -239,7 +239,7 @@ export function ListingEditor({
 
                 <FormField label="Material principal">
                   <Select {...form.register('primaryMaterialId')}>
-                    <option value="">Nao informado</option>
+                    <option value="">Não informado</option>
                     {materials.map((material) => (
                       <option key={material.id} value={material.id}>
                         {material.name}
@@ -268,7 +268,7 @@ export function ListingEditor({
           </DashboardFormSection>
 
           <DashboardFormSection
-            description="Dados usados no detalhe do anuncio e no filtro geografico do catalogo."
+            description="Dados usados no detalhe do anúncio e no filtro geográfico do catálogo."
             title="Localizacao e contato"
           >
             <div className="grid gap-4 md:grid-cols-2">
@@ -364,7 +364,7 @@ export function ListingEditor({
 
         <div className="space-y-6">
           <DashboardFormSection
-            description="O anuncio precisa de ao menos uma imagem para ser enviado para revisao."
+            description="O anúncio precisa de ao menos uma imagem para ser enviado para revisão."
             title="Imagens"
           >
             <div className="space-y-4">
@@ -390,7 +390,7 @@ export function ListingEditor({
                     {activeExistingImages.map((image) => (
                       <div key={image.id} className="overflow-hidden rounded-2xl border border-border/70">
                         <div className="aspect-square bg-muted">
-                          <img alt={image.altText ?? 'Imagem do anuncio'} className="h-full w-full object-cover" src={image.publicUrl} />
+                          <img alt={image.altText ?? 'Imagem do anúncio'} className="h-full w-full object-cover" src={image.publicUrl} />
                         </div>
                         <div className="space-y-3 p-4">
                           <div className="flex flex-wrap gap-2">
@@ -446,7 +446,7 @@ export function ListingEditor({
           ) : null}
 
           <DashboardFormSection
-            description="Salve quantas vezes precisar. Quando os dados estiverem completos, envie para revisao."
+            description="Salve quantas vezes precisar. Quando os dados estiverem completos, envie para revisão."
             title="Publicacao"
           >
             <div className="space-y-3">
@@ -463,12 +463,12 @@ export function ListingEditor({
                 onClick={() => void form.handleSubmit((values) => handleSubmit(values, true))()}
                 type="button"
               >
-                {isSubmitting && submitAfterSave ? 'Enviando...' : 'Salvar e enviar para revisao'}
+                {isSubmitting && submitAfterSave ? 'Enviando...' : 'Salvar e enviar para revisão'}
               </Button>
               {activeExistingImages.length === 0 && pendingFiles.length === 0 ? (
                 <DashboardEmptyState
                   className="px-4 py-8"
-                  description="Adicione fotos do lote antes de enviar para revisao."
+                  description="Adicione fotos do lote antes de enviar para revisão."
                   title="Ainda faltam imagens"
                 />
               ) : null}

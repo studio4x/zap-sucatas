@@ -44,11 +44,11 @@ export function AdminUserForm(props: AdminUserFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{props.mode === 'create' ? 'Adicionar novo usuario' : 'Editar usuario selecionado'}</CardTitle>
+        <CardTitle>{props.mode === 'create' ? 'Adicionar novo usuário' : 'Editar usuário selecionado'}</CardTitle>
         <CardDescription>
           {props.mode === 'create'
             ? 'Crie contas pelo painel com papel, status e senha inicial definidos pelo admin.'
-            : 'Ajuste dados basicos, papel e status sem expor regra critica no frontend.'}
+            : 'Ajuste dados básicos, papel e status sem expor regra crítica no frontend.'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -93,7 +93,7 @@ export function AdminUserForm(props: AdminUserFormProps) {
               Papel
             </label>
             <Select id={`${props.mode}-role`} {...form.register('role')}>
-              <option value="user">Usuario</option>
+              <option value="user">Usuário</option>
               <option value="admin">Administrador</option>
             </Select>
           </div>
@@ -104,7 +104,7 @@ export function AdminUserForm(props: AdminUserFormProps) {
             </label>
             <Select id={`${props.mode}-status`} {...form.register('status')}>
               <option value="active">Ativo</option>
-              <option value="under_review">Em analise</option>
+              <option value="under_review">Em análise</option>
               <option value="suspended">Suspenso</option>
             </Select>
           </div>

@@ -35,7 +35,7 @@ export function PricingManualSnapshotForm({
       <CardHeader>
         <CardTitle>Lancamento manual de snapshot</CardTitle>
         <CardDescription>
-          Use esse formulario como contingencia quando o provider publico falhar. O registro respeita
+          Use esse formulário como contingência quando o provider público falhar. O registro respeita
           a mesma tabela historica usada pelo sincronismo.
         </CardDescription>
       </CardHeader>

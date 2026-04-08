@@ -94,14 +94,14 @@ export function AdminLogsPage() {
             </Button>
           </>
         }
-        description="Tabelas de integracao e trilha administrativa para leitura tecnica, confiavel e sem ruido visual."
+        description="Tabelas de integração e trilha administrativa para leitura técnica, confiável e sem ruído visual."
         eyebrow="Admin / logs"
         title="Logs e auditoria"
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard label="Total" value={stats.total} />
-        <AdminStatCard label="Integracoes" value={stats.integrations} />
+        <AdminStatCard label="Integrações" value={stats.integrations} />
         <AdminStatCard label="Auditoria" value={stats.audits} />
         <AdminStatCard label="Falhas" value={stats.withErrors} />
       </div>
@@ -138,7 +138,7 @@ export function AdminLogsPage() {
             value={kindFilter}
           >
             <option value="all">Todos os tipos</option>
-            <option value="integration">Integracoes</option>
+            <option value="integration">Integrações</option>
             <option value="audit">Auditoria</option>
           </Select>
         </div>
@@ -150,7 +150,7 @@ export function AdminLogsPage() {
             header: 'Tipo',
             cell: (log) => (
               <AdminStatusBadge tone={getLogTone(log.kind, log.secondaryLabel)}>
-                {log.kind === 'integration' ? 'Integracao' : 'Auditoria'}
+                {log.kind === 'integration' ? 'Integração' : 'Auditoria'}
               </AdminStatusBadge>
             ),
           },
@@ -175,7 +175,7 @@ export function AdminLogsPage() {
         data={paginatedLogs}
         emptyDescription="Nenhum log corresponde aos filtros atuais."
         emptyTitle="Sem logs neste recorte"
-        errorMessage="Nao foi possivel carregar a trilha de logs."
+        errorMessage="Não foi possível carregar a trilha de logs."
         getRowKey={(log) => `${log.kind}-${log.id}`}
         isError={logsQuery.isError}
         isLoading={logsQuery.isLoading}
