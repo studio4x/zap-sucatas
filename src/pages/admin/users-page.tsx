@@ -1,17 +1,28 @@
 import { useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
 import { AdminFilterCard } from '@/components/admin/admin-filter-card'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminPagination } from '@/components/admin/admin-pagination'
+import { AdminRowActions } from '@/components/admin/admin-row-actions'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
+import { AdminUserForm } from '@/components/admin/admin-user-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { fetchAdminProfiles } from '@/domains/profiles/api'
+import {
+  createAdminUser,
+  fetchAdminProfiles,
+  updateAdminUser,
+} from '@/domains/profiles/api'
+import type {
+  AdminCreateUserValues,
+  AdminUpdateUserValues,
+} from '@/domains/profiles/schemas'
+import type { AdminProfileSummary } from '@/domains/profiles/types'
 
 const PAGE_SIZE = 12
 
@@ -39,6 +50,9 @@ function formatDate(value: string) {
 }
 
 export function AdminUsersPage() {
+  const queryClient = useQueryClient()
+  const [feedback, setFeedback] = useState<string | null>(null)
+  const [editingProfile, setEditingProfile] = useState<AdminProfileSummary | null>(null)
   const [query, setQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<'admin' | 'all' | 'user'>('all')
   const [statusFilter, setStatusFilter] =
@@ -50,6 +64,29 @@ export function AdminUsersPage() {
     queryFn: fetchAdminProfiles,
   })
 
+  const createMutation = useMutation({
+    mutationFn: createAdminUser,
+    onError: (error) => {
+      setFeedback(error instanceof Error ? error.message : 'Nao foi possivel criar o usuario.')
+    },
+    onSuccess: async () => {
+      setFeedback('Usuario criado com sucesso.')
+      await queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] })
+    },
+  })
+
+  const updateMutation = useMutation({
+    mutationFn: updateAdminUser,
+    onError: (error) => {
+      setFeedback(error instanceof Error ? error.message : 'Nao foi possivel atualizar o usuario.')
+    },
+    onSuccess: async () => {
+      setFeedback('Usuario atualizado com sucesso.')
+      setEditingProfile(null)
+      await queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] })
+    },
+  })
+
   const profiles = profilesQuery.data ?? []
   const filteredProfiles = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -57,12 +94,12 @@ export function AdminUsersPage() {
     return profiles.filter((profile) => {
       const matchesRole = roleFilter === 'all' ? true : profile.role === roleFilter
       const matchesStatus = statusFilter === 'all' ? true : profile.status === statusFilter
-      const haystack = `${profile.fullName} ${profile.phone ?? ''} ${profile.authUserId}`.toLowerCase()
+      const haystack = `${profile.fullName} ${profile.email ?? ''} ${profile.phone ?? ''} ${profile.authUserId}`.toLowerCase()
       const matchesQuery = normalizedQuery.length === 0 ? true : haystack.includes(normalizedQuery)
 
       return matchesRole && matchesStatus && matchesQuery
     })
-  }, [page, profiles, query, roleFilter, statusFilter])
+  }, [profiles, query, roleFilter, statusFilter])
   const paginatedProfiles = useMemo(
     () => filteredProfiles.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
     [filteredProfiles, page],
@@ -78,11 +115,44 @@ export function AdminUsersPage() {
     [profiles],
   )
 
+  const createDefaults = useMemo<AdminCreateUserValues>(
+    () => ({
+      confirmPassword: '',
+      email: '',
+      fullName: '',
+      password: '',
+      phone: '',
+      role: 'user',
+      status: 'active',
+    }),
+    [],
+  )
+
+  const editDefaults = useMemo<AdminUpdateUserValues>(
+    () => ({
+      email: editingProfile?.email ?? '',
+      fullName: editingProfile?.fullName ?? '',
+      phone: editingProfile?.phone ?? '',
+      role: editingProfile?.role ?? 'user',
+      status: editingProfile?.status ?? 'active',
+    }),
+    [editingProfile],
+  )
+
   return (
     <section className="space-y-6">
       <AdminPageHeader
         actions={
           <>
+            <Button
+              onClick={() => {
+                setEditingProfile(null)
+                setFeedback(null)
+              }}
+              type="button"
+            >
+              Novo usuario
+            </Button>
             <Button asChild type="button">
               <Link to={paths.admin.listings}>Anuncios</Link>
             </Button>
@@ -95,6 +165,12 @@ export function AdminUsersPage() {
         eyebrow="Admin / usuarios"
         title="Gestao de usuarios"
       />
+
+      {feedback ? (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 shadow-sm">
+          {feedback}
+        </div>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard label="Total" value={stats.total} />
@@ -155,6 +231,50 @@ export function AdminUsersPage() {
         </div>
       </AdminFilterCard>
 
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <AdminUserForm
+          defaultValues={createDefaults}
+          isPending={createMutation.isPending}
+          mode="create"
+          onSubmit={(values) => {
+            setFeedback(null)
+            createMutation.mutate({
+              email: values.email,
+              fullName: values.fullName,
+              password: values.password,
+              phone: values.phone,
+              role: values.role,
+              status: values.status,
+            })
+          }}
+          submitLabel="Criar usuario"
+        />
+
+        <AdminUserForm
+          defaultValues={editDefaults}
+          isPending={updateMutation.isPending}
+          mode="edit"
+          onCancel={() => setEditingProfile(null)}
+          onSubmit={(values) => {
+            if (!editingProfile) {
+              return
+            }
+
+            setFeedback(null)
+            updateMutation.mutate({
+              email: values.email,
+              fullName: values.fullName,
+              phone: values.phone,
+              profileId: editingProfile.id,
+              role: values.role,
+              status: values.status,
+            })
+          }}
+          submitDisabled={!editingProfile}
+          submitLabel={editingProfile ? 'Salvar ajustes' : 'Selecione um usuario'}
+        />
+      </div>
+
       <AdminDataTable
         columns={[
           {
@@ -170,6 +290,7 @@ export function AdminUsersPage() {
             header: 'Contato',
             cell: (profile) => (
               <div className="space-y-1 text-xs text-muted-foreground">
+                <p>{profile.email ?? 'Sem e-mail'}</p>
                 <p>{profile.phone ?? 'Sem telefone'}</p>
                 <p>auth: {profile.authUserId.slice(0, 8)}...</p>
               </div>
@@ -199,6 +320,23 @@ export function AdminUsersPage() {
                 <p>{profile.authoredQuestions} perguntas</p>
                 <p>{profile.approvedListings} aprovados</p>
               </div>
+            ),
+          },
+          {
+            header: 'Acoes',
+            className: 'w-[150px] text-right',
+            cell: (profile) => (
+              <AdminRowActions
+                actions={[
+                  {
+                    label: 'Editar',
+                    onClick: () => {
+                      setFeedback(null)
+                      setEditingProfile(profile)
+                    },
+                  },
+                ]}
+              />
             ),
           },
         ]}

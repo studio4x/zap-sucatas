@@ -4,6 +4,7 @@ import type { AdminProfileSummary, Profile } from '@/domains/profiles/types'
 type ProfileRow = {
   auth_user_id: string
   created_at: string
+  email: string | null
   full_name: string
   id: string
   is_admin: boolean
@@ -25,6 +26,7 @@ function mapProfile(row: ProfileRow): Profile {
   return {
     authUserId: row.auth_user_id,
     createdAt: row.created_at,
+    email: row.email,
     fullName: row.full_name,
     id: row.id,
     isAdmin: row.is_admin,
@@ -38,7 +40,7 @@ function mapProfile(row: ProfileRow): Profile {
 export async function fetchCurrentProfile(profileId: string) {
   const { data, error } = await ensureSupabase()
     .from('profiles')
-    .select('id, auth_user_id, full_name, phone, role, is_admin, status, created_at, updated_at')
+    .select('id, auth_user_id, email, full_name, phone, role, is_admin, status, created_at, updated_at')
     .eq('id', profileId)
     .single()
 
@@ -85,7 +87,7 @@ export async function fetchAdminProfiles() {
     await Promise.all([
       client
         .from('profiles')
-        .select('id, auth_user_id, full_name, phone, role, is_admin, status, created_at, updated_at')
+        .select('id, auth_user_id, email, full_name, phone, role, is_admin, status, created_at, updated_at')
         .order('created_at', { ascending: false }),
       client.from('listings').select('user_id, status'),
       client.from('listing_questions').select('author_user_id'),
@@ -132,4 +134,58 @@ export async function fetchAdminProfiles() {
       totalListings: counts.total,
     } satisfies AdminProfileSummary
   })
+}
+
+export async function createAdminUser(input: {
+  email: string
+  fullName: string
+  password: string
+  phone: string
+  role: 'admin' | 'user'
+  status: 'active' | 'suspended' | 'under_review'
+}) {
+  const { data, error } = await ensureSupabase().functions.invoke('manage-user-account', {
+    body: {
+      email: input.email,
+      fullName: input.fullName,
+      mode: 'create',
+      password: input.password,
+      phone: input.phone,
+      role: input.role,
+      status: input.status,
+    },
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return data as { profileId: string; success: boolean }
+}
+
+export async function updateAdminUser(input: {
+  email: string
+  fullName: string
+  phone: string
+  profileId: string
+  role: 'admin' | 'user'
+  status: 'active' | 'suspended' | 'under_review'
+}) {
+  const { data, error } = await ensureSupabase().functions.invoke('manage-user-account', {
+    body: {
+      email: input.email,
+      fullName: input.fullName,
+      mode: 'update',
+      phone: input.phone,
+      profileId: input.profileId,
+      role: input.role,
+      status: input.status,
+    },
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return data as { profileId: string; success: boolean }
 }

@@ -57,3 +57,6 @@ verify_jwt = true
 
 [functions.notify-listing-status]
 verify_jwt = true
+
+[functions.manage-user-account]
+verify_jwt = true

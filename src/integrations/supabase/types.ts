@@ -424,6 +424,7 @@ export type Database = {
         Row: {
           auth_user_id: string
           created_at: string
+          email: string | null
           full_name: string
           id: string
           is_admin: boolean
@@ -435,6 +436,7 @@ export type Database = {
         Insert: {
           auth_user_id: string
           created_at?: string
+          email?: string | null
           full_name?: string
           id?: string
           is_admin?: boolean
@@ -446,6 +448,7 @@ export type Database = {
         Update: {
           auth_user_id?: string
           created_at?: string
+          email?: string | null
           full_name?: string
           id?: string
           is_admin?: boolean
