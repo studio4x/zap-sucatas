@@ -1,17 +1,28 @@
-import { useEffect, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useEffect, useMemo, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, MapPin, Package, Phone } from 'lucide-react'
 import { paths } from '@/app/paths'
 import { ListingStatusBadge } from '@/components/listings/listing-status-badge'
+import { QuestionThreadCard } from '@/components/questions/question-thread-card'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { fetchPublicListingBySlug } from '@/domains/listings/api'
+import { createListingQuestion, fetchPublicQuestionsByListing, fetchQuestionSettings } from '@/domains/questions/api'
 import { formatListingDate } from '@/domains/listings/utils'
+import { useAuth } from '@/hooks/use-auth'
 
 export function ListingDetailsPage() {
   const { slug = '' } = useParams()
+  const { isAuthenticated, user } = useAuth()
+  const queryClient = useQueryClient()
   const [activeImageIndex, setActiveImageIndex] = useState(0)
+  const [questionText, setQuestionText] = useState('')
+  const [guestName, setGuestName] = useState('')
+  const [guestEmail, setGuestEmail] = useState('')
+  const [feedback, setFeedback] = useState<string | null>(null)
 
   const listingQuery = useQuery({
     queryKey: ['listing', 'public', slug],
@@ -19,9 +30,63 @@ export function ListingDetailsPage() {
     enabled: Boolean(slug),
   })
 
+  const settingsQuery = useQuery({
+    queryKey: ['question-settings'],
+    queryFn: fetchQuestionSettings,
+  })
+
+  const questionsQuery = useQuery({
+    queryKey: ['questions', 'public', listingQuery.data?.id],
+    queryFn: () => fetchPublicQuestionsByListing(listingQuery.data?.id ?? ''),
+    enabled: Boolean(listingQuery.data?.id),
+  })
+
+  const createQuestionMutation = useMutation({
+    mutationFn: () =>
+      createListingQuestion({
+        guestEmail: isAuthenticated ? undefined : guestEmail,
+        guestName: isAuthenticated ? undefined : guestName,
+        listingId: listingQuery.data?.id ?? '',
+        profileId: isAuthenticated ? user?.profileId ?? undefined : undefined,
+        questionText,
+      }),
+    onSuccess: async () => {
+      setFeedback('Pergunta enviada com sucesso.')
+      setQuestionText('')
+      setGuestName('')
+      setGuestEmail('')
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['questions', 'public', listingQuery.data?.id] }),
+        queryClient.invalidateQueries({ queryKey: ['questions', 'owner'] }),
+        queryClient.invalidateQueries({ queryKey: ['questions', 'admin'] }),
+      ])
+    },
+  })
+
   useEffect(() => {
     setActiveImageIndex(0)
   }, [slug])
+
+  const canAskAsGuest = settingsQuery.data?.allowGuestQuestions ?? false
+  const canAskQuestion = isAuthenticated ? user?.status === 'active' : canAskAsGuest
+
+  const questionValidationMessage = useMemo(() => {
+    if (questionText.trim().length < 10) {
+      return 'A pergunta precisa ter pelo menos 10 caracteres.'
+    }
+
+    if (!isAuthenticated && canAskAsGuest) {
+      if (guestName.trim().length < 2) {
+        return 'Informe seu nome.'
+      }
+
+      if (!guestEmail.includes('@')) {
+        return 'Informe um e-mail valido.'
+      }
+    }
+
+    return null
+  }, [canAskAsGuest, guestEmail, guestName, isAuthenticated, questionText])
 
   if (listingQuery.isLoading) {
     return (
@@ -123,6 +188,27 @@ export function ListingDetailsPage() {
               ) : null}
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Perguntas e respostas</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {questionsQuery.isLoading ? (
+                <p className="text-sm text-muted-foreground">Carregando perguntas publicadas...</p>
+              ) : null}
+
+              {(questionsQuery.data ?? []).map((question) => (
+                <QuestionThreadCard key={question.id} question={question} />
+              ))}
+
+              {!questionsQuery.isLoading && (questionsQuery.data?.length ?? 0) === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Ainda nao ha perguntas publicadas para este anuncio.
+                </p>
+              ) : null}
+            </CardContent>
+          </Card>
         </div>
 
         <div className="space-y-6">
@@ -159,6 +245,68 @@ export function ListingDetailsPage() {
                 <span className="font-medium text-foreground">Publicado:</span>{' '}
                 {formatListingDate(listing.publishedAt)}
               </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Fazer uma pergunta</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!canAskQuestion ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    {isAuthenticated
+                      ? 'Sua conta ainda nao pode interagir com perguntas.'
+                      : 'Para enviar uma pergunta, faca login na plataforma.'}
+                  </p>
+                  {!isAuthenticated ? (
+                    <Button asChild>
+                      <Link to={paths.auth.login}>Entrar para perguntar</Link>
+                    </Button>
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  {!isAuthenticated && canAskAsGuest ? (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Input
+                        onChange={(event) => setGuestName(event.target.value)}
+                        placeholder="Seu nome"
+                        value={guestName}
+                      />
+                      <Input
+                        onChange={(event) => setGuestEmail(event.target.value)}
+                        placeholder="Seu e-mail"
+                        type="email"
+                        value={guestEmail}
+                      />
+                    </div>
+                  ) : null}
+
+                  <Textarea
+                    onChange={(event) => setQuestionText(event.target.value)}
+                    placeholder="Escreva sua duvida sobre este anuncio."
+                    value={questionText}
+                  />
+
+                  {feedback ? <p className="text-sm text-emerald-700">{feedback}</p> : null}
+                  {questionValidationMessage ? (
+                    <p className="text-sm text-muted-foreground">{questionValidationMessage}</p>
+                  ) : null}
+
+                  <Button
+                    disabled={createQuestionMutation.isPending || Boolean(questionValidationMessage)}
+                    onClick={() => {
+                      setFeedback(null)
+                      createQuestionMutation.mutate()
+                    }}
+                    type="button"
+                  >
+                    {createQuestionMutation.isPending ? 'Enviando...' : 'Enviar pergunta'}
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>

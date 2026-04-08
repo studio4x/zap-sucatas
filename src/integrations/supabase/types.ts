@@ -102,6 +102,33 @@ export type Database = {
         }
         Relationships: []
       }
+      listing_answers: {
+        Row: {
+          answer_text: string
+          created_at: string
+          id: string
+          question_id: string
+          responder_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          answer_text: string
+          created_at?: string
+          id?: string
+          question_id: string
+          responder_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          answer_text?: string
+          created_at?: string
+          id?: string
+          question_id?: string
+          responder_user_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       listing_materials: {
         Row: {
           created_at: string
@@ -125,6 +152,42 @@ export type Database = {
           is_active?: boolean
           name?: string
           slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      listing_questions: {
+        Row: {
+          author_user_id: string | null
+          created_at: string
+          guest_email: string | null
+          guest_name: string | null
+          id: string
+          listing_id: string
+          question_text: string
+          status: 'blocked' | 'hidden' | 'published'
+          updated_at: string
+        }
+        Insert: {
+          author_user_id?: string | null
+          created_at?: string
+          guest_email?: string | null
+          guest_name?: string | null
+          id?: string
+          listing_id: string
+          question_text: string
+          status?: 'blocked' | 'hidden' | 'published'
+          updated_at?: string
+        }
+        Update: {
+          author_user_id?: string | null
+          created_at?: string
+          guest_email?: string | null
+          guest_name?: string | null
+          id?: string
+          listing_id?: string
+          question_text?: string
+          status?: 'blocked' | 'hidden' | 'published'
           updated_at?: string
         }
         Relationships: []
@@ -254,6 +317,33 @@ export type Database = {
           phone?: string | null
           role?: 'admin' | 'user'
           status?: 'active' | 'suspended' | 'under_review'
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          allow_guest_questions: boolean
+          created_at: string
+          id: string
+          support_email: string | null
+          support_phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          allow_guest_questions?: boolean
+          created_at?: string
+          id?: string
+          support_email?: string | null
+          support_phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          allow_guest_questions?: boolean
+          created_at?: string
+          id?: string
+          support_email?: string | null
+          support_phone?: string | null
           updated_at?: string
         }
         Relationships: []
