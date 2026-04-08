@@ -18,8 +18,8 @@ type RawSnapshot = {
 }
 
 const WESTMETALL_URL = 'https://www.westmetall.com/en/markdaten.php/en/en/markdaten.php'
-const AWESOME_API_USD_URL = 'https://economia.awesomeapi.com.br/json/last/USD-BRL'
-const AWESOME_API_USD_DAILY_URL = 'https://economia.awesomeapi.com.br/json/daily/USD-BRL/365'
+const BCB_PTAX_PERIOD_URL =
+  'https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)'
 
 const WESTMETALL_FIELD_MAP = new Map<string, { code: string; name: string }>([
   ['LME_Cu_cash', { code: 'CU', name: 'Cobre' }],
@@ -261,52 +261,38 @@ async function fetchWestmetallBackfillSnapshots() {
   return dedupeSnapshots(seriesEntries.flat())
 }
 
-type AwesomeUsdResponse = {
-  USDBRL?: {
-    bid?: string
-    create_date?: string
-    timestamp?: string
-  }
+type BcbPtaxPeriodResponse = {
+  value?: Array<{
+    cotacaoCompra?: number
+    cotacaoVenda?: number
+    dataHoraCotacao?: string
+  }>
 }
 
-type AwesomeUsdDailyEntry = {
-  bid?: string
-  create_date?: string
-  timestamp?: string
+function formatBcbDate(value: Date) {
+  const month = String(value.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(value.getUTCDate()).padStart(2, '0')
+  const year = String(value.getUTCFullYear())
+  return `${month}-${day}-${year}`
 }
 
-async function fetchLatestUsdSnapshot() {
-  const payload = await fetchJson<AwesomeUsdResponse>(AWESOME_API_USD_URL)
-  const usd = payload.USDBRL
-  const value = parseNumericValue(String(usd?.bid ?? ''))
-
-  if (!usd || Number.isNaN(value)) {
-    throw new Error('Unable to parse the USD/BRL payload from AwesomeAPI.')
-  }
-
-  const quotedDate = usd.create_date ? usd.create_date.slice(0, 10) : new Date().toISOString().slice(0, 10)
-
-  return {
-    currency_code: 'BRL',
-    metal_code: 'USD',
-    metal_name: 'Dolar',
-    price_value: value,
-    provider_name: 'awesomeapi',
-    quoted_at: usd.create_date
-      ? new Date(usd.create_date.replace(' ', 'T') + 'Z').toISOString()
-      : toIsoMidday(quotedDate),
-    source_payload: payload,
-  } satisfies RawSnapshot
-}
-
-async function fetchUsdBackfillSnapshots() {
-  const payload = await fetchJson<AwesomeUsdDailyEntry[]>(AWESOME_API_USD_DAILY_URL)
-  const entries = payload
+async function fetchBcbUsdPeriodSnapshots(range: { daysBack: number }) {
+  const end = new Date()
+  const start = new Date()
+  start.setUTCDate(end.getUTCDate() - range.daysBack)
+  const url =
+    `${BCB_PTAX_PERIOD_URL}?@dataInicial='${formatBcbDate(start)}'` +
+    `&@dataFinalCotacao='${formatBcbDate(end)}'&$top=10000&$format=json`
+  const payload = await fetchJson<BcbPtaxPeriodResponse>(url)
+  const entries = (payload.value ?? [])
     .map((entry) => {
-      const priceValue = parseNumericValue(String(entry.bid ?? ''))
-      const quotedDate = entry.create_date ? entry.create_date.slice(0, 10) : null
+      const quotedAt = entry.dataHoraCotacao
+        ? new Date(entry.dataHoraCotacao.replace(' ', 'T') + 'Z').toISOString()
+        : null
+      const quotedDate = quotedAt?.slice(0, 10) ?? null
+      const value = typeof entry.cotacaoVenda === 'number' ? entry.cotacaoVenda : null
 
-      if (Number.isNaN(priceValue) || !quotedDate) {
+      if (!quotedAt || !quotedDate || value === null) {
         return null
       }
 
@@ -314,21 +300,36 @@ async function fetchUsdBackfillSnapshots() {
         currency_code: 'BRL',
         metal_code: 'USD',
         metal_name: 'Dolar',
-        price_value: priceValue,
-        provider_name: 'awesomeapi',
-        quoted_at: entry.create_date
-          ? new Date(entry.create_date.replace(' ', 'T') + 'Z').toISOString()
-          : toIsoMidday(quotedDate),
+        price_value: value,
+        provider_name: 'bcb_ptax',
+        quoted_at: quotedAt,
         source_payload: entry,
       } satisfies RawSnapshot
     })
     .filter((entry): entry is RawSnapshot => entry !== null)
 
   if (entries.length === 0) {
-    throw new Error('Unable to build USD backfill snapshots from AwesomeAPI.')
+    throw new Error('Banco Central PTAX did not return any USD/BRL snapshots.')
   }
 
   return dedupeSnapshots(entries)
+}
+
+async function fetchLatestUsdSnapshot() {
+  const entries = await fetchBcbUsdPeriodSnapshots({ daysBack: 7 })
+  const latest = entries.sort((left, right) =>
+    left.quoted_at < right.quoted_at ? 1 : left.quoted_at > right.quoted_at ? -1 : 0,
+  )[0]
+
+  if (!latest) {
+    throw new Error('Unable to resolve the latest USD/BRL PTAX snapshot.')
+  }
+
+  return latest
+}
+
+async function fetchUsdBackfillSnapshots() {
+  return fetchBcbUsdPeriodSnapshots({ daysBack: 365 })
 }
 
 async function resolveSnapshots(mode: SyncMode) {

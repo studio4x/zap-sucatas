@@ -240,7 +240,7 @@ export function AdminPricingPage() {
               </p>
               <p>
                 <span className="font-medium text-foreground">Provider atual:</span> Westmetall +
-                AwesomeAPI
+                Banco Central PTAX
               </p>
             </div>
           </CardContent>
