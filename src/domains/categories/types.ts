@@ -29,3 +29,7 @@ export type AdminListingMaterial = ListingMaterial & {
   pendingListings: number
   totalListings: number
 }
+
+export type PublicListingCategory = ListingCategory & {
+  approvedListings: number
+}

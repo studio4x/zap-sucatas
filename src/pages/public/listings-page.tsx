@@ -1,16 +1,32 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Search } from 'lucide-react'
-import { PublicListingCard } from '@/components/listings/public-listing-card'
+import { useSearchParams } from 'react-router-dom'
+import { ListingFilters } from '@/components/public/listing-filters'
+import { ListingGrid } from '@/components/public/listing-grid'
+import { ListingSortBar } from '@/components/public/listing-sort-bar'
+import { PublicSectionHeading } from '@/components/public/public-section-heading'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { fetchListingReferences, fetchPublicListings } from '@/domains/listings/api'
 
+const sortOptions = [
+  { label: 'Mais recentes', value: 'recent' },
+  { label: 'Mais antigos', value: 'oldest' },
+  { label: 'Título A-Z', value: 'title_asc' },
+  { label: 'Título Z-A', value: 'title_desc' },
+  { label: 'Destaques primeiro', value: 'featured' },
+]
+
+const pageSize = 9
+
 export function ListingsPage() {
-  const [query, setQuery] = useState('')
-  const [categoryId, setCategoryId] = useState('')
-  const [state, setState] = useState('')
-  const [city, setCity] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [query, setQuery] = useState(searchParams.get('q') ?? '')
+  const [categoryId, setCategoryId] = useState(searchParams.get('categoria') ?? '')
+  const [materialId, setMaterialId] = useState(searchParams.get('material') ?? '')
+  const [state, setState] = useState(searchParams.get('uf') ?? '')
+  const [city, setCity] = useState(searchParams.get('cidade') ?? '')
+  const [sort, setSort] = useState(searchParams.get('ordem') ?? 'recent')
+  const [page, setPage] = useState(Number(searchParams.get('pagina') ?? '1'))
 
   const referencesQuery = useQuery({
     queryKey: ['listing-references'],
@@ -18,91 +34,172 @@ export function ListingsPage() {
   })
 
   const listingsQuery = useQuery({
-    queryKey: ['listings', 'public', { categoryId, city, query, state }],
+    queryKey: ['listings', 'public', { categoryId, city, materialId, query, state }],
     queryFn: () =>
       fetchPublicListings({
         categoryId: categoryId || undefined,
         city: city || undefined,
+        primaryMaterialId: materialId || undefined,
         query: query || undefined,
         state: state || undefined,
       }),
   })
 
+  useEffect(() => {
+    const nextParams = new URLSearchParams()
+
+    if (query.trim()) {
+      nextParams.set('q', query.trim())
+    }
+
+    if (categoryId) {
+      nextParams.set('categoria', categoryId)
+    }
+
+    if (materialId) {
+      nextParams.set('material', materialId)
+    }
+
+    if (state) {
+      nextParams.set('uf', state)
+    }
+
+    if (city.trim()) {
+      nextParams.set('cidade', city.trim())
+    }
+
+    if (sort !== 'recent') {
+      nextParams.set('ordem', sort)
+    }
+
+    if (page > 1) {
+      nextParams.set('pagina', String(page))
+    }
+
+    setSearchParams(nextParams, { replace: true })
+  }, [categoryId, city, materialId, page, query, setSearchParams, sort, state])
+
+  useEffect(() => {
+    setPage(1)
+  }, [categoryId, city, materialId, query, sort, state])
+
+  const sortedListings = useMemo(() => {
+    const items = [...(listingsQuery.data ?? [])]
+
+    switch (sort) {
+      case 'oldest':
+        return items.sort((left, right) => (left.publishedAt ?? '') > (right.publishedAt ?? '') ? 1 : -1)
+      case 'title_asc':
+        return items.sort((left, right) => left.title.localeCompare(right.title, 'pt-BR'))
+      case 'title_desc':
+        return items.sort((left, right) => right.title.localeCompare(left.title, 'pt-BR'))
+      case 'featured':
+        return items.sort((left, right) => {
+          if (left.isFeatured !== right.isFeatured) {
+            return left.isFeatured ? -1 : 1
+          }
+
+          return (left.publishedAt ?? '') < (right.publishedAt ?? '') ? 1 : -1
+        })
+      case 'recent':
+      default:
+        return items.sort((left, right) => (left.publishedAt ?? '') < (right.publishedAt ?? '') ? 1 : -1)
+    }
+  }, [listingsQuery.data, sort])
+
+  const totalPages = Math.max(1, Math.ceil(sortedListings.length / pageSize))
+  const safePage = Math.min(page, totalPages)
+  const paginatedListings = sortedListings.slice((safePage - 1) * pageSize, safePage * pageSize)
+
+  function clearFilters() {
+    setQuery('')
+    setCategoryId('')
+    setMaterialId('')
+    setState('')
+    setCity('')
+    setSort('recent')
+    setPage(1)
+  }
+
   return (
-    <section className="space-y-6">
-      <div className="rounded-[1.75rem] border border-border/70 bg-card/90 p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-          Catalogo
-        </p>
-        <h1 className="mt-4 font-display text-4xl tracking-tight text-foreground">
-          Marketplace publico de anuncios aprovados
-        </h1>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-          Consulte anuncios moderados, filtre por categoria e localizacao e entre no detalhe para
-          analisar disponibilidade e contato.
-        </p>
-      </div>
+    <section className="space-y-6 lg:space-y-8">
+      <PublicSectionHeading
+        description="Explore anúncios aprovados com filtros claros, leitura rápida e navegação pensada para quem compra ou vende no mercado de sucatas e maquinários."
+        eyebrow="Catálogo público"
+        title="Anúncios moderados para negociação real"
+      />
 
-      <Card>
-        <CardContent className="grid gap-4 p-5 md:grid-cols-2 xl:grid-cols-4">
-          <div className="relative md:col-span-2">
-            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              className="pl-11"
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Buscar anuncio, cidade ou descricao"
-              value={query}
-            />
-          </div>
+      <ListingFilters
+        categories={referencesQuery.data?.categories ?? []}
+        categoryId={categoryId}
+        city={city}
+        materialId={materialId}
+        materials={referencesQuery.data?.materials ?? []}
+        onCategoryChange={setCategoryId}
+        onCityChange={setCity}
+        onClear={clearFilters}
+        onMaterialChange={setMaterialId}
+        onQueryChange={setQuery}
+        onStateChange={setState}
+        query={query}
+        state={state}
+      />
 
-          <select
-            className="flex h-11 w-full rounded-2xl border border-input bg-background/80 px-4 py-2 text-sm text-foreground shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
-            onChange={(event) => setCategoryId(event.target.value)}
-            value={categoryId}
-          >
-            <option value="">Todas as categorias</option>
-            {(referencesQuery.data?.categories ?? []).map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Input maxLength={2} onChange={(event) => setState(event.target.value.toUpperCase())} placeholder="UF" value={state} />
-            <Input onChange={(event) => setCity(event.target.value)} placeholder="Cidade" value={city} />
-          </div>
-        </CardContent>
-      </Card>
+      <ListingSortBar
+        onChange={setSort}
+        options={sortOptions}
+        resultLabel={`${sortedListings.length} anúncio${sortedListings.length === 1 ? '' : 's'} encontrado${sortedListings.length === 1 ? '' : 's'}`}
+        value={sort}
+      />
 
       {listingsQuery.isLoading ? (
         <Card>
           <CardContent className="p-6 text-sm text-muted-foreground">
-            Carregando anuncios publicos...
+            Carregando catálogo público...
           </CardContent>
         </Card>
       ) : null}
 
       {listingsQuery.isError ? (
-        <Card className="border-rose-200/70 bg-rose-50">
-          <CardContent className="p-6 text-sm text-rose-900">
-            Nao foi possivel carregar o catalogo publico.
+        <Card className="border-destructive/20 bg-destructive/5">
+          <CardContent className="p-6 text-sm text-destructive">
+            Não foi possível carregar os anúncios públicos neste momento.
           </CardContent>
         </Card>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
-        {(listingsQuery.data ?? []).map((listing) => (
-          <PublicListingCard key={listing.id} listing={listing} />
-        ))}
-      </div>
+      {!listingsQuery.isLoading ? (
+        <ListingGrid
+          emptyDescription="Ajuste a busca ou limpe os filtros para encontrar outros lotes, materiais e equipamentos já aprovados."
+          emptyTitle="Nenhum anúncio encontrado"
+          listings={paginatedListings}
+        />
+      ) : null}
 
-      {!listingsQuery.isLoading && (listingsQuery.data?.length ?? 0) === 0 ? (
-        <Card>
-          <CardContent className="p-6 text-sm text-muted-foreground">
-            Nenhum anuncio aprovado foi encontrado com os filtros atuais.
-          </CardContent>
-        </Card>
+      {sortedListings.length > pageSize ? (
+        <div className="flex flex-col gap-3 rounded-[1.5rem] border border-border bg-card/85 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            Página {safePage} de {totalPages}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              className="inline-flex h-11 items-center justify-center rounded-2xl border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={safePage <= 1}
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+              type="button"
+            >
+              Anterior
+            </button>
+            <button
+              className="inline-flex h-11 items-center justify-center rounded-2xl border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={safePage >= totalPages}
+              onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+              type="button"
+            >
+              Próxima
+            </button>
+          </div>
+        </div>
       ) : null}
     </section>
   )

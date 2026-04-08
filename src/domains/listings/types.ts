@@ -101,6 +101,7 @@ export type ListingListFilters = {
 export type PublicListingFilters = {
   categoryId?: string
   city?: string
+  primaryMaterialId?: string
   query?: string
   state?: string
 }

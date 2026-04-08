@@ -1,10 +1,11 @@
+import { ArrowUpRight, Clock3, MapPin, Package } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { MapPin, Package } from 'lucide-react'
 import { paths } from '@/app/paths'
 import { ListingStatusBadge } from '@/components/listings/listing-status-badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
 import type { Listing } from '@/domains/listings/types'
+import { formatListingDate } from '@/domains/listings/utils'
 
 type PublicListingCardProps = {
   listing: Listing
@@ -14,12 +15,12 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
   const coverImage = listing.images[0]?.publicUrl
 
   return (
-    <Card className="overflow-hidden">
-      <div className="aspect-[16/10] bg-muted">
+    <Card className="group h-full overflow-hidden border-border/80 transition duration-200 hover:-translate-y-1 hover:border-primary/35">
+      <div className="relative aspect-[16/10] bg-muted">
         {coverImage ? (
           <img
             alt={listing.title}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
             loading="lazy"
             src={coverImage}
           />
@@ -28,23 +29,32 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
             Sem imagem
           </div>
         )}
-      </div>
-      <CardHeader className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
+        <div className="absolute left-4 top-4 flex flex-wrap items-center gap-2">
           <ListingStatusBadge status={listing.status} />
-          {listing.categoryName ? (
-            <span className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              {listing.categoryName}
-            </span>
-          ) : null}
+          {listing.isFeatured ? <Badge className="bg-white/92 text-foreground">Em destaque</Badge> : null}
         </div>
-        <CardTitle className="line-clamp-2">{listing.title}</CardTitle>
-        <CardDescription className="line-clamp-3">
+      </div>
+
+      <CardContent className="flex h-full flex-col gap-5 p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-3">
+            {listing.categoryName ? (
+              <span className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/75">
+                {listing.categoryName}
+              </span>
+            ) : null}
+            <h3 className="line-clamp-2 font-display text-2xl tracking-tight text-foreground">
+              {listing.title}
+            </h3>
+          </div>
+          <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition group-hover:text-primary" />
+        </div>
+
+        <p className="line-clamp-3 text-sm leading-7 text-muted-foreground">
           {listing.summary || listing.description}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid gap-2 text-sm text-muted-foreground">
+        </p>
+
+        <div className="grid gap-2.5 text-sm text-muted-foreground">
           <p className="flex items-center gap-2">
             <MapPin className="size-4" />
             {listing.city} - {listing.state}
@@ -55,13 +65,29 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
               {listing.materialName}
             </p>
           ) : null}
+          <p className="flex items-center gap-2">
+            <Clock3 className="size-4" />
+            {formatListingDate(listing.publishedAt)}
+          </p>
         </div>
 
-        <Button asChild className="w-full" disabled={!listing.slug}>
-          <Link to={listing.slug ? paths.public.listingDetails(listing.slug) : paths.public.listings}>
+        <div className="mt-auto flex items-center justify-between gap-4 border-t border-border/80 pt-5">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Faixa comercial
+            </p>
+            <p className="truncate text-sm font-semibold text-foreground">
+              {listing.priceLabel ?? 'Sob consulta'}
+            </p>
+          </div>
+          <Link
+            className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:gap-3"
+            to={listing.slug ? paths.public.listingDetails(listing.slug) : paths.public.listings}
+          >
             Ver anúncio
+            <ArrowUpRight className="size-4" />
           </Link>
-        </Button>
+        </div>
       </CardContent>
     </Card>
   )

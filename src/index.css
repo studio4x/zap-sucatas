@@ -2,34 +2,34 @@
 @import "tailwindcss";
 
 :root {
-  --background: oklch(0.985 0.004 95);
-  --foreground: oklch(0.238 0.018 255);
-  --card: oklch(0.996 0.002 95);
-  --card-foreground: oklch(0.238 0.018 255);
+  --background: #f3f4ef;
+  --foreground: #132117;
+  --card: #ffffff;
+  --card-foreground: #132117;
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.238 0.018 255);
-  --primary: oklch(0.468 0.132 234);
-  --primary-foreground: oklch(0.988 0.002 95);
-  --secondary: oklch(0.948 0.01 216);
-  --secondary-foreground: oklch(0.278 0.022 250);
-  --muted: oklch(0.955 0.005 95);
-  --muted-foreground: oklch(0.55 0.02 245);
-  --accent: oklch(0.86 0.08 84);
-  --accent-foreground: oklch(0.29 0.018 238);
+  --popover-foreground: #132117;
+  --primary: #166246;
+  --primary-foreground: #f8fbf8;
+  --secondary: #e8ede7;
+  --secondary-foreground: #284337;
+  --muted: #eff2eb;
+  --muted-foreground: #637166;
+  --accent: #d6e5d6;
+  --accent-foreground: #1f3428;
   --destructive: oklch(0.57 0.22 28);
   --destructive-foreground: oklch(0.985 0.003 95);
-  --border: oklch(0.89 0.01 245);
-  --input: oklch(0.91 0.01 245);
-  --ring: oklch(0.468 0.132 234);
-  --radius: 1rem;
-  --sidebar: oklch(0.972 0.006 95);
-  --sidebar-foreground: oklch(0.238 0.018 255);
-  --sidebar-primary: oklch(0.468 0.132 234);
-  --sidebar-primary-foreground: oklch(0.988 0.002 95);
-  --sidebar-accent: oklch(0.92 0.01 88);
-  --sidebar-accent-foreground: oklch(0.278 0.022 250);
-  --sidebar-border: oklch(0.87 0.01 245);
-  --sidebar-ring: oklch(0.468 0.132 234);
+  --border: #d8dfd4;
+  --input: #d8dfd4;
+  --ring: #166246;
+  --radius: 1.125rem;
+  --sidebar: #f8faf7;
+  --sidebar-foreground: #132117;
+  --sidebar-primary: #166246;
+  --sidebar-primary-foreground: #f8fbf8;
+  --sidebar-accent: #ebf0e9;
+  --sidebar-accent-foreground: #284337;
+  --sidebar-border: #d8dfd4;
+  --sidebar-ring: #166246;
 }
 
 .dark {
@@ -111,8 +111,8 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 28%, transparent), transparent 28%),
-    linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, var(--background)), var(--background) 45%);
+    radial-gradient(circle at top, rgba(22, 98, 70, 0.1), transparent 34%),
+    linear-gradient(180deg, #f7f7f2 0%, #eef1ea 100%);
   color: var(--foreground);
   font-family: "IBM Plex Sans", sans-serif;
   text-rendering: optimizeLegibility;
@@ -137,8 +137,72 @@ a {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--accent) 48%, white);
+  background: color-mix(in srgb, var(--primary) 18%, white);
   color: var(--foreground);
+}
+
+.public-theme {
+  --background: #f3f4ef;
+  --foreground: #132117;
+  --card: #ffffff;
+  --card-foreground: #132117;
+  --popover: #ffffff;
+  --popover-foreground: #132117;
+  --primary: #166246;
+  --primary-foreground: #f8fbf8;
+  --secondary: #e8ede7;
+  --secondary-foreground: #284337;
+  --muted: #eff2eb;
+  --muted-foreground: #637166;
+  --accent: #d6e5d6;
+  --accent-foreground: #1f3428;
+  --destructive: #d24837;
+  --destructive-foreground: #ffffff;
+  --border: #d8dfd4;
+  --input: #d8dfd4;
+  --ring: #166246;
+  --radius: 18px;
+  --sidebar: #f8faf7;
+  --sidebar-foreground: #132117;
+  --sidebar-primary: #166246;
+  --sidebar-primary-foreground: #f8fbf8;
+  --sidebar-accent: #ebf0e9;
+  --sidebar-accent-foreground: #284337;
+  --sidebar-border: #d8dfd4;
+  --sidebar-ring: #166246;
+  background:
+    radial-gradient(circle at top, rgba(22, 98, 70, 0.1), transparent 34%),
+    linear-gradient(180deg, #f7f7f2 0%, #eef1ea 100%);
+  color: var(--foreground);
+}
+
+.public-theme .font-display {
+  font-family: "Space Grotesk", sans-serif;
+  letter-spacing: -0.03em;
+}
+
+.public-theme [data-slot='card'] {
+  border-radius: 24px;
+  border-color: rgba(216, 223, 212, 0.9);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 22px 54px -30px rgba(19, 33, 23, 0.22),
+    0 10px 24px -18px rgba(22, 98, 70, 0.16);
+}
+
+.public-theme [data-slot='button'] {
+  border-radius: 16px;
+}
+
+.public-theme [data-slot='input'],
+.public-theme [data-slot='textarea'],
+.public-theme [data-slot='select'] {
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.public-theme [data-slot='badge'] {
+  border-radius: 999px;
 }
 
 .admin-theme {

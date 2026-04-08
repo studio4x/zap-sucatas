@@ -19,7 +19,7 @@ function getRowClassName(rowType: PricingTableRow['rowType']) {
   return 'bg-background text-foreground'
 }
 
-export function PricingHistoryTable({ rows, title = 'Tabela historica' }: PricingHistoryTableProps) {
+export function PricingHistoryTable({ rows, title = 'Tabela histórica' }: PricingHistoryTableProps) {
   return (
     <Card className="overflow-hidden">
       <CardHeader className="border-b border-border/70">
@@ -45,7 +45,10 @@ export function PricingHistoryTable({ rows, title = 'Tabela historica' }: Pricin
               </thead>
               <tbody>
                 {rows.map((row, index) => (
-                  <tr key={`${row.rowType}-${row.quotedDate ?? row.weekLabel ?? 'period'}-${index}`} className={getRowClassName(row.rowType)}>
+                  <tr
+                    key={`${row.rowType}-${row.quotedDate ?? row.weekLabel ?? 'period'}-${index}`}
+                    className={getRowClassName(row.rowType)}
+                  >
                     <td className="border-b border-border/60 px-4 py-3">
                       <div className="flex flex-col">
                         <span>{row.label}</span>

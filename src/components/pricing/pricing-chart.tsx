@@ -28,10 +28,10 @@ export function PricingChart({ className, series }: PricingChartProps) {
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle>Historico LME</CardTitle>
+          <CardTitle>Histórico LME</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Ainda nao ha snapshots suficientes para desenhar o grafico.
+          Ainda não há snapshots suficientes para desenhar o gráfico.
         </CardContent>
       </Card>
     )
@@ -50,7 +50,10 @@ export function PricingChart({ className, series }: PricingChartProps) {
       array.length === 1
         ? width / 2
         : paddingX + (index * (width - paddingX * 2)) / Math.max(array.length - 1, 1)
-    const y = height - paddingY - ((point.value - (minValue - spread * 0.1)) / (spread * 1.2)) * (height - paddingY * 2)
+    const y =
+      height -
+      paddingY -
+      ((point.value - (minValue - spread * 0.1)) / (spread * 1.2)) * (height - paddingY * 2)
 
     return {
       ...point,
@@ -80,12 +83,12 @@ export function PricingChart({ className, series }: PricingChartProps) {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              Historico LME
+              Histórico LME
             </p>
             <CardTitle className="mt-2">{activeSeries.label}</CardTitle>
           </div>
           <div className="rounded-3xl border border-border/70 bg-muted/40 px-4 py-2 text-right">
-            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Ultimo ponto</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Último ponto</p>
             <p className="text-lg font-semibold text-foreground">
               {formatPricingNumber(activeSeries.points[activeSeries.points.length - 1]?.value ?? 0, 2)}
             </p>
@@ -130,13 +133,7 @@ export function PricingChart({ className, series }: PricingChartProps) {
                   y1={tick.y}
                   y2={tick.y}
                 />
-                <text
-                  fill="currentColor"
-                  fontSize="12"
-                  textAnchor="start"
-                  x={4}
-                  y={tick.y + 4}
-                >
+                <text fill="currentColor" fontSize="12" textAnchor="start" x={4} y={tick.y + 4}>
                   {formatPricingNumber(tick.value, 2)}
                 </text>
               </g>
@@ -182,8 +179,8 @@ export function PricingChart({ className, series }: PricingChartProps) {
         </div>
 
         <p className="text-sm leading-6 text-muted-foreground">
-          O grafico trabalha com uma serie por vez para manter leitura limpa no desktop e no
-          mobile, priorizando leitura e comparacao por periodo.
+          O gráfico trabalha com uma série por vez para manter leitura limpa no desktop e no
+          mobile, priorizando leitura e comparação por período.
         </p>
       </CardContent>
     </Card>

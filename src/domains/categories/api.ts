@@ -4,6 +4,7 @@ import type {
   AdminListingMaterial,
   ListingCategory,
   ListingMaterial,
+  PublicListingCategory,
 } from '@/domains/categories/types'
 
 type CategoryRow = {
@@ -163,4 +164,55 @@ export async function fetchAdminMaterials() {
       totalListings: counts.total,
     } satisfies AdminListingMaterial
   })
+}
+
+export async function fetchPublicCategories() {
+  const client = ensureSupabase()
+  const [{ data: categories, error: categoriesError }, { data: listings, error: listingsError }] =
+    await Promise.all([
+      client
+        .from('listing_categories')
+        .select('id, name, slug, description, is_active, sort_order, created_at, updated_at')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true }),
+      client.from('listings').select('category_id').eq('status', 'approved'),
+    ])
+
+  if (categoriesError) {
+    throw categoriesError
+  }
+
+  if (listingsError) {
+    throw listingsError
+  }
+
+  const counts = new Map<string, number>()
+
+  ;((listings ?? []) as Array<{ category_id: string | null }>).forEach((row) => {
+    if (!row.category_id) {
+      return
+    }
+
+    counts.set(row.category_id, (counts.get(row.category_id) ?? 0) + 1)
+  })
+
+  return (categories ?? []).map((row) => {
+    const category = mapCategory(row as CategoryRow)
+
+    return {
+      ...category,
+      approvedListings: counts.get(category.id) ?? 0,
+    } satisfies PublicListingCategory
+  })
+}
+
+export async function fetchPublicCategoryBySlug(slug: string) {
+  const categories = await fetchPublicCategories()
+  const category = categories.find((item) => item.slug === slug)
+
+  if (!category) {
+    throw new Error('Categoria não encontrada.')
+  }
+
+  return category
 }

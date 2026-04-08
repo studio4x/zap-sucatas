@@ -306,6 +306,10 @@ export async function fetchPublicListings(filters: PublicListingFilters = {}) {
     query = query.eq('category_id', filters.categoryId)
   }
 
+  if (filters.primaryMaterialId) {
+    query = query.eq('primary_material_id', filters.primaryMaterialId)
+  }
+
   if (filters.state) {
     query = query.ilike('state', filters.state)
   }
@@ -320,6 +324,40 @@ export async function fetchPublicListings(filters: PublicListingFilters = {}) {
   }
 
   const { data, error } = await query
+
+  if (error) {
+    throw error
+  }
+
+  return (data ?? []).map((row) => mapListing(row as ListingRow))
+}
+
+export async function fetchFeaturedPublicListings(limit = 6) {
+  const { data, error } = await buildBaseListingQuery()
+    .eq('status', 'approved')
+    .order('is_featured', { ascending: false })
+    .order('published_at', { ascending: false })
+    .limit(limit)
+
+  if (error) {
+    throw error
+  }
+
+  return (data ?? []).map((row) => mapListing(row as ListingRow))
+}
+
+export async function fetchRelatedPublicListingsByCategory(input: {
+  categoryId: string
+  excludeListingId: string
+  limit?: number
+}) {
+  const { data, error } = await buildBaseListingQuery()
+    .eq('status', 'approved')
+    .eq('category_id', input.categoryId)
+    .neq('id', input.excludeListingId)
+    .order('is_featured', { ascending: false })
+    .order('published_at', { ascending: false })
+    .limit(input.limit ?? 3)
 
   if (error) {
     throw error

@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client'
-import type { AdminBlogPost, BlogPost, BlogPostStatus } from '@/domains/blog/types'
+import type { AdminBlogPost, BlogPost, BlogPostStatus, PublicBlogPost } from '@/domains/blog/types'
 
 type BlogPostRow = {
   author_user_id: string | null
@@ -66,4 +66,44 @@ export async function fetchAdminBlogPosts() {
       categoryName: (row as BlogPostRow).blog_categories?.name ?? null,
     } satisfies AdminBlogPost
   })
+}
+
+function mapPublicBlogPost(row: BlogPostRow): PublicBlogPost {
+  return {
+    ...mapBlogPost(row),
+    categoryName: row.blog_categories?.name ?? null,
+  }
+}
+
+export async function fetchPublicBlogPosts() {
+  const { data, error } = await ensureSupabase()
+    .from('blog_posts')
+    .select(
+      'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, blog_categories(name)',
+    )
+    .eq('status', 'published')
+    .order('published_at', { ascending: false })
+
+  if (error) {
+    throw error
+  }
+
+  return (data ?? []).map((row) => mapPublicBlogPost(row as BlogPostRow))
+}
+
+export async function fetchPublicBlogPostBySlug(slug: string) {
+  const { data, error } = await ensureSupabase()
+    .from('blog_posts')
+    .select(
+      'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, blog_categories(name)',
+    )
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .single()
+
+  if (error || !data) {
+    throw error ?? new Error('Post não encontrado.')
+  }
+
+  return mapPublicBlogPost(data as BlogPostRow)
 }

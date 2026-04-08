@@ -14,11 +14,11 @@ export const pricingSeriesCatalog: Array<{
 }> = [
   { code: 'CU', color: '#218c4f', currencyCode: 'USD', label: 'Cobre' },
   { code: 'ZN', color: '#3fa34d', currencyCode: 'USD', label: 'Zinco' },
-  { code: 'AL', color: '#0e7490', currencyCode: 'USD', label: 'Aluminio' },
+  { code: 'AL', color: '#0e7490', currencyCode: 'USD', label: 'Alumínio' },
   { code: 'PB', color: '#8b5cf6', currencyCode: 'USD', label: 'Chumbo' },
   { code: 'SN', color: '#ca8a04', currencyCode: 'USD', label: 'Estanho' },
-  { code: 'NI', color: '#ef4444', currencyCode: 'USD', label: 'Niquel' },
-  { code: 'USD', color: '#2563eb', currencyCode: 'BRL', label: 'Dolar' },
+  { code: 'NI', color: '#ef4444', currencyCode: 'USD', label: 'Níquel' },
+  { code: 'USD', color: '#2563eb', currencyCode: 'BRL', label: 'Dólar' },
 ]
 
 const pricingSeriesLookup = new Map(pricingSeriesCatalog.map((series) => [series.code, series]))
@@ -37,7 +37,7 @@ export function formatPricingNumber(value: number, fractionDigits = 2) {
 
 export function formatPricingDate(date: string | null) {
   if (!date) {
-    return 'Nao informado'
+    return 'Não informado'
   }
 
   const parsed = new Date(`${date}T12:00:00`)
@@ -51,7 +51,7 @@ export function formatPricingDate(date: string | null) {
 
 export function formatPricingDateTime(dateTime: string | null) {
   if (!dateTime) {
-    return 'Nao informado'
+    return 'Não informado'
   }
 
   return new Intl.DateTimeFormat('pt-BR', {
@@ -128,21 +128,24 @@ function buildDailyRows(snapshots: LmePriceSnapshot[]) {
 }
 
 function buildWeeklyAverageRow(rows: DailySnapshotRow[], isoWeek: number, isoYear: number): PricingTableRow {
-  const values = pricingSeriesCatalog.reduce<Partial<Record<PricingSeriesCode, number>>>((accumulator, series) => {
-    const collected = rows
-      .map((row) => row.values[series.code])
-      .filter((value): value is number => typeof value === 'number')
-    const result = average(collected)
+  const values = pricingSeriesCatalog.reduce<Partial<Record<PricingSeriesCode, number>>>(
+    (accumulator, series) => {
+      const collected = rows
+        .map((row) => row.values[series.code])
+        .filter((value): value is number => typeof value === 'number')
+      const result = average(collected)
 
-    if (typeof result === 'number') {
-      accumulator[series.code] = result
-    }
+      if (typeof result === 'number') {
+        accumulator[series.code] = result
+      }
 
-    return accumulator
-  }, {})
+      return accumulator
+    },
+    {},
+  )
 
   return {
-    label: 'Media da semana',
+    label: 'Média da semana',
     quotedDate: null,
     rowType: 'weekly_average',
     values,
@@ -151,25 +154,28 @@ function buildWeeklyAverageRow(rows: DailySnapshotRow[], isoWeek: number, isoYea
 }
 
 function buildPeriodAverageRow(rows: DailySnapshotRow[]): PricingTableRow | null {
-  const values = pricingSeriesCatalog.reduce<Partial<Record<PricingSeriesCode, number>>>((accumulator, series) => {
-    const collected = rows
-      .map((row) => row.values[series.code])
-      .filter((value): value is number => typeof value === 'number')
-    const result = average(collected)
+  const values = pricingSeriesCatalog.reduce<Partial<Record<PricingSeriesCode, number>>>(
+    (accumulator, series) => {
+      const collected = rows
+        .map((row) => row.values[series.code])
+        .filter((value): value is number => typeof value === 'number')
+      const result = average(collected)
 
-    if (typeof result === 'number') {
-      accumulator[series.code] = result
-    }
+      if (typeof result === 'number') {
+        accumulator[series.code] = result
+      }
 
-    return accumulator
-  }, {})
+      return accumulator
+    },
+    {},
+  )
 
   if (Object.keys(values).length === 0) {
     return null
   }
 
   return {
-    label: 'Media do periodo',
+    label: 'Média do período',
     quotedDate: null,
     rowType: 'period_average',
     values,
@@ -276,7 +282,7 @@ export function buildPricingPageModel(input: {
   )[0]
 
   const latestValues =
-      latestSnapshot === undefined
+    latestSnapshot === undefined
       ? {}
       : input.historySnapshots
           .filter((snapshot) => snapshot.quotedDate === latestSnapshot.quotedDate)

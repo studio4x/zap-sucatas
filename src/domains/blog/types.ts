@@ -28,3 +28,7 @@ export type BlogPost = {
 export type AdminBlogPost = BlogPost & {
   categoryName: string | null
 }
+
+export type PublicBlogPost = BlogPost & {
+  categoryName: string | null
+}

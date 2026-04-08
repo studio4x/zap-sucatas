@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { paths } from '@/app/paths'
+import { PublicSectionHeading } from '@/components/public/public-section-heading'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { signUp } from '@/domains/auth/api'
 import { registerSchema, type RegisterFormValues } from '@/domains/auth/schemas'
 import { useAuth } from '@/hooks/use-auth'
@@ -16,13 +17,13 @@ export function RegisterPage() {
   const [message, setMessage] = useState<string | null>(null)
 
   const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
     defaultValues: {
-      fullName: '',
-      email: '',
-      password: '',
       confirmPassword: '',
+      email: '',
+      fullName: '',
+      password: '',
     },
+    resolver: zodResolver(registerSchema),
   })
 
   async function handleSubmit(values: RegisterFormValues) {
@@ -30,8 +31,8 @@ export function RegisterPage() {
 
     try {
       const sessionUser = await signUp({
-        fullName: values.fullName,
         email: values.email,
+        fullName: values.fullName,
         password: values.password,
       })
 
@@ -43,30 +44,23 @@ export function RegisterPage() {
       setMessage('Cadastro enviado. Verifique seu e-mail para confirmar a conta.')
       form.reset()
     } catch (error) {
-      const nextMessage = error instanceof Error ? error.message : 'Falha ao criar conta.'
-      setMessage(nextMessage)
+      setMessage(error instanceof Error ? error.message : 'Falha ao criar conta.')
     }
   }
 
   return (
-    <section className="space-y-8">
-      <div className="rounded-[2rem] border border-border/70 bg-card/90 p-6 shadow-sm md:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-          Cadastro
-        </p>
-        <h1 className="mt-4 font-display text-4xl tracking-tight text-foreground md:text-5xl">
-          Cadastro de anunciante
-        </h1>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
-          Cadastro aberto para usuarios do marketplace. O papel administrativo continua fechado.
-        </p>
-      </div>
+    <div className="space-y-8 lg:space-y-10">
+      <PublicSectionHeading
+        description="Crie sua conta para publicar anúncios, acompanhar perguntas e operar o seu catálogo no portal."
+        eyebrow="Cadastro"
+        title="Abra sua conta de anunciante"
+      />
 
-      <Card>
+      <Card className="border-border/80">
         <CardHeader>
           <CardTitle>Criar conta</CardTitle>
           <CardDescription>
-            Fluxo base de onboarding com e-mail e senha.
+            Cadastro aberto para anunciantes. O papel administrativo continua fechado.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -75,20 +69,19 @@ export function RegisterPage() {
               <label className="text-sm font-medium text-foreground" htmlFor="register-full-name">
                 Nome completo
               </label>
-              <Input id="register-full-name" {...form.register('fullName')} />
-              {form.formState.errors.fullName ? (
-                <p className="text-sm text-destructive">{form.formState.errors.fullName.message}</p>
-              ) : null}
+              <Input autoComplete="name" id="register-full-name" {...form.register('fullName')} />
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground" htmlFor="register-email">
                 E-mail
               </label>
-              <Input id="register-email" type="email" {...form.register('email')} />
-              {form.formState.errors.email ? (
-                <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
-              ) : null}
+              <Input
+                autoComplete="username"
+                id="register-email"
+                type="email"
+                {...form.register('email')}
+              />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -96,10 +89,12 @@ export function RegisterPage() {
                 <label className="text-sm font-medium text-foreground" htmlFor="register-password">
                   Senha
                 </label>
-                <Input id="register-password" type="password" {...form.register('password')} />
-                {form.formState.errors.password ? (
-                  <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
-                ) : null}
+                <Input
+                  autoComplete="new-password"
+                  id="register-password"
+                  type="password"
+                  {...form.register('password')}
+                />
               </div>
 
               <div className="space-y-2">
@@ -107,15 +102,11 @@ export function RegisterPage() {
                   Confirmar senha
                 </label>
                 <Input
+                  autoComplete="new-password"
                   id="register-confirm-password"
                   type="password"
                   {...form.register('confirmPassword')}
                 />
-                {form.formState.errors.confirmPassword ? (
-                  <p className="text-sm text-destructive">
-                    {form.formState.errors.confirmPassword.message}
-                  </p>
-                ) : null}
               </div>
             </div>
 
@@ -126,12 +117,12 @@ export function RegisterPage() {
                 {form.formState.isSubmitting ? 'Criando conta...' : 'Criar conta'}
               </Button>
               <Button asChild type="button" variant="outline">
-                <a href={paths.auth.login}>Ja tenho conta</a>
+                <Link to={paths.auth.login}>Já tenho conta</Link>
               </Button>
             </div>
           </form>
         </CardContent>
       </Card>
-    </section>
+    </div>
   )
 }
