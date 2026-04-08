@@ -2,7 +2,6 @@ import type {
   LmePriceSnapshot,
   PricingChartSeries,
   PricingPageData,
-  PricingPeriodOption,
   PricingSeriesCode,
   PricingTableRow,
 } from '@/domains/pricing/types'
@@ -71,10 +70,17 @@ export function formatMonthLabel(monthStart: string) {
   return label.charAt(0).toUpperCase() + label.slice(1)
 }
 
-export function addOneMonth(monthStart: string) {
-  const [year, month] = monthStart.split('-').map(Number)
-  const date = new Date(Date.UTC(year, month - 1, 1))
-  date.setUTCMonth(date.getUTCMonth() + 1)
+export function addDays(quotedDate: string, amount: number) {
+  const [year, month, day] = quotedDate.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+  date.setUTCDate(date.getUTCDate() + amount)
+  return date.toISOString().slice(0, 10)
+}
+
+export function subtractMonths(quotedDate: string, amount: number) {
+  const [year, month, day] = quotedDate.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+  date.setUTCMonth(date.getUTCMonth() - amount)
   return date.toISOString().slice(0, 10)
 }
 
@@ -255,44 +261,24 @@ export function buildPricingChartSeries(snapshots: LmePriceSnapshot[]) {
   }, [])
 }
 
-export function buildPricingPeriods(
-  rows: Array<{
-    last_quoted_date: string
-    month_key: string
-    month_start: string
-    trading_days: number
-  }>,
-) {
-  return rows.map<PricingPeriodOption>((row) => ({
-    lastQuotedDate: row.last_quoted_date,
-    monthKey: row.month_key,
-    monthLabel: formatMonthLabel(row.month_start),
-    monthStart: row.month_start,
-    tradingDays: row.trading_days,
-  }))
-}
-
 export function buildPricingPageModel(input: {
+  chartSnapshots: LmePriceSnapshot[]
+  historySnapshots: LmePriceSnapshot[]
+  historyWindowLabel: string
   lastManualUpdate: string | null
   manualEntries: PricingPageData['manualEntries']
-  periods: PricingPeriodOption[]
-  requestedMonthKey?: string
-  snapshots: LmePriceSnapshot[]
+  chartWindowLabel: string
 }): Omit<PricingPageData, 'manualEntries'> {
-  const selectedMonthKey = input.periods.some((period) => period.monthKey === input.requestedMonthKey)
-    ? input.requestedMonthKey ?? null
-    : input.periods[0]?.monthKey ?? null
-
-  const historyRows = buildPricingHistoryRows(input.snapshots)
-  const chartSeries = buildPricingChartSeries(input.snapshots)
-  const latestSnapshot = [...input.snapshots].sort((left, right) =>
+  const historyRows = buildPricingHistoryRows(input.historySnapshots)
+  const chartSeries = buildPricingChartSeries(input.chartSnapshots)
+  const latestSnapshot = [...input.historySnapshots].sort((left, right) =>
     left.quotedDate < right.quotedDate ? 1 : left.quotedDate > right.quotedDate ? -1 : 0,
   )[0]
 
   const latestValues =
-    latestSnapshot === undefined
+      latestSnapshot === undefined
       ? {}
-      : input.snapshots
+      : input.historySnapshots
           .filter((snapshot) => snapshot.quotedDate === latestSnapshot.quotedDate)
           .reduce<Partial<Record<PricingSeriesCode, number>>>((accumulator, snapshot) => {
             accumulator[snapshot.metalCode] = snapshot.priceValue
@@ -301,13 +287,14 @@ export function buildPricingPageModel(input: {
 
   return {
     chartSeries,
+    chartSnapshotCount: input.chartSnapshots.length,
+    chartWindowLabel: input.chartWindowLabel,
     historyRows,
+    historySnapshotCount: input.historySnapshots.length,
+    historyWindowLabel: input.historyWindowLabel,
     lastManualUpdate: input.lastManualUpdate,
     latestQuotedDate: latestSnapshot?.quotedDate ?? null,
     latestValues,
-    periods: input.periods,
-    selectedMonthKey,
-    snapshotCount: input.snapshots.length,
   }
 }
 

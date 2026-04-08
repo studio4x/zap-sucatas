@@ -29,14 +29,6 @@ export type LmePriceSnapshot = {
   sourcePayload: unknown
 }
 
-export type PricingPeriodOption = {
-  lastQuotedDate: string
-  monthKey: string
-  monthLabel: string
-  monthStart: string
-  tradingDays: number
-}
-
 export type PricingChartPoint = {
   quotedDate: string
   value: number
@@ -61,14 +53,15 @@ export type PricingTableRow = {
 
 export type PricingPageData = {
   chartSeries: PricingChartSeries[]
+  chartSnapshotCount: number
+  chartWindowLabel: string
   historyRows: PricingTableRow[]
+  historySnapshotCount: number
+  historyWindowLabel: string
   lastManualUpdate: string | null
   latestQuotedDate: string | null
   latestValues: Partial<Record<PricingSeriesCode, number>>
   manualEntries: ScrapPriceEntry[]
-  periods: PricingPeriodOption[]
-  selectedMonthKey: string | null
-  snapshotCount: number
 }
 
 export type PricingAdminDashboard = PricingPageData & {

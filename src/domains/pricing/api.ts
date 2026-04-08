@@ -3,7 +3,6 @@ import type {
   LmePriceSnapshot,
   PricingAdminDashboard,
   PricingPageData,
-  PricingPeriodOption,
   PricingSeriesCode,
   PricingSyncMode,
   PricingSyncResult,
@@ -11,7 +10,12 @@ import type {
   ScrapPriceEntry,
   UpsertScrapPriceEntryInput,
 } from '@/domains/pricing/types'
-import { addOneMonth, buildPricingPageModel, buildPricingPeriods, parsePricingNumberInput } from '@/domains/pricing/utils'
+import {
+  addDays,
+  buildPricingPageModel,
+  parsePricingNumberInput,
+  subtractMonths,
+} from '@/domains/pricing/utils'
 
 type ScrapPriceEntryRow = {
   created_at: string
@@ -38,13 +42,6 @@ type LmePriceSnapshotRow = {
   quoted_at: string
   quoted_date: string
   source_payload: unknown
-}
-
-type LmeSnapshotMonthRow = {
-  last_quoted_date: string
-  month_key: string
-  month_start: string
-  trading_days: number
 }
 
 function ensureSupabase() {
@@ -86,28 +83,24 @@ function mapSnapshot(row: LmePriceSnapshotRow): LmePriceSnapshot {
   }
 }
 
-async function fetchPricingPeriods() {
+async function fetchLatestQuotedDate() {
   const { data, error } = await ensureSupabase()
-    .from('lme_snapshot_months')
-    .select('month_key, month_start, last_quoted_date, trading_days')
-    .order('month_start', { ascending: false })
+    .from('lme_price_snapshots')
+    .select('quoted_date')
+    .order('quoted_date', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (error) {
     throw error
   }
 
-  return buildPricingPeriods((data ?? []) as LmeSnapshotMonthRow[])
+  return data?.quoted_date ?? null
 }
 
-async function fetchSnapshotsForMonth(periods: PricingPeriodOption[], monthKey?: string) {
-  const selectedPeriod =
-    periods.find((period) => period.monthKey === monthKey) ??
-    periods[0] ??
-    null
-
-  if (!selectedPeriod) {
+async function fetchSnapshotsRange(range: { startDate: string | null; endDate: string | null }) {
+  if (!range.startDate || !range.endDate) {
     return {
-      selectedMonthKey: null,
       snapshots: [] as LmePriceSnapshot[],
     }
   }
@@ -117,8 +110,8 @@ async function fetchSnapshotsForMonth(periods: PricingPeriodOption[], monthKey?:
     .select(
       'id, metal_code, metal_name, currency_code, price_value, quoted_at, quoted_date, provider_name, source_payload, created_at',
     )
-    .gte('quoted_date', selectedPeriod.monthStart)
-    .lt('quoted_date', addOneMonth(selectedPeriod.monthStart))
+    .gte('quoted_date', range.startDate)
+    .lte('quoted_date', range.endDate)
     .order('quoted_date', { ascending: false })
 
   if (error) {
@@ -126,7 +119,6 @@ async function fetchSnapshotsForMonth(periods: PricingPeriodOption[], monthKey?:
   }
 
   return {
-    selectedMonthKey: selectedPeriod.monthKey,
     snapshots: (data ?? []).map((row) => mapSnapshot(row as unknown as LmePriceSnapshotRow)),
   }
 }
@@ -137,8 +129,36 @@ function getLastManualUpdate(entries: ScrapPriceEntry[]) {
     ?.updatedAt ?? null
 }
 
-export async function fetchPublicPricingPageData(monthKey?: string): Promise<PricingPageData> {
-  const [manualResponse, periods] = await Promise.all([
+async function buildPricingDashboardData(
+  manualEntries: ScrapPriceEntry[],
+  latestQuotedDate: string | null,
+) {
+  const historyStartDate = latestQuotedDate ? subtractMonths(latestQuotedDate, 6) : null
+  const chartStartDate = latestQuotedDate ? addDays(latestQuotedDate, -29) : null
+
+  const [historyResponse, chartResponse] = await Promise.all([
+    fetchSnapshotsRange({
+      endDate: latestQuotedDate,
+      startDate: historyStartDate,
+    }),
+    fetchSnapshotsRange({
+      endDate: latestQuotedDate,
+      startDate: chartStartDate,
+    }),
+  ])
+
+  return buildPricingPageModel({
+    chartSnapshots: chartResponse.snapshots,
+    chartWindowLabel: 'Ultimos 30 dias',
+    historySnapshots: historyResponse.snapshots,
+    historyWindowLabel: 'Ultimos 6 meses',
+    lastManualUpdate: getLastManualUpdate(manualEntries),
+    manualEntries,
+  })
+}
+
+export async function fetchPublicPricingPageData(): Promise<PricingPageData> {
+  const [manualResponse, latestQuotedDate] = await Promise.all([
     ensureSupabase()
       .from('scrap_price_entries')
       .select(
@@ -147,7 +167,7 @@ export async function fetchPublicPricingPageData(monthKey?: string): Promise<Pri
       .eq('is_active', true)
       .order('effective_date', { ascending: false })
       .order('material_name', { ascending: true }),
-    fetchPricingPeriods(),
+    fetchLatestQuotedDate(),
   ])
 
   if (manualResponse.error) {
@@ -158,14 +178,7 @@ export async function fetchPublicPricingPageData(monthKey?: string): Promise<Pri
     mapScrapPriceEntry(row as unknown as ScrapPriceEntryRow),
   )
 
-  const snapshotResponse = await fetchSnapshotsForMonth(periods, monthKey)
-  const model = buildPricingPageModel({
-    lastManualUpdate: getLastManualUpdate(manualEntries),
-    manualEntries,
-    periods,
-    requestedMonthKey: snapshotResponse.selectedMonthKey ?? monthKey,
-    snapshots: snapshotResponse.snapshots,
-  })
+  const model = await buildPricingDashboardData(manualEntries, latestQuotedDate)
 
   return {
     manualEntries,
@@ -173,8 +186,8 @@ export async function fetchPublicPricingPageData(monthKey?: string): Promise<Pri
   }
 }
 
-export async function fetchAdminPricingDashboard(monthKey?: string): Promise<PricingAdminDashboard> {
-  const [manualResponse, recentResponse, periods] = await Promise.all([
+export async function fetchAdminPricingDashboard(): Promise<PricingAdminDashboard> {
+  const [manualResponse, recentResponse, latestQuotedDate] = await Promise.all([
     ensureSupabase()
       .from('scrap_price_entries')
       .select(
@@ -189,7 +202,7 @@ export async function fetchAdminPricingDashboard(monthKey?: string): Promise<Pri
       )
       .order('quoted_date', { ascending: false })
       .limit(70),
-    fetchPricingPeriods(),
+    fetchLatestQuotedDate(),
   ])
 
   if (manualResponse.error) {
@@ -206,14 +219,7 @@ export async function fetchAdminPricingDashboard(monthKey?: string): Promise<Pri
   const recentSnapshots = (recentResponse.data ?? []).map((row) =>
     mapSnapshot(row as unknown as LmePriceSnapshotRow),
   )
-  const snapshotResponse = await fetchSnapshotsForMonth(periods, monthKey)
-  const model = buildPricingPageModel({
-    lastManualUpdate: getLastManualUpdate(manualEntries),
-    manualEntries,
-    periods,
-    requestedMonthKey: snapshotResponse.selectedMonthKey ?? monthKey,
-    snapshots: snapshotResponse.snapshots,
-  })
+  const model = await buildPricingDashboardData(manualEntries, latestQuotedDate)
 
   return {
     manualEntries,

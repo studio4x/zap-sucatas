@@ -3,17 +3,19 @@ import type { PricingSeriesCode } from '@/domains/pricing/types'
 import { formatPricingDate, formatPricingDateTime, formatPricingNumber, getSeriesLabel, pricingSeriesCatalog } from '@/domains/pricing/utils'
 
 type PricingUpdateOverviewProps = {
+  historySnapshotCount: number
+  historyWindowLabel: string
   lastManualUpdate: string | null
   latestQuotedDate: string | null
   latestValues: Partial<Record<PricingSeriesCode, number>>
-  snapshotCount: number
 }
 
 export function PricingUpdateOverview({
+  historySnapshotCount,
+  historyWindowLabel,
   lastManualUpdate,
   latestQuotedDate,
   latestValues,
-  snapshotCount,
 }: PricingUpdateOverviewProps) {
   return (
     <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
@@ -43,9 +45,10 @@ export function PricingUpdateOverview({
         <Card>
           <CardContent className="space-y-2 p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              Snapshots no periodo
+              Snapshots na tabela
             </p>
-            <p className="font-display text-2xl text-foreground">{snapshotCount}</p>
+            <p className="font-display text-2xl text-foreground">{historySnapshotCount}</p>
+            <p className="text-xs text-muted-foreground">{historyWindowLabel}</p>
           </CardContent>
         </Card>
       </div>

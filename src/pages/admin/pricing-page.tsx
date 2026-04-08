@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { RefreshCcw, Upload } from 'lucide-react'
 import { PricingChart } from '@/components/pricing/pricing-chart'
@@ -49,20 +49,13 @@ function toSnapshotFormValues(): ManualSnapshotFormValues {
 
 export function AdminPricingPage() {
   const queryClient = useQueryClient()
-  const [monthKey, setMonthKey] = useState('')
   const [feedback, setFeedback] = useState<string | null>(null)
   const [editingEntry, setEditingEntry] = useState<ScrapPriceEntry | null>(null)
 
   const pricingQuery = useQuery({
-    queryKey: ['pricing', 'admin', monthKey],
-    queryFn: () => fetchAdminPricingDashboard(monthKey || undefined),
+    queryKey: ['pricing', 'admin'],
+    queryFn: fetchAdminPricingDashboard,
   })
-
-  useEffect(() => {
-    if (!monthKey && pricingQuery.data?.selectedMonthKey) {
-      setMonthKey(pricingQuery.data.selectedMonthKey)
-    }
-  }, [monthKey, pricingQuery.data?.selectedMonthKey])
 
   const invalidatePricing = async () => {
     await Promise.all([
@@ -201,10 +194,11 @@ export function AdminPricingPage() {
       ) : null}
 
       <PricingUpdateOverview
+        historySnapshotCount={data.historySnapshotCount}
+        historyWindowLabel={data.historyWindowLabel}
         lastManualUpdate={data.lastManualUpdate}
         latestQuotedDate={data.latestQuotedDate}
         latestValues={data.latestValues}
-        snapshotCount={data.snapshotCount}
       />
 
       <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
@@ -215,28 +209,25 @@ export function AdminPricingPage() {
             <CardTitle>Janela analisada</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <select
-              className="flex h-11 w-full rounded-2xl border border-input bg-background/80 px-4 py-2 text-sm text-foreground shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
-              onChange={(event) => setMonthKey(event.target.value)}
-              value={data.selectedMonthKey ?? ''}
-            >
-              {data.periods.map((period) => (
-                <option key={period.monthKey} value={period.monthKey}>
-                  {period.monthLabel}
-                </option>
-              ))}
-            </select>
-
             <div className="rounded-[1.25rem] border border-border/70 bg-muted/35 p-4 text-sm leading-6 text-muted-foreground">
               <p>
-                <span className="font-medium text-foreground">Ultimo dia no periodo:</span>{' '}
-                {formatPricingDate(
-                  data.periods.find((period) => period.monthKey === data.selectedMonthKey)?.lastQuotedDate ?? null,
-                )}
+                <span className="font-medium text-foreground">Tabela historica:</span>{' '}
+                {data.historyWindowLabel}
               </p>
               <p>
-                <span className="font-medium text-foreground">Snapshots carregados:</span>{' '}
-                {data.snapshotCount}
+                <span className="font-medium text-foreground">Grafico:</span> {data.chartWindowLabel}
+              </p>
+              <p>
+                <span className="font-medium text-foreground">Ultima data consolidada:</span>{' '}
+                {formatPricingDate(data.latestQuotedDate)}
+              </p>
+              <p>
+                <span className="font-medium text-foreground">Snapshots na tabela:</span>{' '}
+                {data.historySnapshotCount}
+              </p>
+              <p>
+                <span className="font-medium text-foreground">Snapshots no grafico:</span>{' '}
+                {data.chartSnapshotCount}
               </p>
               <p>
                 <span className="font-medium text-foreground">Provider atual:</span> Westmetall +
@@ -247,7 +238,7 @@ export function AdminPricingPage() {
         </Card>
       </div>
 
-      <PricingHistoryTable rows={data.historyRows} title="Historico do periodo selecionado" />
+      <PricingHistoryTable rows={data.historyRows} title="Historico consolidado dos ultimos 6 meses" />
 
       <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <PricingManualPriceForm
