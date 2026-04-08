@@ -21,42 +21,41 @@ type BlogPostCardProps = {
 
 export function BlogPostCard({ post }: BlogPostCardProps) {
   return (
-    <Card className="h-full overflow-hidden border-border/80">
-      {post.coverImageUrl ? (
-        <img
-          alt={`Capa do artigo ${post.title}`}
-          className="h-48 w-full object-cover"
-          src={post.coverImageUrl}
-        />
-      ) : (
-        <div className="h-48 bg-[linear-gradient(160deg,rgba(22,98,70,0.16),rgba(19,33,23,0.06))]" />
-      )}
-      <CardContent className="flex h-full flex-col gap-5 p-6">
-        <div className="flex flex-wrap items-center gap-3">
-          {post.categoryName ? <Badge variant="outline">{post.categoryName}</Badge> : null}
-          <span className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
-            <CalendarDays className="size-4" />
-            {formatBlogDate(post.publishedAt)}
-          </span>
-        </div>
+    <Link className="group block h-full" to={paths.public.blogPost(post.slug)}>
+      <Card className="h-full overflow-hidden border-border/80 transition duration-200 group-hover:-translate-y-1 group-hover:shadow-[0_24px_60px_-36px_rgba(19,33,23,0.35)]">
+        {post.coverImageUrl ? (
+          <img
+            alt={`Capa do artigo ${post.title}`}
+            className="h-48 w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+            src={post.coverImageUrl}
+          />
+        ) : (
+          <div className="h-48 bg-[linear-gradient(160deg,rgba(22,98,70,0.16),rgba(19,33,23,0.06))]" />
+        )}
+        <CardContent className="flex h-full flex-col gap-5 p-6">
+          <div className="flex flex-wrap items-center gap-3">
+            {post.categoryName ? <Badge variant="outline">{post.categoryName}</Badge> : null}
+            <span className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
+              <CalendarDays className="size-4" />
+              {formatBlogDate(post.publishedAt)}
+            </span>
+          </div>
 
-        <div className="space-y-3">
-          <h3 className="font-display text-2xl tracking-tight text-foreground">{post.title}</h3>
-          <p className="line-clamp-3 text-sm leading-7 text-muted-foreground">
-            {post.excerpt ?? 'Conteúdo editorial da Zap Sucatas sobre sucatas, metais e mercado industrial.'}
-          </p>
-        </div>
+          <div className="space-y-3">
+            <h3 className="font-display text-2xl tracking-tight text-foreground transition group-hover:text-primary">
+              {post.title}
+            </h3>
+            <p className="line-clamp-3 text-sm leading-7 text-muted-foreground">
+              {post.excerpt ?? 'Conteúdo editorial da Zap Sucatas sobre sucatas, metais e mercado industrial.'}
+            </p>
+          </div>
 
-        <div className="mt-auto">
-          <Link
-            className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:gap-3"
-            to={paths.public.blogPost(post.slug)}
-          >
+          <div className="mt-auto inline-flex items-center gap-2 text-sm font-semibold text-primary transition group-hover:gap-3">
             Ler artigo
             <ArrowRight className="size-4" />
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   )
 }

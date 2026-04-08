@@ -209,6 +209,16 @@ Se criar placeholder, ele deve ser curto, explicito e facil de substituir.
 
 ---
 
+## Publicacao obrigatoria
+
+Ao concluir uma tarefa:
+
+- sempre fazer `commit` e `push` no GitHub;
+- sempre aplicar deploy no Supabase quando houver mudanca relevante em migrations, Edge Functions, policies, storage ou qualquer backend sensivel associado a entrega;
+- nao deixar alteracoes prontas apenas no workspace local quando a entrega depender de publicacao para funcionar.
+
+---
+
 ## Regras para resposta dentro do repositorio
 
 Quando receber uma tarefa, responder de forma objetiva e tecnica.
