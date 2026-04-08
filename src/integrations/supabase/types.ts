@@ -321,6 +321,85 @@ export type Database = {
         }
         Relationships: []
       }
+      scrap_price_entries: {
+        Row: {
+          created_at: string
+          effective_date: string
+          id: string
+          is_active: boolean
+          material_name: string
+          price_label: string
+          price_numeric: number | null
+          price_unit: string | null
+          region_name: string | null
+          source_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          effective_date: string
+          id?: string
+          is_active?: boolean
+          material_name: string
+          price_label: string
+          price_numeric?: number | null
+          price_unit?: string | null
+          region_name?: string | null
+          source_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          effective_date?: string
+          id?: string
+          is_active?: boolean
+          material_name?: string
+          price_label?: string
+          price_numeric?: number | null
+          price_unit?: string | null
+          region_name?: string | null
+          source_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      lme_price_snapshots: {
+        Row: {
+          created_at: string
+          currency_code: string
+          id: string
+          metal_code: 'AL' | 'CU' | 'NI' | 'PB' | 'SN' | 'USD' | 'ZN'
+          metal_name: string
+          price_value: number
+          provider_name: string
+          quoted_at: string
+          quoted_date: string
+          source_payload: Json | null
+        }
+        Insert: {
+          created_at?: string
+          currency_code: string
+          id?: string
+          metal_code: 'AL' | 'CU' | 'NI' | 'PB' | 'SN' | 'USD' | 'ZN'
+          metal_name: string
+          price_value: number
+          provider_name?: string
+          quoted_at: string
+          source_payload?: Json | null
+        }
+        Update: {
+          created_at?: string
+          currency_code?: string
+          id?: string
+          metal_code?: 'AL' | 'CU' | 'NI' | 'PB' | 'SN' | 'USD' | 'ZN'
+          metal_name?: string
+          price_value?: number
+          provider_name?: string
+          quoted_at?: string
+          source_payload?: Json | null
+        }
+        Relationships: []
+      }
       system_settings: {
         Row: {
           allow_guest_questions: boolean
@@ -361,6 +440,28 @@ export type Database = {
         Relationships: []
       }
     }
-    Views: Record<string, never>
+    Views: {
+      lme_snapshot_months: {
+        Relationships: []
+        Row: {
+          last_quoted_date: string
+          month_key: string
+          month_start: string
+          trading_days: number
+        }
+        Insert: {
+          last_quoted_date?: string
+          month_key?: string
+          month_start?: string
+          trading_days?: number
+        }
+        Update: {
+          last_quoted_date?: string
+          month_key?: string
+          month_start?: string
+          trading_days?: number
+        }
+      }
+    }
   }
 }
