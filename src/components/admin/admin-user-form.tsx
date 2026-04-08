@@ -70,7 +70,12 @@ export function AdminUserForm(props: AdminUserFormProps) {
             <label className="text-sm font-medium text-foreground" htmlFor={`${props.mode}-email`}>
               E-mail
             </label>
-            <Input id={`${props.mode}-email`} type="email" {...form.register('email')} />
+            <Input
+              autoComplete="username"
+              id={`${props.mode}-email`}
+              type="email"
+              {...form.register('email')}
+            />
             {form.formState.errors.email ? (
               <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
             ) : null}

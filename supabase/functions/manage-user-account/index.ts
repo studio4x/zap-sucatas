@@ -208,14 +208,19 @@ Deno.serve(async (request) => {
       const authUserId = createdUser.user.id
       const { data: profile, error: profileError } = await admin
         .from('profiles')
-        .upsert({
-          auth_user_id: authUserId,
-          email: input.email,
-          full_name: input.fullName,
-          phone: input.phone,
-          role: input.role,
-          status: input.status,
-        })
+        .upsert(
+          {
+            auth_user_id: authUserId,
+            email: input.email,
+            full_name: input.fullName,
+            phone: input.phone,
+            role: input.role,
+            status: input.status,
+          },
+          {
+            onConflict: 'auth_user_id',
+          },
+        )
         .select('id, auth_user_id, email, full_name, phone, role, status')
         .single()
 
@@ -320,7 +325,12 @@ Deno.serve(async (request) => {
       success: true,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message =
+      error instanceof Error
+        ? error.message
+        : typeof error === 'object' && error !== null && 'message' in error
+          ? String((error as { message?: unknown }).message ?? 'Unexpected error.')
+          : 'Unexpected error.'
     return jsonResponse({ error: message }, 500)
   }
 })
