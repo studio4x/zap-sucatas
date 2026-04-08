@@ -69,7 +69,15 @@ export function BlogPostPage() {
       </Button>
 
       <div className="overflow-hidden rounded-[2rem] border border-border bg-card/90">
-        <div className="h-72 bg-[linear-gradient(160deg,rgba(22,98,70,0.18),rgba(19,33,23,0.06))]" />
+        {post.coverImageUrl ? (
+          <img
+            alt={`Capa do artigo ${post.title}`}
+            className="h-72 w-full object-cover"
+            src={post.coverImageUrl}
+          />
+        ) : (
+          <div className="h-72 bg-[linear-gradient(160deg,rgba(22,98,70,0.18),rgba(19,33,23,0.06))]" />
+        )}
         <div className="space-y-5 px-6 py-8 md:px-8">
           <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
             {post.categoryName ? <span>{post.categoryName}</span> : null}

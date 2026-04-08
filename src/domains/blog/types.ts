@@ -13,6 +13,7 @@ export type BlogPost = {
   categoryId: string | null
   content: unknown
   coverImagePath: string | null
+  coverImageUrl: string | null
   createdAt: string
   excerpt: string | null
   id: string
@@ -31,4 +32,14 @@ export type AdminBlogPost = BlogPost & {
 
 export type PublicBlogPost = BlogPost & {
   categoryName: string | null
+}
+
+export type AdminBlogCategory = BlogCategory & {
+  postCount: number
+  publishedPostCount: number
+}
+
+export type BlogPostStatusMeta = {
+  label: string
+  value: BlogPostStatus
 }

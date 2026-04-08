@@ -22,7 +22,15 @@ type BlogPostCardProps = {
 export function BlogPostCard({ post }: BlogPostCardProps) {
   return (
     <Card className="h-full overflow-hidden border-border/80">
-      <div className="h-48 bg-[linear-gradient(160deg,rgba(22,98,70,0.16),rgba(19,33,23,0.06))]" />
+      {post.coverImageUrl ? (
+        <img
+          alt={`Capa do artigo ${post.title}`}
+          className="h-48 w-full object-cover"
+          src={post.coverImageUrl}
+        />
+      ) : (
+        <div className="h-48 bg-[linear-gradient(160deg,rgba(22,98,70,0.16),rgba(19,33,23,0.06))]" />
+      )}
       <CardContent className="flex h-full flex-col gap-5 p-6">
         <div className="flex flex-wrap items-center gap-3">
           {post.categoryName ? <Badge variant="outline">{post.categoryName}</Badge> : null}
