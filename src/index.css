@@ -207,3 +207,60 @@ a {
   font-size: 18px;
   font-weight: 600;
 }
+
+.dashboard-theme {
+  --background: #f9fafb;
+  --foreground: #1d2530;
+  --card: #ffffff;
+  --card-foreground: #1d2530;
+  --popover: #ffffff;
+  --popover-foreground: #1d2530;
+  --primary: #007bff;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f2f4;
+  --secondary-foreground: #32414f;
+  --muted: #ebedf0;
+  --muted-foreground: #65707e;
+  --accent: #28af60;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4343;
+  --destructive-foreground: #ffffff;
+  --border: #e1e7ef;
+  --input: #e1e7ef;
+  --ring: #007bff;
+  --radius: 16px;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #65707e;
+  --sidebar-primary: #007bff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f0f2f4;
+  --sidebar-accent-foreground: #32414f;
+  --sidebar-border: #e1e7ef;
+  --sidebar-ring: #007bff;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.dashboard-theme .font-display {
+  font-family: 'Inter', system-ui, sans-serif;
+  letter-spacing: normal;
+}
+
+.dashboard-theme [data-slot='card'] {
+  border-radius: 16px;
+  border-color: var(--border);
+  background: var(--card);
+  box-shadow: 0 2px 8px -2px rgba(29, 37, 48, 0.1), 0 1px 2px -1px rgba(29, 37, 48, 0.05);
+}
+
+.dashboard-theme [data-slot='button'],
+.dashboard-theme [data-slot='input'],
+.dashboard-theme [data-slot='textarea'],
+.dashboard-theme [data-slot='select'] {
+  border-radius: 10px;
+}
+
+.dashboard-theme [data-slot='badge'] {
+  border-radius: 999px;
+}

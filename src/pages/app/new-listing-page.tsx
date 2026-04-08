@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { paths } from '@/app/paths'
+import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { ListingEditor, type ListingEditorSubmitPayload } from '@/components/listings/listing-editor'
-import { Card, CardContent } from '@/components/ui/card'
 import {
   createListingDraft,
   fetchListingReferences,
@@ -60,21 +60,19 @@ export function AppNewListingPage() {
 
   if (referencesQuery.isLoading) {
     return (
-      <Card>
-        <CardContent className="p-6 text-sm text-muted-foreground">
-          Carregando categorias e materiais...
-        </CardContent>
-      </Card>
+      <div className="rounded-2xl border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
+        Carregando categorias e materiais...
+      </div>
     )
   }
 
   if (referencesQuery.isError || !referencesQuery.data) {
     return (
-      <Card className="border-rose-200/70 bg-rose-50">
-        <CardContent className="p-6 text-sm text-rose-900">
-          Nao foi possivel carregar as referencias do formulario.
-        </CardContent>
-      </Card>
+      <DashboardAlertCard
+        description="Nao foi possivel carregar categorias e materiais para o formulario."
+        title="Falha ao carregar referencias"
+        tone="error"
+      />
     )
   }
 

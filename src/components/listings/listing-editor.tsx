@@ -4,10 +4,14 @@ import { useEffect, useMemo, useState } from 'react'
 import type { ChangeEvent, ReactNode } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
+import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
+import { DashboardEmptyState } from '@/components/dashboard/dashboard-empty-state'
+import { DashboardFormSection } from '@/components/dashboard/dashboard-form-section'
+import { DashboardSectionHeader } from '@/components/dashboard/dashboard-section-header'
 import { ListingStatusBadge } from '@/components/listings/listing-status-badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { listingFormSchema, type ListingFormSchemaValues } from '@/domains/listings/schemas'
 import type {
@@ -18,9 +22,6 @@ import type {
   ListingStatus,
 } from '@/domains/listings/types'
 import { cn } from '@/lib/utils'
-
-const inputLikeClassName =
-  'flex h-11 w-full rounded-2xl border border-input bg-background/80 px-4 py-2 text-sm text-foreground shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
 
 export type ListingEditorSubmitPayload = {
   coverImageId: string | null
@@ -184,47 +185,34 @@ export function ListingEditor({
 
   return (
     <form className="space-y-6" onSubmit={form.handleSubmit((values) => handleSubmit(values, false))}>
-      <div className="flex flex-col gap-3 rounded-[1.75rem] border border-border/70 bg-card/90 p-6 md:flex-row md:items-start md:justify-between">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-            {mode === 'create' ? 'Novo anuncio' : 'Editar anuncio'}
-          </p>
-          <h1 className="font-display text-4xl tracking-tight text-foreground">
-            {mode === 'create' ? 'Criar anuncio' : 'Atualizar anuncio'}
-          </h1>
-          <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-            Preencha os dados principais, gerencie as imagens e decida se deseja apenas salvar o
-            rascunho ou enviar para revisao.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          {status ? <ListingStatusBadge status={status} /> : null}
-          <Button asChild type="button" variant="outline">
-            <Link to={cancelTo}>Voltar</Link>
-          </Button>
-        </div>
-      </div>
+      <DashboardSectionHeader
+        action={
+          <div className="flex flex-wrap items-center gap-3">
+            {status ? <ListingStatusBadge status={status} /> : null}
+            <Button asChild type="button" variant="outline">
+              <Link to={cancelTo}>Voltar</Link>
+            </Button>
+          </div>
+        }
+        description="Preencha os dados do lote, revise fotos e escolha se quer apenas salvar ou enviar para moderacao."
+        title={mode === 'create' ? 'Criar anuncio' : 'Editar anuncio'}
+      />
 
       {rejectionReason ? (
-        <Card className="border-rose-200/70 bg-rose-50">
-          <CardHeader>
-            <CardTitle>Motivo da rejeicao anterior</CardTitle>
-            <CardDescription>{rejectionReason}</CardDescription>
-          </CardHeader>
-        </Card>
+        <DashboardAlertCard
+          description={rejectionReason}
+          title="Motivo da rejeicao anterior"
+          tone="warning"
+        />
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Dados principais</CardTitle>
-              <CardDescription>
-                Esses campos entram no card do catalogo e na validacao da moderacao.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4">
+          <DashboardFormSection
+            description="Esses campos entram no card do catalogo e na validacao da moderacao."
+            title="Dados principais"
+          >
+            <div className="grid gap-4">
               <FormField label="Titulo">
                 <Input {...form.register('title')} />
                 {form.formState.errors.title ? (
@@ -234,14 +222,14 @@ export function ListingEditor({
 
               <div className="grid gap-4 md:grid-cols-2">
                 <FormField label="Categoria">
-                  <select className={inputLikeClassName} {...form.register('categoryId')}>
+                  <Select {...form.register('categoryId')}>
                     <option value="">Selecione</option>
                     {categories.map((category) => (
                       <option key={category.id} value={category.id}>
                         {category.name}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                   {form.formState.errors.categoryId ? (
                     <p className="text-sm text-destructive">
                       {form.formState.errors.categoryId.message}
@@ -250,14 +238,14 @@ export function ListingEditor({
                 </FormField>
 
                 <FormField label="Material principal">
-                  <select className={inputLikeClassName} {...form.register('primaryMaterialId')}>
+                  <Select {...form.register('primaryMaterialId')}>
                     <option value="">Nao informado</option>
                     {materials.map((material) => (
                       <option key={material.id} value={material.id}>
                         {material.name}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </FormField>
               </div>
 
@@ -276,17 +264,14 @@ export function ListingEditor({
                   </p>
                 ) : null}
               </FormField>
-            </CardContent>
-          </Card>
+            </div>
+          </DashboardFormSection>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Localizacao e contato</CardTitle>
-              <CardDescription>
-                Dados usados no detalhe do anuncio e no filtro geografico do catalogo.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2">
+          <DashboardFormSection
+            description="Dados usados no detalhe do anuncio e no filtro geografico do catalogo."
+            title="Localizacao e contato"
+          >
+            <div className="grid gap-4 md:grid-cols-2">
               <FormField label="Cidade">
                 <Input {...form.register('city')} />
                 {form.formState.errors.city ? (
@@ -316,17 +301,11 @@ export function ListingEditor({
               <FormField label="Faixa de preco">
                 <Input {...form.register('priceLabel')} placeholder="Ex.: sob consulta, a combinar" />
               </FormField>
-            </CardContent>
-          </Card>
+            </div>
+          </DashboardFormSection>
 
-          <Card>
-            <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="space-y-1.5">
-                <CardTitle>Atributos tecnicos</CardTitle>
-                <CardDescription>
-                  Informacoes adicionais para detalhar o lote, peso, volume ou especificacao.
-                </CardDescription>
-              </div>
+          <DashboardFormSection
+            actions={
               <Button
                 onClick={() => attributesFieldArray.append({ attributeLabel: '', attributeValue: '' })}
                 type="button"
@@ -334,8 +313,11 @@ export function ListingEditor({
               >
                 Adicionar atributo
               </Button>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            }
+            description="Informacoes adicionais para detalhar o lote, peso, volume ou especificacao."
+            title="Atributos tecnicos"
+          >
+            <div className="space-y-4">
               {attributesFieldArray.fields.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   Nenhum atributo adicionado ainda. Isso e opcional.
@@ -376,22 +358,19 @@ export function ListingEditor({
                   </div>
                 </div>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </DashboardFormSection>
         </div>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Imagens</CardTitle>
-              <CardDescription>
-                O anuncio precisa de ao menos uma imagem para ser enviado para revisao.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <DashboardFormSection
+            description="O anuncio precisa de ao menos uma imagem para ser enviado para revisao."
+            title="Imagens"
+          >
+            <div className="space-y-4">
               <label
                 className={cn(
-                  'flex cursor-pointer flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-border/70 bg-muted/40 px-5 py-8 text-center transition hover:border-primary/40 hover:bg-primary/5',
+                  'flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border/70 bg-muted/40 px-5 py-8 text-center transition hover:border-primary/40 hover:bg-primary/5',
                 )}
               >
                 <ImagePlus className="size-6 text-primary" />
@@ -409,7 +388,7 @@ export function ListingEditor({
                   <p className="text-sm font-medium text-foreground">Imagens atuais</p>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {activeExistingImages.map((image) => (
-                      <div key={image.id} className="overflow-hidden rounded-3xl border border-border/70">
+                      <div key={image.id} className="overflow-hidden rounded-2xl border border-border/70">
                         <div className="aspect-square bg-muted">
                           <img alt={image.altText ?? 'Imagem do anuncio'} className="h-full w-full object-cover" src={image.publicUrl} />
                         </div>
@@ -444,7 +423,7 @@ export function ListingEditor({
                   <p className="text-sm font-medium text-foreground">Novas imagens para upload</p>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {pendingFiles.map((item, index) => (
-                      <div key={`${item.file.name}-${index}`} className="overflow-hidden rounded-3xl border border-border/70">
+                      <div key={`${item.file.name}-${index}`} className="overflow-hidden rounded-2xl border border-border/70">
                         <div className="aspect-square bg-muted">
                           <img alt={item.file.name} className="h-full w-full object-cover" src={item.previewUrl} />
                         </div>
@@ -459,24 +438,18 @@ export function ListingEditor({
                   </div>
                 </div>
               ) : null}
-            </CardContent>
-          </Card>
+            </div>
+          </DashboardFormSection>
 
           {feedback ? (
-            <Card className="border-rose-200/70 bg-rose-50">
-              <CardContent className="p-5 text-sm text-rose-900">{feedback}</CardContent>
-            </Card>
+            <DashboardAlertCard description={feedback} title="Ajuste necessario" tone="error" />
           ) : null}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Publicacao</CardTitle>
-              <CardDescription>
-                Salve quantas vezes precisar. Quando os dados estiverem completos, envie para
-                revisao.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
+          <DashboardFormSection
+            description="Salve quantas vezes precisar. Quando os dados estiverem completos, envie para revisao."
+            title="Publicacao"
+          >
+            <div className="space-y-3">
               <Button
                 disabled={isSubmitting}
                 onClick={() => void form.handleSubmit((values) => handleSubmit(values, false))()}
@@ -492,8 +465,15 @@ export function ListingEditor({
               >
                 {isSubmitting && submitAfterSave ? 'Enviando...' : 'Salvar e enviar para revisao'}
               </Button>
-            </CardContent>
-          </Card>
+              {activeExistingImages.length === 0 && pendingFiles.length === 0 ? (
+                <DashboardEmptyState
+                  className="px-4 py-8"
+                  description="Adicione fotos do lote antes de enviar para revisao."
+                  title="Ainda faltam imagens"
+                />
+              ) : null}
+            </div>
+          </DashboardFormSection>
         </div>
       </div>
     </form>

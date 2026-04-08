@@ -2,9 +2,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
+import { DashboardFormSection } from '@/components/dashboard/dashboard-form-section'
+import { DashboardSectionHeader } from '@/components/dashboard/dashboard-section-header'
+import { DashboardStatCard } from '@/components/dashboard/dashboard-stat-card'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { fetchSystemSettings } from '@/domains/settings/api'
 import { passwordSettingsSchema, type PasswordSettingsValues } from '@/domains/settings/schemas'
 import { updatePassword } from '@/domains/auth/api'
@@ -31,32 +34,52 @@ export function AppSettingsPage() {
     },
     onSuccess: () => {
       form.reset()
-      setFeedback('Senha atualizada com sucesso.')
+      setFeedback('Sua senha foi atualizada com sucesso.')
     },
   })
 
   return (
     <section className="space-y-6">
-      <div className="rounded-[1.75rem] border border-border/70 bg-card/90 p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-          Configuracoes
-        </p>
-        <h1 className="mt-4 font-display text-4xl tracking-tight text-foreground">
-          Configuracoes da conta
-        </h1>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-          Ajustes basicos de seguranca e consulta das informacoes operacionais do marketplace.
-        </p>
+      <DashboardSectionHeader
+        description="Gerencie a seguranca basica da conta e acompanhe as informacoes operacionais da plataforma."
+        title="Configuracoes"
+      />
+
+      <DashboardAlertCard
+        description="Preferencias individuais mais avancadas ainda nao entram neste MVP. Esta tela cobre seguranca e referencia institucional."
+        title="Configuracoes essenciais da conta"
+        tone="info"
+      />
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <DashboardStatCard
+          label="Marketplace"
+          value={settingsQuery.data?.siteName ?? 'Carregando'}
+        />
+        <DashboardStatCard
+          label="Suporte"
+          value={settingsQuery.data?.supportEmail ?? 'Nao informado'}
+        />
+        <DashboardStatCard
+          label="Perguntas anonimas"
+          value={settingsQuery.data?.allowGuestQuestions ? 'Ativas' : 'Desativadas'}
+        />
+        <DashboardStatCard
+          label="Manutencao"
+          value={settingsQuery.data?.maintenanceMode ? 'Ativa' : 'Desativada'}
+        />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Seguranca</CardTitle>
-            <CardDescription>Atualize sua senha de acesso da conta autenticada.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form className="space-y-4" onSubmit={form.handleSubmit((values) => passwordMutation.mutate(values))}>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
+        <DashboardFormSection
+          description="Atualize sua senha sempre que precisar reforcar a seguranca da conta."
+          title="Seguranca"
+        >
+          <form
+            className="space-y-4"
+            onSubmit={form.handleSubmit((values) => passwordMutation.mutate(values))}
+          >
+            <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground" htmlFor="settings-password">
                   Nova senha
@@ -68,7 +91,10 @@ export function AppSettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground" htmlFor="settings-confirm-password">
+                <label
+                  className="text-sm font-medium text-foreground"
+                  htmlFor="settings-confirm-password"
+                >
                   Confirmar nova senha
                 </label>
                 <Input
@@ -82,22 +108,28 @@ export function AppSettingsPage() {
                   </p>
                 ) : null}
               </div>
+            </div>
 
-              {feedback ? <p className="text-sm text-emerald-700">{feedback}</p> : null}
+            {feedback ? (
+              <DashboardAlertCard
+                description={feedback}
+                title="Senha atualizada"
+                tone="success"
+              />
+            ) : null}
 
-              <Button disabled={passwordMutation.isPending} type="submit">
-                {passwordMutation.isPending ? 'Atualizando...' : 'Atualizar senha'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            <Button disabled={passwordMutation.isPending} type="submit">
+              {passwordMutation.isPending ? 'Atualizando...' : 'Atualizar senha'}
+            </Button>
+          </form>
+        </DashboardFormSection>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informacoes da plataforma</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-3 text-sm text-muted-foreground">
+          <DashboardFormSection
+            description="Referencias institucionais e operacionais do marketplace neste momento."
+            title="Informacoes da plataforma"
+          >
+            <div className="space-y-3 text-sm text-muted-foreground">
               <p>
                 <span className="font-medium text-foreground">Marketplace:</span>{' '}
                 {settingsQuery.data?.siteName ?? 'Carregando'}
@@ -114,18 +146,14 @@ export function AppSettingsPage() {
                 <span className="font-medium text-foreground">Perguntas anonimas:</span>{' '}
                 {settingsQuery.data?.allowGuestQuestions ? 'Habilitadas' : 'Desabilitadas'}
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </DashboardFormSection>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Operacao</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm leading-6 text-muted-foreground">
-              Preferencias individuais mais avancadas ainda nao entram neste MVP. Nesta etapa, a
-              tela cobre seguranca basica da conta e informacoes institucionais do marketplace.
-            </CardContent>
-          </Card>
+          <DashboardAlertCard
+            description="Mudancas globais de comportamento do site ficam sob controle administrativo."
+            title="Preferencias do produto"
+            tone="warning"
+          />
         </div>
       </div>
     </section>

@@ -2,9 +2,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
+import { DashboardFormSection } from '@/components/dashboard/dashboard-form-section'
+import { DashboardSectionHeader } from '@/components/dashboard/dashboard-section-header'
+import { DashboardStatCard } from '@/components/dashboard/dashboard-stat-card'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { fetchCurrentProfile, updateCurrentProfile } from '@/domains/profiles/api'
 import { profileFormSchema, type ProfileFormValues } from '@/domains/profiles/schemas'
 import { useAuth } from '@/hooks/use-auth'
@@ -62,33 +65,60 @@ export function AppProfilePage() {
       return nextProfile
     },
     onSuccess: () => {
-      setFeedback('Perfil atualizado com sucesso.')
+      setFeedback('Seus dados foram atualizados com sucesso.')
     },
   })
 
+  if (profileQuery.isLoading) {
+    return (
+      <div className="rounded-2xl border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
+        Carregando perfil...
+      </div>
+    )
+  }
+
+  if (profileQuery.isError || !profileQuery.data) {
+    return (
+      <DashboardAlertCard
+        description="Nao foi possivel carregar seus dados nesta tentativa."
+        title="Falha ao carregar perfil"
+        tone="error"
+      />
+    )
+  }
+
   return (
     <section className="space-y-6">
-      <div className="rounded-[1.75rem] border border-border/70 bg-card/90 p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-          Perfil
-        </p>
-        <h1 className="mt-4 font-display text-4xl tracking-tight text-foreground">
-          Perfil do anunciante
-        </h1>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-          Atualize seus dados cadastrais basicos. As regras sensiveis de papel e status continuam
-          protegidas no backend.
-        </p>
+      <DashboardSectionHeader
+        description="Atualize seus dados de contato e mantenha a conta pronta para operar no marketplace."
+        title="Meu perfil"
+      />
+
+      <DashboardAlertCard
+        description="Seu perfil e usado para identificar a conta autenticada e apoiar os contatos exibidos nos seus anuncios."
+        title="Mantenha estas informacoes sempre atualizadas"
+        tone="info"
+      />
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <DashboardStatCard label="Status" value={getStatusLabel(profileQuery.data.status)} />
+        <DashboardStatCard
+          label="Papel"
+          value={profileQuery.data.role === 'admin' ? 'Administrador' : 'Anunciante'}
+        />
+        <DashboardStatCard label="Email" value={user?.email ?? 'Sem email'} />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Dados cadastrais</CardTitle>
-            <CardDescription>Essas informacoes alimentam sua area autenticada e dados de contato.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form className="space-y-4" onSubmit={form.handleSubmit((values) => updateMutation.mutate(values))}>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+        <DashboardFormSection
+          description="Esses dados alimentam sua area autenticada e ajudam o time a reconhecer sua conta."
+          title="Dados cadastrais"
+        >
+          <form
+            className="space-y-4"
+            onSubmit={form.handleSubmit((values) => updateMutation.mutate(values))}
+          >
+            <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground" htmlFor="profile-full-name">
                   Nome completo
@@ -103,47 +133,53 @@ export function AppProfilePage() {
                 <label className="text-sm font-medium text-foreground" htmlFor="profile-phone">
                   Telefone
                 </label>
-                <Input id="profile-phone" {...form.register('phone')} placeholder="(11) 99999-9999" />
+                <Input
+                  id="profile-phone"
+                  {...form.register('phone')}
+                  placeholder="(11) 99999-9999"
+                />
               </div>
+            </div>
 
-              {feedback ? <p className="text-sm text-emerald-700">{feedback}</p> : null}
+            {feedback ? (
+              <DashboardAlertCard
+                description={feedback}
+                title="Perfil atualizado"
+                tone="success"
+              />
+            ) : null}
 
-              <Button disabled={updateMutation.isPending || profileQuery.isLoading} type="submit">
-                {updateMutation.isPending ? 'Salvando...' : 'Salvar perfil'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            <Button disabled={updateMutation.isPending} type="submit">
+              {updateMutation.isPending ? 'Salvando...' : 'Salvar perfil'}
+            </Button>
+          </form>
+        </DashboardFormSection>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Status da conta</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-3 text-sm text-muted-foreground">
+          <DashboardFormSection
+            description="Os controles sensiveis de papel e liberacao da conta continuam protegidos no backend e no admin."
+            title="Contexto da conta"
+          >
+            <div className="space-y-3 text-sm text-muted-foreground">
               <p>
-                <span className="font-medium text-foreground">E-mail:</span> {user?.email}
+                <span className="font-medium text-foreground">Status atual:</span>{' '}
+                {getStatusLabel(profileQuery.data.status)}
               </p>
               <p>
-                <span className="font-medium text-foreground">Papel:</span>{' '}
-                {profileQuery.data?.role === 'admin' ? 'Administrador' : 'Anunciante'}
+                <span className="font-medium text-foreground">Perfil:</span>{' '}
+                {profileQuery.data.role === 'admin' ? 'Administrador' : 'Anunciante'}
               </p>
               <p>
-                <span className="font-medium text-foreground">Status:</span>{' '}
-                {profileQuery.data ? getStatusLabel(profileQuery.data.status) : 'Carregando'}
+                <span className="font-medium text-foreground">Email:</span> {user?.email}
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </DashboardFormSection>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Observacao</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm leading-6 text-muted-foreground">
-              Alteracoes de papel, aprovacao ou suspensao de conta nao podem ser feitas por esta
-              tela. Isso continua no fluxo administrativo.
-            </CardContent>
-          </Card>
+          <DashboardAlertCard
+            description="Se houver mudanca de status da conta, o time administrativo trata esse fluxo fora desta tela."
+            title="Alteracoes administrativas"
+            tone="warning"
+          />
         </div>
       </div>
     </section>

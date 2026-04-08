@@ -3,12 +3,12 @@ import {
   FilePlus2,
   House,
   MessageSquareMore,
-  PackageSearch,
+  Settings2,
   Rows4,
 } from 'lucide-react'
 import { Outlet } from 'react-router-dom'
 import { paths } from '@/app/paths'
-import { AppShell } from '@/components/layout/app-shell'
+import { DashboardShell } from '@/components/dashboard/dashboard-shell'
 
 const dashboardNavItems = [
   {
@@ -37,18 +37,25 @@ const dashboardNavItems = [
     label: 'Perfil',
     icon: CircleUserRound,
   },
+  {
+    to: paths.app.settings,
+    label: 'Configuracoes',
+    icon: Settings2,
+  },
 ]
 
 export function DashboardLayout() {
+  const quickNavItems = [
+    dashboardNavItems[0],
+    dashboardNavItems[1],
+    dashboardNavItems[2],
+    dashboardNavItems[3],
+    dashboardNavItems[4],
+  ]
+
   return (
-    <AppShell
-      description="Area autenticada preparada para operacao do anunciante no MVP."
-      navItems={dashboardNavItems}
-      title="Dashboard do anunciante"
-      tone="user"
-      topIcon={PackageSearch}
-    >
+    <DashboardShell navItems={dashboardNavItems} quickNavItems={quickNavItems}>
       <Outlet />
-    </AppShell>
+    </DashboardShell>
   )
 }

@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import { paths } from '@/app/paths'
+import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { ListingEditor, type ListingEditorSubmitPayload } from '@/components/listings/listing-editor'
-import { Card, CardContent } from '@/components/ui/card'
 import {
   fetchListingDetailsForOwner,
   fetchListingReferences,
@@ -76,21 +76,24 @@ export function AppEditListingPage() {
 
   if (referencesQuery.isLoading || listingQuery.isLoading) {
     return (
-      <Card>
-        <CardContent className="p-6 text-sm text-muted-foreground">
-          Carregando dados do anuncio...
-        </CardContent>
-      </Card>
+      <div className="rounded-2xl border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
+        Carregando dados do anuncio...
+      </div>
     )
   }
 
-  if (referencesQuery.isError || listingQuery.isError || !referencesQuery.data || !listingQuery.data) {
+  if (
+    referencesQuery.isError ||
+    listingQuery.isError ||
+    !referencesQuery.data ||
+    !listingQuery.data
+  ) {
     return (
-      <Card className="border-rose-200/70 bg-rose-50">
-        <CardContent className="p-6 text-sm text-rose-900">
-          Nao foi possivel carregar o anuncio para edicao.
-        </CardContent>
-      </Card>
+      <DashboardAlertCard
+        description="Nao foi possivel carregar este anuncio para edicao."
+        title="Falha ao abrir anuncio"
+        tone="error"
+      />
     )
   }
 

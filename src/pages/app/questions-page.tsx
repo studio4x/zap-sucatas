@@ -1,20 +1,31 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Search } from 'lucide-react'
-import { QuestionThreadCard } from '@/components/questions/question-thread-card'
+import { Link } from 'react-router-dom'
+import { Reply, Search } from 'lucide-react'
+import { paths } from '@/app/paths'
+import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
+import { DashboardEmptyState } from '@/components/dashboard/dashboard-empty-state'
+import { DashboardFilterCard } from '@/components/dashboard/dashboard-filter-card'
+import { DashboardSectionHeader } from '@/components/dashboard/dashboard-section-header'
+import { DashboardStatCard } from '@/components/dashboard/dashboard-stat-card'
+import { QuestionStatusBadge } from '@/components/questions/question-status-badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { answerListingQuestion, fetchOwnerQuestions } from '@/domains/questions/api'
-import { questionStatusOptions } from '@/domains/questions/utils'
+import { formatQuestionDate, questionStatusOptions } from '@/domains/questions/utils'
 import { useAuth } from '@/hooks/use-auth'
+
+type AppQuestionsStatusFilter =
+  (typeof questionStatusOptions)[number]['value']
 
 export function AppQuestionsPage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<(typeof questionStatusOptions)[number]['value']>('all')
+  const [statusFilter, setStatusFilter] = useState<AppQuestionsStatusFilter>('all')
   const [drafts, setDrafts] = useState<Record<string, string>>({})
   const [feedback, setFeedback] = useState<string | null>(null)
 
@@ -36,31 +47,77 @@ export function AppQuestionsPage() {
     },
   })
 
+  const questions = questionsQuery.data ?? []
   const filteredQuestions = useMemo(() => {
-    return (questionsQuery.data ?? []).filter((question) => {
+    const normalizedQuery = query.trim().toLowerCase()
+
+    return questions.filter((question) => {
       const matchesStatus = statusFilter === 'all' ? true : question.status === statusFilter
       const haystack = `${question.questionText} ${question.listingTitle ?? ''}`.toLowerCase()
-      const matchesQuery = query.trim().length === 0 ? true : haystack.includes(query.trim().toLowerCase())
+      const matchesQuery = normalizedQuery.length === 0 ? true : haystack.includes(normalizedQuery)
       return matchesStatus && matchesQuery
     })
-  }, [questionsQuery.data, query, statusFilter])
+  }, [questions, query, statusFilter])
+
+  const stats = useMemo(
+    () => ({
+      blocked: questions.filter((question) => question.status === 'blocked').length,
+      open: questions.filter((question) => !question.answer).length,
+      published: questions.filter((question) => question.status === 'published').length,
+      total: questions.length,
+    }),
+    [questions],
+  )
 
   return (
     <section className="space-y-6">
-      <div className="rounded-[1.75rem] border border-border/70 bg-card/90 p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-          Perguntas
-        </p>
-        <h1 className="mt-4 font-display text-4xl tracking-tight text-foreground">
-          Inbox das perguntas recebidas
-        </h1>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-          Responda duvidas dos interessados e acompanhe o status de publicacao de cada thread.
-        </p>
+      <DashboardSectionHeader
+        action={
+          <Button asChild type="button" variant="outline">
+            <Link to={paths.app.listings}>Ver anuncios</Link>
+          </Button>
+        }
+        description="Responda rapido aos interessados e acompanhe o status publico de cada thread."
+        title="Perguntas recebidas"
+      />
+
+      <DashboardAlertCard
+        description="Responder com clareza ajuda a reduzir friccao comercial e aumenta a confianca no seu anuncio."
+        title="Mantenha sua inbox em dia"
+        tone={stats.open > 0 ? 'warning' : 'info'}
+      />
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <DashboardStatCard label="Total" value={stats.total} />
+        <DashboardStatCard
+          label="Sem resposta"
+          tone={stats.open > 0 ? 'warning' : 'default'}
+          value={stats.open}
+        />
+        <DashboardStatCard label="Publicadas" value={stats.published} />
+        <DashboardStatCard
+          label="Bloqueadas"
+          tone={stats.blocked > 0 ? 'warning' : 'default'}
+          value={stats.blocked}
+        />
       </div>
 
-      <Card>
-        <CardContent className="grid gap-4 p-5 md:grid-cols-[1fr_240px]">
+      <DashboardFilterCard
+        actions={
+          <Button
+            onClick={() => {
+              setQuery('')
+              setStatusFilter('all')
+            }}
+            type="button"
+            variant="outline"
+          >
+            Limpar filtros
+          </Button>
+        }
+        description="Filtre por status ou busque por texto para encontrar a thread certa."
+      >
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
           <div className="relative">
             <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -70,10 +127,8 @@ export function AppQuestionsPage() {
               value={query}
             />
           </div>
-
-          <select
-            className="flex h-11 w-full rounded-2xl border border-input bg-background/80 px-4 py-2 text-sm text-foreground shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring"
-            onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}
+          <Select
+            onChange={(event) => setStatusFilter(event.target.value as AppQuestionsStatusFilter)}
             value={statusFilter}
           >
             {questionStatusOptions.map((option) => (
@@ -81,22 +136,33 @@ export function AppQuestionsPage() {
                 {option.label}
               </option>
             ))}
-          </select>
-        </CardContent>
-      </Card>
+          </Select>
+        </div>
+      </DashboardFilterCard>
 
       {feedback ? (
-        <Card className="border-emerald-200/70 bg-emerald-50">
-          <CardContent className="p-5 text-sm text-emerald-900">{feedback}</CardContent>
-        </Card>
+        <DashboardAlertCard description={feedback} title="Resposta registrada" tone="success" />
       ) : null}
 
       {questionsQuery.isLoading ? (
-        <Card>
-          <CardContent className="p-6 text-sm text-muted-foreground">
-            Carregando perguntas recebidas...
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
+          Carregando perguntas recebidas...
+        </div>
+      ) : null}
+
+      {questionsQuery.isError ? (
+        <DashboardAlertCard
+          description="Nao foi possivel carregar as perguntas neste momento."
+          title="Falha ao carregar inbox"
+          tone="error"
+        />
+      ) : null}
+
+      {!questionsQuery.isLoading && !questionsQuery.isError && filteredQuestions.length === 0 ? (
+        <DashboardEmptyState
+          description="Quando os interessados enviarem perguntas nos seus anuncios, elas aparecerao aqui."
+          title="Nenhuma pergunta encontrada"
+        />
       ) : null}
 
       <div className="grid gap-4">
@@ -105,54 +171,89 @@ export function AppQuestionsPage() {
           const isBlocked = question.status === 'blocked'
 
           return (
-            <QuestionThreadCard
-              key={question.id}
-              question={question}
-              showListingLink
-              answerComposer={
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-foreground">
+            <Card key={question.id}>
+              <CardHeader className="space-y-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <QuestionStatusBadge status={question.status} />
+                  <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                    {formatQuestionDate(question.createdAt)}
+                  </span>
+                  {question.listingTitle ? (
+                    <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                      {question.listingTitle}
+                    </span>
+                  ) : null}
+                </div>
+                <CardTitle className="text-base leading-7">{question.questionText}</CardTitle>
+              </CardHeader>
+
+              <CardContent className="space-y-5">
+                {question.answer ? (
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
+                    <p className="text-sm font-semibold text-emerald-900">Resposta atual</p>
+                    <p className="mt-2 text-sm leading-6 text-emerald-950">
+                      {question.answer.answerText}
+                    </p>
+                  </div>
+                ) : null}
+
+                {isBlocked ? (
+                  <DashboardAlertCard
+                    description="Threads bloqueadas so podem ser tratadas pelo painel administrativo."
+                    title="Pergunta bloqueada"
+                    tone="warning"
+                  />
+                ) : null}
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground" htmlFor={`answer-${question.id}`}>
                     {question.answer ? 'Atualizar resposta' : 'Responder pergunta'}
                   </label>
                   <Textarea
                     disabled={isBlocked}
+                    id={`answer-${question.id}`}
                     onChange={(event) =>
                       setDrafts((current) => ({ ...current, [question.id]: event.target.value }))
                     }
                     placeholder={
                       isBlocked
-                        ? 'Perguntas bloqueadas so podem ser tratadas pelo admin.'
-                        : 'Escreva a resposta do anunciante.'
+                        ? 'Thread bloqueada pelo admin.'
+                        : 'Escreva uma resposta objetiva para o interessado.'
                     }
                     value={draft}
                   />
-                  <div className="flex flex-wrap gap-3">
-                    <Button
-                      disabled={isBlocked || answerMutation.isPending || draft.trim().length < 2}
-                      onClick={() =>
-                        answerMutation.mutate({
-                          answerText: draft,
-                          questionId: question.id,
-                        })
-                      }
-                      type="button"
-                    >
-                      {question.answer ? 'Atualizar resposta' : 'Salvar resposta'}
-                    </Button>
-                  </div>
                 </div>
-              }
-            />
+
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  {question.listingSlug ? (
+                    <Link
+                      className="text-sm font-medium text-primary hover:underline"
+                      to={paths.public.listingDetails(question.listingSlug)}
+                    >
+                      Abrir anuncio publico
+                    </Link>
+                  ) : (
+                    <span />
+                  )}
+
+                  <Button
+                    disabled={isBlocked || answerMutation.isPending || draft.trim().length < 2}
+                    onClick={() =>
+                      answerMutation.mutate({
+                        answerText: draft,
+                        questionId: question.id,
+                      })
+                    }
+                    type="button"
+                  >
+                    <Reply className="size-4" />
+                    {question.answer ? 'Atualizar resposta' : 'Salvar resposta'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           )
         })}
-
-        {!questionsQuery.isLoading && filteredQuestions.length === 0 ? (
-          <Card>
-            <CardContent className="p-6 text-sm text-muted-foreground">
-              Nenhuma pergunta encontrada com os filtros atuais.
-            </CardContent>
-          </Card>
-        ) : null}
       </div>
     </section>
   )
