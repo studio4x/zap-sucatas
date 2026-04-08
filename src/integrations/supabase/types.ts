@@ -326,6 +326,10 @@ export type Database = {
           allow_guest_questions: boolean
           created_at: string
           id: string
+          maintenance_mode: boolean
+          seo_description_default: string | null
+          seo_title_default: string | null
+          site_name: string
           support_email: string | null
           support_phone: string | null
           updated_at: string
@@ -334,6 +338,10 @@ export type Database = {
           allow_guest_questions?: boolean
           created_at?: string
           id?: string
+          maintenance_mode?: boolean
+          seo_description_default?: string | null
+          seo_title_default?: string | null
+          site_name: string
           support_email?: string | null
           support_phone?: string | null
           updated_at?: string
@@ -342,6 +350,10 @@ export type Database = {
           allow_guest_questions?: boolean
           created_at?: string
           id?: string
+          maintenance_mode?: boolean
+          seo_description_default?: string | null
+          seo_title_default?: string | null
+          site_name?: string
           support_email?: string | null
           support_phone?: string | null
           updated_at?: string
