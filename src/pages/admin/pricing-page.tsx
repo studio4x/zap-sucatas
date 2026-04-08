@@ -112,7 +112,7 @@ export function AdminPricingPage() {
   const backfillMutation = useMutation({
     mutationFn: () => runPricingSync('backfill'),
     onSuccess: async (result) => {
-      setFeedback(`Backfill legado concluido com ${result.inserted} snapshots.`)
+      setFeedback(`Backfill historico concluido com ${result.inserted} snapshots.`)
       await invalidatePricing()
     },
   })
@@ -171,8 +171,8 @@ export function AdminPricingPage() {
               Operacao da tabela de precos
             </h1>
             <p className="mt-3 max-w-4xl text-sm leading-6 text-muted-foreground">
-              Gerencie referencias manuais de sucata, snapshots diarios LME, backfill do legado e a
-              sincronizacao com provider publico.
+              Gerencie referencias manuais de sucata, snapshots diarios LME, backfill historico e a
+              sincronizacao com providers publicos.
             </p>
           </div>
 
@@ -188,7 +188,7 @@ export function AdminPricingPage() {
               variant="outline"
             >
               <Upload className="size-4" />
-              {backfillMutation.isPending ? 'Importando...' : 'Backfill legado'}
+              {backfillMutation.isPending ? 'Importando...' : 'Backfill historico'}
             </Button>
           </div>
         </div>

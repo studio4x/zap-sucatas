@@ -183,7 +183,7 @@ export function PricingChart({ className, series }: PricingChartProps) {
 
         <p className="text-sm leading-6 text-muted-foreground">
           O grafico trabalha com uma serie por vez para manter leitura limpa no desktop e no
-          mobile, como na experiencia do plugin legado.
+          mobile, priorizando leitura e comparacao por periodo.
         </p>
       </CardContent>
     </Card>

@@ -19,7 +19,7 @@ type RawSnapshot = {
 
 const WESTMETALL_URL = 'https://www.westmetall.com/en/markdaten.php/en/en/markdaten.php'
 const AWESOME_API_USD_URL = 'https://economia.awesomeapi.com.br/json/last/USD-BRL'
-const LEGACY_ZAPSUCATAS_URL = 'https://zapsucatas.com.br/preco-dos-metais-lme/'
+const AWESOME_API_USD_DAILY_URL = 'https://economia.awesomeapi.com.br/json/daily/USD-BRL/365'
 
 const WESTMETALL_FIELD_MAP = new Map<string, { code: string; name: string }>([
   ['LME_Cu_cash', { code: 'CU', name: 'Cobre' }],
@@ -29,16 +29,6 @@ const WESTMETALL_FIELD_MAP = new Map<string, { code: string; name: string }>([
   ['LME_Sn_cash', { code: 'SN', name: 'Estanho' }],
   ['LME_Ni_cash', { code: 'NI', name: 'Niquel' }],
 ])
-
-const LEGACY_COLUMN_MAP = [
-  { code: 'CU', key: 'cobre', name: 'Cobre' },
-  { code: 'ZN', key: 'zinco', name: 'Zinco' },
-  { code: 'AL', key: 'aluminio', name: 'Aluminio' },
-  { code: 'PB', key: 'chumbo', name: 'Chumbo' },
-  { code: 'SN', key: 'estanho', name: 'Estanho' },
-  { code: 'NI', key: 'niquel', name: 'Niquel' },
-  { code: 'USD', key: 'dolar', name: 'Dolar' },
-] as const
 
 const MONTH_MAP = new Map<string, string>([
   ['january', '01'],
@@ -127,6 +117,16 @@ function dedupeSnapshots(entries: RawSnapshot[]) {
   return Array.from(map.values()).sort((left, right) =>
     left.quoted_at < right.quoted_at ? 1 : left.quoted_at > right.quoted_at ? -1 : 0,
   )
+}
+
+function chunkArray<T>(entries: T[], size: number) {
+  const chunks: T[][] = []
+
+  for (let index = 0; index < entries.length; index += size) {
+    chunks.push(entries.slice(index, index + size))
+  }
+
+  return chunks
 }
 
 async function fetchText(url: string) {
@@ -219,12 +219,60 @@ async function fetchLatestWestmetallSnapshots() {
   return entries
 }
 
+async function fetchWestmetallBackfillSnapshots() {
+  const requests = Array.from(WESTMETALL_FIELD_MAP.entries()).map(async ([field, series]) => {
+    const html = await fetchText(`${WESTMETALL_URL}?action=table&field=${field}`)
+    const rowRegex =
+      /<tr>\s*<td[^>]*>\s*(\d{1,2}\.\s+[A-Za-z]+\s+\d{4})\s*<\/td>\s*<td[^>]*>\s*([^<]+?)\s*<\/td>/gi
+    const seriesEntries: RawSnapshot[] = []
+    let match = rowRegex.exec(html)
+
+    while (match) {
+      const [, providerDate, value] = match
+      const numericValue = parseNumericValue(value)
+
+      if (!Number.isNaN(numericValue)) {
+        const quotedDate = parseWestmetallDate(providerDate)
+
+        seriesEntries.push({
+          currency_code: 'USD',
+          metal_code: series.code,
+          metal_name: series.name,
+          price_value: numericValue,
+          provider_name: 'westmetall',
+          quoted_at: toIsoMidday(quotedDate),
+          source_payload: {
+            field,
+            quoted_date: quotedDate,
+            url: `${WESTMETALL_URL}?action=table&field=${field}`,
+            value: normalizeWhitespace(value),
+          },
+        })
+      }
+
+      match = rowRegex.exec(html)
+    }
+
+    return seriesEntries
+  })
+
+  const seriesEntries = await Promise.all(requests)
+
+  return dedupeSnapshots(seriesEntries.flat())
+}
+
 type AwesomeUsdResponse = {
   USDBRL?: {
     bid?: string
     create_date?: string
     timestamp?: string
   }
+}
+
+type AwesomeUsdDailyEntry = {
+  bid?: string
+  create_date?: string
+  timestamp?: string
 }
 
 async function fetchLatestUsdSnapshot() {
@@ -251,58 +299,33 @@ async function fetchLatestUsdSnapshot() {
   } satisfies RawSnapshot
 }
 
-function parseLegacyBackfill(html: string) {
-  const text = stripHtml(html)
-  const rowRegex =
-    /(\d{2}\/\d{2}\/\d{4})\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)/g
+async function fetchUsdBackfillSnapshots() {
+  const payload = await fetchJson<AwesomeUsdDailyEntry[]>(AWESOME_API_USD_DAILY_URL)
+  const entries = payload
+    .map((entry) => {
+      const priceValue = parseNumericValue(String(entry.bid ?? ''))
+      const quotedDate = entry.create_date ? entry.create_date.slice(0, 10) : null
 
-  const entries: RawSnapshot[] = []
-  let match = rowRegex.exec(text)
-
-  while (match) {
-    const [
-      rawRow,
-      legacyDate,
-      cobre,
-      zinco,
-      aluminio,
-      chumbo,
-      estanho,
-      niquel,
-      dolar,
-    ] = match
-
-    const [day, month, year] = legacyDate.split('/')
-    const quotedDate = `${year}-${month}-${day}`
-    const values = { aluminio, chumbo, cobre, dolar, estanho, niquel, zinco }
-
-    for (const series of LEGACY_COLUMN_MAP) {
-      const numericValue = parseNumericValue(values[series.key])
-
-      if (Number.isNaN(numericValue)) {
-        continue
+      if (Number.isNaN(priceValue) || !quotedDate) {
+        return null
       }
 
-      entries.push({
-        currency_code: series.code === 'USD' ? 'BRL' : 'USD',
-        metal_code: series.code,
-        metal_name: series.name,
-        price_value: numericValue,
-        provider_name: 'legacy_zapsucatas',
-        quoted_at: toIsoMidday(quotedDate),
-        source_payload: {
-          quoted_date: quotedDate,
-          row: rawRow,
-          source: LEGACY_ZAPSUCATAS_URL,
-        },
-      })
-    }
-
-    match = rowRegex.exec(text)
-  }
+      return {
+        currency_code: 'BRL',
+        metal_code: 'USD',
+        metal_name: 'Dolar',
+        price_value: priceValue,
+        provider_name: 'awesomeapi',
+        quoted_at: entry.create_date
+          ? new Date(entry.create_date.replace(' ', 'T') + 'Z').toISOString()
+          : toIsoMidday(quotedDate),
+        source_payload: entry,
+      } satisfies RawSnapshot
+    })
+    .filter((entry): entry is RawSnapshot => entry !== null)
 
   if (entries.length === 0) {
-    throw new Error('Legacy backfill parser did not find any valid pricing rows.')
+    throw new Error('Unable to build USD backfill snapshots from AwesomeAPI.')
   }
 
   return dedupeSnapshots(entries)
@@ -310,8 +333,12 @@ function parseLegacyBackfill(html: string) {
 
 async function resolveSnapshots(mode: SyncMode) {
   if (mode === 'backfill') {
-    const html = await fetchText(LEGACY_ZAPSUCATAS_URL)
-    return parseLegacyBackfill(html)
+    const [metalSnapshots, usdSnapshots] = await Promise.all([
+      fetchWestmetallBackfillSnapshots(),
+      fetchUsdBackfillSnapshots(),
+    ])
+
+    return dedupeSnapshots([...metalSnapshots, ...usdSnapshots])
   }
 
   const [metalSnapshots, usdSnapshot] = await Promise.all([
@@ -350,13 +377,16 @@ Deno.serve(async (request) => {
     const mode = resolveMode(body)
     const entries = await resolveSnapshots(mode)
     const admin = createAdminClient()
+    const chunks = chunkArray(entries, 500)
 
-    const { error: upsertError } = await admin.from('lme_price_snapshots').upsert(entries, {
-      onConflict: 'metal_code,quoted_date,currency_code,provider_name',
-    })
+    for (const chunk of chunks) {
+      const { error: upsertError } = await admin.from('lme_price_snapshots').upsert(chunk, {
+        onConflict: 'metal_code,quoted_date,currency_code,provider_name',
+      })
 
-    if (upsertError) {
-      throw upsertError
+      if (upsertError) {
+        throw upsertError
+      }
     }
 
     await insertIntegrationLog({
