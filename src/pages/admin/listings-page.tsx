@@ -220,7 +220,7 @@ export function AdminListingsPage() {
                     label: 'Detalhe',
                     to: paths.admin.listingDetails(listing.id),
                   },
-                  ...(listing.slug
+                  ...(listing.slug && listing.status === 'approved'
                     ? [
                         {
                           icon: Eye,

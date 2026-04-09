@@ -69,6 +69,34 @@ function ensureSupabase() {
   return supabase
 }
 
+async function unwrapFunctionError(error: unknown) {
+  if (typeof error !== 'object' || error === null || !('context' in error)) {
+    throw error
+  }
+
+  const context = (error as { context?: Response }).context
+
+  if (!context) {
+    throw error
+  }
+
+  try {
+    const payload = (await context.json()) as { error?: string }
+
+    if (payload.error) {
+      throw new Error(payload.error)
+    }
+  } catch (parseError) {
+    if (parseError instanceof Error && parseError.message) {
+      throw parseError
+    }
+
+    throw error
+  }
+
+  throw error
+}
+
 function normalizeAttributeKey(label: string) {
   return label
     .normalize('NFD')
@@ -521,7 +549,7 @@ export async function uploadListingImages(input: {
     throw error
   }
 
-  return (data ?? []).map((row) => toPublicImage(row as ListingImageRow))
+  return sortImages((data ?? []).map((row) => toPublicImage(row as ListingImageRow)))
 }
 
 export async function removeListingImage(image: ListingImage) {
@@ -584,12 +612,23 @@ export async function syncListingCoverImage(listingId: string, preferredImageId?
   }
 }
 
+export async function reorderListingImages(input: {
+  coverImageId?: string | null
+  listingId: string
+  orderedImageIds: string[]
+}) {
+  return invokeListingFunction<
+    { coverImageId?: string | null; listingId: string; orderedImageIds: string[] },
+    { coverImageId: string; listingId: string; orderedImageIds: string[]; success: boolean }
+  >('reorder-listing-images', input)
+}
+
 async function invokeListingFunction<TBody extends object, TResponse>(name: string, body: TBody) {
   const client = ensureSupabase()
   const { data, error } = await client.functions.invoke(name, { body })
 
   if (error) {
-    throw error
+    await unwrapFunctionError(error)
   }
 
   return data as TResponse
@@ -613,6 +652,26 @@ export async function rejectListing(input: { listingId: string; reason: string }
   return invokeListingFunction<{ listingId: string; reason: string }, { status: string; success: boolean }>(
     'reject-listing',
     input,
+  )
+}
+
+export async function pauseListing(listingId: string) {
+  return invokeListingFunction<{ action: 'pause'; listingId: string }, { status: string; success: boolean }>(
+    'manage-listing-lifecycle',
+    {
+      action: 'pause',
+      listingId,
+    },
+  )
+}
+
+export async function archiveListing(listingId: string) {
+  return invokeListingFunction<{ action: 'archive'; listingId: string }, { status: string; success: boolean }>(
+    'manage-listing-lifecycle',
+    {
+      action: 'archive',
+      listingId,
+    },
   )
 }
 

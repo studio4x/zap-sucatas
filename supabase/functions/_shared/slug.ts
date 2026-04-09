@@ -1,6 +1,6 @@
 import { createAdminClient } from './supabase.ts'
 
-function slugify(value: string) {
+export function slugifyValue(value: string) {
   return value
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -9,19 +9,25 @@ function slugify(value: string) {
     .replace(/(^-|-$)/g, '')
 }
 
-export async function generateUniqueListingSlug(title: string, listingId: string) {
+export async function generateUniqueSlug(input: {
+  currentId?: string | null
+  fallback: string
+  source: string
+  table: 'listing_categories' | 'listing_materials' | 'listings'
+}) {
   const admin = createAdminClient()
-  const baseSlug = slugify(title) || 'anuncio'
+  const baseSlug = slugifyValue(input.source) || input.fallback
   let candidate = baseSlug
   let counter = 0
 
   while (true) {
-    const { data, error } = await admin
-      .from('listings')
-      .select('id')
-      .eq('slug', candidate)
-      .neq('id', listingId)
-      .limit(1)
+    let query = admin.from(input.table).select('id').eq('slug', candidate).limit(1)
+
+    if (input.currentId) {
+      query = query.neq('id', input.currentId)
+    }
+
+    const { data, error } = await query
 
     if (error) {
       throw error
@@ -34,4 +40,13 @@ export async function generateUniqueListingSlug(title: string, listingId: string
     counter += 1
     candidate = `${baseSlug}-${counter}`
   }
+}
+
+export async function generateUniqueListingSlug(title: string, listingId: string) {
+  return generateUniqueSlug({
+    currentId: listingId,
+    fallback: 'anuncio',
+    source: title,
+    table: 'listings',
+  })
 }

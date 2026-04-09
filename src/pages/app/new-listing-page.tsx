@@ -6,8 +6,8 @@ import { ListingEditor, type ListingEditorSubmitPayload } from '@/components/lis
 import {
   createListingDraft,
   fetchListingReferences,
+  reorderListingImages,
   submitListingForReview,
-  syncListingCoverImage,
   uploadListingImages,
 } from '@/domains/listings/api'
 import { createEmptyListingFormValues } from '@/domains/listings/utils'
@@ -34,15 +34,36 @@ export function AppNewListingPage() {
         values: payload.values,
       })
 
-      if (payload.newFiles.length > 0) {
-        await uploadListingImages({
+      let orderedImageIds: string[] = []
+      let coverImageId: string | null = null
+
+      if (payload.newUploads.length > 0) {
+        const uploadedImages = await uploadListingImages({
           authUserId: user.id,
-          files: payload.newFiles,
+          files: payload.newUploads.map((upload) => upload.file),
           listingId,
         })
+
+        const uploadedImageIdsByKey = new Map(
+          payload.newUploads.map((upload, index) => [upload.key, uploadedImages[index]?.id ?? null]),
+        )
+
+        orderedImageIds = payload.imageOrderKeys
+          .map((key) => uploadedImageIdsByKey.get(key) ?? null)
+          .filter((value): value is string => Boolean(value))
+
+        coverImageId = payload.coverImageKey
+          ? uploadedImageIdsByKey.get(payload.coverImageKey) ?? null
+          : null
       }
 
-      await syncListingCoverImage(listingId, payload.coverImageId)
+      if (orderedImageIds.length > 0) {
+        await reorderListingImages({
+          coverImageId,
+          listingId,
+          orderedImageIds,
+        })
+      }
 
       if (payload.submitAfterSave) {
         await submitListingForReview(listingId)

@@ -6,6 +6,10 @@ import type {
   ListingMaterial,
   PublicListingCategory,
 } from '@/domains/categories/types'
+import type {
+  AdminCategoryFormValues,
+  AdminMaterialFormValues,
+} from '@/domains/categories/schemas'
 
 type CategoryRow = {
   created_at: string
@@ -39,6 +43,34 @@ function ensureSupabase() {
   }
 
   return supabase
+}
+
+async function unwrapFunctionError(error: unknown) {
+  if (typeof error !== 'object' || error === null || !('context' in error)) {
+    throw error
+  }
+
+  const context = (error as { context?: Response }).context
+
+  if (!context) {
+    throw error
+  }
+
+  try {
+    const payload = (await context.json()) as { error?: string }
+
+    if (payload.error) {
+      throw new Error(payload.error)
+    }
+  } catch (parseError) {
+    if (parseError instanceof Error && parseError.message) {
+      throw parseError
+    }
+
+    throw error
+  }
+
+  throw error
 }
 
 function mapCategory(row: CategoryRow): ListingCategory {
@@ -215,4 +247,125 @@ export async function fetchPublicCategoryBySlug(slug: string) {
   }
 
   return category
+}
+
+export async function createAdminCategory(values: AdminCategoryFormValues) {
+  const { data, error } = await ensureSupabase().functions.invoke('manage-listing-category', {
+    body: {
+      description: values.description,
+      mode: 'create',
+      name: values.name,
+      slug: values.slug,
+    },
+  })
+
+  if (error) {
+    await unwrapFunctionError(error)
+  }
+
+  return data as { categoryId: string; success: boolean }
+}
+
+export async function updateAdminCategory(input: {
+  categoryId: string
+  values: AdminCategoryFormValues
+}) {
+  const { data, error } = await ensureSupabase().functions.invoke('manage-listing-category', {
+    body: {
+      description: input.values.description,
+      id: input.categoryId,
+      isActive: input.values.isActive,
+      mode: 'update',
+      name: input.values.name,
+      slug: input.values.slug,
+    },
+  })
+
+  if (error) {
+    await unwrapFunctionError(error)
+  }
+
+  return data as { categoryId: string; success: boolean }
+}
+
+export async function deleteAdminCategory(categoryId: string) {
+  const { data, error } = await ensureSupabase().functions.invoke('manage-listing-category', {
+    body: {
+      id: categoryId,
+      mode: 'delete',
+    },
+  })
+
+  if (error) {
+    await unwrapFunctionError(error)
+  }
+
+  return data as { categoryId: string; success: boolean }
+}
+
+export async function reorderAdminCategories(orderedIds: string[]) {
+  const { data, error } = await ensureSupabase().functions.invoke('manage-listing-category', {
+    body: {
+      mode: 'reorder',
+      orderedIds,
+    },
+  })
+
+  if (error) {
+    await unwrapFunctionError(error)
+  }
+
+  return data as { success: boolean }
+}
+
+export async function createAdminMaterial(values: AdminMaterialFormValues) {
+  const { data, error } = await ensureSupabase().functions.invoke('manage-listing-material', {
+    body: {
+      mode: 'create',
+      name: values.name,
+      slug: values.slug,
+    },
+  })
+
+  if (error) {
+    await unwrapFunctionError(error)
+  }
+
+  return data as { materialId: string; success: boolean }
+}
+
+export async function updateAdminMaterial(input: {
+  materialId: string
+  values: AdminMaterialFormValues
+}) {
+  const { data, error } = await ensureSupabase().functions.invoke('manage-listing-material', {
+    body: {
+      id: input.materialId,
+      isActive: input.values.isActive,
+      mode: 'update',
+      name: input.values.name,
+      slug: input.values.slug,
+    },
+  })
+
+  if (error) {
+    await unwrapFunctionError(error)
+  }
+
+  return data as { materialId: string; success: boolean }
+}
+
+export async function deleteAdminMaterial(materialId: string) {
+  const { data, error } = await ensureSupabase().functions.invoke('manage-listing-material', {
+    body: {
+      id: materialId,
+      mode: 'delete',
+    },
+  })
+
+  if (error) {
+    await unwrapFunctionError(error)
+  }
+
+  return data as { materialId: string; success: boolean }
 }

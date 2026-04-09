@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ImagePlus, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, ImagePlus, Star, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { ChangeEvent, ReactNode } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
@@ -23,9 +23,15 @@ import type {
 } from '@/domains/listings/types'
 import { cn } from '@/lib/utils'
 
+export type ListingEditorPendingUpload = {
+  file: File
+  key: string
+}
+
 export type ListingEditorSubmitPayload = {
-  coverImageId: string | null
-  newFiles: File[]
+  coverImageKey: string | null
+  imageOrderKeys: string[]
+  newUploads: ListingEditorPendingUpload[]
   removedImages: ListingImage[]
   submitAfterSave: boolean
   values: ListingFormValues
@@ -45,8 +51,31 @@ type ListingEditorProps = {
 }
 
 type PendingFile = {
+  clientId: string
   file: File
   previewUrl: string
+}
+
+type OrderedImageItem =
+  | {
+      id: string
+      image: ListingImage
+      key: string
+      kind: 'existing'
+    }
+  | {
+      id: string
+      item: PendingFile
+      key: string
+      kind: 'pending'
+    }
+
+function buildExistingImageKey(imageId: string) {
+  return `existing:${imageId}`
+}
+
+function buildPendingImageKey(clientId: string) {
+  return `pending:${clientId}`
 }
 
 function FormField({
@@ -64,6 +93,14 @@ function FormField({
   )
 }
 
+function arraysAreEqual(left: string[], right: string[]) {
+  if (left.length !== right.length) {
+    return false
+  }
+
+  return left.every((value, index) => value === right[index])
+}
+
 export function ListingEditor({
   cancelTo,
   categories,
@@ -78,8 +115,19 @@ export function ListingEditor({
 }: ListingEditorProps) {
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
   const [removedImageIds, setRemovedImageIds] = useState<string[]>([])
-  const [coverImageId, setCoverImageId] = useState<string | null>(existingImages.find((image) => image.isCover)?.id ?? null)
-  const [feedback, setFeedback] = useState<string | null>(null)
+  const [imageOrderKeys, setImageOrderKeys] = useState<string[]>(
+    existingImages.map((image) => buildExistingImageKey(image.id)),
+  )
+  const [coverImageKey, setCoverImageKey] = useState<string | null>(
+    existingImages.find((image) => image.isCover)
+      ? buildExistingImageKey(existingImages.find((image) => image.isCover)!.id)
+      : existingImages[0]
+        ? buildExistingImageKey(existingImages[0].id)
+        : null,
+  )
+  const [feedback, setFeedback] = useState<{ message: string; tone: 'error' | 'success' } | null>(
+    null,
+  )
   const [submitAfterSave, setSubmitAfterSave] = useState(false)
 
   const form = useForm<ListingFormSchemaValues>({
@@ -92,32 +140,122 @@ export function ListingEditor({
     name: 'attributes',
   })
 
+  const activeExistingImages = useMemo(
+    () => existingImages.filter((image) => !removedImageIds.includes(image.id)),
+    [existingImages, removedImageIds],
+  )
+  const removedExistingImages = useMemo(
+    () => existingImages.filter((image) => removedImageIds.includes(image.id)),
+    [existingImages, removedImageIds],
+  )
+  const pendingFileMap = useMemo(
+    () => new Map(pendingFiles.map((item) => [item.clientId, item])),
+    [pendingFiles],
+  )
+
+  const orderedImageItems = useMemo<OrderedImageItem[]>(() => {
+    const existingMap = new Map(activeExistingImages.map((image) => [image.id, image]))
+
+    return imageOrderKeys
+      .map((key) => {
+        if (key.startsWith('existing:')) {
+          const imageId = key.slice('existing:'.length)
+          const image = existingMap.get(imageId)
+
+          if (!image) {
+            return null
+          }
+
+          return {
+            id: image.id,
+            image,
+            key,
+            kind: 'existing',
+          } satisfies OrderedImageItem
+        }
+
+        if (key.startsWith('pending:')) {
+          const clientId = key.slice('pending:'.length)
+          const item = pendingFileMap.get(clientId)
+
+          if (!item) {
+            return null
+          }
+
+          return {
+            id: item.clientId,
+            item,
+            key,
+            kind: 'pending',
+          } satisfies OrderedImageItem
+        }
+
+        return null
+      })
+      .filter((item): item is OrderedImageItem => item !== null)
+  }, [activeExistingImages, imageOrderKeys, pendingFileMap])
+
   useEffect(() => {
     form.reset(defaultValues)
     setPendingFiles([])
     setRemovedImageIds([])
-    setCoverImageId(existingImages.find((image) => image.isCover)?.id ?? null)
+    const nextKeys = existingImages.map((image) => buildExistingImageKey(image.id))
+    setImageOrderKeys(nextKeys)
+    const nextCoverKey = existingImages.find((image) => image.isCover)
+      ? buildExistingImageKey(existingImages.find((image) => image.isCover)!.id)
+      : nextKeys[0] ?? null
+    setCoverImageKey(nextCoverKey)
     setFeedback(null)
   }, [defaultValues, existingImages, form])
 
   useEffect(() => {
     return () => {
-      pendingFiles.forEach((file) => URL.revokeObjectURL(file.previewUrl))
+      pendingFiles.forEach((item) => URL.revokeObjectURL(item.previewUrl))
     }
   }, [pendingFiles])
 
-  const activeExistingImages = useMemo(
-    () => existingImages.filter((image) => !removedImageIds.includes(image.id)),
-    [existingImages, removedImageIds],
-  )
+  useEffect(() => {
+    const availableKeys = [
+      ...activeExistingImages.map((image) => buildExistingImageKey(image.id)),
+      ...pendingFiles.map((item) => buildPendingImageKey(item.clientId)),
+    ]
+    const availableSet = new Set(availableKeys)
+
+    setImageOrderKeys((current) => {
+      const next = current.filter((key) => availableSet.has(key))
+
+      availableKeys.forEach((key) => {
+        if (!next.includes(key)) {
+          next.push(key)
+        }
+      })
+
+      return arraysAreEqual(current, next) ? current : next
+    })
+
+    setCoverImageKey((current) => {
+      if (current && availableSet.has(current)) {
+        return current
+      }
+
+      return availableKeys[0] ?? null
+    })
+  }, [activeExistingImages, pendingFiles])
 
   async function handleSubmit(values: ListingFormSchemaValues, shouldSubmitAfterSave: boolean) {
     try {
       setFeedback(null)
       setSubmitAfterSave(shouldSubmitAfterSave)
+
       await onSubmit({
-        coverImageId,
-        newFiles: pendingFiles.map((file) => file.file),
+        coverImageKey,
+        imageOrderKeys,
+        newUploads: orderedImageItems
+          .filter((item) => item.kind === 'pending')
+          .map((item) => ({
+            file: item.item.file,
+            key: item.key,
+          })),
         removedImages: existingImages.filter((image) => removedImageIds.includes(image.id)),
         submitAfterSave: shouldSubmitAfterSave,
         values: {
@@ -126,15 +264,22 @@ export function ListingEditor({
         },
       })
 
-      pendingFiles.forEach((file) => URL.revokeObjectURL(file.previewUrl))
+      pendingFiles.forEach((item) => URL.revokeObjectURL(item.previewUrl))
       setPendingFiles([])
       setRemovedImageIds([])
       setSubmitAfterSave(false)
+
       if (!shouldSubmitAfterSave) {
-        setFeedback('Rascunho salvo com sucesso.')
+        setFeedback({
+          message: 'Rascunho salvo com sucesso.',
+          tone: 'success',
+        })
       }
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : 'Falha ao salvar o anúncio.')
+      setFeedback({
+        message: error instanceof Error ? error.message : 'Falha ao salvar o anúncio.',
+        tone: 'error',
+      })
     }
   }
 
@@ -148,6 +293,7 @@ export function ListingEditor({
     setPendingFiles((current) => [
       ...current,
       ...files.map((file) => ({
+        clientId: crypto.randomUUID(),
         file,
         previewUrl: URL.createObjectURL(file),
       })),
@@ -156,32 +302,49 @@ export function ListingEditor({
     event.target.value = ''
   }
 
-  function removePendingFile(index: number) {
+  function removePendingFile(clientId: string) {
     setPendingFiles((current) => {
-      const next = [...current]
-      const removed = next.splice(index, 1)[0]
+      const target = current.find((item) => item.clientId === clientId)
 
-      if (removed) {
-        URL.revokeObjectURL(removed.previewUrl)
+      if (target) {
+        URL.revokeObjectURL(target.previewUrl)
       }
 
+      return current.filter((item) => item.clientId !== clientId)
+    })
+  }
+
+  function removeExistingImage(imageId: string) {
+    setRemovedImageIds((current) => (current.includes(imageId) ? current : [...current, imageId]))
+  }
+
+  function restoreExistingImage(imageId: string) {
+    setRemovedImageIds((current) => current.filter((id) => id !== imageId))
+  }
+
+  function moveImage(key: string, direction: 'down' | 'up') {
+    setImageOrderKeys((current) => {
+      const index = current.findIndex((item) => item === key)
+
+      if (index === -1) {
+        return current
+      }
+
+      const nextIndex = direction === 'up' ? index - 1 : index + 1
+
+      if (nextIndex < 0 || nextIndex >= current.length) {
+        return current
+      }
+
+      const next = [...current]
+      const currentValue = next[index]
+      next[index] = next[nextIndex]
+      next[nextIndex] = currentValue
       return next
     })
   }
 
-  function toggleRemoveExistingImage(imageId: string) {
-    setRemovedImageIds((current) => {
-      if (current.includes(imageId)) {
-        return current.filter((id) => id !== imageId)
-      }
-
-      if (coverImageId === imageId) {
-        setCoverImageId(null)
-      }
-
-      return [...current, imageId]
-    })
-  }
+  const canSubmitForReview = orderedImageItems.length > 0
 
   return (
     <form className="space-y-6" onSubmit={form.handleSubmit((values) => handleSubmit(values, false))}>
@@ -194,14 +357,22 @@ export function ListingEditor({
             </Button>
           </div>
         }
-        description="Preencha os dados do lote, revise fotos e escolha se quer apenas salvar ou enviar para moderação."
+        description="Preencha os dados do lote, organize as imagens e escolha se quer apenas salvar ou enviar para moderacao."
         title={mode === 'create' ? 'Criar anúncio' : 'Editar anúncio'}
       />
 
       {rejectionReason ? (
         <DashboardAlertCard
           description={rejectionReason}
-          title="Motivo da rejeicao anterior"
+          title="Motivo da rejeição anterior"
+          tone="warning"
+        />
+      ) : null}
+
+      {status === 'archived' ? (
+        <DashboardAlertCard
+          description="Anuncios arquivados nao podem ser editados novamente nesta etapa do MVP."
+          title="Anuncio arquivado"
           tone="warning"
         />
       ) : null}
@@ -295,10 +466,13 @@ export function ListingEditor({
               </FormField>
 
               <FormField label="Condicao">
-                <Input {...form.register('conditionType')} placeholder="Ex.: usado, em lote, sucata prensada" />
+                <Input
+                  {...form.register('conditionType')}
+                  placeholder="Ex.: usado, em lote, sucata prensada"
+                />
               </FormField>
 
-              <FormField label="Faixa de preco">
+              <FormField label="Faixa de preço">
                 <Input {...form.register('priceLabel')} placeholder="Ex.: sob consulta, a combinar" />
               </FormField>
             </div>
@@ -325,7 +499,10 @@ export function ListingEditor({
               ) : null}
 
               {attributesFieldArray.fields.map((field, index) => (
-                <div key={field.id} className="grid gap-3 rounded-3xl border border-border/70 p-4 md:grid-cols-[1fr_1fr_auto]">
+                <div
+                  key={field.id}
+                  className="grid gap-3 rounded-3xl border border-border/70 p-4 md:grid-cols-[1fr_1fr_auto]"
+                >
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Rotulo</label>
                     <Input {...form.register(`attributes.${index}.attributeLabel`)} />
@@ -364,73 +541,142 @@ export function ListingEditor({
 
         <div className="space-y-6">
           <DashboardFormSection
-            description="O anúncio precisa de ao menos uma imagem para ser enviado para revisão."
+            description="Organize a ordem real da galeria. Uma capa forte melhora a leitura no catálogo."
             title="Imagens"
           >
             <div className="space-y-4">
-              <label
-                className={cn(
-                  'flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border/70 bg-muted/40 px-5 py-8 text-center transition hover:border-primary/40 hover:bg-primary/5',
-                )}
-              >
+              <label className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border/70 bg-muted/40 px-5 py-8 text-center transition hover:border-primary/40 hover:bg-primary/5">
                 <ImagePlus className="size-6 text-primary" />
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-foreground">Selecionar imagens</p>
                   <p className="text-xs text-muted-foreground">
-                    JPG, PNG ou WEBP. Voce pode escolher varias imagens de uma vez.
+                    JPG, PNG ou WEBP. Você pode escolher várias imagens de uma vez.
                   </p>
                 </div>
                 <input accept="image/*" className="hidden" multiple onChange={handleFileSelection} type="file" />
               </label>
 
-              {activeExistingImages.length > 0 ? (
-                <div className="space-y-3">
-                  <p className="text-sm font-medium text-foreground">Imagens atuais</p>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {activeExistingImages.map((image) => (
-                      <div key={image.id} className="overflow-hidden rounded-2xl border border-border/70">
-                        <div className="aspect-square bg-muted">
-                          <img alt={image.altText ?? 'Imagem do anúncio'} className="h-full w-full object-cover" src={image.publicUrl} />
-                        </div>
-                        <div className="space-y-3 p-4">
-                          <div className="flex flex-wrap gap-2">
-                            <Button
-                              onClick={() => setCoverImageId(image.id)}
-                              size="sm"
-                              type="button"
-                              variant={coverImageId === image.id ? 'default' : 'outline'}
-                            >
-                              {coverImageId === image.id ? 'Capa selecionada' : 'Definir capa'}
-                            </Button>
-                            <Button
-                              onClick={() => toggleRemoveExistingImage(image.id)}
-                              size="sm"
-                              type="button"
-                              variant="outline"
-                            >
-                              Remover
-                            </Button>
+              {orderedImageItems.length === 0 ? (
+                <DashboardEmptyState
+                  className="px-4 py-8"
+                  description="Adicione imagens e organize a ordem antes de enviar para revisão."
+                  title="Nenhuma imagem pronta"
+                />
+              ) : (
+                <div className="grid gap-3">
+                  {orderedImageItems.map((item, index) => {
+                    const isCover = coverImageKey === item.key
+                    const isFirst = index === 0
+                    const isLast = index === orderedImageItems.length - 1
+
+                    return (
+                      <div
+                        key={item.key}
+                        className={cn(
+                          'overflow-hidden rounded-2xl border border-border/70 bg-card',
+                          isCover ? 'ring-2 ring-primary/35' : undefined,
+                        )}
+                      >
+                        <div className="grid gap-4 p-4 sm:grid-cols-[120px_minmax(0,1fr)]">
+                          <div className="aspect-square overflow-hidden rounded-2xl bg-muted">
+                            <img
+                              alt={
+                                item.kind === 'existing'
+                                  ? item.image.altText ?? 'Imagem do anúncio'
+                                  : item.item.file.name
+                              }
+                              className="h-full w-full object-cover"
+                              src={item.kind === 'existing' ? item.image.publicUrl : item.item.previewUrl}
+                            />
+                          </div>
+
+                          <div className="space-y-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
+                                {item.kind === 'existing' ? 'Imagem atual' : 'Novo upload'}
+                              </span>
+                              {isCover ? (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                                  <Star className="size-3.5" />
+                                  Capa
+                                </span>
+                              ) : null}
+                            </div>
+
+                            <p className="text-sm font-medium text-foreground">
+                              {item.kind === 'existing'
+                                ? `Imagem ${index + 1}`
+                                : item.item.file.name}
+                            </p>
+
+                            <div className="flex flex-wrap gap-2">
+                              <Button
+                                disabled={isFirst}
+                                onClick={() => moveImage(item.key, 'up')}
+                                size="sm"
+                                type="button"
+                                variant="outline"
+                              >
+                                <ArrowUp className="size-4" />
+                                Subir
+                              </Button>
+                              <Button
+                                disabled={isLast}
+                                onClick={() => moveImage(item.key, 'down')}
+                                size="sm"
+                                type="button"
+                                variant="outline"
+                              >
+                                <ArrowDown className="size-4" />
+                                Descer
+                              </Button>
+                              <Button
+                                onClick={() => setCoverImageKey(item.key)}
+                                size="sm"
+                                type="button"
+                                variant={isCover ? 'default' : 'outline'}
+                              >
+                                {isCover ? 'Capa selecionada' : 'Definir capa'}
+                              </Button>
+                              <Button
+                                onClick={() =>
+                                  item.kind === 'existing'
+                                    ? removeExistingImage(item.image.id)
+                                    : removePendingFile(item.item.clientId)
+                                }
+                                size="sm"
+                                type="button"
+                                variant="outline"
+                              >
+                                Remover
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    )
+                  })}
                 </div>
-              ) : null}
+              )}
 
-              {pendingFiles.length > 0 ? (
-                <div className="space-y-3">
-                  <p className="text-sm font-medium text-foreground">Novas imagens para upload</p>
+              {removedExistingImages.length > 0 ? (
+                <div className="space-y-3 rounded-2xl border border-border/70 bg-muted/20 p-4">
+                  <p className="text-sm font-medium text-foreground">
+                    Imagens marcadas para remocao
+                  </p>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    {pendingFiles.map((item, index) => (
-                      <div key={`${item.file.name}-${index}`} className="overflow-hidden rounded-2xl border border-border/70">
+                    {removedExistingImages.map((image) => (
+                      <div key={image.id} className="overflow-hidden rounded-2xl border border-border/70 bg-background">
                         <div className="aspect-square bg-muted">
-                          <img alt={item.file.name} className="h-full w-full object-cover" src={item.previewUrl} />
+                          <img
+                            alt={image.altText ?? 'Imagem removida do anúncio'}
+                            className="h-full w-full object-cover opacity-70"
+                            src={image.publicUrl}
+                          />
                         </div>
-                        <div className="space-y-2 p-4">
-                          <p className="truncate text-sm font-medium text-foreground">{item.file.name}</p>
-                          <Button onClick={() => removePendingFile(index)} size="sm" type="button" variant="outline">
-                            Remover da fila
+                        <div className="p-4">
+                          <Button onClick={() => restoreExistingImage(image.id)} size="sm" type="button" variant="outline">
+                            Desfazer remocao
                           </Button>
                         </div>
                       </div>
@@ -442,7 +688,11 @@ export function ListingEditor({
           </DashboardFormSection>
 
           {feedback ? (
-            <DashboardAlertCard description={feedback} title="Ajuste necessario" tone="error" />
+            <DashboardAlertCard
+              description={feedback.message}
+              title={feedback.tone === 'success' ? 'Rascunho salvo' : 'Ajuste necessario'}
+              tone={feedback.tone}
+            />
           ) : null}
 
           <DashboardFormSection
@@ -451,7 +701,7 @@ export function ListingEditor({
           >
             <div className="space-y-3">
               <Button
-                disabled={isSubmitting}
+                disabled={isSubmitting || status === 'archived'}
                 onClick={() => void form.handleSubmit((values) => handleSubmit(values, false))()}
                 type="button"
                 variant="outline"
@@ -459,13 +709,13 @@ export function ListingEditor({
                 {isSubmitting && !submitAfterSave ? 'Salvando...' : 'Salvar rascunho'}
               </Button>
               <Button
-                disabled={isSubmitting}
+                disabled={isSubmitting || !canSubmitForReview || status === 'archived'}
                 onClick={() => void form.handleSubmit((values) => handleSubmit(values, true))()}
                 type="button"
               >
                 {isSubmitting && submitAfterSave ? 'Enviando...' : 'Salvar e enviar para revisão'}
               </Button>
-              {activeExistingImages.length === 0 && pendingFiles.length === 0 ? (
+              {!canSubmitForReview ? (
                 <DashboardEmptyState
                   className="px-4 py-8"
                   description="Adicione fotos do lote antes de enviar para revisão."

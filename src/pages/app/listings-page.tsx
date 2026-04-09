@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { Eye, FilePlus2, SendHorizontal } from 'lucide-react'
+import { Archive, Eye, FilePlus2, PauseCircle, SendHorizontal } from 'lucide-react'
 import { paths } from '@/app/paths'
 import { DashboardActionCard } from '@/components/dashboard/dashboard-action-card'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
@@ -14,18 +14,28 @@ import { ListingStatusBadge } from '@/components/listings/listing-status-badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { fetchUserListings, submitListingForReview } from '@/domains/listings/api'
+import {
+  archiveListing,
+  fetchUserListings,
+  pauseListing,
+  submitListingForReview,
+} from '@/domains/listings/api'
 import { formatListingDate, listingStatusFilterOptions } from '@/domains/listings/utils'
 import { useAuth } from '@/hooks/use-auth'
 
-type AppListingsStatusFilter =
-  (typeof listingStatusFilterOptions)[number]['value']
+type AppListingsStatusFilter = (typeof listingStatusFilterOptions)[number]['value']
+
+type FeedbackState = {
+  message: string
+  tone: 'error' | 'success' | 'warning'
+}
 
 export function AppListingsPage() {
   const queryClient = useQueryClient()
   const { user } = useAuth()
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<AppListingsStatusFilter>('all')
+  const [feedback, setFeedback] = useState<FeedbackState | null>(null)
 
   const listingsQuery = useQuery({
     queryKey: ['listings', 'owner', user?.profileId],
@@ -33,10 +43,62 @@ export function AppListingsPage() {
     enabled: Boolean(user?.profileId),
   })
 
+  async function invalidateListings() {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['listings', 'owner', user?.profileId] }),
+      queryClient.invalidateQueries({ queryKey: ['listings', 'admin'] }),
+      queryClient.invalidateQueries({ queryKey: ['listings', 'public'] }),
+    ])
+  }
+
   const submitMutation = useMutation({
     mutationFn: submitListingForReview,
+    onError: (error) => {
+      setFeedback({
+        message: error instanceof Error ? error.message : 'Não foi possível enviar para revisão.',
+        tone: 'error',
+      })
+    },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['listings', 'owner', user?.profileId] })
+      setFeedback({
+        message: 'Anúncio enviado para revisão com sucesso.',
+        tone: 'success',
+      })
+      await invalidateListings()
+    },
+  })
+
+  const pauseMutation = useMutation({
+    mutationFn: pauseListing,
+    onError: (error) => {
+      setFeedback({
+        message: error instanceof Error ? error.message : 'Não foi possível pausar o anúncio.',
+        tone: 'error',
+      })
+    },
+    onSuccess: async () => {
+      setFeedback({
+        message: 'Anúncio pausado com sucesso.',
+        tone: 'success',
+      })
+      await invalidateListings()
+    },
+  })
+
+  const archiveMutation = useMutation({
+    mutationFn: archiveListing,
+    onError: (error) => {
+      setFeedback({
+        message: error instanceof Error ? error.message : 'Não foi possível arquivar o anúncio.',
+        tone: 'error',
+      })
+    },
+    onSuccess: async () => {
+      setFeedback({
+        message: 'Anúncio arquivado com sucesso.',
+        tone: 'warning',
+      })
+      await invalidateListings()
     },
   })
 
@@ -57,9 +119,9 @@ export function AppListingsPage() {
   const stats = useMemo(
     () => ({
       approved: listings.filter((listing) => listing.status === 'approved').length,
+      archived: listings.filter((listing) => listing.status === 'archived').length,
       drafts: listings.filter((listing) => listing.status === 'draft').length,
       pending: listings.filter((listing) => listing.status === 'pending_review').length,
-      rejected: listings.filter((listing) => listing.status === 'rejected').length,
       total: listings.length,
     }),
     [listings],
@@ -68,6 +130,8 @@ export function AppListingsPage() {
   const requiresAttention = listings.find(
     (listing) => listing.status === 'rejected' || listing.status === 'draft',
   )
+  const isBusy =
+    submitMutation.isPending || pauseMutation.isPending || archiveMutation.isPending
 
   return (
     <section className="space-y-6">
@@ -80,7 +144,7 @@ export function AppListingsPage() {
             </Link>
           </Button>
         }
-        description="Gerencie seus anúncios em um único lugar, acompanhe os status e envie itens prontos para revisão."
+        description="Gerencie seus anúncios em um único lugar, acompanhe os status e controle quando pausar ou arquivar itens."
         title="Meus anúncios"
       />
 
@@ -105,6 +169,20 @@ export function AppListingsPage() {
         />
       ) : null}
 
+      {feedback ? (
+        <DashboardAlertCard
+          description={feedback.message}
+          title={
+            feedback.tone === 'error'
+              ? 'Operação não concluída'
+              : feedback.tone === 'warning'
+                ? 'Anúncio arquivado'
+                : 'Operação concluída'
+          }
+          tone={feedback.tone}
+        />
+      ) : null}
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <DashboardStatCard label="Total" value={stats.total} />
         <DashboardStatCard label="Rascunhos" value={stats.drafts} />
@@ -119,9 +197,9 @@ export function AppListingsPage() {
           value={stats.approved}
         />
         <DashboardStatCard
-          label="Rejeitados"
-          tone={stats.rejected > 0 ? 'warning' : 'default'}
-          value={stats.rejected}
+          label="Arquivados"
+          tone={stats.archived > 0 ? 'warning' : 'default'}
+          value={stats.archived}
         />
       </div>
 
@@ -193,9 +271,7 @@ export function AppListingsPage() {
               cell: (listing) => (
                 <div className="space-y-1">
                   <p className="font-medium text-foreground">{listing.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {listing.summary || listing.description}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{listing.summary || listing.description}</p>
                 </div>
               ),
             },
@@ -218,37 +294,85 @@ export function AppListingsPage() {
             },
             {
               header: 'Ações',
-              className: 'w-[260px] text-right',
+              className: 'w-[360px] text-right',
               cell: (listing) => {
                 const canSubmit =
                   listing.status === 'draft' ||
                   listing.status === 'rejected' ||
                   listing.status === 'paused'
+                const canEdit = listing.status !== 'archived'
+                const canPause = listing.status === 'approved'
+                const canArchive = listing.status !== 'archived'
 
                 return (
                   <div className="flex justify-end gap-2">
-                    <Button asChild size="sm" type="button" variant="outline">
-                      <Link to={paths.app.editListing(listing.id)}>Editar</Link>
-                    </Button>
+                    {canEdit ? (
+                      <Button asChild size="sm" type="button" variant="outline">
+                        <Link to={paths.app.editListing(listing.id)}>Editar</Link>
+                      </Button>
+                    ) : null}
 
-                    {listing.slug ? (
+                    {listing.slug && listing.status === 'approved' ? (
                       <Button asChild size="sm" type="button" variant="ghost">
                         <Link to={paths.public.listingDetails(listing.slug)}>
                           <Eye className="size-4" />
-                          Publico
+                          Público
                         </Link>
                       </Button>
                     ) : null}
 
                     {canSubmit ? (
                       <Button
-                        disabled={submitMutation.isPending}
-                        onClick={() => submitMutation.mutate(listing.id)}
+                        disabled={isBusy}
+                        onClick={() => {
+                          setFeedback(null)
+                          submitMutation.mutate(listing.id)
+                        }}
                         size="sm"
                         type="button"
                       >
                         <SendHorizontal className="size-4" />
                         {submitMutation.isPending ? 'Enviando...' : 'Revisão'}
+                      </Button>
+                    ) : null}
+
+                    {canPause ? (
+                      <Button
+                        disabled={isBusy}
+                        onClick={() => {
+                          setFeedback(null)
+                          pauseMutation.mutate(listing.id)
+                        }}
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                      >
+                        <PauseCircle className="size-4" />
+                        {pauseMutation.isPending ? 'Pausando...' : 'Pausar'}
+                      </Button>
+                    ) : null}
+
+                    {canArchive ? (
+                      <Button
+                        disabled={isBusy}
+                        onClick={() => {
+                          const confirmed = window.confirm(
+                            `Arquivar o anúncio "${listing.title}"? Ele sairá da operação pública e continuará apenas no histórico interno.`,
+                          )
+
+                          if (!confirmed) {
+                            return
+                          }
+
+                          setFeedback(null)
+                          archiveMutation.mutate(listing.id)
+                        }}
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                      >
+                        <Archive className="size-4" />
+                        {archiveMutation.isPending ? 'Arquivando...' : 'Arquivar'}
                       </Button>
                     ) : null}
                   </div>
@@ -261,7 +385,7 @@ export function AppListingsPage() {
           emptyDescription="Nenhum anúncio encontrado."
           emptyTitle="Sem anúncios"
           getRowKey={(listing) => listing.id}
-          minWidth="min-w-[940px]"
+          minWidth="min-w-[1020px]"
           title="Lista de anúncios"
         />
       ) : null}

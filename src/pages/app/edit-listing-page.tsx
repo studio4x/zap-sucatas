@@ -7,8 +7,8 @@ import {
   fetchListingDetailsForOwner,
   fetchListingReferences,
   removeListingImage,
+  reorderListingImages,
   submitListingForReview,
-  syncListingCoverImage,
   updateListingDraft,
   uploadListingImages,
 } from '@/domains/listings/api'
@@ -47,15 +47,40 @@ export function AppEditListingPage() {
         await removeListingImage(image)
       }
 
-      if (payload.newFiles.length > 0) {
-        await uploadListingImages({
-          authUserId: user.id,
-          files: payload.newFiles,
+      const uploadedImages =
+        payload.newUploads.length > 0
+          ? await uploadListingImages({
+              authUserId: user.id,
+              files: payload.newUploads.map((upload) => upload.file),
+              listingId: id,
+            })
+          : []
+
+      const uploadedImageIdsByKey = new Map(
+        payload.newUploads.map((upload, index) => [upload.key, uploadedImages[index]?.id ?? null]),
+      )
+      const orderedImageIds = payload.imageOrderKeys
+        .map((key) => {
+          if (key.startsWith('existing:')) {
+            return key.slice('existing:'.length)
+          }
+
+          return uploadedImageIdsByKey.get(key) ?? null
+        })
+        .filter((value): value is string => Boolean(value))
+      const resolvedCoverImageId = payload.coverImageKey
+        ? payload.coverImageKey.startsWith('existing:')
+          ? payload.coverImageKey.slice('existing:'.length)
+          : uploadedImageIdsByKey.get(payload.coverImageKey) ?? null
+        : null
+
+      if (orderedImageIds.length > 0) {
+        await reorderListingImages({
+          coverImageId: resolvedCoverImageId,
           listingId: id,
+          orderedImageIds,
         })
       }
-
-      await syncListingCoverImage(id, payload.coverImageId)
 
       if (payload.submitAfterSave) {
         await submitListingForReview(id)
@@ -93,6 +118,16 @@ export function AppEditListingPage() {
         description="Não foi possível carregar este anúncio para edição."
         title="Falha ao abrir anúncio"
         tone="error"
+      />
+    )
+  }
+
+  if (listingQuery.data.status === 'archived') {
+    return (
+      <DashboardAlertCard
+        description="Este anúncio foi arquivado e não pode mais ser editado nesta etapa do MVP."
+        title="Anúncio arquivado"
+        tone="warning"
       />
     )
   }

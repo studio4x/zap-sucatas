@@ -60,3 +60,15 @@ verify_jwt = true
 
 [functions.manage-user-account]
 verify_jwt = false
+
+[functions.manage-listing-lifecycle]
+verify_jwt = true
+
+[functions.reorder-listing-images]
+verify_jwt = true
+
+[functions.manage-listing-category]
+verify_jwt = true
+
+[functions.manage-listing-material]
+verify_jwt = true
