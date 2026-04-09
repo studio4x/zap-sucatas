@@ -41,19 +41,19 @@ enabled = true
 file_size_limit = "50MiB"
 
 [functions.submit-listing-for-review]
-verify_jwt = true
+verify_jwt = false
 
 [functions.approve-listing]
-verify_jwt = true
+verify_jwt = false
 
 [functions.reject-listing]
-verify_jwt = true
+verify_jwt = false
 
 [functions.answer-listing-question]
-verify_jwt = true
+verify_jwt = false
 
 [functions.sync-lme-prices]
-verify_jwt = true
+verify_jwt = false
 
 [functions.notify-listing-status]
 verify_jwt = true
