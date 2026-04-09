@@ -50,14 +50,24 @@ async function unwrapFunctionError(error: unknown) {
     throw error
   }
 
-  const context = (error as { context?: Response }).context
+  const context = (error as { context?: Response | { json?: () => Promise<unknown> } }).context
 
   if (!context) {
     throw error
   }
 
+  const json = (context as { json?: () => Promise<unknown> }).json
+
+  if (typeof json !== 'function') {
+    if (error instanceof Error && error.message) {
+      throw error
+    }
+
+    throw new Error('Falha de rede ao acessar a operação sensível.')
+  }
+
   try {
-    const payload = (await context.json()) as { error?: string }
+    const payload = (await json()) as { error?: string }
 
     if (payload.error) {
       throw new Error(payload.error)
