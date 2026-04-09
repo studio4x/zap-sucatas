@@ -18,8 +18,10 @@ import { AppQuestionsPage } from '@/pages/app/questions-page'
 import { AppSettingsPage } from '@/pages/app/settings-page'
 import { AdminBlogPage } from '@/pages/admin/blog-page'
 import { AdminCategoriesPage } from '@/pages/admin/categories-page'
+import { AdminEditListingPage } from '@/pages/admin/edit-listing-page'
 import { AdminListingDetailsPage } from '@/pages/admin/listing-details-page'
 import { AdminListingsPage } from '@/pages/admin/listings-page'
+import { AdminNewListingPage } from '@/pages/admin/new-listing-page'
 import { AdminLocationsPage } from '@/pages/admin/locations-page'
 import { AdminLogsPage } from '@/pages/admin/logs-page'
 import { AdminMaterialsPage } from '@/pages/admin/materials-page'
@@ -162,6 +164,14 @@ export const routes: RouteObject[] = [
       {
         path: 'anuncios',
         element: <AdminListingsPage />,
+      },
+      {
+        path: 'anuncios/novo',
+        element: <AdminNewListingPage />,
+      },
+      {
+        path: 'anuncios/:id/editar',
+        element: <AdminEditListingPage />,
       },
       {
         path: 'anuncios/:id',

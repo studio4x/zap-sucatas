@@ -30,6 +30,8 @@ export const paths = {
   admin: {
     root: '/admin',
     listings: '/admin/anuncios',
+    newListing: '/admin/anuncios/novo',
+    editListing: (id: string) => `/admin/anuncios/${id}/editar`,
     listingDetails: (id: string) => `/admin/anuncios/${id}`,
     questions: '/admin/perguntas',
     users: '/admin/usuarios',

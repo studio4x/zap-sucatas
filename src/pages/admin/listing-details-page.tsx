@@ -162,6 +162,9 @@ export function AdminListingDetailsPage() {
             <Button asChild type="button" variant="outline">
               <Link to={paths.admin.listings}>Voltar para anúncios</Link>
             </Button>
+            <Button asChild type="button" variant="outline">
+              <Link to={paths.admin.editListing(id)}>Editar anúncio</Link>
+            </Button>
             {listing.slug && listing.status === 'approved' ? (
               <Button asChild type="button" variant="outline">
                 <Link to={paths.public.listingDetails(listing.slug)}>

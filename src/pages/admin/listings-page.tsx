@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { Eye, FileSearch } from 'lucide-react'
+import { Eye, FilePlus2, FileSearch, Pencil } from 'lucide-react'
 import { paths } from '@/app/paths'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
 import { AdminFilterCard } from '@/components/admin/admin-filter-card'
@@ -34,7 +34,7 @@ function getListingStatusMeta(status: string) {
       return { label: 'Expirado', tone: 'warning' as const }
     default:
       return { label: 'Arquivado', tone: 'neutral' as const }
-    }
+  }
 }
 
 export function AdminListingsPage() {
@@ -67,6 +67,7 @@ export function AdminListingsPage() {
       return matchesStatus && matchesState && matchesQuery
     })
   }, [listings, query, stateFilter, statusFilter])
+
   const paginatedListings = useMemo(
     () => filteredListings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
     [filteredListings, page],
@@ -88,6 +89,12 @@ export function AdminListingsPage() {
         actions={
           <>
             <Button asChild type="button">
+              <Link to={paths.admin.newListing}>
+                <FilePlus2 className="size-4" />
+                Novo anúncio
+              </Link>
+            </Button>
+            <Button asChild type="button" variant="outline">
               <Link to={paths.admin.root}>Visão geral</Link>
             </Button>
             <Button asChild type="button" variant="outline">
@@ -168,7 +175,7 @@ export function AdminListingsPage() {
       <AdminDataTable
         columns={[
           {
-            header: 'Anuncio',
+            header: 'Anúncio',
             cell: (listing) => (
               <div className="space-y-1">
                 <p className="font-medium text-foreground">{listing.title}</p>
@@ -211,10 +218,15 @@ export function AdminListingsPage() {
           },
           {
             header: 'Ações',
-            className: 'w-[220px] text-right',
+            className: 'w-[280px] text-right',
             cell: (listing) => (
               <AdminRowActions
                 actions={[
+                  {
+                    icon: Pencil,
+                    label: 'Editar',
+                    to: paths.admin.editListing(listing.id),
+                  },
                   {
                     icon: FileSearch,
                     label: 'Detalhe',
@@ -242,9 +254,7 @@ export function AdminListingsPage() {
         getRowKey={(listing) => listing.id}
         isError={listingsQuery.isError}
         isLoading={listingsQuery.isLoading}
-        rowClassName={(listing) =>
-          listing.status === 'pending_review' ? 'bg-sky-50/30' : undefined
-        }
+        rowClassName={(listing) => (listing.status === 'pending_review' ? 'bg-sky-50/30' : undefined)}
       />
 
       <AdminPagination
@@ -255,8 +265,7 @@ export function AdminListingsPage() {
       />
 
       <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-sm">
-        A fila administrativa esta orientada por tabela para leitura rapida, com filtros acima do
-        dataset e detalhe separado por anúncio.
+        A fila administrativa está orientada por tabela para leitura rápida, com filtros acima do dataset e detalhe separado por anúncio.
       </div>
     </section>
   )

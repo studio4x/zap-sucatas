@@ -70,6 +70,8 @@ type OrderedImageItem =
       kind: 'pending'
     }
 
+const EMPTY_EXISTING_IMAGES: ListingImage[] = []
+
 function buildExistingImageKey(imageId: string) {
   return `existing:${imageId}`
 }
@@ -105,7 +107,7 @@ export function ListingEditor({
   cancelTo,
   categories,
   defaultValues,
-  existingImages = [],
+  existingImages,
   isSubmitting = false,
   materials,
   mode,
@@ -113,16 +115,17 @@ export function ListingEditor({
   rejectionReason,
   status,
 }: ListingEditorProps) {
+  const resolvedExistingImages = existingImages ?? EMPTY_EXISTING_IMAGES
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
   const [removedImageIds, setRemovedImageIds] = useState<string[]>([])
   const [imageOrderKeys, setImageOrderKeys] = useState<string[]>(
-    existingImages.map((image) => buildExistingImageKey(image.id)),
+    resolvedExistingImages.map((image) => buildExistingImageKey(image.id)),
   )
   const [coverImageKey, setCoverImageKey] = useState<string | null>(
-    existingImages.find((image) => image.isCover)
-      ? buildExistingImageKey(existingImages.find((image) => image.isCover)!.id)
-      : existingImages[0]
-        ? buildExistingImageKey(existingImages[0].id)
+    resolvedExistingImages.find((image) => image.isCover)
+      ? buildExistingImageKey(resolvedExistingImages.find((image) => image.isCover)!.id)
+      : resolvedExistingImages[0]
+        ? buildExistingImageKey(resolvedExistingImages[0].id)
         : null,
   )
   const [feedback, setFeedback] = useState<{ message: string; tone: 'error' | 'success' } | null>(
@@ -141,12 +144,12 @@ export function ListingEditor({
   })
 
   const activeExistingImages = useMemo(
-    () => existingImages.filter((image) => !removedImageIds.includes(image.id)),
-    [existingImages, removedImageIds],
+    () => resolvedExistingImages.filter((image) => !removedImageIds.includes(image.id)),
+    [resolvedExistingImages, removedImageIds],
   )
   const removedExistingImages = useMemo(
-    () => existingImages.filter((image) => removedImageIds.includes(image.id)),
-    [existingImages, removedImageIds],
+    () => resolvedExistingImages.filter((image) => removedImageIds.includes(image.id)),
+    [resolvedExistingImages, removedImageIds],
   )
   const pendingFileMap = useMemo(
     () => new Map(pendingFiles.map((item) => [item.clientId, item])),
@@ -199,14 +202,14 @@ export function ListingEditor({
     form.reset(defaultValues)
     setPendingFiles([])
     setRemovedImageIds([])
-    const nextKeys = existingImages.map((image) => buildExistingImageKey(image.id))
+    const nextKeys = resolvedExistingImages.map((image) => buildExistingImageKey(image.id))
     setImageOrderKeys(nextKeys)
-    const nextCoverKey = existingImages.find((image) => image.isCover)
-      ? buildExistingImageKey(existingImages.find((image) => image.isCover)!.id)
+    const nextCoverKey = resolvedExistingImages.find((image) => image.isCover)
+      ? buildExistingImageKey(resolvedExistingImages.find((image) => image.isCover)!.id)
       : nextKeys[0] ?? null
     setCoverImageKey(nextCoverKey)
     setFeedback(null)
-  }, [defaultValues, existingImages, form])
+  }, [defaultValues, resolvedExistingImages, form])
 
   useEffect(() => {
     return () => {
@@ -256,7 +259,7 @@ export function ListingEditor({
             file: item.item.file,
             key: item.key,
           })),
-        removedImages: existingImages.filter((image) => removedImageIds.includes(image.id)),
+        removedImages: resolvedExistingImages.filter((image) => removedImageIds.includes(image.id)),
         submitAfterSave: shouldSubmitAfterSave,
         values: {
           ...values,
@@ -357,7 +360,7 @@ export function ListingEditor({
             </Button>
           </div>
         }
-        description="Preencha os dados do lote, organize as imagens e escolha se quer apenas salvar ou enviar para moderacao."
+        description="Preencha os dados do lote, organize as imagens e escolha se quer apenas salvar ou enviar para moderação."
         title={mode === 'create' ? 'Criar anúncio' : 'Editar anúncio'}
       />
 
