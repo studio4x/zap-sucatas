@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Trash2 } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -5,6 +6,7 @@ import { paths } from '@/app/paths'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { ListingEditor, type ListingEditorSubmitPayload } from '@/components/listings/listing-editor'
+import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
 import {
   approveListing,
   archiveListing,
@@ -24,6 +26,7 @@ export function AdminEditListingPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { user } = useAuth()
+  const [confirmingArchive, setConfirmingArchive] = useState(false)
 
   const referencesQuery = useQuery({
     queryKey: ['listing-references'],
@@ -111,6 +114,7 @@ export function AdminEditListingPage() {
         queryClient.invalidateQueries({ queryKey: ['listings', 'owner'] }),
         queryClient.invalidateQueries({ queryKey: ['listings', 'public'] }),
       ])
+      setConfirmingArchive(false)
       navigate(paths.admin.listings, { replace: true })
     },
   })
@@ -140,17 +144,7 @@ export function AdminEditListingPage() {
           listingQuery.data.status !== 'archived' ? (
             <Button
               disabled={updateMutation.isPending || archiveMutation.isPending}
-              onClick={() => {
-                const confirmed = window.confirm(
-                  `Remover o anúncio "${listingQuery.data.title}" da operação pública? Ele será arquivado e permanecerá apenas no histórico interno.`,
-                )
-
-                if (!confirmed) {
-                  return
-                }
-
-                archiveMutation.mutate()
-              }}
+              onClick={() => setConfirmingArchive(true)}
               type="button"
               variant="outline"
             >
@@ -189,6 +183,17 @@ export function AdminEditListingPage() {
         onSubmit={updateMutation.mutateAsync}
         rejectionReason={listingQuery.data.rejectionReason}
         status={listingQuery.data.status}
+      />
+
+      <ConfirmActionDialog
+        confirmLabel="Remover anúncio"
+        description={`Remover o anúncio "${listingQuery.data.title}" da operação pública? Ele será arquivado e permanecerá apenas no histórico interno.`}
+        isPending={archiveMutation.isPending}
+        onConfirm={() => archiveMutation.mutate()}
+        onOpenChange={setConfirmingArchive}
+        open={confirmingArchive}
+        title="Confirmar remoção"
+        tone="default"
       />
     </section>
   )

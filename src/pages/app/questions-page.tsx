@@ -37,6 +37,9 @@ export function AppQuestionsPage() {
 
   const answerMutation = useMutation({
     mutationFn: answerListingQuestion,
+    onError: (error) => {
+      setFeedback(error instanceof Error ? error.message : 'Não foi possível salvar a resposta.')
+    },
     onSuccess: async () => {
       setFeedback('Resposta salva com sucesso.')
       await Promise.all([
@@ -238,12 +241,13 @@ export function AppQuestionsPage() {
 
                   <Button
                     disabled={isBlocked || answerMutation.isPending || draft.trim().length < 2}
-                    onClick={() =>
+                    onClick={() => {
+                      setFeedback(null)
                       answerMutation.mutate({
                         answerText: draft,
                         questionId: question.id,
                       })
-                    }
+                    }}
                     type="button"
                   >
                     <Reply className="size-4" />

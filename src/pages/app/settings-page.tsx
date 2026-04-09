@@ -32,6 +32,9 @@ export function AppSettingsPage() {
     mutationFn: async (values: PasswordSettingsValues) => {
       await updatePassword(values.password)
     },
+    onError: (error) => {
+      setFeedback(error instanceof Error ? error.message : 'Não foi possível atualizar sua senha.')
+    },
     onSuccess: () => {
       form.reset()
       setFeedback('Sua senha foi atualizada com sucesso.')
@@ -77,7 +80,10 @@ export function AppSettingsPage() {
         >
           <form
             className="space-y-4"
-            onSubmit={form.handleSubmit((values) => passwordMutation.mutate(values))}
+            onSubmit={form.handleSubmit((values) => {
+              setFeedback(null)
+              passwordMutation.mutate(values)
+            })}
           >
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">

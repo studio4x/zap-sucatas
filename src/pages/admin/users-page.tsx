@@ -10,27 +10,22 @@ import { AdminRowActions } from '@/components/admin/admin-row-actions'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { AdminUserForm } from '@/components/admin/admin-user-form'
+import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
+import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import {
-  createAdminUser,
-  deleteAdminUser,
-  fetchAdminProfiles,
-  updateAdminUser,
-} from '@/domains/profiles/api'
-import type {
-  AdminCreateUserValues,
-  AdminUpdateUserValues,
-} from '@/domains/profiles/schemas'
+import { createAdminUser, deleteAdminUser, fetchAdminProfiles, updateAdminUser } from '@/domains/profiles/api'
+import type { AdminCreateUserValues, AdminUpdateUserValues } from '@/domains/profiles/schemas'
 import type { AdminProfileSummary } from '@/domains/profiles/types'
+import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 
 const PAGE_SIZE = 12
 
 function getRoleMeta(role: 'admin' | 'user') {
   return role === 'admin'
     ? { label: 'Administrador', tone: 'info' as const }
-    : { label: 'Usuario', tone: 'neutral' as const }
+    : { label: 'Usuário', tone: 'neutral' as const }
 }
 
 function getProfileStatusMeta(status: 'active' | 'suspended' | 'under_review') {
@@ -52,12 +47,12 @@ function formatDate(value: string) {
 
 export function AdminUsersPage() {
   const queryClient = useQueryClient()
-  const [feedback, setFeedback] = useState<string | null>(null)
+  const { clearFeedback, feedback, setErrorFeedback, setSuccessFeedback } = useOperationFeedback()
   const [editingProfile, setEditingProfile] = useState<AdminProfileSummary | null>(null)
+  const [profilePendingRemoval, setProfilePendingRemoval] = useState<AdminProfileSummary | null>(null)
   const [query, setQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<'admin' | 'all' | 'user'>('all')
-  const [statusFilter, setStatusFilter] =
-    useState<'active' | 'all' | 'suspended' | 'under_review'>('all')
+  const [statusFilter, setStatusFilter] = useState<'active' | 'all' | 'suspended' | 'under_review'>('all')
   const [page, setPage] = useState(1)
 
   const profilesQuery = useQuery({
@@ -68,10 +63,10 @@ export function AdminUsersPage() {
   const createMutation = useMutation({
     mutationFn: createAdminUser,
     onError: (error) => {
-      setFeedback(error instanceof Error ? error.message : 'Não foi possível criar o usuário.')
+      setErrorFeedback(error, 'Não foi possível criar o usuário.')
     },
     onSuccess: async () => {
-      setFeedback('Usuario criado com sucesso.')
+      setSuccessFeedback('Usuário criado com sucesso.')
       await queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] })
     },
   })
@@ -79,10 +74,10 @@ export function AdminUsersPage() {
   const updateMutation = useMutation({
     mutationFn: updateAdminUser,
     onError: (error) => {
-      setFeedback(error instanceof Error ? error.message : 'Não foi possível atualizar o usuário.')
+      setErrorFeedback(error, 'Não foi possível atualizar o usuário.')
     },
     onSuccess: async () => {
-      setFeedback('Usuario atualizado com sucesso.')
+      setSuccessFeedback('Usuário atualizado com sucesso.')
       setEditingProfile(null)
       await queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] })
     },
@@ -91,11 +86,12 @@ export function AdminUsersPage() {
   const deleteMutation = useMutation({
     mutationFn: deleteAdminUser,
     onError: (error) => {
-      setFeedback(error instanceof Error ? error.message : 'Não foi possível excluir o usuário.')
+      setErrorFeedback(error, 'Não foi possível excluir o usuário.')
     },
     onSuccess: async () => {
-      setFeedback('Usuario excluido com sucesso.')
+      setSuccessFeedback('Usuário excluído com sucesso.')
       setEditingProfile(null)
+      setProfilePendingRemoval(null)
       await queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] })
     },
   })
@@ -121,9 +117,9 @@ export function AdminUsersPage() {
   const stats = useMemo(
     () => ({
       admins: profiles.filter((profile) => profile.role === 'admin').length,
-      underReview: profiles.filter((profile) => profile.status === 'under_review').length,
       suspended: profiles.filter((profile) => profile.status === 'suspended').length,
       total: profiles.length,
+      underReview: profiles.filter((profile) => profile.status === 'under_review').length,
     }),
     [profiles],
   )
@@ -159,15 +155,15 @@ export function AdminUsersPage() {
           <>
             <Button
               onClick={() => {
+                clearFeedback()
                 setEditingProfile(null)
-                setFeedback(null)
               }}
               type="button"
             >
               Novo usuário
             </Button>
             <Button asChild type="button">
-              <Link to={paths.admin.listings}>Anuncios</Link>
+              <Link to={paths.admin.listings}>Anúncios</Link>
             </Button>
             <Button asChild type="button" variant="outline">
               <Link to={paths.admin.questions}>Perguntas</Link>
@@ -179,11 +175,7 @@ export function AdminUsersPage() {
         title="Gestão de usuários"
       />
 
-      {feedback ? (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 shadow-sm">
-          {feedback}
-        </div>
-      ) : null}
+      {feedback ? <OperationFeedback feedback={feedback} /> : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard label="Total" value={stats.total} />
@@ -225,8 +217,8 @@ export function AdminUsersPage() {
             }}
             value={roleFilter}
           >
-            <option value="all">Todos os papeis</option>
-            <option value="user">Usuarios</option>
+            <option value="all">Todos os papéis</option>
+            <option value="user">Usuários</option>
             <option value="admin">Admins</option>
           </Select>
           <Select
@@ -250,7 +242,7 @@ export function AdminUsersPage() {
           isPending={createMutation.isPending}
           mode="create"
           onSubmit={(values) => {
-            setFeedback(null)
+            clearFeedback()
             createMutation.mutate({
               email: values.email,
               fullName: values.fullName,
@@ -273,7 +265,7 @@ export function AdminUsersPage() {
               return
             }
 
-            setFeedback(null)
+            clearFeedback()
             updateMutation.mutate({
               email: values.email,
               fullName: values.fullName,
@@ -291,7 +283,7 @@ export function AdminUsersPage() {
       <AdminDataTable
         columns={[
           {
-            header: 'Usuario',
+            header: 'Usuário',
             cell: (profile) => (
               <div className="space-y-1">
                 <p className="font-medium text-foreground">{profile.fullName}</p>
@@ -344,25 +336,14 @@ export function AdminUsersPage() {
                   {
                     label: 'Editar',
                     onClick: () => {
-                      setFeedback(null)
+                      clearFeedback()
                       setEditingProfile(profile)
                     },
                   },
                   {
                     disabled: deleteMutation.isPending,
                     label: 'Excluir',
-                    onClick: () => {
-                      const confirmed = window.confirm(
-                        `Excluir o usuário ${profile.fullName}? Essa ação só funciona quando não existem dados vinculados.`,
-                      )
-
-                      if (!confirmed) {
-                        return
-                      }
-
-                      setFeedback(null)
-                      deleteMutation.mutate(profile.id)
-                    },
+                    onClick: () => setProfilePendingRemoval(profile),
                     variant: 'destructive',
                   },
                 ]}
@@ -384,6 +365,30 @@ export function AdminUsersPage() {
         onPageChange={setPage}
         pageSize={PAGE_SIZE}
         totalItems={filteredProfiles.length}
+      />
+
+      <ConfirmActionDialog
+        confirmLabel="Excluir usuário"
+        description={
+          profilePendingRemoval
+            ? `Excluir o usuário ${profilePendingRemoval.fullName}? A ação só será concluída se não houver dados vinculados.`
+            : ''
+        }
+        isPending={deleteMutation.isPending}
+        onConfirm={() => {
+          if (profilePendingRemoval) {
+            clearFeedback()
+            deleteMutation.mutate(profilePendingRemoval.id)
+          }
+        }}
+        onOpenChange={(open) => {
+          if (!open) {
+            setProfilePendingRemoval(null)
+          }
+        }}
+        open={Boolean(profilePendingRemoval)}
+        title="Confirmar exclusão"
+        tone="danger"
       />
     </section>
   )

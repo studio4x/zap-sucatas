@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
 import { Archive, Eye, FilePlus2, PauseCircle, SendHorizontal } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { DashboardActionCard } from '@/components/dashboard/dashboard-action-card'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
@@ -11,15 +11,11 @@ import { DashboardSectionHeader } from '@/components/dashboard/dashboard-section
 import { DashboardStatCard } from '@/components/dashboard/dashboard-stat-card'
 import { DashboardTableCard } from '@/components/dashboard/dashboard-table-card'
 import { ListingStatusBadge } from '@/components/listings/listing-status-badge'
+import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import {
-  archiveListing,
-  fetchUserListings,
-  pauseListing,
-  submitListingForReview,
-} from '@/domains/listings/api'
+import { archiveListing, fetchUserListings, pauseListing, submitListingForReview } from '@/domains/listings/api'
 import { formatListingDate, listingStatusFilterOptions } from '@/domains/listings/utils'
 import { useAuth } from '@/hooks/use-auth'
 
@@ -36,6 +32,9 @@ export function AppListingsPage() {
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<AppListingsStatusFilter>('all')
   const [feedback, setFeedback] = useState<FeedbackState | null>(null)
+  const [listingPendingArchive, setListingPendingArchive] = useState<{ id: string; title: string } | null>(
+    null,
+  )
 
   const listingsQuery = useQuery({
     queryKey: ['listings', 'owner', user?.profileId],
@@ -99,6 +98,7 @@ export function AppListingsPage() {
         tone: 'warning',
       })
       await invalidateListings()
+      setListingPendingArchive(null)
     },
   })
 
@@ -108,8 +108,7 @@ export function AppListingsPage() {
 
     return listings.filter((listing) => {
       const matchesStatus = statusFilter === 'all' ? true : listing.status === statusFilter
-      const haystack =
-        `${listing.title} ${listing.summary ?? ''} ${listing.city} ${listing.state}`.toLowerCase()
+      const haystack = `${listing.title} ${listing.summary ?? ''} ${listing.city} ${listing.state}`.toLowerCase()
       const matchesQuery = normalizedQuery.length === 0 ? true : haystack.includes(normalizedQuery)
 
       return matchesStatus && matchesQuery
@@ -130,8 +129,7 @@ export function AppListingsPage() {
   const requiresAttention = listings.find(
     (listing) => listing.status === 'rejected' || listing.status === 'draft',
   )
-  const isBusy =
-    submitMutation.isPending || pauseMutation.isPending || archiveMutation.isPending
+  const isBusy = submitMutation.isPending || pauseMutation.isPending || archiveMutation.isPending
 
   return (
     <section className="space-y-6">
@@ -186,21 +184,9 @@ export function AppListingsPage() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <DashboardStatCard label="Total" value={stats.total} />
         <DashboardStatCard label="Rascunhos" value={stats.drafts} />
-        <DashboardStatCard
-          label="Em revisão"
-          tone={stats.pending > 0 ? 'warning' : 'default'}
-          value={stats.pending}
-        />
-        <DashboardStatCard
-          label="Aprovados"
-          tone={stats.approved > 0 ? 'success' : 'default'}
-          value={stats.approved}
-        />
-        <DashboardStatCard
-          label="Arquivados"
-          tone={stats.archived > 0 ? 'warning' : 'default'}
-          value={stats.archived}
-        />
+        <DashboardStatCard label="Em revisão" tone={stats.pending > 0 ? 'warning' : 'default'} value={stats.pending} />
+        <DashboardStatCard label="Aprovados" tone={stats.approved > 0 ? 'success' : 'default'} value={stats.approved} />
+        <DashboardStatCard label="Arquivados" tone={stats.archived > 0 ? 'warning' : 'default'} value={stats.archived} />
       </div>
 
       <DashboardFilterCard
@@ -297,9 +283,7 @@ export function AppListingsPage() {
               className: 'w-[360px] text-right',
               cell: (listing) => {
                 const canSubmit =
-                  listing.status === 'draft' ||
-                  listing.status === 'rejected' ||
-                  listing.status === 'paused'
+                  listing.status === 'draft' || listing.status === 'rejected' || listing.status === 'paused'
                 const canEdit = listing.status !== 'archived'
                 const canPause = listing.status === 'approved'
                 const canArchive = listing.status !== 'archived'
@@ -355,18 +339,7 @@ export function AppListingsPage() {
                     {canArchive ? (
                       <Button
                         disabled={isBusy}
-                        onClick={() => {
-                          const confirmed = window.confirm(
-                            `Arquivar o anúncio "${listing.title}"? Ele sairá da operação pública e continuará apenas no histórico interno.`,
-                          )
-
-                          if (!confirmed) {
-                            return
-                          }
-
-                          setFeedback(null)
-                          archiveMutation.mutate(listing.id)
-                        }}
+                        onClick={() => setListingPendingArchive({ id: listing.id, title: listing.title })}
                         size="sm"
                         type="button"
                         variant="outline"
@@ -411,6 +384,32 @@ export function AppListingsPage() {
           title="Inbox de perguntas"
         />
       </div>
+
+      <ConfirmActionDialog
+        confirmLabel="Arquivar anúncio"
+        description={
+          listingPendingArchive
+            ? `Arquivar o anúncio "${listingPendingArchive.title}"? Ele sairá da operação pública e continuará apenas no histórico interno.`
+            : ''
+        }
+        isPending={archiveMutation.isPending}
+        onConfirm={() => {
+          if (!listingPendingArchive) {
+            return
+          }
+
+          setFeedback(null)
+          archiveMutation.mutate(listingPendingArchive.id)
+        }}
+        onOpenChange={(open) => {
+          if (!open) {
+            setListingPendingArchive(null)
+          }
+        }}
+        open={Boolean(listingPendingArchive)}
+        title="Confirmar arquivamento"
+        tone="default"
+      />
     </section>
   )
 }

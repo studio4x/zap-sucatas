@@ -64,6 +64,9 @@ export function AppProfilePage() {
       await refreshUser()
       return nextProfile
     },
+    onError: (error) => {
+      setFeedback(error instanceof Error ? error.message : 'Não foi possível atualizar seus dados.')
+    },
     onSuccess: () => {
       setFeedback('Seus dados foram atualizados com sucesso.')
     },
@@ -116,7 +119,10 @@ export function AppProfilePage() {
         >
           <form
             className="space-y-4"
-            onSubmit={form.handleSubmit((values) => updateMutation.mutate(values))}
+            onSubmit={form.handleSubmit((values) => {
+              setFeedback(null)
+              updateMutation.mutate(values)
+            })}
           >
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">

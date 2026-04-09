@@ -212,7 +212,7 @@ export async function updateAdminUser(input: {
   })
 
   if (error) {
-    throw error
+    await unwrapFunctionError(error)
   }
 
   return data as { profileId: string; success: boolean }

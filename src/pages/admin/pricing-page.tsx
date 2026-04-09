@@ -12,6 +12,8 @@ import { PricingHistoryTable } from '@/components/pricing/pricing-history-table'
 import { PricingManualPriceForm } from '@/components/pricing/pricing-manual-price-form'
 import { PricingManualSnapshotForm } from '@/components/pricing/pricing-manual-snapshot-form'
 import { PricingUpdateOverview } from '@/components/pricing/pricing-update-overview'
+import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
+import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
@@ -25,6 +27,7 @@ import {
 import type { ManualSnapshotFormValues, ScrapPriceEntryFormValues } from '@/domains/pricing/schemas'
 import type { LmePriceSnapshot, ScrapPriceEntry } from '@/domains/pricing/types'
 import { formatPricingDate, formatPricingNumber } from '@/domains/pricing/utils'
+import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 
 const MANUAL_PAGE_SIZE = 8
 const SNAPSHOT_PAGE_SIZE = 10
@@ -60,8 +63,14 @@ function toSnapshotFormValues(): ManualSnapshotFormValues {
 
 export function AdminPricingPage() {
   const queryClient = useQueryClient()
-  const [feedback, setFeedback] = useState<string | null>(null)
+  const {
+    clearFeedback,
+    feedback,
+    setErrorFeedback,
+    setSuccessFeedback,
+  } = useOperationFeedback()
   const [editingEntry, setEditingEntry] = useState<ScrapPriceEntry | null>(null)
+  const [entryPendingRemoval, setEntryPendingRemoval] = useState<ScrapPriceEntry | null>(null)
   const [manualQuery, setManualQuery] = useState('')
   const [manualStatusFilter, setManualStatusFilter] = useState<'active' | 'all' | 'inactive'>('all')
   const [providerFilter, setProviderFilter] = useState('all')
@@ -87,42 +96,68 @@ export function AdminPricingPage() {
         id: editingEntry?.id,
       }),
     onSuccess: async () => {
-      setFeedback(editingEntry ? 'Entrada manual atualizada com sucesso.' : 'Entrada manual criada com sucesso.')
+      setSuccessFeedback(
+        editingEntry
+          ? 'Entrada manual atualizada com sucesso.'
+          : 'Entrada manual criada com sucesso.',
+      )
       setEditingEntry(null)
       await invalidatePricing()
+    },
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível salvar a entrada manual.')
     },
   })
 
   const deletePriceMutation = useMutation({
     mutationFn: deleteScrapPriceEntry,
     onSuccess: async () => {
-      setFeedback('Entrada manual removida com sucesso.')
+      setSuccessFeedback('Entrada manual removida com sucesso.')
       setEditingEntry(null)
+      setEntryPendingRemoval(null)
       await invalidatePricing()
+    },
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível remover a entrada manual.')
     },
   })
 
   const saveSnapshotMutation = useMutation({
     mutationFn: saveManualLmeSnapshots,
-    onSuccess: async () => {
-      setFeedback('Snapshot manual registrado com sucesso.')
+    onSuccess: async (_, values) => {
+      const informedValues = Object.values(values.values).filter((value) => value.trim().length > 0).length
+      setSuccessFeedback(
+        `Snapshot manual registrado com sucesso para ${informedValues} série${informedValues === 1 ? '' : 's'}.`,
+      )
       await invalidatePricing()
+    },
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível registrar o snapshot manual.')
     },
   })
 
   const latestSyncMutation = useMutation({
     mutationFn: () => runPricingSync('latest'),
     onSuccess: async (result) => {
-      setFeedback(`Sincronização concluída com ${result.inserted} snapshots.`)
+      const providersLabel = result.providers.join(', ')
+      setSuccessFeedback(
+        `Sincronização concluída com ${result.inserted} snapshots. Providers: ${providersLabel}.`,
+      )
       await invalidatePricing()
+    },
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível sincronizar os preços agora.')
     },
   })
 
   const backfillMutation = useMutation({
     mutationFn: () => runPricingSync('backfill'),
     onSuccess: async (result) => {
-      setFeedback(`Backfill histórico concluído com ${result.inserted} snapshots.`)
+      setSuccessFeedback(`Backfill histórico concluído com ${result.inserted} snapshots.`)
       await invalidatePricing()
+    },
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível executar o backfill histórico.')
     },
   })
 
@@ -189,13 +224,23 @@ export function AdminPricingPage() {
       <AdminPageHeader
         actions={
           <>
-            <Button disabled={isBusy} onClick={() => latestSyncMutation.mutate()} type="button">
+            <Button
+              disabled={isBusy}
+              onClick={() => {
+                clearFeedback()
+                latestSyncMutation.mutate()
+              }}
+              type="button"
+            >
               <RefreshCcw className="size-4" />
               {latestSyncMutation.isPending ? 'Sincronizando...' : 'Sincronizar agora'}
             </Button>
             <Button
               disabled={isBusy}
-              onClick={() => backfillMutation.mutate()}
+              onClick={() => {
+                clearFeedback()
+                backfillMutation.mutate()
+              }}
               type="button"
               variant="outline"
             >
@@ -209,11 +254,7 @@ export function AdminPricingPage() {
         title="Operação da tabela de preços"
       />
 
-      {feedback ? (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 shadow-sm">
-          {feedback}
-        </div>
-      ) : null}
+      <OperationFeedback feedback={feedback} />
 
       <PricingUpdateOverview
         historySnapshotCount={data.historySnapshotCount}
@@ -232,6 +273,7 @@ export function AdminPricingPage() {
               setProviderFilter('all')
               setManualPage(1)
               setSnapshotPage(1)
+              clearFeedback()
             }}
             type="button"
             variant="outline"
@@ -289,22 +331,24 @@ export function AdminPricingPage() {
             ),
           },
           {
-            header: 'Preco',
+            header: 'Preço',
             cell: (entry) => (
               <div className="space-y-1">
                 <p className="font-medium text-foreground">{entry.priceLabel}</p>
                 <p className="text-xs text-muted-foreground">
                   {typeof entry.priceNumeric === 'number'
                     ? `${formatPricingNumber(entry.priceNumeric, 2)} ${entry.priceUnit ?? ''}`
-                    : 'Sem valor numerico'}
+                    : 'Sem valor numérico'}
                 </p>
               </div>
             ),
           },
           {
-            header: 'Vigencia',
+            header: 'Vigência',
             cell: (entry) => (
-              <span className="text-sm text-muted-foreground">{formatPricingDate(entry.effectiveDate)}</span>
+              <span className="text-sm text-muted-foreground">
+                {formatPricingDate(entry.effectiveDate)}
+              </span>
             ),
           },
           {
@@ -323,12 +367,18 @@ export function AdminPricingPage() {
                 actions={[
                   {
                     label: 'Editar',
-                    onClick: () => setEditingEntry(entry),
+                    onClick: () => {
+                      clearFeedback()
+                      setEditingEntry(entry)
+                    },
                   },
                   {
                     disabled: deletePriceMutation.isPending,
                     label: 'Remover',
-                    onClick: () => deletePriceMutation.mutate(entry.id),
+                    onClick: () => {
+                      clearFeedback()
+                      setEntryPendingRemoval(entry)
+                    },
                     variant: 'destructive',
                   },
                 ]}
@@ -356,37 +406,38 @@ export function AdminPricingPage() {
           <p className="text-sm font-semibold text-foreground">Janela operacional</p>
           <div className="mt-4 grid gap-3 text-sm text-muted-foreground">
             <p>
-              <span className="font-medium text-foreground">Tabela historica:</span> {data.historyWindowLabel}
+              <span className="font-medium text-foreground">Tabela histórica:</span>{' '}
+              {data.historyWindowLabel}
             </p>
             <p>
-              <span className="font-medium text-foreground">Grafico:</span> {data.chartWindowLabel}
+              <span className="font-medium text-foreground">Gráfico:</span> {data.chartWindowLabel}
             </p>
             <p>
               <span className="font-medium text-foreground">Última data consolidada:</span>{' '}
               {formatPricingDate(data.latestQuotedDate)}
             </p>
             <p>
-              <span className="font-medium text-foreground">Providers atuais:</span> Westmetall e Banco Central PTAX
+              <span className="font-medium text-foreground">Providers atuais:</span> Westmetall e
+              Banco Central PTAX
             </p>
           </div>
         </div>
       </div>
 
-      <PricingHistoryTable
-        rows={data.historyRows}
-        title="Histórico consolidado dos últimos 6 meses"
-      />
+      <PricingHistoryTable rows={data.historyRows} title="Histórico consolidado dos últimos 6 meses" />
 
       <AdminDataTable
         columns={[
           {
             header: 'Data',
             cell: (snapshot: LmePriceSnapshot) => (
-              <span className="text-sm text-muted-foreground">{formatPricingDate(snapshot.quotedDate)}</span>
+              <span className="text-sm text-muted-foreground">
+                {formatPricingDate(snapshot.quotedDate)}
+              </span>
             ),
           },
           {
-            header: 'Serie',
+            header: 'Série',
             cell: (snapshot: LmePriceSnapshot) => (
               <div className="space-y-1">
                 <p className="font-medium text-foreground">{snapshot.metalName}</p>
@@ -432,17 +483,54 @@ export function AdminPricingPage() {
         <PricingManualPriceForm
           defaultValues={manualPriceDefaults}
           isPending={savePriceMutation.isPending}
-          onCancel={editingEntry ? () => setEditingEntry(null) : undefined}
-          onSubmit={(values) => savePriceMutation.mutate(values)}
+          onCancel={
+            editingEntry
+              ? () => {
+                  setEditingEntry(null)
+                  clearFeedback()
+                }
+              : undefined
+          }
+          onSubmit={(values) => {
+            clearFeedback()
+            savePriceMutation.mutate(values)
+          }}
           submitLabel={editingEntry ? 'Atualizar entrada manual' : 'Criar entrada manual'}
         />
 
         <PricingManualSnapshotForm
           defaultValues={manualSnapshotDefaults}
           isPending={saveSnapshotMutation.isPending}
-          onSubmit={(values) => saveSnapshotMutation.mutate(values)}
+          onSubmit={(values) => {
+            clearFeedback()
+            saveSnapshotMutation.mutate(values)
+          }}
         />
       </div>
+
+      <ConfirmActionDialog
+        confirmLabel="Remover entrada"
+        description={
+          entryPendingRemoval
+            ? `Remover a entrada manual de "${entryPendingRemoval.materialName}" com vigência em ${formatPricingDate(entryPendingRemoval.effectiveDate)}?`
+            : ''
+        }
+        isPending={deletePriceMutation.isPending}
+        onConfirm={() => {
+          if (!entryPendingRemoval) {
+            return
+          }
+
+          deletePriceMutation.mutate(entryPendingRemoval.id)
+        }}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEntryPendingRemoval(null)
+          }
+        }}
+        open={Boolean(entryPendingRemoval)}
+        title="Confirmar remoção da entrada manual"
+      />
     </section>
   )
 }

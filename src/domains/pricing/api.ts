@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client'
+import { env } from '@/lib/env'
 import type {
   LmePriceSnapshot,
   PricingAdminDashboard,
@@ -50,6 +51,77 @@ function ensureSupabase() {
   }
 
   return supabase
+}
+
+async function getFreshAccessToken() {
+  const client = ensureSupabase()
+  const {
+    data: { session },
+  } = await client.auth.getSession()
+
+  if (!session?.refresh_token) {
+    if (!session?.access_token) {
+      throw new Error('Sessao invalida. Faca login novamente.')
+    }
+
+    return session.access_token
+  }
+
+  const { data, error } = await client.auth.refreshSession({
+    refresh_token: session.refresh_token,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  const accessToken = data.session?.access_token ?? session.access_token
+
+  if (!accessToken) {
+    throw new Error('Sessao invalida. Faca login novamente.')
+  }
+
+  return accessToken
+}
+
+async function invokePricingFunction<TBody extends object, TResponse>(name: string, body: TBody) {
+  ensureSupabase()
+
+  if (!env.supabaseUrl || !env.supabaseAnonKey) {
+    throw new Error('Supabase nao configurado no ambiente atual.')
+  }
+
+  const accessToken = await getFreshAccessToken()
+  const response = await fetch(`${env.supabaseUrl}/functions/v1/${name}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      apikey: env.supabaseAnonKey,
+    },
+    body: JSON.stringify({
+      ...body,
+      access_token: accessToken,
+    }),
+  })
+
+  if (!response.ok) {
+    try {
+      const payload = (await response.json()) as { error?: string }
+
+      if (payload.error) {
+        throw new Error(payload.error)
+      }
+    } catch (parseError) {
+      if (parseError instanceof Error && parseError.message) {
+        throw parseError
+      }
+    }
+
+    throw new Error('Edge Function returned a non-2xx status code')
+  }
+
+  return (await response.json()) as TResponse
 }
 
 function mapScrapPriceEntry(row: ScrapPriceEntryRow): ScrapPriceEntry {
@@ -311,13 +383,7 @@ export async function saveManualLmeSnapshots(input: SaveManualLmeSnapshotsInput)
 }
 
 export async function runPricingSync(mode: PricingSyncMode) {
-  const { data, error } = await ensureSupabase().functions.invoke('sync-lme-prices', {
-    body: { mode },
+  return invokePricingFunction<{ mode: PricingSyncMode }, PricingSyncResult>('sync-lme-prices', {
+    mode,
   })
-
-  if (error) {
-    throw error
-  }
-
-  return data as PricingSyncResult
 }

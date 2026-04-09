@@ -2,7 +2,7 @@
 
 import { requireAdminProfile, resolveHttpErrorStatus } from '../_shared/auth.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
-import { insertIntegrationLog } from '../_shared/logging.ts'
+import { insertAdminAuditLog, insertIntegrationLog } from '../_shared/logging.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
 
 type SyncMode = 'backfill' | 'latest'
@@ -400,6 +400,17 @@ Deno.serve(async (request) => {
         providers: Array.from(new Set(entries.map((entry) => entry.provider_name))),
       },
       status: 'success',
+    })
+
+    await insertAdminAuditLog({
+      action: 'sync_lme_prices',
+      actorUserId: actor.id,
+      afterData: {
+        count: entries.length,
+        mode,
+        providers: Array.from(new Set(entries.map((entry) => entry.provider_name))),
+      },
+      entityType: 'pricing',
     })
 
     return jsonResponse({

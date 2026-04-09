@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminBlogCategoryForm } from '@/components/admin/admin-blog-category-form'
 import { AdminBlogPostForm } from '@/components/admin/admin-blog-post-form'
@@ -12,6 +12,8 @@ import { AdminPagination } from '@/components/admin/admin-pagination'
 import { AdminRowActions } from '@/components/admin/admin-row-actions'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
+import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
+import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -30,6 +32,7 @@ import {
 } from '@/domains/blog/api'
 import type { BlogCategoryFormValues, BlogPostFormValues } from '@/domains/blog/schemas'
 import type { AdminBlogCategory, AdminBlogPost, BlogPostStatus } from '@/domains/blog/types'
+import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 import { useAuth } from '@/hooks/use-auth'
 
 const PAGE_SIZE = 10
@@ -58,13 +61,15 @@ function formatDate(value: string | null) {
 export function AdminBlogPage() {
   const queryClient = useQueryClient()
   const { user } = useAuth()
+  const { clearFeedback, feedback, setErrorFeedback, setSuccessFeedback } = useOperationFeedback()
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | BlogPostStatus>('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [page, setPage] = useState(1)
-  const [feedback, setFeedback] = useState<string | null>(null)
   const [editingPost, setEditingPost] = useState<AdminBlogPost | null>(null)
   const [editingCategory, setEditingCategory] = useState<AdminBlogCategory | null>(null)
+  const [postPendingRemoval, setPostPendingRemoval] = useState<AdminBlogPost | null>(null)
+  const [categoryPendingRemoval, setCategoryPendingRemoval] = useState<AdminBlogCategory | null>(null)
 
   const blogQuery = useQuery({
     queryKey: ['blog', 'admin'],
@@ -85,25 +90,30 @@ export function AdminBlogPage() {
         existingCategory: editingCategory,
         values,
       }),
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível salvar a categoria.')
+    },
     onSuccess: async () => {
-      setFeedback(editingCategory ? 'Categoria editorial atualizada com sucesso.' : 'Categoria editorial criada com sucesso.')
+      setSuccessFeedback(
+        editingCategory
+          ? 'Categoria editorial atualizada com sucesso.'
+          : 'Categoria editorial criada com sucesso.',
+      )
       setEditingCategory(null)
       await invalidateBlog()
-    },
-    onError: (error) => {
-      setFeedback(error instanceof Error ? error.message : 'Não foi possível salvar a categoria.')
     },
   })
 
   const deleteCategoryMutation = useMutation({
     mutationFn: deleteBlogCategory,
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível remover a categoria.')
+    },
     onSuccess: async () => {
-      setFeedback('Categoria editorial removida com sucesso.')
+      setSuccessFeedback('Categoria editorial removida com sucesso.')
+      setCategoryPendingRemoval(null)
       setEditingCategory(null)
       await invalidateBlog()
-    },
-    onError: (error) => {
-      setFeedback(error instanceof Error ? error.message : 'Não foi possível remover a categoria.')
     },
   })
 
@@ -121,8 +131,11 @@ export function AdminBlogPage() {
         values: input.values,
       })
     },
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível salvar o post.')
+    },
     onSuccess: async (savedPost) => {
-      setFeedback(
+      setSuccessFeedback(
         editingPost
           ? `Post "${savedPost.title}" atualizado com sucesso.`
           : `Post "${savedPost.title}" criado com sucesso.`,
@@ -130,29 +143,24 @@ export function AdminBlogPage() {
       setEditingPost(savedPost)
       await invalidateBlog()
     },
-    onError: (error) => {
-      setFeedback(error instanceof Error ? error.message : 'Não foi possível salvar o post.')
-    },
   })
 
   const deletePostMutation = useMutation({
     mutationFn: deleteBlogPost,
-    onSuccess: async () => {
-      setFeedback('Post removido com sucesso.')
-      setEditingPost(null)
-      await invalidateBlog()
-    },
     onError: (error) => {
-      setFeedback(error instanceof Error ? error.message : 'Não foi possível remover o post.')
+      setErrorFeedback(error, 'Não foi possível remover o post.')
+    },
+    onSuccess: async () => {
+      setSuccessFeedback('Post removido com sucesso.')
+      setEditingPost(null)
+      setPostPendingRemoval(null)
+      await invalidateBlog()
     },
   })
 
   const posts = blogQuery.data ?? []
   const categories = categoriesQuery.data ?? []
-  const categoryOptions = useMemo(
-    () => ['all', ...categories.map((category) => category.name)],
-    [categories],
-  )
+  const categoryOptions = useMemo(() => ['all', ...categories.map((category) => category.name)], [categories])
   const filteredPosts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
 
@@ -197,8 +205,8 @@ export function AdminBlogPage() {
           <>
             <Button
               onClick={() => {
+                clearFeedback()
                 setEditingPost(null)
-                setFeedback(null)
               }}
               type="button"
             >
@@ -223,11 +231,7 @@ export function AdminBlogPage() {
         <AdminStatCard label="Categorias" value={stats.categories} />
       </div>
 
-      {feedback ? (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 shadow-sm">
-          {feedback}
-        </div>
-      ) : null}
+      {feedback ? <OperationFeedback feedback={feedback} /> : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_380px]">
         <AdminBlogPostForm
@@ -270,10 +274,7 @@ export function AdminBlogPage() {
                 <p className="text-sm text-muted-foreground">Carregando categorias...</p>
               ) : categories.length > 0 ? (
                 categories.map((category) => (
-                  <div
-                    key={category.id}
-                    className="rounded-2xl border border-border/70 px-4 py-4"
-                  >
+                  <div key={category.id} className="rounded-2xl border border-border/70 px-4 py-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1">
                         <p className="font-medium text-foreground">{category.name}</p>
@@ -294,15 +295,7 @@ export function AdminBlogPage() {
                             disabled: deleteCategoryMutation.isPending || category.postCount > 0,
                             icon: Trash2,
                             label: 'Excluir',
-                            onClick: () => {
-                              if (
-                                window.confirm(
-                                  `Excluir a categoria "${category.name}"? Esta ação só é permitida sem posts vinculados.`,
-                                )
-                              ) {
-                                deleteCategoryMutation.mutate(category)
-                              }
-                            },
+                            onClick: () => setCategoryPendingRemoval(category),
                             variant: 'destructive',
                           },
                         ]}
@@ -324,11 +317,11 @@ export function AdminBlogPage() {
         actions={
           <Button
             onClick={() => {
+              clearFeedback()
+              setCategoryFilter('all')
               setPage(1)
               setQuery('')
               setStatusFilter('all')
-              setCategoryFilter('all')
-              setFeedback(null)
             }}
             type="button"
             variant="outline"
@@ -436,11 +429,7 @@ export function AdminBlogPage() {
                     disabled: deletePostMutation.isPending,
                     icon: Trash2,
                     label: 'Excluir',
-                    onClick: () => {
-                      if (window.confirm(`Excluir o post "${post.title}"? Esta ação é irreversível.`)) {
-                        deletePostMutation.mutate(post)
-                      }
-                    },
+                    onClick: () => setPostPendingRemoval(post),
                     variant: 'destructive',
                   },
                 ]}
@@ -462,6 +451,52 @@ export function AdminBlogPage() {
         onPageChange={setPage}
         pageSize={PAGE_SIZE}
         totalItems={filteredPosts.length}
+      />
+
+      <ConfirmActionDialog
+        confirmLabel="Excluir categoria"
+        description={
+          categoryPendingRemoval
+            ? `Excluir a categoria "${categoryPendingRemoval.name}"? Essa ação só é segura quando não houver posts vinculados.`
+            : ''
+        }
+        isPending={deleteCategoryMutation.isPending}
+        onConfirm={() => {
+          if (categoryPendingRemoval) {
+            deleteCategoryMutation.mutate(categoryPendingRemoval)
+          }
+        }}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCategoryPendingRemoval(null)
+          }
+        }}
+        open={Boolean(categoryPendingRemoval)}
+        title="Confirmar exclusão"
+        tone="danger"
+      />
+
+      <ConfirmActionDialog
+        confirmLabel="Excluir post"
+        description={
+          postPendingRemoval
+            ? `Excluir o post "${postPendingRemoval.title}"? Essa ação remove o conteúdo editorial do sistema.`
+            : ''
+        }
+        isPending={deletePostMutation.isPending}
+        onConfirm={() => {
+          if (postPendingRemoval) {
+            deletePostMutation.mutate(postPendingRemoval)
+          }
+        }}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPostPendingRemoval(null)
+          }
+        }}
+        open={Boolean(postPendingRemoval)}
+        title="Confirmar exclusão"
+        tone="danger"
       />
     </section>
   )

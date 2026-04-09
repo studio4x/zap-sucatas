@@ -5,6 +5,7 @@ import { paths } from '@/app/paths'
 import { AdminFilterCard } from '@/components/admin/admin-filter-card'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
+import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -12,12 +13,13 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { fetchSystemSettings, updateSystemSettings } from '@/domains/settings/api'
 import type { UpdateSystemSettingsInput } from '@/domains/settings/types'
+import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 
 type SettingsFormState = UpdateSystemSettingsInput
 
 export function AdminSettingsPage() {
   const queryClient = useQueryClient()
-  const [feedback, setFeedback] = useState<string | null>(null)
+  const { clearFeedback, feedback, setErrorFeedback, setSuccessFeedback } = useOperationFeedback()
   const [formState, setFormState] = useState<SettingsFormState>({
     allowGuestQuestions: false,
     maintenanceMode: false,
@@ -52,8 +54,11 @@ export function AdminSettingsPage() {
   const updateMutation = useMutation({
     mutationFn: updateSystemSettings,
     onSuccess: async () => {
-      setFeedback('Configurações globais atualizadas com sucesso.')
+      setSuccessFeedback('Configurações globais atualizadas com sucesso.')
       await queryClient.invalidateQueries({ queryKey: ['system-settings'] })
+    },
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível salvar as configurações globais.')
     },
   })
 
@@ -80,7 +85,10 @@ export function AdminSettingsPage() {
           <>
             <Button
               disabled={updateMutation.isPending}
-              onClick={() => updateMutation.mutate(formState)}
+              onClick={() => {
+                clearFeedback()
+                updateMutation.mutate(formState)
+              }}
               type="button"
             >
               {updateMutation.isPending ? 'Salvando...' : 'Salvar configurações'}
@@ -90,31 +98,24 @@ export function AdminSettingsPage() {
             </Button>
           </>
         }
-        description="Parametros globais do produto, contatos institucionais e toggles operacionais do MVP."
+        description="Parâmetros globais do produto, contatos institucionais e toggles operacionais do MVP."
         eyebrow="Admin / configurações"
         title="Configurações globais"
       />
 
-      {feedback ? (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 shadow-sm">
-          {feedback}
-        </div>
-      ) : null}
+      <OperationFeedback feedback={feedback} />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard label="Site" value={settingsQuery.data.siteName} />
         <AdminStatCard
-          label="Perguntas anonimas"
+          label="Perguntas anônimas"
           value={settingsQuery.data.allowGuestQuestions ? 'Ativas' : 'Desativadas'}
         />
         <AdminStatCard
           label="Manutenção"
           value={settingsQuery.data.maintenanceMode ? 'Ativa' : 'Desativada'}
         />
-        <AdminStatCard
-          label="Suporte"
-          value={settingsQuery.data.supportEmail ?? 'Sem e-mail'}
-        />
+        <AdminStatCard label="Suporte" value={settingsQuery.data.supportEmail ?? 'Sem e-mail'} />
       </div>
 
       <AdminFilterCard
@@ -126,7 +127,7 @@ export function AdminSettingsPage() {
             Ajustes aqui afetam o comportamento público e autenticado do MVP.
           </div>
           <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-            Regra critica continua no backend com RLS e funcoes sensiveis no Supabase.
+            Regras críticas continuam no backend com RLS, triggers e funções sensíveis no Supabase.
           </div>
         </div>
       </AdminFilterCard>
@@ -143,22 +144,24 @@ export function AdminSettingsPage() {
               </label>
               <Input
                 id="site-name"
-                onChange={(event) =>
+                onChange={(event) => {
+                  clearFeedback()
                   setFormState((current) => ({ ...current, siteName: event.target.value }))
-                }
+                }}
                 value={formState.siteName}
               />
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground" htmlFor="support-email">
-                Email de suporte
+                E-mail de suporte
               </label>
               <Input
                 id="support-email"
-                onChange={(event) =>
+                onChange={(event) => {
+                  clearFeedback()
                   setFormState((current) => ({ ...current, supportEmail: event.target.value }))
-                }
+                }}
                 value={formState.supportEmail}
               />
             </div>
@@ -169,9 +172,10 @@ export function AdminSettingsPage() {
               </label>
               <Input
                 id="support-phone"
-                onChange={(event) =>
+                onChange={(event) => {
+                  clearFeedback()
                   setFormState((current) => ({ ...current, supportPhone: event.target.value }))
-                }
+                }}
                 value={formState.supportPhone}
               />
             </div>
@@ -179,16 +183,17 @@ export function AdminSettingsPage() {
             <div className="rounded-lg border border-border bg-muted/25 px-4 py-4">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-medium text-foreground">Perguntas anonimas</p>
+                  <p className="text-sm font-medium text-foreground">Perguntas anônimas</p>
                   <p className="text-sm text-muted-foreground">
                     Libera envio de perguntas sem login no detalhe do anúncio.
                   </p>
                 </div>
                 <Switch
                   checked={formState.allowGuestQuestions}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={(checked) => {
+                    clearFeedback()
                     setFormState((current) => ({ ...current, allowGuestQuestions: checked }))
-                  }
+                  }}
                 />
               </div>
             </div>
@@ -198,14 +203,15 @@ export function AdminSettingsPage() {
                 <div>
                   <p className="text-sm font-medium text-foreground">Modo manutenção</p>
                   <p className="text-sm text-muted-foreground">
-                    Toggle operacional para contingencia global do site.
+                    Toggle operacional para contingência global do site.
                   </p>
                 </div>
                 <Switch
                   checked={formState.maintenanceMode}
-                  onCheckedChange={(checked) =>
+                  onCheckedChange={(checked) => {
+                    clearFeedback()
                     setFormState((current) => ({ ...current, maintenanceMode: checked }))
-                  }
+                  }}
                 />
               </div>
             </div>
@@ -214,34 +220,36 @@ export function AdminSettingsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>SEO padrao</CardTitle>
+            <CardTitle>SEO padrão</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground" htmlFor="seo-title">
-                Titulo SEO padrao
+                Título SEO padrão
               </label>
               <Input
                 id="seo-title"
-                onChange={(event) =>
+                onChange={(event) => {
+                  clearFeedback()
                   setFormState((current) => ({ ...current, seoTitleDefault: event.target.value }))
-                }
+                }}
                 value={formState.seoTitleDefault}
               />
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground" htmlFor="seo-description">
-                Descricao SEO padrao
+                Descrição SEO padrão
               </label>
               <Textarea
                 id="seo-description"
-                onChange={(event) =>
+                onChange={(event) => {
+                  clearFeedback()
                   setFormState((current) => ({
                     ...current,
                     seoDescriptionDefault: event.target.value,
                   }))
-                }
+                }}
                 value={formState.seoDescriptionDefault}
               />
             </div>
