@@ -42,6 +42,8 @@ type ListingEditorProps = {
   categories: ListingCategory[]
   defaultValues: ListingFormValues
   existingImages?: ListingImage[]
+  finalActionDescription?: string
+  finalActionLabel?: string
   isSubmitting?: boolean
   materials: ListingMaterial[]
   mode: 'create' | 'edit'
@@ -108,6 +110,8 @@ export function ListingEditor({
   categories,
   defaultValues,
   existingImages,
+  finalActionDescription,
+  finalActionLabel,
   isSubmitting = false,
   materials,
   mode,
@@ -348,6 +352,10 @@ export function ListingEditor({
   }
 
   const canSubmitForReview = orderedImageItems.length > 0
+  const resolvedFinalActionLabel = finalActionLabel ?? 'Salvar e enviar para revisão'
+  const resolvedFinalActionDescription =
+    finalActionDescription ??
+    'Salve quantas vezes precisar. Quando os dados estiverem completos, envie para revisão.'
 
   return (
     <form className="space-y-6" onSubmit={form.handleSubmit((values) => handleSubmit(values, false))}>
@@ -698,10 +706,7 @@ export function ListingEditor({
             />
           ) : null}
 
-          <DashboardFormSection
-            description="Salve quantas vezes precisar. Quando os dados estiverem completos, envie para revisão."
-            title="Publicacao"
-          >
+          <DashboardFormSection description={resolvedFinalActionDescription} title="Publicacao">
             <div className="space-y-3">
               <Button
                 disabled={isSubmitting || status === 'archived'}
@@ -716,7 +721,7 @@ export function ListingEditor({
                 onClick={() => void form.handleSubmit((values) => handleSubmit(values, true))()}
                 type="button"
               >
-                {isSubmitting && submitAfterSave ? 'Enviando...' : 'Salvar e enviar para revisão'}
+                {isSubmitting && submitAfterSave ? 'Processando...' : resolvedFinalActionLabel}
               </Button>
               {!canSubmitForReview ? (
                 <DashboardEmptyState

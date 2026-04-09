@@ -5,11 +5,11 @@ import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { ListingEditor, type ListingEditorSubmitPayload } from '@/components/listings/listing-editor'
 import {
+  approveListing,
   fetchListingDetailsForAdmin,
   fetchListingReferences,
   removeListingImage,
   reorderListingImages,
-  submitListingForReview,
   updateListingDraft,
   uploadListingImages,
 } from '@/domains/listings/api'
@@ -83,7 +83,7 @@ export function AdminEditListingPage() {
       }
 
       if (payload.submitAfterSave) {
-        await submitListingForReview(id)
+        await approveListing(id)
       }
 
       await Promise.all([
@@ -130,6 +130,8 @@ export function AdminEditListingPage() {
         categories={referencesQuery.data.categories}
         defaultValues={listingToFormValues(listingQuery.data)}
         existingImages={listingQuery.data.images}
+        finalActionDescription="Salve alterações em rascunho ou publique imediatamente o anúncio no catálogo quando o conteúdo estiver validado pela operação."
+        finalActionLabel="Salvar e publicar agora"
         isSubmitting={updateMutation.isPending}
         materials={referencesQuery.data.materials}
         mode="edit"

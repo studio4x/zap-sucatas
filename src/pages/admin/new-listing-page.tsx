@@ -6,10 +6,10 @@ import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { ListingEditor, type ListingEditorSubmitPayload } from '@/components/listings/listing-editor'
 import {
+  approveListing,
   createListingDraft,
   fetchListingReferences,
   reorderListingImages,
-  submitListingForReview,
   uploadListingImages,
 } from '@/domains/listings/api'
 import { createEmptyListingFormValues } from '@/domains/listings/utils'
@@ -83,7 +83,7 @@ export function AdminNewListingPage() {
       }
 
       if (payload.submitAfterSave) {
-        await submitListingForReview(listingId)
+        await approveListing(listingId)
       }
 
       await Promise.all([
@@ -129,6 +129,8 @@ export function AdminNewListingPage() {
         cancelTo={paths.admin.listings}
         categories={referencesQuery.data.categories}
         defaultValues={defaultValues}
+        finalActionDescription="Salve o anúncio como rascunho ou publique diretamente no catálogo da Zap Sucatas quando os dados estiverem prontos."
+        finalActionLabel="Salvar e publicar agora"
         isSubmitting={createMutation.isPending}
         materials={referencesQuery.data.materials}
         mode="create"
