@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client'
 import { paths } from '@/app/paths'
+import { env } from '@/lib/env'
 import type {
   Listing,
   ListingAttribute,
@@ -69,40 +70,35 @@ function ensureSupabase() {
   return supabase
 }
 
-async function unwrapFunctionError(error: unknown) {
-  if (typeof error !== 'object' || error === null || !('context' in error)) {
+async function getFreshAccessToken() {
+  const client = ensureSupabase()
+  const {
+    data: { session },
+  } = await client.auth.getSession()
+
+  if (!session?.refresh_token) {
+    if (!session?.access_token) {
+      throw new Error('Sessao invalida. Faça login novamente.')
+    }
+
+    return session.access_token
+  }
+
+  const { data, error } = await client.auth.refreshSession({
+    refresh_token: session.refresh_token,
+  })
+
+  if (error) {
     throw error
   }
 
-  const context = (error as { context?: Response | { json?: () => Promise<unknown> } }).context
+  const accessToken = data.session?.access_token ?? session.access_token
 
-  if (!context) {
-    throw error
+  if (!accessToken) {
+    throw new Error('Sessao invalida. Faça login novamente.')
   }
 
-  if (typeof (context as { json?: () => Promise<unknown> }).json !== 'function') {
-    if (error instanceof Error && error.message) {
-      throw error
-    }
-
-    throw new Error('Falha de rede ao acessar a operação sensível.')
-  }
-
-  try {
-    const payload = (await (context as Response).json()) as { error?: string }
-
-    if (payload.error) {
-      throw new Error(payload.error)
-    }
-  } catch (parseError) {
-    if (parseError instanceof Error && parseError.message) {
-      throw parseError
-    }
-
-    throw error
-  }
-
-  throw error
+  return accessToken
 }
 
 function normalizeAttributeKey(label: string) {
@@ -632,14 +628,43 @@ export async function reorderListingImages(input: {
 }
 
 async function invokeListingFunction<TBody extends object, TResponse>(name: string, body: TBody) {
-  const client = ensureSupabase()
-  const { data, error } = await client.functions.invoke(name, { body })
+  ensureSupabase()
 
-  if (error) {
-    await unwrapFunctionError(error)
+  if (!env.supabaseUrl || !env.supabaseAnonKey) {
+    throw new Error('Supabase nao configurado no ambiente atual.')
   }
 
-  return data as TResponse
+  const accessToken = await getFreshAccessToken()
+  const response = await fetch(`${env.supabaseUrl}/functions/v1/${name}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      apikey: env.supabaseAnonKey,
+    },
+    body: JSON.stringify({
+      ...body,
+      access_token: accessToken,
+    }),
+  })
+
+  if (!response.ok) {
+    try {
+      const payload = (await response.json()) as { error?: string }
+
+      if (payload.error) {
+        throw new Error(payload.error)
+      }
+    } catch (parseError) {
+      if (parseError instanceof Error && parseError.message) {
+        throw parseError
+      }
+    }
+
+    throw new Error('Edge Function returned a non-2xx status code')
+  }
+
+  return (await response.json()) as TResponse
 }
 
 export async function submitListingForReview(listingId: string) {
