@@ -56,9 +56,7 @@ async function unwrapFunctionError(error: unknown) {
     throw error
   }
 
-  const json = (context as { json?: () => Promise<unknown> }).json
-
-  if (typeof json !== 'function') {
+  if (typeof (context as { json?: () => Promise<unknown> }).json !== 'function') {
     if (error instanceof Error && error.message) {
       throw error
     }
@@ -67,7 +65,7 @@ async function unwrapFunctionError(error: unknown) {
   }
 
   try {
-    const payload = (await json()) as { error?: string }
+    const payload = (await (context as Response).json()) as { error?: string }
 
     if (payload.error) {
       throw new Error(payload.error)
