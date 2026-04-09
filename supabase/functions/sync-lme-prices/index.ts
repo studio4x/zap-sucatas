@@ -1,6 +1,6 @@
 /// <reference types="jsr:@supabase/functions-js/edge-runtime.d.ts" />
 
-import { requireAdminProfile } from '../_shared/auth.ts'
+import { requireAdminProfile, resolveHttpErrorStatus } from '../_shared/auth.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertIntegrationLog } from '../_shared/logging.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
@@ -417,6 +417,6 @@ Deno.serve(async (request) => {
       status: 'error',
     })
 
-    return jsonResponse({ error: message }, 500)
+    return jsonResponse({ error: message }, resolveHttpErrorStatus(error))
   }
 })

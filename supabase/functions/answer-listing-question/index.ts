@@ -1,6 +1,6 @@
 /// <reference types="jsr:@supabase/functions-js/edge-runtime.d.ts" />
 
-import { requireActiveProfile } from '../_shared/auth.ts'
+import { requireActiveProfile, resolveHttpErrorStatus } from '../_shared/auth.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertAdminAuditLog } from '../_shared/logging.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
@@ -96,6 +96,6 @@ Deno.serve(async (request) => {
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected error.'
-    return jsonResponse({ error: message }, 500)
+    return jsonResponse({ error: message }, resolveHttpErrorStatus(error))
   }
 })

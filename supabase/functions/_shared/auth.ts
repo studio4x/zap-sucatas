@@ -8,45 +8,61 @@ export type ActorProfile = {
   status: 'active' | 'suspended' | 'under_review'
 }
 
-function decodeJwtPayload(token: string) {
-  const parts = token.split('.')
+export class HttpError extends Error {
+  status: number
 
-  if (parts.length < 2) {
-    throw new Error('Invalid JWT')
+  constructor(message: string, status: number) {
+    super(message)
+    this.name = 'HttpError'
+    this.status = status
   }
-
-  const payload = parts[1]
-  const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
-  const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4)
-  const decoded = atob(padded)
-
-  return JSON.parse(decoded)
 }
 
-export function getBearerToken(request: Request) {
+async function getBodyAccessToken(request: Request) {
+  try {
+    const payload = (await request.clone().json()) as { access_token?: unknown }
+
+    if (typeof payload.access_token === 'string' && payload.access_token.trim().length > 0) {
+      return payload.access_token.trim()
+    }
+  } catch {
+    return null
+  }
+
+  return null
+}
+
+export async function getBearerToken(request: Request) {
   const authorization = request.headers.get('Authorization')
 
-  if (!authorization?.startsWith('Bearer ')) {
-    throw new Error('Missing bearer token.')
+  if (authorization?.startsWith('Bearer ')) {
+    return authorization.slice('Bearer '.length)
   }
 
-  return authorization.slice('Bearer '.length)
+  const bodyToken = await getBodyAccessToken(request)
+
+  if (bodyToken) {
+    return bodyToken
+  }
+
+  throw new HttpError('Missing bearer token.', 401)
 }
 
-export function getAuthUserId(request: Request) {
-  const token = getBearerToken(request)
-  const payload = decodeJwtPayload(token)
+export async function getAuthUserId(request: Request) {
+  const token = await getBearerToken(request)
+  const admin = createAdminClient()
+  const { data, error } = await admin.auth.getUser(token)
 
-  if (typeof payload.sub !== 'string' || payload.sub.length === 0) {
-    throw new Error('Invalid auth user id.')
+  if (error || !data.user?.id) {
+    throw new HttpError('Invalid or expired session.', 401)
   }
 
-  return payload.sub
+  return data.user.id
 }
 
 export async function requireActiveProfile(request: Request) {
   const admin = createAdminClient()
-  const authUserId = getAuthUserId(request)
+  const authUserId = await getAuthUserId(request)
   const { data, error } = await admin
     .from('profiles')
     .select('id, auth_user_id, full_name, role, status')
@@ -54,11 +70,11 @@ export async function requireActiveProfile(request: Request) {
     .single()
 
   if (error || !data) {
-    throw new Error('Active profile not found.')
+    throw new HttpError('Active profile not found.', 403)
   }
 
   if (data.status !== 'active') {
-    throw new Error('Profile is not active.')
+    throw new HttpError('Profile is not active.', 403)
   }
 
   return data as ActorProfile
@@ -68,8 +84,12 @@ export async function requireAdminProfile(request: Request) {
   const profile = await requireActiveProfile(request)
 
   if (profile.role !== 'admin') {
-    throw new Error('Admin access required.')
+    throw new HttpError('Admin access required.', 403)
   }
 
   return profile
+}
+
+export function resolveHttpErrorStatus(error: unknown) {
+  return error instanceof HttpError ? error.status : 500
 }
