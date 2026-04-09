@@ -219,6 +219,20 @@ Ao concluir uma tarefa:
 
 ---
 
+## Versao de build obrigatoria
+
+Toda entrega que altere o produto deve atualizar obrigatoriamente:
+
+- `src/lib/build-version.ts`
+
+Regras:
+
+- a versao do build deve aparecer de forma discreta no rodape da area publica, do dashboard e do admin;
+- antes de publicar qualquer alteracao, atualizar o valor de `BUILD_VERSION`;
+- nao concluir tarefa com mudanca de produto sem revisar e incrementar essa versao.
+
+---
+
 ## Regras para resposta dentro do repositorio
 
 Quando receber uma tarefa, responder de forma objetiva e tecnica.
