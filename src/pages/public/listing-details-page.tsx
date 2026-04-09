@@ -6,9 +6,9 @@ import { paths } from '@/app/paths'
 import { FeaturedListingsSection } from '@/components/public/featured-listings-section'
 import { ListingGallery } from '@/components/public/listing-gallery'
 import { ListingSidebarCard } from '@/components/public/listing-sidebar-card'
+import { PublicSectionHeading } from '@/components/public/public-section-heading'
 import { QuestionAnswerBlock } from '@/components/public/question-answer-block'
 import { SellerCard } from '@/components/public/seller-card'
-import { PublicSectionHeading } from '@/components/public/public-section-heading'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -80,6 +80,11 @@ export function ListingDetailsPage() {
         queryKey: ['questions', 'public', listingQuery.data?.id],
       })
     },
+    onError: (error) => {
+      setFeedback(
+        error instanceof Error ? error.message : 'Não foi possível enviar a pergunta no momento.',
+      )
+    },
   })
 
   const canAskAsGuest = settingsQuery.data?.allowGuestQuestions ?? false
@@ -137,7 +142,10 @@ export function ListingDetailsPage() {
       <div className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-6">
           <PublicSectionHeading
-            description={listing.summary || 'Anúncio público com detalhes comerciais, atributos técnicos e perguntas para apoiar a negociação.'}
+            description={
+              listing.summary ||
+              'Anúncio público com detalhes comerciais, atributos técnicos e perguntas para apoiar a negociação.'
+            }
             eyebrow={listing.categoryName ?? 'Anúncio moderado'}
             title={listing.title}
           />

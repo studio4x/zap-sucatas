@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client'
+import { env } from '@/lib/env'
 import type {
   AnswerQuestionInput,
   CreateQuestionInput,
@@ -48,6 +49,89 @@ function ensureSupabase() {
   }
 
   return supabase
+}
+
+async function getFreshAccessToken() {
+  const client = ensureSupabase()
+  const {
+    data: { session },
+  } = await client.auth.getSession()
+
+  if (!session?.refresh_token) {
+    if (!session?.access_token) {
+      throw new Error('Sessao invalida. Faca login novamente.')
+    }
+
+    return session.access_token
+  }
+
+  const { data, error } = await client.auth.refreshSession({
+    refresh_token: session.refresh_token,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  const accessToken = data.session?.access_token ?? session.access_token
+
+  if (!accessToken) {
+    throw new Error('Sessao invalida. Faca login novamente.')
+  }
+
+  return accessToken
+}
+
+function normalizeQuestionInsertError(message: string) {
+  if (message.includes('Guest name is required')) {
+    return 'Informe seu nome para enviar a pergunta sem login.'
+  }
+
+  if (message.includes('valid guest email')) {
+    return 'Informe um e-mail valido para enviar a pergunta sem login.'
+  }
+
+  return message
+}
+
+async function invokeQuestionFunction<TBody extends object, TResponse>(name: string, body: TBody) {
+  ensureSupabase()
+
+  if (!env.supabaseUrl || !env.supabaseAnonKey) {
+    throw new Error('Supabase nao configurado no ambiente atual.')
+  }
+
+  const accessToken = await getFreshAccessToken()
+  const response = await fetch(`${env.supabaseUrl}/functions/v1/${name}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      apikey: env.supabaseAnonKey,
+    },
+    body: JSON.stringify({
+      ...body,
+      access_token: accessToken,
+    }),
+  })
+
+  if (!response.ok) {
+    try {
+      const payload = (await response.json()) as { error?: string }
+
+      if (payload.error) {
+        throw new Error(payload.error)
+      }
+    } catch (parseError) {
+      if (parseError instanceof Error && parseError.message) {
+        throw parseError
+      }
+    }
+
+    throw new Error('Edge Function returned a non-2xx status code')
+  }
+
+  return (await response.json()) as TResponse
 }
 
 function mapAnswer(row: AnswerRow): ListingAnswer {
@@ -161,31 +245,25 @@ export async function createListingQuestion(input: CreateQuestionInput) {
     .single()
 
   if (error || !data) {
-    throw error ?? new Error('Falha ao enviar a pergunta.')
+    const message = error?.message
+      ? normalizeQuestionInsertError(error.message)
+      : 'Falha ao enviar a pergunta.'
+    throw new Error(message)
   }
 
   return data.id as string
 }
 
 export async function answerListingQuestion(input: AnswerQuestionInput) {
-  const { data, error } = await ensureSupabase().functions.invoke('answer-listing-question', {
-    body: input,
-  })
-
-  if (error) {
-    throw error
-  }
-
-  return data as { questionId: string; questionStatus: QuestionStatus; success: boolean }
+  return invokeQuestionFunction<
+    AnswerQuestionInput,
+    { questionId: string; questionStatus: QuestionStatus; success: boolean }
+  >('answer-listing-question', input)
 }
 
 export async function updateQuestionStatus(input: { questionId: string; questionStatus: QuestionStatus }) {
-  const { error } = await ensureSupabase()
-    .from('listing_questions')
-    .update({ status: input.questionStatus })
-    .eq('id', input.questionId)
-
-  if (error) {
-    throw error
-  }
+  return invokeQuestionFunction<
+    { questionId: string; questionStatus: QuestionStatus },
+    { questionId: string; questionStatus: QuestionStatus; success: boolean }
+  >('moderate-listing-question', input)
 }

@@ -13,6 +13,7 @@ import type {
   ListingMaterial,
   PublicListingFilters,
 } from '@/domains/listings/types'
+import { normalizeListingCity, normalizeListingState } from '@/domains/listings/utils'
 
 const LISTING_MEDIA_BUCKET = 'listing-media'
 
@@ -437,14 +438,14 @@ export async function fetchPublicListingBySlug(slug: string) {
 function mapListingPayload(values: ListingFormValues) {
   return {
     category_id: values.categoryId,
-    city: values.city.trim(),
+    city: normalizeListingCity(values.city),
     condition_type: values.conditionType.trim() || null,
     contact_name: values.contactName.trim() || null,
     contact_phone: values.contactPhone.trim() || null,
     description: values.description.trim(),
     price_label: values.priceLabel.trim() || null,
     primary_material_id: values.primaryMaterialId.trim() || null,
-    state: values.state.trim().toUpperCase(),
+    state: normalizeListingState(values.state),
     summary: values.summary.trim() || null,
     title: values.title.trim(),
   }

@@ -1,8 +1,24 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
+import { paths } from '@/app/paths'
 import { SiteFooter } from '@/components/public/site-footer'
 import { SiteHeader } from '@/components/public/site-header'
+import { MaintenanceScreen } from '@/components/shared/maintenance-screen'
+import { useSystemSettings } from '@/hooks/use-system-settings'
 
 export function PublicLayout() {
+  const location = useLocation()
+  const { isLoading, maintenanceMode } = useSystemSettings()
+  const allowDuringMaintenance = [paths.auth.login, paths.auth.forgotPassword] as string[]
+
+  if (!isLoading && maintenanceMode && !allowDuringMaintenance.includes(location.pathname)) {
+    return (
+      <MaintenanceScreen
+        description="O catálogo público da Zap Sucatas está temporariamente indisponível para ajuste operacional. O acesso à conta segue liberado para administradores e contingência."
+        title="Portal temporariamente em manutenção"
+      />
+    )
+  }
+
   return (
     <div className="public-theme min-h-screen">
       <div className="relative min-h-screen">

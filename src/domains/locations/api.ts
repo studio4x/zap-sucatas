@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client'
 import type { AdminListingLocation } from '@/domains/locations/types'
+import { normalizeListingCity, normalizeListingState } from '@/domains/listings/utils'
 
 type ListingLocationRow = {
   city: string
@@ -30,13 +31,15 @@ export async function fetchAdminLocations() {
   const grouped = new Map<string, AdminListingLocation>()
 
   ;((data ?? []) as ListingLocationRow[]).forEach((row) => {
-    const key = `${row.state}-${row.city}`.toLowerCase()
+    const normalizedState = normalizeListingState(row.state)
+    const normalizedCity = normalizeListingCity(row.city)
+    const key = `${normalizedState}-${normalizedCity}`.toLowerCase()
     const current = grouped.get(key) ?? {
       approvedListings: 0,
-      city: row.city,
+      city: normalizedCity,
       lastUpdatedAt: row.updated_at,
       pendingListings: 0,
-      state: row.state,
+      state: normalizedState,
       totalListings: 0,
     }
 

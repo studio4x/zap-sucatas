@@ -72,3 +72,6 @@ verify_jwt = false
 
 [functions.manage-listing-material]
 verify_jwt = false
+
+[functions.moderate-listing-question]
+verify_jwt = false

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
 import { Eye, MessageSquareReply } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
 import { AdminFilterCard } from '@/components/admin/admin-filter-card'
@@ -46,7 +46,9 @@ export function AdminQuestionsPage() {
   const [page, setPage] = useState(1)
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null)
   const [drafts, setDrafts] = useState<Record<string, string>>({})
-  const [feedback, setFeedback] = useState<string | null>(null)
+  const [feedback, setFeedback] = useState<{ message: string; tone: 'error' | 'success' } | null>(
+    null,
+  )
 
   const questionsQuery = useQuery({
     queryKey: ['questions', 'admin'],
@@ -56,24 +58,48 @@ export function AdminQuestionsPage() {
   const answerMutation = useMutation({
     mutationFn: answerListingQuestion,
     onSuccess: async () => {
-      setFeedback('Resposta administrativa registrada com sucesso.')
+      setFeedback({
+        message: 'Resposta administrativa registrada com sucesso.',
+        tone: 'success',
+      })
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['questions', 'admin'] }),
         queryClient.invalidateQueries({ queryKey: ['questions', 'owner'] }),
         queryClient.invalidateQueries({ queryKey: ['questions', 'public'] }),
       ])
     },
+    onError: (error) => {
+      setFeedback({
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível salvar a resposta administrativa.',
+        tone: 'error',
+      })
+    },
   })
 
   const statusMutation = useMutation({
     mutationFn: updateQuestionStatus,
     onSuccess: async () => {
-      setFeedback('Status da pergunta atualizado com sucesso.')
+      setFeedback({
+        message: 'Status da pergunta atualizado com sucesso.',
+        tone: 'success',
+      })
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['questions', 'admin'] }),
         queryClient.invalidateQueries({ queryKey: ['questions', 'owner'] }),
         queryClient.invalidateQueries({ queryKey: ['questions', 'public'] }),
       ])
+    },
+    onError: (error) => {
+      setFeedback({
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível atualizar o status da pergunta.',
+        tone: 'error',
+      })
     },
   })
 
@@ -129,16 +155,16 @@ export function AdminQuestionsPage() {
         actions={
           <>
             <Button asChild type="button">
-              <Link to={paths.admin.listings}>Anuncios</Link>
+              <Link to={paths.admin.listings}>Anúncios</Link>
             </Button>
             <Button asChild type="button" variant="outline">
               <Link to={paths.app.questions}>Inbox do anunciante</Link>
             </Button>
           </>
         }
-        description="Publique, oculte ou bloqueie threads e registre respostas de apoio quando necessario."
+        description="Publique, oculte ou bloqueie threads e registre respostas de apoio quando necessário."
         eyebrow="Admin / perguntas"
-        title="Moderacao de perguntas"
+        title="Moderação de perguntas"
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -190,8 +216,14 @@ export function AdminQuestionsPage() {
       </AdminFilterCard>
 
       {feedback ? (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 shadow-sm">
-          {feedback}
+        <div
+          className={
+            feedback.tone === 'success'
+              ? 'rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 shadow-sm'
+              : 'rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm'
+          }
+        >
+          {feedback.message}
         </div>
       ) : null}
 
@@ -203,18 +235,18 @@ export function AdminQuestionsPage() {
               <div className="space-y-1">
                 <p className="font-medium text-foreground">{question.questionText}</p>
                 <p className="text-xs text-muted-foreground">
-                  {question.guestName ?? 'Usuario autenticado'}
+                  {question.guestName ?? 'Usuário autenticado'}
                   {question.guestEmail ? ` / ${question.guestEmail}` : ''}
                 </p>
               </div>
             ),
           },
           {
-            header: 'Anuncio',
+            header: 'Anúncio',
             cell: (question) => (
               <div className="space-y-1">
                 <p className="font-medium text-foreground">
-                  {question.listingTitle ?? 'Anuncio removido'}
+                  {question.listingTitle ?? 'Anúncio removido'}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {formatQuestionDate(question.createdAt)}
@@ -252,7 +284,7 @@ export function AdminQuestionsPage() {
                     ? [
                         {
                           icon: Eye,
-                          label: 'Publico',
+                          label: 'Público',
                           to: paths.public.listingDetails(question.listingSlug),
                           variant: 'ghost' as const,
                         },
@@ -306,10 +338,10 @@ export function AdminQuestionsPage() {
             <div className="mt-6 space-y-5">
               <div className="space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                  Anuncio
+                  Anúncio
                 </p>
                 <p className="text-sm font-medium text-foreground">
-                  {selectedQuestion.listingTitle ?? 'Anuncio removido'}
+                  {selectedQuestion.listingTitle ?? 'Anúncio removido'}
                 </p>
               </div>
 
@@ -328,7 +360,7 @@ export function AdminQuestionsPage() {
                     Autor
                   </p>
                   <p className="text-sm text-foreground">
-                    {selectedQuestion.guestName ?? 'Usuario autenticado'}
+                    {selectedQuestion.guestName ?? 'Usuário autenticado'}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {selectedQuestion.guestEmail ?? 'Sem e-mail informado'}
@@ -356,7 +388,7 @@ export function AdminQuestionsPage() {
                       [selectedQuestion.id]: event.target.value,
                     }))
                   }
-                  placeholder="Escreva a resposta que sera associada a esta thread."
+                  placeholder="Escreva a resposta que será associada a esta thread."
                   value={drafts[selectedQuestion.id] ?? selectedQuestion.answer?.answerText ?? ''}
                 />
               </div>
@@ -413,7 +445,7 @@ export function AdminQuestionsPage() {
           <p className="text-sm font-semibold text-foreground">Regras operacionais</p>
           <ul className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
             <li>A thread pública deve ter texto claro e sem ruído comercial indevido.</li>
-            <li>Use "Ocultar" para casos reversíveis e "Bloquear" para abuso ou conteúdo inadequado.</li>
+            <li>Use &quot;Ocultar&quot; para casos reversíveis e &quot;Bloquear&quot; para abuso ou conteúdo inadequado.</li>
             <li>As respostas administrativas ficam registradas no mesmo histórico do anunciante.</li>
           </ul>
         </div>

@@ -14,6 +14,26 @@ export const listingStatusFilterOptions: Array<{ label: string; value: ListingSt
   { label: 'Arquivado', value: 'archived' },
 ]
 
+export function normalizeListingCity(value: string) {
+  const collapsed = value.trim().replace(/\s+/g, ' ')
+
+  if (!collapsed) {
+    return ''
+  }
+
+  if (collapsed === collapsed.toUpperCase() || collapsed === collapsed.toLowerCase()) {
+    return collapsed
+      .toLocaleLowerCase('pt-BR')
+      .replace(/\b\p{L}/gu, (letter) => letter.toLocaleUpperCase('pt-BR'))
+  }
+
+  return collapsed
+}
+
+export function normalizeListingState(value: string) {
+  return value.trim().replace(/\s+/g, '').toUpperCase()
+}
+
 export function createEmptyListingFormValues(): ListingFormValues {
   return {
     attributes: [],
