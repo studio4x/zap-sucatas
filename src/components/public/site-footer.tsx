@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { Brand } from '@/components/navigation/brand'
+import { BuildVersionBadge } from '@/components/shared/build-version-badge'
 import { Button } from '@/components/ui/button'
 
 export function SiteFooter() {
@@ -10,8 +11,8 @@ export function SiteFooter() {
         <div className="space-y-5">
           <Brand subtitle="Portal comercial para sucatas e maquinários" tone="inverse" />
           <p className="max-w-md text-sm leading-7 text-white/72">
-            Catálogo moderado, páginas de anúncio robustas, referência de preços e estrutura
-            comercial pensada para o mercado de sucatas e equipamentos.
+            Catálogo moderado, páginas de anúncio robustas, referência de preços e estrutura comercial
+            pensada para o mercado de sucatas e equipamentos.
           </p>
           <Button asChild className="bg-white text-[#163a2d] hover:bg-white/90">
             <Link to={paths.auth.register}>Publicar anúncio</Link>
@@ -56,7 +57,10 @@ export function SiteFooter() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-3 px-4 py-4 text-sm text-white/58 md:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <p>© 2026 Zap Sucatas. Marketplace especializado em sucatas e maquinários.</p>
-          <p>Produto público separado do dashboard do usuário e do painel administrativo.</p>
+          <div className="flex flex-col items-start gap-1 lg:items-end">
+            <p>Produto público separado do dashboard do usuário e do painel administrativo.</p>
+            <BuildVersionBadge tone="dark" />
+          </div>
         </div>
       </div>
     </footer>

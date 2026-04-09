@@ -5,6 +5,7 @@ import type { DashboardNavItem } from '@/components/dashboard/dashboard-quick-na
 import { DashboardMobileHeader } from '@/components/dashboard/dashboard-mobile-header'
 import { DashboardQuickNav } from '@/components/dashboard/dashboard-quick-nav'
 import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar'
+import { BuildVersionBadge } from '@/components/shared/build-version-badge'
 import { useAuth } from '@/hooks/use-auth'
 
 type DashboardShellProps = PropsWithChildren<{
@@ -76,6 +77,9 @@ export function DashboardShell({
             />
             <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col p-3 pb-28 pt-4 md:p-6 md:pb-28 lg:p-8 lg:pb-8">
               {children}
+              <div className="mt-8 border-t border-border/70 pt-4">
+                <BuildVersionBadge />
+              </div>
             </div>
           </main>
         </div>

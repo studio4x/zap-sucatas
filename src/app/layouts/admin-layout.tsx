@@ -16,6 +16,7 @@ import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
+import { BuildVersionBadge } from '@/components/shared/build-version-badge'
 import { Button } from '@/components/ui/button'
 
 const adminNavItems = [
@@ -120,6 +121,9 @@ export function AdminLayout() {
           <main className="min-h-screen overflow-x-auto p-4 md:p-6 lg:p-8">
             <div className="mx-auto flex w-full max-w-none flex-col gap-6">
               <Outlet />
+              <div className="border-t border-border/70 pt-4">
+                <BuildVersionBadge />
+              </div>
             </div>
           </main>
         </div>
