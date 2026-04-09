@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Trash2 } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
@@ -6,6 +7,7 @@ import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { ListingEditor, type ListingEditorSubmitPayload } from '@/components/listings/listing-editor'
 import {
   approveListing,
+  archiveListing,
   fetchListingDetailsForAdmin,
   fetchListingReferences,
   removeListingImage,
@@ -15,6 +17,7 @@ import {
 } from '@/domains/listings/api'
 import { listingToFormValues } from '@/domains/listings/utils'
 import { useAuth } from '@/hooks/use-auth'
+import { Button } from '@/components/ui/button'
 
 export function AdminEditListingPage() {
   const { id = '' } = useParams()
@@ -99,6 +102,19 @@ export function AdminEditListingPage() {
     },
   })
 
+  const archiveMutation = useMutation({
+    mutationFn: () => archiveListing(id),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['listing', 'admin', id] }),
+        queryClient.invalidateQueries({ queryKey: ['listings', 'admin'] }),
+        queryClient.invalidateQueries({ queryKey: ['listings', 'owner'] }),
+        queryClient.invalidateQueries({ queryKey: ['listings', 'public'] }),
+      ])
+      navigate(paths.admin.listings, { replace: true })
+    },
+  })
+
   if (referencesQuery.isLoading || listingQuery.isLoading) {
     return (
       <div className="rounded-lg border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
@@ -120,10 +136,45 @@ export function AdminEditListingPage() {
   return (
     <section className="space-y-6">
       <AdminPageHeader
+        actions={
+          listingQuery.data.status !== 'archived' ? (
+            <Button
+              disabled={updateMutation.isPending || archiveMutation.isPending}
+              onClick={() => {
+                const confirmed = window.confirm(
+                  `Remover o anúncio "${listingQuery.data.title}" da operação pública? Ele será arquivado e permanecerá apenas no histórico interno.`,
+                )
+
+                if (!confirmed) {
+                  return
+                }
+
+                archiveMutation.mutate()
+              }}
+              type="button"
+              variant="outline"
+            >
+              <Trash2 className="size-4" />
+              {archiveMutation.isPending ? 'Removendo...' : 'Remover anúncio'}
+            </Button>
+          ) : undefined
+        }
         description="Atualize o conteúdo, as imagens e os dados comerciais do anúncio criado pela operação."
         eyebrow="Admin / anúncios"
         title="Editar anúncio"
       />
+
+      {archiveMutation.isError ? (
+        <DashboardAlertCard
+          description={
+            archiveMutation.error instanceof Error
+              ? archiveMutation.error.message
+              : 'Não foi possível remover este anúncio da operação.'
+          }
+          title="Ajuste necessário"
+          tone="error"
+        />
+      ) : null}
 
       <ListingEditor
         cancelTo={paths.admin.listingDetails(id)}

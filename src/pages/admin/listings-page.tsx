@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { Eye, FilePlus2, FileSearch, Pencil } from 'lucide-react'
+import { Eye, FilePlus2, FileSearch, Pencil, Trash2 } from 'lucide-react'
 import { paths } from '@/app/paths'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
 import { AdminFilterCard } from '@/components/admin/admin-filter-card'
@@ -10,10 +10,11 @@ import { AdminPagination } from '@/components/admin/admin-pagination'
 import { AdminRowActions } from '@/components/admin/admin-row-actions'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
+import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { fetchAdminListings } from '@/domains/listings/api'
+import { archiveListing, fetchAdminListings } from '@/domains/listings/api'
 import { formatListingDate, listingStatusFilterOptions } from '@/domains/listings/utils'
 
 const PAGE_SIZE = 12
@@ -38,15 +39,47 @@ function getListingStatusMeta(status: string) {
 }
 
 export function AdminListingsPage() {
+  const queryClient = useQueryClient()
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] =
     useState<(typeof listingStatusFilterOptions)[number]['value']>('all')
   const [stateFilter, setStateFilter] = useState('all')
   const [page, setPage] = useState(1)
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [feedback, setFeedback] = useState<{ message: string; tone: 'error' | 'success' | 'warning' } | null>(null)
 
   const listingsQuery = useQuery({
     queryKey: ['listings', 'admin'],
     queryFn: () => fetchAdminListings(),
+  })
+
+  const archiveMutation = useMutation({
+    mutationFn: async (listingIds: string[]) => {
+      for (const listingId of listingIds) {
+        await archiveListing(listingId)
+      }
+    },
+    onError: (error) => {
+      setFeedback({
+        message: error instanceof Error ? error.message : 'Não foi possível remover os anúncios selecionados.',
+        tone: 'error',
+      })
+    },
+    onSuccess: async (_, listingIds) => {
+      setFeedback({
+        message:
+          listingIds.length === 1
+            ? 'Anúncio removido da operação com sucesso.'
+            : `${listingIds.length} anúncios removidos da operação com sucesso.`,
+        tone: 'warning',
+      })
+      setSelectedIds([])
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['listings', 'admin'] }),
+        queryClient.invalidateQueries({ queryKey: ['listings', 'owner'] }),
+        queryClient.invalidateQueries({ queryKey: ['listings', 'public'] }),
+      ])
+    },
   })
 
   const listings = listingsQuery.data ?? []
@@ -72,6 +105,46 @@ export function AdminListingsPage() {
     () => filteredListings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
     [filteredListings, page],
   )
+  const selectableListings = useMemo(
+    () => filteredListings.filter((listing) => listing.status !== 'archived'),
+    [filteredListings],
+  )
+  const selectedCount = selectedIds.length
+  const allSelectableChecked =
+    selectableListings.length > 0 && selectableListings.every((listing) => selectedIds.includes(listing.id))
+
+  function toggleSelection(listingId: string, checked: boolean) {
+    setSelectedIds((current) =>
+      checked
+        ? current.includes(listingId)
+          ? current
+          : [...current, listingId]
+        : current.filter((id) => id !== listingId),
+    )
+  }
+
+  function toggleSelectAll(checked: boolean) {
+    setSelectedIds(checked ? selectableListings.map((listing) => listing.id) : [])
+  }
+
+  function handleArchiveSelection(listingIds: string[]) {
+    if (listingIds.length === 0) {
+      return
+    }
+
+    const confirmed = window.confirm(
+      listingIds.length === 1
+        ? 'Remover este anúncio da operação pública? Ele será arquivado e permanecerá apenas no histórico interno.'
+        : `Remover ${listingIds.length} anúncios da operação pública? Eles serão arquivados e permanecerão apenas no histórico interno.`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    setFeedback(null)
+    archiveMutation.mutate(listingIds)
+  }
 
   const stats = useMemo(
     () => ({
@@ -105,10 +178,18 @@ export function AdminListingsPage() {
             </Button>
           </>
         }
-        description="Revise a fila, acompanhe status editoriais e abra o detalhe operacional de cada anúncio."
+        description="Revise a fila, acompanhe status editoriais e remova da operação os anúncios que precisarem sair do catálogo."
         eyebrow="Admin / anúncios"
         title="Gestão de anúncios"
       />
+
+      {feedback ? (
+        <DashboardAlertCard
+          description={feedback.message}
+          title={feedback.tone === 'error' ? 'Ajuste necessário' : 'Operação concluída'}
+          tone={feedback.tone}
+        />
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard label="Total" value={stats.total} />
@@ -119,18 +200,32 @@ export function AdminListingsPage() {
 
       <AdminFilterCard
         actions={
-          <Button
-            onClick={() => {
-              setPage(1)
-              setQuery('')
-              setStateFilter('all')
-              setStatusFilter('all')
-            }}
-            type="button"
-            variant="outline"
-          >
-            Limpar filtros
-          </Button>
+          <>
+            {selectedCount > 0 ? (
+              <Button
+                disabled={archiveMutation.isPending}
+                onClick={() => handleArchiveSelection(selectedIds)}
+                type="button"
+                variant="outline"
+              >
+                <Trash2 className="size-4" />
+                {archiveMutation.isPending ? 'Removendo...' : `Remover selecionados (${selectedCount})`}
+              </Button>
+            ) : null}
+            <Button
+              onClick={() => {
+                setPage(1)
+                setQuery('')
+                setSelectedIds([])
+                setStateFilter('all')
+                setStatusFilter('all')
+              }}
+              type="button"
+              variant="outline"
+            >
+              Limpar filtros
+            </Button>
+          </>
         }
         description="Filtros estruturais sempre antecedem o dataset principal de moderação."
       >
@@ -175,6 +270,20 @@ export function AdminListingsPage() {
       <AdminDataTable
         columns={[
           {
+            header: 'Seleção',
+            className: 'w-[72px]',
+            cell: (listing) =>
+              listing.status === 'archived' ? null : (
+                <input
+                  aria-label={`Selecionar anúncio ${listing.title}`}
+                  checked={selectedIds.includes(listing.id)}
+                  className="size-4 rounded border border-border"
+                  onChange={(event) => toggleSelection(listing.id, event.target.checked)}
+                  type="checkbox"
+                />
+              ),
+          },
+          {
             header: 'Anúncio',
             cell: (listing) => (
               <div className="space-y-1">
@@ -217,8 +326,18 @@ export function AdminListingsPage() {
             ),
           },
           {
-            header: 'Ações',
-            className: 'w-[280px] text-right',
+            header: (
+              <div className="flex justify-end">
+                <input
+                  aria-label="Selecionar todos os anúncios filtrados"
+                  checked={allSelectableChecked}
+                  className="size-4 rounded border border-border"
+                  onChange={(event) => toggleSelectAll(event.target.checked)}
+                  type="checkbox"
+                />
+              </div>
+            ) as unknown as string,
+            className: 'w-[300px] text-right',
             cell: (listing) => (
               <AdminRowActions
                 actions={[
@@ -232,6 +351,16 @@ export function AdminListingsPage() {
                     label: 'Detalhe',
                     to: paths.admin.listingDetails(listing.id),
                   },
+                  ...(listing.status !== 'archived'
+                    ? [
+                        {
+                          icon: Trash2,
+                          label: 'Remover',
+                          onClick: () => handleArchiveSelection([listing.id]),
+                          variant: 'ghost' as const,
+                        },
+                      ]
+                    : []),
                   ...(listing.slug && listing.status === 'approved'
                     ? [
                         {
@@ -265,7 +394,7 @@ export function AdminListingsPage() {
       />
 
       <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-sm">
-        A fila administrativa está orientada por tabela para leitura rápida, com filtros acima do dataset e detalhe separado por anúncio.
+        A fila administrativa está orientada por tabela para leitura rápida, com filtros acima do dataset e remoção lógica por arquivamento.
       </div>
     </section>
   )
