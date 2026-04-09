@@ -14,7 +14,7 @@ import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { fetchAdminLogEvents } from '@/domains/logs/api'
+import { fetchAdminLogEventsPage, fetchAdminLogStats } from '@/domains/logs/api'
 import type { AdminLogEvent } from '@/domains/logs/types'
 
 const PAGE_SIZE = 12
@@ -32,7 +32,7 @@ function getLogTone(log: AdminLogEvent) {
   }
 
   const normalized = log.secondaryLabel.toLowerCase()
-  if (normalized.includes('error') || normalized.includes('fail')) {
+  if (normalized.includes('error') || normalized.includes('fail') || normalized.includes('blocked')) {
     return 'danger' as const
   }
 
@@ -51,59 +51,36 @@ export function AdminLogsPage() {
   const [selectedLog, setSelectedLog] = useState<AdminLogEvent | null>(null)
 
   const logsQuery = useQuery({
-    queryKey: ['logs', 'admin'],
-    queryFn: fetchAdminLogEvents,
+    placeholderData: (previousData) => previousData,
+    queryKey: ['logs', 'admin', 'page', { entityFilter, kindFilter, page, query }],
+    queryFn: () =>
+      fetchAdminLogEventsPage({
+        entityType: entityFilter,
+        kind: kindFilter,
+        page,
+        pageSize: PAGE_SIZE,
+        query,
+      }),
   })
 
-  const logs = logsQuery.data ?? []
+  const statsQuery = useQuery({
+    queryKey: ['logs', 'admin', 'stats'],
+    queryFn: fetchAdminLogStats,
+  })
+
+  const logs = logsQuery.data?.items ?? []
+  const totalCount = logsQuery.data?.totalCount ?? 0
   const entityOptions = useMemo(
     () =>
       ['all', ...new Set(logs.map((log) => log.entityType).filter((value): value is string => Boolean(value)))],
     [logs],
   )
-
-  const filteredLogs = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase()
-
-    return logs.filter((log) => {
-      const matchesKind = kindFilter === 'all' ? true : log.kind === kindFilter
-      const matchesEntity = entityFilter === 'all' ? true : log.entityType === entityFilter
-      const haystack = [
-        log.label,
-        log.secondaryLabel,
-        log.detail ?? '',
-        log.actorName ?? '',
-        log.actorUserId ?? '',
-        log.entityId ?? '',
-        log.entityType ?? '',
-      ]
-        .join(' ')
-        .toLowerCase()
-      const matchesQuery = normalizedQuery.length === 0 ? true : haystack.includes(normalizedQuery)
-
-      return matchesKind && matchesEntity && matchesQuery
-    })
-  }, [entityFilter, kindFilter, logs, query])
-
-  const paginatedLogs = useMemo(
-    () => filteredLogs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filteredLogs, page],
-  )
-
-  const stats = useMemo(
-    () => ({
-      audits: logs.filter((log) => log.kind === 'audit').length,
-      integrations: logs.filter((log) => log.kind === 'integration').length,
-      total: logs.length,
-      withErrors: logs.filter((log) =>
-        log.kind === 'integration'
-          ? log.secondaryLabel.toLowerCase().includes('error') ||
-            log.secondaryLabel.toLowerCase().includes('fail')
-          : false,
-      ).length,
-    }),
-    [logs],
-  )
+  const stats = statsQuery.data ?? {
+    audits: 0,
+    integrations: 0,
+    total: 0,
+    withErrors: 0,
+  }
 
   return (
     <section className="space-y-6">
@@ -111,21 +88,21 @@ export function AdminLogsPage() {
         actions={
           <>
             <Button asChild type="button">
-              <Link to={paths.admin.pricing}>Preços</Link>
+              <Link to={paths.admin.pricing}>Precos</Link>
             </Button>
             <Button asChild type="button" variant="outline">
-              <Link to={paths.admin.listings}>Anúncios</Link>
+              <Link to={paths.admin.listings}>Anuncios</Link>
             </Button>
           </>
         }
-        description="Trilha administrativa e integrações com leitura operacional, filtro rápido e contexto suficiente para suporte."
+        description="Trilha administrativa e integracoes com leitura operacional, filtro rapido e contexto suficiente para suporte."
         eyebrow="Admin / logs"
         title="Logs e auditoria"
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard label="Total" value={stats.total} />
-        <AdminStatCard label="Integrações" value={stats.integrations} />
+        <AdminStatCard label="Integracoes" value={stats.integrations} />
         <AdminStatCard label="Auditoria" value={stats.audits} />
         <AdminStatCard label="Falhas" value={stats.withErrors} />
       </div>
@@ -164,7 +141,7 @@ export function AdminLogsPage() {
             value={kindFilter}
           >
             <option value="all">Todos os tipos</option>
-            <option value="integration">Integrações</option>
+            <option value="integration">Integracoes</option>
             <option value="audit">Auditoria</option>
           </Select>
           <Select
@@ -192,7 +169,7 @@ export function AdminLogsPage() {
             header: 'Tipo',
             cell: (log) => (
               <AdminStatusBadge tone={getLogTone(log)}>
-                {log.kind === 'integration' ? 'Integração' : 'Auditoria'}
+                {log.kind === 'integration' ? 'Integracao' : 'Auditoria'}
               </AdminStatusBadge>
             ),
           },
@@ -220,12 +197,12 @@ export function AdminLogsPage() {
             cell: (log) => (
               <div className="space-y-1 text-sm text-muted-foreground">
                 <p>{formatDateTime(log.createdAt)}</p>
-                <p className="text-xs">{log.entityId ? `ID ${log.entityId}` : 'Sem id específico'}</p>
+                <p className="text-xs">{log.entityId ? `ID ${log.entityId}` : 'Sem id especifico'}</p>
               </div>
             ),
           },
           {
-            header: 'Ações',
+            header: 'Acoes',
             className: 'w-[130px] text-right',
             cell: (log) => (
               <AdminRowActions
@@ -241,20 +218,20 @@ export function AdminLogsPage() {
             ),
           },
         ]}
-        data={paginatedLogs}
+        data={logs}
         emptyDescription="Nenhum evento corresponde aos filtros atuais."
         emptyTitle="Sem logs neste recorte"
-        errorMessage="Não foi possível carregar a trilha de logs."
+        errorMessage="Nao foi possivel carregar a trilha de logs."
         getRowKey={(log) => `${log.kind}-${log.id}`}
-        isError={logsQuery.isError}
-        isLoading={logsQuery.isLoading}
+        isError={logsQuery.isError || statsQuery.isError}
+        isLoading={logsQuery.isLoading || statsQuery.isLoading}
       />
 
       <AdminPagination
         currentPage={page}
         onPageChange={setPage}
         pageSize={PAGE_SIZE}
-        totalItems={filteredLogs.length}
+        totalItems={totalCount}
       />
 
       <AdminLogDetailsDialog

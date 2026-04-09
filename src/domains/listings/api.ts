@@ -1,6 +1,8 @@
 import { supabase } from '@/integrations/supabase/client'
 import { paths } from '@/app/paths'
 import { env } from '@/lib/env'
+import type { PaginatedResult } from '@/lib/pagination'
+import { getPaginationRange } from '@/lib/pagination'
 import type {
   Listing,
   ListingAttribute,
@@ -328,6 +330,123 @@ export async function fetchAdminListings(filters: ListingListFilters = {}) {
   }
 
   return (data ?? []).map((row) => mapListing(row as ListingRow))
+}
+
+export async function fetchAdminListingStats() {
+  const client = ensureSupabase()
+  const [
+    { count: totalCount, error: totalError },
+    { count: pendingCount, error: pendingError },
+    { count: approvedCount, error: approvedError },
+    { count: rejectedCount, error: rejectedError },
+  ] = await Promise.all([
+    client.from('listings').select('id', { count: 'exact', head: true }),
+    client.from('listings').select('id', { count: 'exact', head: true }).eq('status', 'pending_review'),
+    client.from('listings').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
+    client.from('listings').select('id', { count: 'exact', head: true }).eq('status', 'rejected'),
+  ])
+
+  if (totalError || pendingError || approvedError || rejectedError) {
+    throw totalError ?? pendingError ?? approvedError ?? rejectedError ?? new Error('Falha ao carregar os indicadores.')
+  }
+
+  return {
+    approved: approvedCount ?? 0,
+    pending: pendingCount ?? 0,
+    rejected: rejectedCount ?? 0,
+    total: totalCount ?? 0,
+  }
+}
+
+export async function fetchAdminListingStateOptions() {
+  const { data, error } = await ensureSupabase()
+    .from('listings')
+    .select('state')
+    .not('state', 'is', null)
+    .order('state', { ascending: true })
+
+  if (error) {
+    throw error
+  }
+
+  const states = (data ?? [])
+    .map((row) => row.state)
+    .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+
+  return [...new Set(states)]
+}
+
+export async function fetchAdminListingsPage(input: {
+  page: number
+  pageSize: number
+  query?: string
+  state?: string
+  status?: ListingListFilters['status']
+}): Promise<PaginatedResult<Listing>> {
+  const { from, to } = getPaginationRange({
+    page: input.page,
+    pageSize: input.pageSize,
+  })
+
+  let query = ensureSupabase()
+    .from('listings')
+    .select(
+      `
+        id,
+        user_id,
+        category_id,
+        primary_material_id,
+        title,
+        slug,
+        summary,
+        description,
+        condition_type,
+        price_label,
+        contact_name,
+        contact_phone,
+        city,
+        state,
+        status,
+        rejection_reason,
+        is_featured,
+        published_at,
+        expires_at,
+        created_at,
+        updated_at,
+        listing_categories(name, slug),
+        listing_materials(name, slug),
+        listing_images(id, listing_id, storage_path, sort_order, alt_text, is_cover, created_at)
+      `,
+      { count: 'exact' },
+    )
+    .order('updated_at', { ascending: false })
+    .range(from, to)
+
+  if (input.status && input.status !== 'all') {
+    query = query.eq('status', input.status)
+  }
+
+  if (input.state && input.state !== 'all') {
+    query = query.eq('state', input.state)
+  }
+
+  if (input.query?.trim()) {
+    const search = `%${input.query.trim()}%`
+    query = query.or(
+      `title.ilike.${search},summary.ilike.${search},city.ilike.${search},state.ilike.${search}`,
+    )
+  }
+
+  const { data, error, count } = await query
+
+  if (error) {
+    throw error
+  }
+
+  return {
+    items: (data ?? []).map((row) => mapListing(row as ListingRow)),
+    totalCount: count ?? 0,
+  }
 }
 
 export async function fetchPublicListings(filters: PublicListingFilters = {}) {

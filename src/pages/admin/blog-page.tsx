@@ -26,14 +26,15 @@ import {
   deleteBlogCategory,
   deleteBlogPost,
   fetchAdminBlogCategories,
-  fetchAdminBlogPosts,
+  fetchAdminBlogPostsPage,
+  fetchAdminBlogStats,
   saveAdminBlogPost,
   upsertBlogCategory,
 } from '@/domains/blog/api'
 import type { BlogCategoryFormValues, BlogPostFormValues } from '@/domains/blog/schemas'
 import type { AdminBlogCategory, AdminBlogPost, BlogPostStatus } from '@/domains/blog/types'
-import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 import { useAuth } from '@/hooks/use-auth'
+import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 
 const PAGE_SIZE = 10
 
@@ -50,7 +51,7 @@ function getStatusMeta(status: BlogPostStatus) {
 
 function formatDate(value: string | null) {
   if (!value) {
-    return 'Não publicado'
+    return 'Nao publicado'
   }
 
   return new Intl.DateTimeFormat('pt-BR', {
@@ -72,12 +73,24 @@ export function AdminBlogPage() {
   const [categoryPendingRemoval, setCategoryPendingRemoval] = useState<AdminBlogCategory | null>(null)
 
   const blogQuery = useQuery({
-    queryKey: ['blog', 'admin'],
-    queryFn: fetchAdminBlogPosts,
+    placeholderData: (previousData) => previousData,
+    queryKey: ['blog', 'admin', 'page', { categoryFilter, page, query, statusFilter }],
+    queryFn: () =>
+      fetchAdminBlogPostsPage({
+        categoryId: categoryFilter,
+        page,
+        pageSize: PAGE_SIZE,
+        query,
+        status: statusFilter,
+      }),
   })
   const categoriesQuery = useQuery({
     queryKey: ['blog', 'admin', 'categories'],
     queryFn: fetchAdminBlogCategories,
+  })
+  const statsQuery = useQuery({
+    queryKey: ['blog', 'admin', 'stats'],
+    queryFn: fetchAdminBlogStats,
   })
 
   const invalidateBlog = async () => {
@@ -91,7 +104,7 @@ export function AdminBlogPage() {
         values,
       }),
     onError: (error) => {
-      setErrorFeedback(error, 'Não foi possível salvar a categoria.')
+      setErrorFeedback(error, 'Nao foi possivel salvar a categoria.')
     },
     onSuccess: async () => {
       setSuccessFeedback(
@@ -107,7 +120,7 @@ export function AdminBlogPage() {
   const deleteCategoryMutation = useMutation({
     mutationFn: deleteBlogCategory,
     onError: (error) => {
-      setErrorFeedback(error, 'Não foi possível remover a categoria.')
+      setErrorFeedback(error, 'Nao foi possivel remover a categoria.')
     },
     onSuccess: async () => {
       setSuccessFeedback('Categoria editorial removida com sucesso.')
@@ -120,7 +133,7 @@ export function AdminBlogPage() {
   const savePostMutation = useMutation({
     mutationFn: async (input: { coverFile: File | null; values: BlogPostFormValues }) => {
       if (!user?.id || !user.profileId) {
-        throw new Error('Sessão administrativa inválida para publicação editorial.')
+        throw new Error('Sessao administrativa invalida para publicacao editorial.')
       }
 
       return saveAdminBlogPost({
@@ -132,7 +145,7 @@ export function AdminBlogPage() {
       })
     },
     onError: (error) => {
-      setErrorFeedback(error, 'Não foi possível salvar o post.')
+      setErrorFeedback(error, 'Nao foi possivel salvar o post.')
     },
     onSuccess: async (savedPost) => {
       setSuccessFeedback(
@@ -148,7 +161,7 @@ export function AdminBlogPage() {
   const deletePostMutation = useMutation({
     mutationFn: deleteBlogPost,
     onError: (error) => {
-      setErrorFeedback(error, 'Não foi possível remover o post.')
+      setErrorFeedback(error, 'Nao foi possivel remover o post.')
     },
     onSuccess: async () => {
       setSuccessFeedback('Post removido com sucesso.')
@@ -158,36 +171,15 @@ export function AdminBlogPage() {
     },
   })
 
-  const posts = blogQuery.data ?? []
+  const posts = blogQuery.data?.items ?? []
+  const totalCount = blogQuery.data?.totalCount ?? 0
   const categories = categoriesQuery.data ?? []
-  const categoryOptions = useMemo(() => ['all', ...categories.map((category) => category.name)], [categories])
-  const filteredPosts = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase()
-
-    return posts.filter((post) => {
-      const matchesStatus = statusFilter === 'all' ? true : post.status === statusFilter
-      const matchesCategory = categoryFilter === 'all' ? true : post.categoryName === categoryFilter
-      const haystack = `${post.title} ${post.slug} ${post.excerpt ?? ''}`.toLowerCase()
-      const matchesQuery = normalizedQuery.length === 0 ? true : haystack.includes(normalizedQuery)
-
-      return matchesStatus && matchesCategory && matchesQuery
-    })
-  }, [categoryFilter, posts, query, statusFilter])
-  const paginatedPosts = useMemo(
-    () => filteredPosts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filteredPosts, page],
-  )
-
-  const stats = useMemo(
-    () => ({
-      archived: posts.filter((post) => post.status === 'archived').length,
-      categories: categories.length,
-      drafts: posts.filter((post) => post.status === 'draft').length,
-      published: posts.filter((post) => post.status === 'published').length,
-      total: posts.length,
-    }),
-    [categories.length, posts],
-  )
+  const stats = statsQuery.data ?? {
+    archived: 0,
+    drafts: 0,
+    published: 0,
+    total: 0,
+  }
 
   const categoryDefaultValues = useMemo(
     () => (editingCategory ? blogCategoryToFormValues(editingCategory) : createEmptyBlogCategoryFormValues()),
@@ -214,13 +206,13 @@ export function AdminBlogPage() {
               Novo post
             </Button>
             <Button asChild type="button" variant="outline">
-              <Link to={paths.public.blog}>Blog público</Link>
+              <Link to={paths.public.blog}>Blog publico</Link>
             </Button>
           </>
         }
-        description="Painel editorial do MVP com foco em criação, edição, categorias, status e publicação."
+        description="Painel editorial do MVP com foco em criacao, edicao, categorias, status e publicacao."
         eyebrow="Admin / blog"
-        title="Gestão do blog"
+        title="Gestao do blog"
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
@@ -228,7 +220,7 @@ export function AdminBlogPage() {
         <AdminStatCard label="Rascunhos" value={stats.drafts} />
         <AdminStatCard label="Publicados" value={stats.published} />
         <AdminStatCard label="Arquivados" value={stats.archived} />
-        <AdminStatCard label="Categorias" value={stats.categories} />
+        <AdminStatCard label="Categorias" value={categories.length} />
       </div>
 
       {feedback ? <OperationFeedback feedback={feedback} /> : null}
@@ -337,7 +329,7 @@ export function AdminBlogPage() {
               setPage(1)
               setQuery(event.target.value)
             }}
-            placeholder="Buscar por título, slug ou resumo"
+            placeholder="Buscar por titulo, slug ou resumo"
             value={query}
           />
           <Select
@@ -360,13 +352,11 @@ export function AdminBlogPage() {
             value={categoryFilter}
           >
             <option value="all">Todas as categorias</option>
-            {categoryOptions
-              .filter((category) => category !== 'all')
-              .map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
           </Select>
         </div>
       </AdminFilterCard>
@@ -395,7 +385,7 @@ export function AdminBlogPage() {
             ),
           },
           {
-            header: 'Publicação',
+            header: 'Publicacao',
             cell: (post) => (
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>{formatDate(post.publishedAt)}</p>
@@ -404,7 +394,7 @@ export function AdminBlogPage() {
             ),
           },
           {
-            header: 'Ações',
+            header: 'Acoes',
             className: 'w-[240px] text-right',
             cell: (post) => (
               <AdminRowActions
@@ -419,7 +409,7 @@ export function AdminBlogPage() {
                     ? [
                         {
                           icon: Eye,
-                          label: 'Público',
+                          label: 'Publico',
                           to: paths.public.blogPost(post.slug),
                           variant: 'ghost' as const,
                         },
@@ -437,27 +427,27 @@ export function AdminBlogPage() {
             ),
           },
         ]}
-        data={paginatedPosts}
+        data={posts}
         emptyDescription="Nenhum post corresponde ao recorte atual."
         emptyTitle="Sem posts neste filtro"
-        errorMessage="Não foi possível carregar os posts do blog."
+        errorMessage="Nao foi possivel carregar os posts do blog."
         getRowKey={(post) => post.id}
-        isError={blogQuery.isError}
-        isLoading={blogQuery.isLoading}
+        isError={blogQuery.isError || categoriesQuery.isError || statsQuery.isError}
+        isLoading={blogQuery.isLoading || categoriesQuery.isLoading || statsQuery.isLoading}
       />
 
       <AdminPagination
         currentPage={page}
         onPageChange={setPage}
         pageSize={PAGE_SIZE}
-        totalItems={filteredPosts.length}
+        totalItems={totalCount}
       />
 
       <ConfirmActionDialog
         confirmLabel="Excluir categoria"
         description={
           categoryPendingRemoval
-            ? `Excluir a categoria "${categoryPendingRemoval.name}"? Essa ação só é segura quando não houver posts vinculados.`
+            ? `Excluir a categoria "${categoryPendingRemoval.name}"? Essa acao so e segura quando nao houver posts vinculados.`
             : ''
         }
         isPending={deleteCategoryMutation.isPending}
@@ -472,7 +462,7 @@ export function AdminBlogPage() {
           }
         }}
         open={Boolean(categoryPendingRemoval)}
-        title="Confirmar exclusão"
+        title="Confirmar exclusao"
         tone="danger"
       />
 
@@ -480,7 +470,7 @@ export function AdminBlogPage() {
         confirmLabel="Excluir post"
         description={
           postPendingRemoval
-            ? `Excluir o post "${postPendingRemoval.title}"? Essa ação remove o conteúdo editorial do sistema.`
+            ? `Excluir o post "${postPendingRemoval.title}"? Essa acao remove o conteudo editorial do sistema.`
             : ''
         }
         isPending={deletePostMutation.isPending}
@@ -495,7 +485,7 @@ export function AdminBlogPage() {
           }
         }}
         open={Boolean(postPendingRemoval)}
-        title="Confirmar exclusão"
+        title="Confirmar exclusao"
         tone="danger"
       />
     </section>

@@ -1,11 +1,13 @@
-import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { KeyRound, Trash2 } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
 import { AdminFilterCard } from '@/components/admin/admin-filter-card'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminPagination } from '@/components/admin/admin-pagination'
+import { AdminResetUserPasswordDialog } from '@/components/admin/admin-reset-user-password-dialog'
 import { AdminRowActions } from '@/components/admin/admin-row-actions'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
@@ -15,8 +17,19 @@ import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { createAdminUser, deleteAdminUser, fetchAdminProfiles, updateAdminUser } from '@/domains/profiles/api'
-import type { AdminCreateUserValues, AdminUpdateUserValues } from '@/domains/profiles/schemas'
+import {
+  createAdminUser,
+  deleteAdminUser,
+  fetchAdminProfileStats,
+  fetchAdminProfilesPage,
+  resetAdminUserPassword,
+  updateAdminUser,
+} from '@/domains/profiles/api'
+import type {
+  AdminCreateUserValues,
+  AdminResetUserPasswordValues,
+  AdminUpdateUserValues,
+} from '@/domains/profiles/schemas'
 import type { AdminProfileSummary } from '@/domains/profiles/types'
 import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 
@@ -50,15 +63,37 @@ export function AdminUsersPage() {
   const { clearFeedback, feedback, setErrorFeedback, setSuccessFeedback } = useOperationFeedback()
   const [editingProfile, setEditingProfile] = useState<AdminProfileSummary | null>(null)
   const [profilePendingRemoval, setProfilePendingRemoval] = useState<AdminProfileSummary | null>(null)
+  const [profilePendingPasswordReset, setProfilePendingPasswordReset] =
+    useState<AdminProfileSummary | null>(null)
   const [query, setQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<'admin' | 'all' | 'user'>('all')
   const [statusFilter, setStatusFilter] = useState<'active' | 'all' | 'suspended' | 'under_review'>('all')
   const [page, setPage] = useState(1)
 
   const profilesQuery = useQuery({
-    queryKey: ['profiles', 'admin'],
-    queryFn: fetchAdminProfiles,
+    placeholderData: (previousData) => previousData,
+    queryKey: ['profiles', 'admin', { page, query, roleFilter, statusFilter }],
+    queryFn: () =>
+      fetchAdminProfilesPage({
+        page,
+        pageSize: PAGE_SIZE,
+        query,
+        role: roleFilter,
+        status: statusFilter,
+      }),
   })
+
+  const statsQuery = useQuery({
+    queryKey: ['profiles', 'admin', 'stats'],
+    queryFn: fetchAdminProfileStats,
+  })
+
+  useEffect(() => {
+    const currentItems = profilesQuery.data?.items ?? []
+    if (editingProfile && !currentItems.some((profile) => profile.id === editingProfile.id)) {
+      setEditingProfile(null)
+    }
+  }, [editingProfile, profilesQuery.data?.items])
 
   const createMutation = useMutation({
     mutationFn: createAdminUser,
@@ -67,7 +102,10 @@ export function AdminUsersPage() {
     },
     onSuccess: async () => {
       setSuccessFeedback('Usuário criado com sucesso.')
-      await queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] }),
+        queryClient.invalidateQueries({ queryKey: ['profiles', 'admin', 'stats'] }),
+      ])
     },
   })
 
@@ -79,7 +117,10 @@ export function AdminUsersPage() {
     onSuccess: async () => {
       setSuccessFeedback('Usuário atualizado com sucesso.')
       setEditingProfile(null)
-      await queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] }),
+        queryClient.invalidateQueries({ queryKey: ['profiles', 'admin', 'stats'] }),
+      ])
     },
   })
 
@@ -92,37 +133,33 @@ export function AdminUsersPage() {
       setSuccessFeedback('Usuário excluído com sucesso.')
       setEditingProfile(null)
       setProfilePendingRemoval(null)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] }),
+        queryClient.invalidateQueries({ queryKey: ['profiles', 'admin', 'stats'] }),
+      ])
+    },
+  })
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: resetAdminUserPassword,
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível redefinir a senha deste usuário.')
+    },
+    onSuccess: async () => {
+      setSuccessFeedback('Senha redefinida com sucesso.')
+      setProfilePendingPasswordReset(null)
       await queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] })
     },
   })
 
-  const profiles = profilesQuery.data ?? []
-  const filteredProfiles = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase()
-
-    return profiles.filter((profile) => {
-      const matchesRole = roleFilter === 'all' ? true : profile.role === roleFilter
-      const matchesStatus = statusFilter === 'all' ? true : profile.status === statusFilter
-      const haystack = `${profile.fullName} ${profile.email ?? ''} ${profile.phone ?? ''} ${profile.authUserId}`.toLowerCase()
-      const matchesQuery = normalizedQuery.length === 0 ? true : haystack.includes(normalizedQuery)
-
-      return matchesRole && matchesStatus && matchesQuery
-    })
-  }, [profiles, query, roleFilter, statusFilter])
-  const paginatedProfiles = useMemo(
-    () => filteredProfiles.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filteredProfiles, page],
-  )
-
-  const stats = useMemo(
-    () => ({
-      admins: profiles.filter((profile) => profile.role === 'admin').length,
-      suspended: profiles.filter((profile) => profile.status === 'suspended').length,
-      total: profiles.length,
-      underReview: profiles.filter((profile) => profile.status === 'under_review').length,
-    }),
-    [profiles],
-  )
+  const profiles = profilesQuery.data?.items ?? []
+  const totalCount = profilesQuery.data?.totalCount ?? 0
+  const stats = statsQuery.data ?? {
+    admins: 0,
+    suspended: 0,
+    total: 0,
+    underReview: 0,
+  }
 
   const createDefaults = useMemo<AdminCreateUserValues>(
     () => ({
@@ -207,7 +244,7 @@ export function AdminUsersPage() {
               setPage(1)
               setQuery(event.target.value)
             }}
-            placeholder="Buscar por nome, telefone ou auth id"
+            placeholder="Buscar por nome, e-mail ou telefone"
             value={query}
           />
           <Select
@@ -257,7 +294,7 @@ export function AdminUsersPage() {
 
         <AdminUserForm
           defaultValues={editDefaults}
-          isPending={updateMutation.isPending || deleteMutation.isPending}
+          isPending={updateMutation.isPending || deleteMutation.isPending || resetPasswordMutation.isPending}
           mode="edit"
           onCancel={() => setEditingProfile(null)}
           onSubmit={(values) => {
@@ -329,7 +366,7 @@ export function AdminUsersPage() {
           },
           {
             header: 'Ações',
-            className: 'w-[150px] text-right',
+            className: 'w-[240px] text-right',
             cell: (profile) => (
               <AdminRowActions
                 actions={[
@@ -341,7 +378,14 @@ export function AdminUsersPage() {
                     },
                   },
                   {
+                    icon: KeyRound,
+                    label: 'Senha',
+                    onClick: () => setProfilePendingPasswordReset(profile),
+                    variant: 'outline',
+                  },
+                  {
                     disabled: deleteMutation.isPending,
+                    icon: Trash2,
                     label: 'Excluir',
                     onClick: () => setProfilePendingRemoval(profile),
                     variant: 'destructive',
@@ -351,20 +395,20 @@ export function AdminUsersPage() {
             ),
           },
         ]}
-        data={paginatedProfiles}
+        data={profiles}
         emptyDescription="Nenhum perfil corresponde ao recorte atual."
         emptyTitle="Sem usuários no filtro"
         errorMessage="Não foi possível carregar os usuários administrativos."
         getRowKey={(profile) => profile.id}
-        isError={profilesQuery.isError}
-        isLoading={profilesQuery.isLoading}
+        isError={profilesQuery.isError || statsQuery.isError}
+        isLoading={profilesQuery.isLoading || statsQuery.isLoading}
       />
 
       <AdminPagination
         currentPage={page}
         onPageChange={setPage}
         pageSize={PAGE_SIZE}
-        totalItems={filteredProfiles.length}
+        totalItems={totalCount}
       />
 
       <ConfirmActionDialog
@@ -389,6 +433,28 @@ export function AdminUsersPage() {
         open={Boolean(profilePendingRemoval)}
         title="Confirmar exclusão"
         tone="danger"
+      />
+
+      <AdminResetUserPasswordDialog
+        isPending={resetPasswordMutation.isPending}
+        onOpenChange={(open) => {
+          if (!open) {
+            setProfilePendingPasswordReset(null)
+          }
+        }}
+        onSubmit={(values: AdminResetUserPasswordValues) => {
+          if (!profilePendingPasswordReset) {
+            return
+          }
+
+          clearFeedback()
+          resetPasswordMutation.mutate({
+            password: values.password,
+            profileId: profilePendingPasswordReset.id,
+          })
+        }}
+        open={Boolean(profilePendingPasswordReset)}
+        userLabel={profilePendingPasswordReset?.fullName ?? 'usuário'}
       />
     </section>
   )

@@ -75,3 +75,6 @@ verify_jwt = false
 
 [functions.moderate-listing-question]
 verify_jwt = false
+
+[functions.submit-contact-message]
+verify_jwt = false

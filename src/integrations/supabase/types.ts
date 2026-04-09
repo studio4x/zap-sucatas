@@ -120,6 +120,54 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          message: string
+          phone: string | null
+          profile_id: string | null
+          request_ip: string | null
+          source: string
+          status: 'new' | 'read' | 'resolved'
+          subject: string
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          message: string
+          phone?: string | null
+          profile_id?: string | null
+          request_ip?: string | null
+          source?: string
+          status?: 'new' | 'read' | 'resolved'
+          subject: string
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          message?: string
+          phone?: string | null
+          profile_id?: string | null
+          request_ip?: string | null
+          source?: string
+          status?: 'new' | 'read' | 'resolved'
+          subject?: string
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       integration_logs: {
         Row: {
           created_at: string
@@ -579,6 +627,51 @@ export type Database = {
       }
     }
     Views: {
+      admin_log_feed: {
+        Relationships: []
+        Row: {
+          actor_user_id: string | null
+          after_data: Json | null
+          before_data: Json | null
+          created_at: string | null
+          detail: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string | null
+          kind: string | null
+          label: string | null
+          payload: Json | null
+          secondary_label: string | null
+        }
+        Insert: {
+          actor_user_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string | null
+          detail?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string | null
+          kind?: string | null
+          label?: string | null
+          payload?: Json | null
+          secondary_label?: string | null
+        }
+        Update: {
+          actor_user_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string | null
+          detail?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string | null
+          kind?: string | null
+          label?: string | null
+          payload?: Json | null
+          secondary_label?: string | null
+        }
+      }
       lme_snapshot_months: {
         Relationships: []
         Row: {

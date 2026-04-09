@@ -31,7 +31,13 @@ type DeletePayload = {
   profileId?: string
 }
 
-type RequestBody = CreatePayload | DeletePayload | UpdatePayload
+type ResetPasswordPayload = {
+  mode: 'reset_password'
+  password?: string
+  profileId?: string
+}
+
+type RequestBody = CreatePayload | DeletePayload | ResetPasswordPayload | UpdatePayload
 
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase()
@@ -140,6 +146,28 @@ function validateDeletePayload(payload: RequestBody) {
   }
 
   return { profileId }
+}
+
+function validateResetPasswordPayload(payload: RequestBody) {
+  if (payload.mode !== 'reset_password') {
+    throw new Error('Invalid mode for reset password.')
+  }
+
+  const profileId = typeof payload.profileId === 'string' ? payload.profileId.trim() : ''
+  const password = typeof payload.password === 'string' ? payload.password.trim() : ''
+
+  if (profileId.length === 0) {
+    throw new Error('profileId is required.')
+  }
+
+  if (password.length < 8) {
+    throw new Error('Password must be at least 8 characters long.')
+  }
+
+  return {
+    password,
+    profileId,
+  }
 }
 
 async function requireVerifiedAdminProfile(request: Request) {
@@ -358,6 +386,47 @@ Deno.serve(async (request) => {
       if (deleteAuthError) {
         throw deleteAuthError
       }
+
+      return jsonResponse({
+        profileId: existingProfile.id,
+        success: true,
+      })
+    }
+
+    if (payload.mode === 'reset_password') {
+      const input = validateResetPasswordPayload(payload)
+      const { data: existingProfile, error: existingProfileError } = await admin
+        .from('profiles')
+        .select('id, auth_user_id, email, full_name, phone, role, status')
+        .eq('id', input.profileId)
+        .single()
+
+      if (existingProfileError || !existingProfile) {
+        return jsonResponse({ error: 'Profile not found.' }, 404)
+      }
+
+      const { error: updatePasswordError } = await admin.auth.admin.updateUserById(
+        existingProfile.auth_user_id,
+        {
+          password: input.password,
+        },
+      )
+
+      if (updatePasswordError) {
+        throw updatePasswordError
+      }
+
+      await insertAdminAuditLog({
+        action: 'reset_user_password',
+        actorUserId: actor.id,
+        afterData: {
+          email: existingProfile.email,
+          fullName: existingProfile.full_name,
+          status: existingProfile.status,
+        },
+        entityId: existingProfile.id,
+        entityType: 'profile',
+      })
 
       return jsonResponse({
         profileId: existingProfile.id,

@@ -27,5 +27,16 @@ export const adminCreateUserSchema = baseAdminUserSchema
 
 export const adminUpdateUserSchema = baseAdminUserSchema
 
+export const adminResetUserPasswordSchema = z
+  .object({
+    confirmPassword: z.string().min(8, 'Confirme a nova senha.'),
+    password: z.string().min(8, 'A nova senha precisa ter ao menos 8 caracteres.'),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    message: 'As senhas precisam ser iguais.',
+    path: ['confirmPassword'],
+  })
+
 export type AdminCreateUserValues = z.infer<typeof adminCreateUserSchema>
 export type AdminUpdateUserValues = z.infer<typeof adminUpdateUserSchema>
+export type AdminResetUserPasswordValues = z.infer<typeof adminResetUserPasswordSchema>

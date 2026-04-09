@@ -1,4 +1,6 @@
 import { supabase } from '@/integrations/supabase/client'
+import type { PaginatedResult } from '@/lib/pagination'
+import { getPaginationRange } from '@/lib/pagination'
 import type { AdminProfileSummary, Profile } from '@/domains/profiles/types'
 
 type ProfileRow = {
@@ -164,6 +166,138 @@ export async function fetchAdminProfiles() {
   })
 }
 
+export async function fetchAdminProfileStats() {
+  const client = ensureSupabase()
+  const [
+    { count: totalCount, error: totalError },
+    { count: adminCount, error: adminError },
+    { count: suspendedCount, error: suspendedError },
+    { count: underReviewCount, error: underReviewError },
+  ] = await Promise.all([
+    client.from('profiles').select('id', { count: 'exact', head: true }),
+    client.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'admin'),
+    client.from('profiles').select('id', { count: 'exact', head: true }).eq('status', 'suspended'),
+    client.from('profiles').select('id', { count: 'exact', head: true }).eq('status', 'under_review'),
+  ])
+
+  if (totalError || adminError || suspendedError || underReviewError) {
+    throw totalError ?? adminError ?? suspendedError ?? underReviewError ?? new Error('Falha ao carregar os indicadores.')
+  }
+
+  return {
+    admins: adminCount ?? 0,
+    suspended: suspendedCount ?? 0,
+    total: totalCount ?? 0,
+    underReview: underReviewCount ?? 0,
+  }
+}
+
+export async function fetchAdminProfilesPage(input: {
+  page: number
+  pageSize: number
+  query?: string
+  role?: 'admin' | 'all' | 'user'
+  status?: 'active' | 'all' | 'suspended' | 'under_review'
+}): Promise<PaginatedResult<AdminProfileSummary>> {
+  const client = ensureSupabase()
+  const { from, to } = getPaginationRange({
+    page: input.page,
+    pageSize: input.pageSize,
+  })
+
+  let query = client
+    .from('profiles')
+    .select('id, auth_user_id, email, full_name, phone, role, is_admin, status, created_at, updated_at', {
+      count: 'exact',
+    })
+    .order('created_at', { ascending: false })
+    .range(from, to)
+
+  if (input.role && input.role !== 'all') {
+    query = query.eq('role', input.role)
+  }
+
+  if (input.status && input.status !== 'all') {
+    query = query.eq('status', input.status)
+  }
+
+  if (input.query?.trim()) {
+    const search = `%${input.query.trim()}%`
+    query = query.or(`full_name.ilike.${search},email.ilike.${search},phone.ilike.${search}`)
+  }
+
+  const { data: profiles, error: profilesError, count } = await query
+
+  if (profilesError) {
+    throw profilesError
+  }
+
+  const profileRows = (profiles ?? []) as ProfileRow[]
+  const profileIds = profileRows.map((row) => row.id)
+
+  if (profileIds.length === 0) {
+    return {
+      items: [],
+      totalCount: count ?? 0,
+    }
+  }
+
+  const [{ data: listings, error: listingsError }, { data: questions, error: questionsError }] =
+    await Promise.all([
+      client.from('listings').select('user_id, status').in('user_id', profileIds),
+      client.from('listing_questions').select('author_user_id').in('author_user_id', profileIds),
+    ])
+
+  if (listingsError || questionsError) {
+    throw listingsError ?? questionsError ?? new Error('Falha ao carregar a atividade dos usuários.')
+  }
+
+  const listingCounts = new Map<string, { approved: number; total: number }>()
+  ;((listings ?? []) as Array<{ status: string; user_id: string }>).forEach((row) => {
+    const current = listingCounts.get(row.user_id) ?? { approved: 0, total: 0 }
+    current.total += 1
+    if (row.status === 'approved') {
+      current.approved += 1
+    }
+    listingCounts.set(row.user_id, current)
+  })
+
+  const questionCounts = new Map<string, number>()
+  ;((questions ?? []) as Array<{ author_user_id: string | null }>).forEach((row) => {
+    if (!row.author_user_id) {
+      return
+    }
+    questionCounts.set(row.author_user_id, (questionCounts.get(row.author_user_id) ?? 0) + 1)
+  })
+
+  return {
+    items: profileRows.map((row) => {
+      const profile = mapProfile(row)
+      const counts = listingCounts.get(profile.id) ?? { approved: 0, total: 0 }
+
+      return {
+        ...profile,
+        approvedListings: counts.approved,
+        authoredQuestions: questionCounts.get(profile.id) ?? 0,
+        totalListings: counts.total,
+      } satisfies AdminProfileSummary
+    }),
+    totalCount: count ?? 0,
+  }
+}
+
+async function invokeUserManagementFunction(body: Record<string, unknown>) {
+  const { data, error } = await ensureSupabase().functions.invoke('manage-user-account', {
+    body,
+  })
+
+  if (error) {
+    await unwrapFunctionError(error)
+  }
+
+  return data as { profileId: string; success: boolean }
+}
+
 export async function createAdminUser(input: {
   email: string
   fullName: string
@@ -172,23 +306,15 @@ export async function createAdminUser(input: {
   role: 'admin' | 'user'
   status: 'active' | 'suspended' | 'under_review'
 }) {
-  const { data, error } = await ensureSupabase().functions.invoke('manage-user-account', {
-    body: {
-      email: input.email,
-      fullName: input.fullName,
-      mode: 'create',
-      password: input.password,
-      phone: input.phone,
-      role: input.role,
-      status: input.status,
-    },
+  return invokeUserManagementFunction({
+    email: input.email,
+    fullName: input.fullName,
+    mode: 'create',
+    password: input.password,
+    phone: input.phone,
+    role: input.role,
+    status: input.status,
   })
-
-  if (error) {
-    await unwrapFunctionError(error)
-  }
-
-  return data as { profileId: string; success: boolean }
 }
 
 export async function updateAdminUser(input: {
@@ -199,36 +325,31 @@ export async function updateAdminUser(input: {
   role: 'admin' | 'user'
   status: 'active' | 'suspended' | 'under_review'
 }) {
-  const { data, error } = await ensureSupabase().functions.invoke('manage-user-account', {
-    body: {
-      email: input.email,
-      fullName: input.fullName,
-      mode: 'update',
-      phone: input.phone,
-      profileId: input.profileId,
-      role: input.role,
-      status: input.status,
-    },
+  return invokeUserManagementFunction({
+    email: input.email,
+    fullName: input.fullName,
+    mode: 'update',
+    phone: input.phone,
+    profileId: input.profileId,
+    role: input.role,
+    status: input.status,
   })
-
-  if (error) {
-    await unwrapFunctionError(error)
-  }
-
-  return data as { profileId: string; success: boolean }
 }
 
 export async function deleteAdminUser(profileId: string) {
-  const { data, error } = await ensureSupabase().functions.invoke('manage-user-account', {
-    body: {
-      mode: 'delete',
-      profileId,
-    },
+  return invokeUserManagementFunction({
+    mode: 'delete',
+    profileId,
   })
+}
 
-  if (error) {
-    await unwrapFunctionError(error)
-  }
-
-  return data as { profileId: string; success: boolean }
+export async function resetAdminUserPassword(input: {
+  password: string
+  profileId: string
+}) {
+  return invokeUserManagementFunction({
+    mode: 'reset_password',
+    password: input.password,
+    profileId: input.profileId,
+  })
 }

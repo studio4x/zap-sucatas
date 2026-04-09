@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
 import { Eye, FilePlus2, FileSearch, Pencil, Trash2 } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
 import { AdminFilterCard } from '@/components/admin/admin-filter-card'
@@ -10,12 +10,19 @@ import { AdminPagination } from '@/components/admin/admin-pagination'
 import { AdminRowActions } from '@/components/admin/admin-row-actions'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
-import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
+import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
+import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { archiveListing, fetchAdminListings } from '@/domains/listings/api'
+import {
+  archiveListing,
+  fetchAdminListingStateOptions,
+  fetchAdminListingStats,
+  fetchAdminListingsPage,
+} from '@/domains/listings/api'
 import { formatListingDate, listingStatusFilterOptions } from '@/domains/listings/utils'
+import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 
 const PAGE_SIZE = 12
 
@@ -40,17 +47,37 @@ function getListingStatusMeta(status: string) {
 
 export function AdminListingsPage() {
   const queryClient = useQueryClient()
+  const { clearFeedback, feedback, setErrorFeedback, setWarningFeedback } = useOperationFeedback()
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] =
     useState<(typeof listingStatusFilterOptions)[number]['value']>('all')
   const [stateFilter, setStateFilter] = useState('all')
   const [page, setPage] = useState(1)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [feedback, setFeedback] = useState<{ message: string; tone: 'error' | 'success' | 'warning' } | null>(null)
+  const [idsPendingArchive, setIdsPendingArchive] = useState<string[]>([])
+  const [archiveDialogDescription, setArchiveDialogDescription] = useState('')
 
   const listingsQuery = useQuery({
-    queryKey: ['listings', 'admin'],
-    queryFn: () => fetchAdminListings(),
+    placeholderData: (previousData) => previousData,
+    queryKey: ['listings', 'admin', 'page', { page, query, stateFilter, statusFilter }],
+    queryFn: () =>
+      fetchAdminListingsPage({
+        page,
+        pageSize: PAGE_SIZE,
+        query,
+        state: stateFilter,
+        status: statusFilter,
+      }),
+  })
+
+  const stateOptionsQuery = useQuery({
+    queryKey: ['listings', 'admin', 'states'],
+    queryFn: fetchAdminListingStateOptions,
+  })
+
+  const statsQuery = useQuery({
+    queryKey: ['listings', 'admin', 'stats'],
+    queryFn: fetchAdminListingStats,
   })
 
   const archiveMutation = useMutation({
@@ -60,58 +87,46 @@ export function AdminListingsPage() {
       }
     },
     onError: (error) => {
-      setFeedback({
-        message: error instanceof Error ? error.message : 'Não foi possível remover os anúncios selecionados.',
-        tone: 'error',
-      })
+      setErrorFeedback(error, 'Não foi possível remover os anúncios selecionados.')
     },
     onSuccess: async (_, listingIds) => {
-      setFeedback({
-        message:
-          listingIds.length === 1
-            ? 'Anúncio removido da operação com sucesso.'
-            : `${listingIds.length} anúncios removidos da operação com sucesso.`,
-        tone: 'warning',
-      })
+      setWarningFeedback(
+        listingIds.length === 1
+          ? 'Anúncio removido da operação com sucesso.'
+          : `${listingIds.length} anúncios removidos da operação com sucesso.`,
+      )
+      setIdsPendingArchive([])
       setSelectedIds([])
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['listings', 'admin'] }),
         queryClient.invalidateQueries({ queryKey: ['listings', 'owner'] }),
         queryClient.invalidateQueries({ queryKey: ['listings', 'public'] }),
+        queryClient.invalidateQueries({ queryKey: ['listings', 'admin', 'stats'] }),
       ])
     },
   })
 
-  const listings = listingsQuery.data ?? []
-  const stateOptions = useMemo(
-    () => ['all', ...new Set(listings.map((listing) => listing.state).filter(Boolean))],
-    [listings],
-  )
-  const filteredListings = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase()
+  const listings = listingsQuery.data?.items ?? []
+  const totalCount = listingsQuery.data?.totalCount ?? 0
+  const stateOptions = ['all', ...(stateOptionsQuery.data ?? [])]
+  const stats = statsQuery.data ?? {
+    approved: 0,
+    pending: 0,
+    rejected: 0,
+    total: 0,
+  }
 
-    return listings.filter((listing) => {
-      const matchesStatus = statusFilter === 'all' ? true : listing.status === statusFilter
-      const matchesState = stateFilter === 'all' ? true : listing.state === stateFilter
-      const haystack =
-        `${listing.title} ${listing.summary ?? ''} ${listing.city} ${listing.state} ${listing.categoryName ?? ''} ${listing.materialName ?? ''}`.toLowerCase()
-      const matchesQuery = normalizedQuery.length === 0 ? true : haystack.includes(normalizedQuery)
-
-      return matchesStatus && matchesState && matchesQuery
-    })
-  }, [listings, query, stateFilter, statusFilter])
-
-  const paginatedListings = useMemo(
-    () => filteredListings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filteredListings, page],
-  )
   const selectableListings = useMemo(
-    () => filteredListings.filter((listing) => listing.status !== 'archived'),
-    [filteredListings],
+    () => listings.filter((listing) => listing.status !== 'archived'),
+    [listings],
   )
   const selectedCount = selectedIds.length
   const allSelectableChecked =
     selectableListings.length > 0 && selectableListings.every((listing) => selectedIds.includes(listing.id))
+
+  useEffect(() => {
+    setSelectedIds((current) => current.filter((id) => listings.some((listing) => listing.id === id)))
+  }, [listings])
 
   function toggleSelection(listingId: string, checked: boolean) {
     setSelectedIds((current) =>
@@ -127,34 +142,15 @@ export function AdminListingsPage() {
     setSelectedIds(checked ? selectableListings.map((listing) => listing.id) : [])
   }
 
-  function handleArchiveSelection(listingIds: string[]) {
+  function requestArchive(listingIds: string[], description: string) {
     if (listingIds.length === 0) {
       return
     }
 
-    const confirmed = window.confirm(
-      listingIds.length === 1
-        ? 'Remover este anúncio da operação pública? Ele será arquivado e permanecerá apenas no histórico interno.'
-        : `Remover ${listingIds.length} anúncios da operação pública? Eles serão arquivados e permanecerão apenas no histórico interno.`,
-    )
-
-    if (!confirmed) {
-      return
-    }
-
-    setFeedback(null)
-    archiveMutation.mutate(listingIds)
+    clearFeedback()
+    setArchiveDialogDescription(description)
+    setIdsPendingArchive(listingIds)
   }
-
-  const stats = useMemo(
-    () => ({
-      approved: listings.filter((listing) => listing.status === 'approved').length,
-      pending: listings.filter((listing) => listing.status === 'pending_review').length,
-      rejected: listings.filter((listing) => listing.status === 'rejected').length,
-      total: listings.length,
-    }),
-    [listings],
-  )
 
   return (
     <section className="space-y-6">
@@ -183,13 +179,7 @@ export function AdminListingsPage() {
         title="Gestão de anúncios"
       />
 
-      {feedback ? (
-        <DashboardAlertCard
-          description={feedback.message}
-          title={feedback.tone === 'error' ? 'Ajuste necessário' : 'Operação concluída'}
-          tone={feedback.tone}
-        />
-      ) : null}
+      {feedback ? <OperationFeedback feedback={feedback} /> : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard label="Total" value={stats.total} />
@@ -204,7 +194,14 @@ export function AdminListingsPage() {
             {selectedCount > 0 ? (
               <Button
                 disabled={archiveMutation.isPending}
-                onClick={() => handleArchiveSelection(selectedIds)}
+                onClick={() =>
+                  requestArchive(
+                    selectedIds,
+                    selectedIds.length === 1
+                      ? 'Remover este anúncio da operação pública? Ele será arquivado e permanecerá apenas no histórico interno.'
+                      : `Remover ${selectedIds.length} anúncios da operação pública? Eles serão arquivados e permanecerão apenas no histórico interno.`,
+                  )
+                }
                 type="button"
                 variant="outline"
               >
@@ -329,7 +326,7 @@ export function AdminListingsPage() {
             header: (
               <div className="flex justify-end">
                 <input
-                  aria-label="Selecionar todos os anúncios filtrados"
+                  aria-label="Selecionar todos os anúncios da página"
                   checked={allSelectableChecked}
                   className="size-4 rounded border border-border"
                   onChange={(event) => toggleSelectAll(event.target.checked)}
@@ -356,7 +353,11 @@ export function AdminListingsPage() {
                         {
                           icon: Trash2,
                           label: 'Remover',
-                          onClick: () => handleArchiveSelection([listing.id]),
+                          onClick: () =>
+                            requestArchive(
+                              [listing.id],
+                              `Remover o anúncio "${listing.title}" da operação pública? Ele será arquivado e permanecerá apenas no histórico interno.`,
+                            ),
                           variant: 'ghost' as const,
                         },
                       ]
@@ -376,13 +377,13 @@ export function AdminListingsPage() {
             ),
           },
         ]}
-        data={paginatedListings}
+        data={listings}
         emptyDescription="Nenhum anúncio corresponde aos filtros aplicados."
         emptyTitle="Sem anúncios no recorte atual"
         errorMessage="Não foi possível carregar os anúncios administrativos."
         getRowKey={(listing) => listing.id}
-        isError={listingsQuery.isError}
-        isLoading={listingsQuery.isLoading}
+        isError={listingsQuery.isError || stateOptionsQuery.isError || statsQuery.isError}
+        isLoading={listingsQuery.isLoading || stateOptionsQuery.isLoading || statsQuery.isLoading}
         rowClassName={(listing) => (listing.status === 'pending_review' ? 'bg-sky-50/30' : undefined)}
       />
 
@@ -390,12 +391,34 @@ export function AdminListingsPage() {
         currentPage={page}
         onPageChange={setPage}
         pageSize={PAGE_SIZE}
-        totalItems={filteredListings.length}
+        totalItems={totalCount}
       />
 
       <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-sm">
-        A fila administrativa está orientada por tabela para leitura rápida, com filtros acima do dataset e remoção lógica por arquivamento.
+        A fila administrativa agora pagina no servidor para reduzir custo de leitura em bases maiores.
       </div>
+
+      <ConfirmActionDialog
+        confirmLabel={idsPendingArchive.length > 1 ? 'Remover anúncios' : 'Remover anúncio'}
+        description={archiveDialogDescription}
+        isPending={archiveMutation.isPending}
+        onConfirm={() => {
+          if (idsPendingArchive.length === 0) {
+            return
+          }
+
+          archiveMutation.mutate(idsPendingArchive)
+        }}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIdsPendingArchive([])
+            setArchiveDialogDescription('')
+          }
+        }}
+        open={idsPendingArchive.length > 0}
+        title="Confirmar remoção"
+        tone="default"
+      />
     </section>
   )
 }

@@ -1,5 +1,7 @@
 import { supabase } from '@/integrations/supabase/client'
 import { env } from '@/lib/env'
+import type { PaginatedResult } from '@/lib/pagination'
+import { getPaginationRange } from '@/lib/pagination'
 import type {
   AnswerQuestionInput,
   CreateQuestionInput,
@@ -227,6 +229,85 @@ export async function fetchAdminQuestions() {
   }
 
   return (data ?? []).map((row) => mapQuestion(row as unknown as QuestionRow))
+}
+
+export async function fetchAdminQuestionStats() {
+  const client = ensureSupabase()
+  const [
+    { count: totalCount, error: totalError },
+    { count: publishedCount, error: publishedError },
+    { count: hiddenCount, error: hiddenError },
+    { count: blockedCount, error: blockedError },
+  ] = await Promise.all([
+    client.from('listing_questions').select('id', { count: 'exact', head: true }),
+    client.from('listing_questions').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+    client.from('listing_questions').select('id', { count: 'exact', head: true }).eq('status', 'hidden'),
+    client.from('listing_questions').select('id', { count: 'exact', head: true }).eq('status', 'blocked'),
+  ])
+
+  if (totalError || publishedError || hiddenError || blockedError) {
+    throw totalError ?? publishedError ?? hiddenError ?? blockedError ?? new Error('Falha ao carregar os indicadores.')
+  }
+
+  return {
+    blocked: blockedCount ?? 0,
+    hidden: hiddenCount ?? 0,
+    published: publishedCount ?? 0,
+    total: totalCount ?? 0,
+  }
+}
+
+export async function fetchAdminQuestionsPage(input: {
+  page: number
+  pageSize: number
+  query?: string
+  status?: 'all' | QuestionStatus
+}): Promise<PaginatedResult<ListingQuestion>> {
+  const { from, to } = getPaginationRange({
+    page: input.page,
+    pageSize: input.pageSize,
+  })
+
+  let query = ensureSupabase().from('listing_questions').select(
+    `
+      id,
+      listing_id,
+      author_user_id,
+      guest_name,
+      guest_email,
+      question_text,
+      status,
+      created_at,
+      updated_at,
+      listing_answers(id, question_id, responder_user_id, answer_text, created_at, updated_at),
+      listings!inner(title, slug, status, user_id)
+    `,
+    { count: 'exact' },
+  )
+    .order('created_at', { ascending: false })
+    .range(from, to)
+
+  if (input.status && input.status !== 'all') {
+    query = query.eq('status', input.status)
+  }
+
+  if (input.query?.trim()) {
+    const search = `%${input.query.trim()}%`
+    query = query.or(
+      `question_text.ilike.${search},guest_name.ilike.${search},guest_email.ilike.${search},listings.title.ilike.${search}`,
+    )
+  }
+
+  const { data, error, count } = await query
+
+  if (error) {
+    throw error
+  }
+
+  return {
+    items: (data ?? []).map((row) => mapQuestion(row as unknown as QuestionRow)),
+    totalCount: count ?? 0,
+  }
 }
 
 export async function createListingQuestion(input: CreateQuestionInput) {

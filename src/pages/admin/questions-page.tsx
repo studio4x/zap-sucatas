@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Eye, MessageSquareReply } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -10,13 +10,20 @@ import { AdminPagination } from '@/components/admin/admin-pagination'
 import { AdminRowActions } from '@/components/admin/admin-row-actions'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
+import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { answerListingQuestion, fetchAdminQuestions, updateQuestionStatus } from '@/domains/questions/api'
+import {
+  answerListingQuestion,
+  fetchAdminQuestionStats,
+  fetchAdminQuestionsPage,
+  updateQuestionStatus,
+} from '@/domains/questions/api'
 import type { QuestionStatus } from '@/domains/questions/types'
 import { questionStatusOptions } from '@/domains/questions/utils'
+import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 
 const PAGE_SIZE = 10
 
@@ -40,112 +47,84 @@ function formatQuestionDate(value: string) {
 
 export function AdminQuestionsPage() {
   const queryClient = useQueryClient()
+  const { clearFeedback, feedback, setErrorFeedback, setSuccessFeedback } = useOperationFeedback()
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] =
     useState<(typeof questionStatusOptions)[number]['value']>('all')
   const [page, setPage] = useState(1)
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null)
   const [drafts, setDrafts] = useState<Record<string, string>>({})
-  const [feedback, setFeedback] = useState<{ message: string; tone: 'error' | 'success' } | null>(
-    null,
-  )
 
   const questionsQuery = useQuery({
-    queryKey: ['questions', 'admin'],
-    queryFn: fetchAdminQuestions,
+    placeholderData: (previousData) => previousData,
+    queryKey: ['questions', 'admin', 'page', { page, query, statusFilter }],
+    queryFn: () =>
+      fetchAdminQuestionsPage({
+        page,
+        pageSize: PAGE_SIZE,
+        query,
+        status: statusFilter,
+      }),
+  })
+
+  const statsQuery = useQuery({
+    queryKey: ['questions', 'admin', 'stats'],
+    queryFn: fetchAdminQuestionStats,
   })
 
   const answerMutation = useMutation({
     mutationFn: answerListingQuestion,
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível salvar a resposta administrativa.')
+    },
     onSuccess: async () => {
-      setFeedback({
-        message: 'Resposta administrativa registrada com sucesso.',
-        tone: 'success',
-      })
+      setSuccessFeedback('Resposta administrativa registrada com sucesso.')
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['questions', 'admin'] }),
         queryClient.invalidateQueries({ queryKey: ['questions', 'owner'] }),
         queryClient.invalidateQueries({ queryKey: ['questions', 'public'] }),
       ])
-    },
-    onError: (error) => {
-      setFeedback({
-        message:
-          error instanceof Error
-            ? error.message
-            : 'Não foi possível salvar a resposta administrativa.',
-        tone: 'error',
-      })
     },
   })
 
   const statusMutation = useMutation({
     mutationFn: updateQuestionStatus,
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível atualizar o status da pergunta.')
+    },
     onSuccess: async () => {
-      setFeedback({
-        message: 'Status da pergunta atualizado com sucesso.',
-        tone: 'success',
-      })
+      setSuccessFeedback('Status da pergunta atualizado com sucesso.')
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['questions', 'admin'] }),
         queryClient.invalidateQueries({ queryKey: ['questions', 'owner'] }),
         queryClient.invalidateQueries({ queryKey: ['questions', 'public'] }),
       ])
     },
-    onError: (error) => {
-      setFeedback({
-        message:
-          error instanceof Error
-            ? error.message
-            : 'Não foi possível atualizar o status da pergunta.',
-        tone: 'error',
-      })
-    },
   })
 
-  const questions = questionsQuery.data ?? []
-  const filteredQuestions = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase()
-
-    return questions.filter((question) => {
-      const matchesStatus = statusFilter === 'all' ? true : question.status === statusFilter
-      const haystack =
-        `${question.questionText} ${question.listingTitle ?? ''} ${question.guestName ?? ''} ${question.guestEmail ?? ''}`.toLowerCase()
-      const matchesQuery = normalizedQuery.length === 0 ? true : haystack.includes(normalizedQuery)
-
-      return matchesStatus && matchesQuery
-    })
-  }, [questions, query, statusFilter])
-  const paginatedQuestions = useMemo(
-    () => filteredQuestions.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filteredQuestions, page],
-  )
-  const selectedQuestion =
-    filteredQuestions.find((question) => question.id === selectedQuestionId) ??
-    paginatedQuestions[0] ??
-    null
+  const questions = questionsQuery.data?.items ?? []
+  const totalCount = questionsQuery.data?.totalCount ?? 0
+  const stats = statsQuery.data ?? {
+    blocked: 0,
+    hidden: 0,
+    published: 0,
+    total: 0,
+  }
+  const selectedQuestion = questions.find((question) => question.id === selectedQuestionId) ?? questions[0] ?? null
 
   useEffect(() => {
-    if (!selectedQuestion && filteredQuestions.length > 0) {
-      setSelectedQuestionId(filteredQuestions[0].id)
+    if (!selectedQuestion && questions.length > 0) {
+      setSelectedQuestionId(questions[0].id)
+      return
     }
 
     if (selectedQuestion && selectedQuestion.id !== selectedQuestionId) {
       setSelectedQuestionId(selectedQuestion.id)
     }
-  }, [filteredQuestions, selectedQuestion, selectedQuestionId])
-
-  const stats = useMemo(
-    () => ({
-      blocked: questions.filter((question) => question.status === 'blocked').length,
-      hidden: questions.filter((question) => question.status === 'hidden').length,
-      published: questions.filter((question) => question.status === 'published').length,
-      total: questions.length,
-    }),
-    [questions],
-  )
+  }, [questions, selectedQuestion, selectedQuestionId])
 
   function mutateStatus(questionId: string, questionStatus: QuestionStatus) {
+    clearFeedback()
     statusMutation.mutate({ questionId, questionStatus })
   }
 
@@ -166,6 +145,8 @@ export function AdminQuestionsPage() {
         eyebrow="Admin / perguntas"
         title="Moderação de perguntas"
       />
+
+      {feedback ? <OperationFeedback feedback={feedback} /> : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard label="Total" value={stats.total} />
@@ -215,18 +196,6 @@ export function AdminQuestionsPage() {
         </div>
       </AdminFilterCard>
 
-      {feedback ? (
-        <div
-          className={
-            feedback.tone === 'success'
-              ? 'rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 shadow-sm'
-              : 'rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm'
-          }
-        >
-          {feedback.message}
-        </div>
-      ) : null}
-
       <AdminDataTable
         columns={[
           {
@@ -248,9 +217,7 @@ export function AdminQuestionsPage() {
                 <p className="font-medium text-foreground">
                   {question.listingTitle ?? 'Anúncio removido'}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {formatQuestionDate(question.createdAt)}
-                </p>
+                <p className="text-xs text-muted-foreground">{formatQuestionDate(question.createdAt)}</p>
               </div>
             ),
           },
@@ -295,23 +262,21 @@ export function AdminQuestionsPage() {
             ),
           },
         ]}
-        data={paginatedQuestions}
+        data={questions}
         emptyDescription="Nenhuma thread encontrada com os filtros atuais."
         emptyTitle="Sem perguntas neste recorte"
         errorMessage="Não foi possível carregar as perguntas do admin."
         getRowKey={(question) => question.id}
-        isError={questionsQuery.isError}
-        isLoading={questionsQuery.isLoading}
-        rowClassName={(question) =>
-          question.id === selectedQuestion?.id ? 'bg-sky-50/40' : undefined
-        }
+        isError={questionsQuery.isError || statsQuery.isError}
+        isLoading={questionsQuery.isLoading || statsQuery.isLoading}
+        rowClassName={(question) => (question.id === selectedQuestion?.id ? 'bg-sky-50/40' : undefined)}
       />
 
       <AdminPagination
         currentPage={page}
         onPageChange={setPage}
         pageSize={PAGE_SIZE}
-        totalItems={filteredQuestions.length}
+        totalItems={totalCount}
       />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_360px]">
@@ -349,9 +314,7 @@ export function AdminQuestionsPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                   Pergunta
                 </p>
-                <p className="text-sm leading-7 text-foreground">
-                  {selectedQuestion.questionText}
-                </p>
+                <p className="text-sm leading-7 text-foreground">{selectedQuestion.questionText}</p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -370,9 +333,7 @@ export function AdminQuestionsPage() {
                   <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                     Criada em
                   </p>
-                  <p className="text-sm text-foreground">
-                    {formatQuestionDate(selectedQuestion.createdAt)}
-                  </p>
+                  <p className="text-sm text-foreground">{formatQuestionDate(selectedQuestion.createdAt)}</p>
                 </div>
               </div>
 
@@ -397,17 +358,16 @@ export function AdminQuestionsPage() {
                 <Button
                   disabled={
                     answerMutation.isPending ||
-                    (drafts[selectedQuestion.id] ?? selectedQuestion.answer?.answerText ?? '').trim()
-                      .length < 2
+                    (drafts[selectedQuestion.id] ?? selectedQuestion.answer?.answerText ?? '').trim().length < 2
                   }
-                  onClick={() =>
+                  onClick={() => {
+                    clearFeedback()
                     answerMutation.mutate({
-                      answerText:
-                        drafts[selectedQuestion.id] ?? selectedQuestion.answer?.answerText ?? '',
+                      answerText: drafts[selectedQuestion.id] ?? selectedQuestion.answer?.answerText ?? '',
                       questionId: selectedQuestion.id,
                       questionStatus: selectedQuestion.status,
                     })
-                  }
+                  }}
                   type="button"
                 >
                   {answerMutation.isPending ? 'Salvando...' : 'Salvar resposta'}
@@ -432,7 +392,7 @@ export function AdminQuestionsPage() {
                   disabled={statusMutation.isPending || selectedQuestion.status === 'blocked'}
                   onClick={() => mutateStatus(selectedQuestion.id, 'blocked')}
                   type="button"
-                  variant="destructive"
+                  variant="outline"
                 >
                   Bloquear
                 </Button>
@@ -442,12 +402,18 @@ export function AdminQuestionsPage() {
         </div>
 
         <div className="rounded-lg border border-border bg-card p-5 shadow-sm">
-          <p className="text-sm font-semibold text-foreground">Regras operacionais</p>
-          <ul className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
-            <li>A thread pública deve ter texto claro e sem ruído comercial indevido.</li>
-            <li>Use &quot;Ocultar&quot; para casos reversíveis e &quot;Bloquear&quot; para abuso ou conteúdo inadequado.</li>
-            <li>As respostas administrativas ficam registradas no mesmo histórico do anunciante.</li>
-          </ul>
+          <p className="text-sm font-semibold text-foreground">Guia operacional</p>
+          <div className="mt-4 space-y-3 text-sm leading-6 text-muted-foreground">
+            <p>
+              Publique quando a thread puder aparecer no detalhe público do anúncio sem gerar ruído comercial.
+            </p>
+            <p>
+              Oculte quando o conteúdo precisar sair da vitrine, mas ainda fizer sentido manter o histórico interno.
+            </p>
+            <p>
+              Bloqueie quando houver necessidade clara de moderação definitiva.
+            </p>
+          </div>
         </div>
       </div>
     </section>

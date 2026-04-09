@@ -1,4 +1,6 @@
 import { supabase } from '@/integrations/supabase/client'
+import type { PaginatedResult } from '@/lib/pagination'
+import { getPaginationRange } from '@/lib/pagination'
 import type {
   AdminBlogCategory,
   AdminBlogPost,
@@ -321,6 +323,78 @@ export async function fetchAdminBlogPosts() {
   }
 
   return (data ?? []).map((row) => mapAdminBlogPost(row as BlogPostRow))
+}
+
+export async function fetchAdminBlogStats() {
+  const client = ensureSupabase()
+  const [
+    { count: totalCount, error: totalError },
+    { count: draftCount, error: draftError },
+    { count: publishedCount, error: publishedError },
+    { count: archivedCount, error: archivedError },
+  ] = await Promise.all([
+    client.from('blog_posts').select('id', { count: 'exact', head: true }),
+    client.from('blog_posts').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
+    client.from('blog_posts').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+    client.from('blog_posts').select('id', { count: 'exact', head: true }).eq('status', 'archived'),
+  ])
+
+  if (totalError || draftError || publishedError || archivedError) {
+    throw totalError ?? draftError ?? publishedError ?? archivedError ?? new Error('Falha ao carregar os indicadores editoriais.')
+  }
+
+  return {
+    archived: archivedCount ?? 0,
+    drafts: draftCount ?? 0,
+    published: publishedCount ?? 0,
+    total: totalCount ?? 0,
+  }
+}
+
+export async function fetchAdminBlogPostsPage(input: {
+  categoryId?: string
+  page: number
+  pageSize: number
+  query?: string
+  status?: 'all' | BlogPostStatus
+}): Promise<PaginatedResult<AdminBlogPost>> {
+  const { from, to } = getPaginationRange({
+    page: input.page,
+    pageSize: input.pageSize,
+  })
+
+  let query = ensureSupabase()
+    .from('blog_posts')
+    .select(
+      'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, blog_categories(name)',
+      { count: 'exact' },
+    )
+    .order('updated_at', { ascending: false })
+    .range(from, to)
+
+  if (input.status && input.status !== 'all') {
+    query = query.eq('status', input.status)
+  }
+
+  if (input.categoryId && input.categoryId !== 'all') {
+    query = query.eq('category_id', input.categoryId)
+  }
+
+  if (input.query?.trim()) {
+    const search = `%${input.query.trim()}%`
+    query = query.or(`title.ilike.${search},slug.ilike.${search},excerpt.ilike.${search}`)
+  }
+
+  const { data, error, count } = await query
+
+  if (error) {
+    throw error
+  }
+
+  return {
+    items: (data ?? []).map((row) => mapAdminBlogPost(row as BlogPostRow)),
+    totalCount: count ?? 0,
+  }
 }
 
 export async function saveAdminBlogPost(input: {
