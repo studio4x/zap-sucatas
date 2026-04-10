@@ -1,11 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useLocation, useNavigate, Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { getDefaultPathByRole, paths } from '@/app/paths'
-import { PublicSectionHeading } from '@/components/public/public-section-heading'
+import { PublicAuthShell } from '@/components/public/public-auth-shell'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { sendMagicLink, signInWithPassword } from '@/domains/auth/api'
 import {
@@ -71,80 +70,78 @@ export function LoginPage() {
   }
 
   return (
-    <div className="space-y-8 lg:space-y-10">
-      <PublicSectionHeading
-        description="Acesse sua conta para publicar anúncios, responder perguntas e acompanhar o status da sua operação na plataforma."
-        eyebrow="Entrar"
-        title="Login do anunciante"
-      />
+    <PublicAuthShell
+      badge="Entrar"
+      description="Acesse sua conta para publicar anuncios, responder perguntas e acompanhar o status da sua operacao no portal."
+      highlights={[
+        'Painel do anunciante com anuncios, perguntas e perfil.',
+        'Fluxo de moderacao para dar mais confianca ao catalogo publico.',
+        'Acesso administrativo separado e protegido por role.',
+      ]}
+      title="Login do anunciante"
+    >
+      <div className="space-y-6">
+        {!isSupabaseConfigured ? (
+          <div className="rounded-[1.4rem] border border-destructive/20 bg-destructive/5 px-4 py-4 text-sm text-destructive">
+            Supabase nao configurado. Defina as variaveis publicas para habilitar o login real.
+          </div>
+        ) : null}
 
-      {!isSupabaseConfigured ? (
-        <Card className="border-destructive/20 bg-destructive/5">
-          <CardHeader>
-            <CardTitle>Supabase não configurado</CardTitle>
-            <CardDescription>
-              Defina as variáveis públicas do Supabase para habilitar o login real.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      ) : null}
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-semibold text-foreground">Entrar com senha</h2>
+            <p className="text-sm leading-7 text-muted-foreground">
+              Fluxo principal para anunciantes e administracao da plataforma.
+            </p>
+          </div>
 
-      <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
-        <Card className="border-border/80">
-          <CardHeader>
-            <CardTitle>Entrar com senha</CardTitle>
-            <CardDescription>
-              Fluxo principal para anunciantes e administração da plataforma.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form className="space-y-4" onSubmit={passwordForm.handleSubmit(handlePasswordLogin)}>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground" htmlFor="login-email">
-                  E-mail
-                </label>
-                <Input
-                  autoComplete="username"
-                  id="login-email"
-                  type="email"
-                  {...passwordForm.register('email')}
-                />
-              </div>
+          <form className="space-y-4" onSubmit={passwordForm.handleSubmit(handlePasswordLogin)}>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground" htmlFor="login-email">
+                E-mail
+              </label>
+              <Input
+                autoComplete="username"
+                id="login-email"
+                type="email"
+                {...passwordForm.register('email')}
+              />
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground" htmlFor="login-password">
-                  Senha
-                </label>
-                <Input
-                  autoComplete="current-password"
-                  id="login-password"
-                  type="password"
-                  {...passwordForm.register('password')}
-                />
-              </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground" htmlFor="login-password">
+                Senha
+              </label>
+              <Input
+                autoComplete="current-password"
+                id="login-password"
+                type="password"
+                {...passwordForm.register('password')}
+              />
+            </div>
 
-              {passwordMessage ? <p className="text-sm text-muted-foreground">{passwordMessage}</p> : null}
+            {passwordMessage ? <p className="text-sm text-muted-foreground">{passwordMessage}</p> : null}
 
-              <div className="flex flex-wrap gap-3">
-                <Button disabled={!isSupabaseConfigured || passwordForm.formState.isSubmitting} type="submit">
-                  {passwordForm.formState.isSubmitting ? 'Entrando...' : 'Entrar'}
-                </Button>
-                <Button asChild type="button" variant="outline">
-                  <Link to={paths.auth.forgotPassword}>Recuperar senha</Link>
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+            <div className="flex flex-wrap gap-3">
+              <Button disabled={!isSupabaseConfigured || passwordForm.formState.isSubmitting} type="submit">
+                {passwordForm.formState.isSubmitting ? 'Entrando...' : 'Entrar'}
+              </Button>
+              <Button asChild type="button" variant="outline">
+                <Link to={paths.auth.forgotPassword}>Recuperar senha</Link>
+              </Button>
+            </div>
+          </form>
+        </div>
 
-        <Card className="border-border/80">
-          <CardHeader>
-            <CardTitle>Entrar com magic link</CardTitle>
-            <CardDescription>
-              Acesse sem senha usando um link seguro enviado por e-mail.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <div className="border-t border-border/70 pt-6">
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold text-foreground">Entrar com magic link</h2>
+              <p className="text-sm leading-7 text-muted-foreground">
+                Acesse sem senha usando um link seguro enviado por e-mail.
+              </p>
+            </div>
+
             <form className="space-y-4" onSubmit={magicLinkForm.handleSubmit(handleMagicLink)}>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground" htmlFor="magic-email">
@@ -173,9 +170,9 @@ export function LoginPage() {
                 </Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
-    </div>
+    </PublicAuthShell>
   )
 }

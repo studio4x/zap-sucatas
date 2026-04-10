@@ -1,3 +1,4 @@
+import { lazy, Suspense, type ReactNode } from 'react'
 import type { RouteObject } from 'react-router-dom'
 import { AuthGuard } from '@/app/guards/auth-guard'
 import { GuestGuard } from '@/app/guards/guest-guard'
@@ -6,41 +7,47 @@ import { AdminLayout } from '@/app/layouts/admin-layout'
 import { DashboardLayout } from '@/app/layouts/dashboard-layout'
 import { PublicLayout } from '@/app/layouts/public-layout'
 import { paths } from '@/app/paths'
-import { ForgotPasswordPage } from '@/pages/auth/forgot-password-page'
-import { LoginPage } from '@/pages/auth/login-page'
-import { RegisterPage } from '@/pages/auth/register-page'
-import { AppEditListingPage } from '@/pages/app/edit-listing-page'
-import { AppListingsPage } from '@/pages/app/listings-page'
-import { AppNewListingPage } from '@/pages/app/new-listing-page'
-import { AppOverviewPage } from '@/pages/app/overview-page'
-import { AppProfilePage } from '@/pages/app/profile-page'
-import { AppQuestionsPage } from '@/pages/app/questions-page'
-import { AppSettingsPage } from '@/pages/app/settings-page'
-import { AdminBlogPage } from '@/pages/admin/blog-page'
-import { AdminCategoriesPage } from '@/pages/admin/categories-page'
-import { AdminEditListingPage } from '@/pages/admin/edit-listing-page'
-import { AdminListingDetailsPage } from '@/pages/admin/listing-details-page'
-import { AdminListingsPage } from '@/pages/admin/listings-page'
-import { AdminNewListingPage } from '@/pages/admin/new-listing-page'
-import { AdminLocationsPage } from '@/pages/admin/locations-page'
-import { AdminLogsPage } from '@/pages/admin/logs-page'
-import { AdminMaterialsPage } from '@/pages/admin/materials-page'
-import { AdminOverviewPage } from '@/pages/admin/overview-page'
-import { AdminPricingPage } from '@/pages/admin/pricing-page'
-import { AdminQuestionsPage } from '@/pages/admin/questions-page'
-import { AdminSettingsPage } from '@/pages/admin/settings-page'
-import { AdminUsersPage } from '@/pages/admin/users-page'
-import { AboutPage } from '@/pages/public/about-page'
-import { BlogPage } from '@/pages/public/blog-page'
-import { BlogPostPage } from '@/pages/public/blog-post-page'
-import { CategoriesPage } from '@/pages/public/categories-page'
-import { CategoryDetailsPage } from '@/pages/public/category-details-page'
-import { ContactPage } from '@/pages/public/contact-page'
-import { HomePage } from '@/pages/public/home-page'
-import { ListingDetailsPage } from '@/pages/public/listing-details-page'
-import { ListingsPage } from '@/pages/public/listings-page'
-import { PricingPage } from '@/pages/public/pricing-page'
-import { NotFoundPage } from '@/pages/shared/not-found-page'
+import { RouteLoadingScreen } from '@/components/shared/route-loading-screen'
+
+const ForgotPasswordPage = lazy(() => import('@/pages/auth/forgot-password-page').then((module) => ({ default: module.ForgotPasswordPage })))
+const LoginPage = lazy(() => import('@/pages/auth/login-page').then((module) => ({ default: module.LoginPage })))
+const RegisterPage = lazy(() => import('@/pages/auth/register-page').then((module) => ({ default: module.RegisterPage })))
+const AppEditListingPage = lazy(() => import('@/pages/app/edit-listing-page').then((module) => ({ default: module.AppEditListingPage })))
+const AppListingsPage = lazy(() => import('@/pages/app/listings-page').then((module) => ({ default: module.AppListingsPage })))
+const AppNewListingPage = lazy(() => import('@/pages/app/new-listing-page').then((module) => ({ default: module.AppNewListingPage })))
+const AppOverviewPage = lazy(() => import('@/pages/app/overview-page').then((module) => ({ default: module.AppOverviewPage })))
+const AppProfilePage = lazy(() => import('@/pages/app/profile-page').then((module) => ({ default: module.AppProfilePage })))
+const AppQuestionsPage = lazy(() => import('@/pages/app/questions-page').then((module) => ({ default: module.AppQuestionsPage })))
+const AppSettingsPage = lazy(() => import('@/pages/app/settings-page').then((module) => ({ default: module.AppSettingsPage })))
+const AdminBlogPage = lazy(() => import('@/pages/admin/blog-page').then((module) => ({ default: module.AdminBlogPage })))
+const AdminCategoriesPage = lazy(() => import('@/pages/admin/categories-page').then((module) => ({ default: module.AdminCategoriesPage })))
+const AdminEditListingPage = lazy(() => import('@/pages/admin/edit-listing-page').then((module) => ({ default: module.AdminEditListingPage })))
+const AdminListingDetailsPage = lazy(() => import('@/pages/admin/listing-details-page').then((module) => ({ default: module.AdminListingDetailsPage })))
+const AdminListingsPage = lazy(() => import('@/pages/admin/listings-page').then((module) => ({ default: module.AdminListingsPage })))
+const AdminNewListingPage = lazy(() => import('@/pages/admin/new-listing-page').then((module) => ({ default: module.AdminNewListingPage })))
+const AdminLocationsPage = lazy(() => import('@/pages/admin/locations-page').then((module) => ({ default: module.AdminLocationsPage })))
+const AdminLogsPage = lazy(() => import('@/pages/admin/logs-page').then((module) => ({ default: module.AdminLogsPage })))
+const AdminMaterialsPage = lazy(() => import('@/pages/admin/materials-page').then((module) => ({ default: module.AdminMaterialsPage })))
+const AdminOverviewPage = lazy(() => import('@/pages/admin/overview-page').then((module) => ({ default: module.AdminOverviewPage })))
+const AdminPricingPage = lazy(() => import('@/pages/admin/pricing-page').then((module) => ({ default: module.AdminPricingPage })))
+const AdminQuestionsPage = lazy(() => import('@/pages/admin/questions-page').then((module) => ({ default: module.AdminQuestionsPage })))
+const AdminSettingsPage = lazy(() => import('@/pages/admin/settings-page').then((module) => ({ default: module.AdminSettingsPage })))
+const AdminUsersPage = lazy(() => import('@/pages/admin/users-page').then((module) => ({ default: module.AdminUsersPage })))
+const AboutPage = lazy(() => import('@/pages/public/about-page').then((module) => ({ default: module.AboutPage })))
+const BlogPage = lazy(() => import('@/pages/public/blog-page').then((module) => ({ default: module.BlogPage })))
+const BlogPostPage = lazy(() => import('@/pages/public/blog-post-page').then((module) => ({ default: module.BlogPostPage })))
+const CategoriesPage = lazy(() => import('@/pages/public/categories-page').then((module) => ({ default: module.CategoriesPage })))
+const CategoryDetailsPage = lazy(() => import('@/pages/public/category-details-page').then((module) => ({ default: module.CategoryDetailsPage })))
+const ContactPage = lazy(() => import('@/pages/public/contact-page').then((module) => ({ default: module.ContactPage })))
+const HomePage = lazy(() => import('@/pages/public/home-page').then((module) => ({ default: module.HomePage })))
+const ListingDetailsPage = lazy(() => import('@/pages/public/listing-details-page').then((module) => ({ default: module.ListingDetailsPage })))
+const ListingsPage = lazy(() => import('@/pages/public/listings-page').then((module) => ({ default: module.ListingsPage })))
+const PricingPage = lazy(() => import('@/pages/public/pricing-page').then((module) => ({ default: module.PricingPage })))
+const NotFoundPage = lazy(() => import('@/pages/shared/not-found-page').then((module) => ({ default: module.NotFoundPage })))
+
+function withSuspense(element: ReactNode) {
+  return <Suspense fallback={<RouteLoadingScreen />}>{element}</Suspense>
+}
 
 export const routes: RouteObject[] = [
   {
@@ -49,49 +56,49 @@ export const routes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <HomePage />,
+        element: withSuspense(<HomePage />),
       },
       {
         path: 'anuncios',
-        element: <ListingsPage />,
+        element: withSuspense(<ListingsPage />),
       },
       {
         path: 'anuncios/:slug',
-        element: <ListingDetailsPage />,
+        element: withSuspense(<ListingDetailsPage />),
       },
       {
         path: 'categorias',
-        element: <CategoriesPage />,
+        element: withSuspense(<CategoriesPage />),
       },
       {
         path: 'categorias/:slug',
-        element: <CategoryDetailsPage />,
+        element: withSuspense(<CategoryDetailsPage />),
       },
       {
         path: 'tabela-de-precos',
-        element: <PricingPage />,
+        element: withSuspense(<PricingPage />),
       },
       {
         path: 'blog',
-        element: <BlogPage />,
+        element: withSuspense(<BlogPage />),
       },
       {
         path: 'blog/:slug',
-        element: <BlogPostPage />,
+        element: withSuspense(<BlogPostPage />),
       },
       {
         path: 'sobre',
-        element: <AboutPage />,
+        element: withSuspense(<AboutPage />),
       },
       {
         path: 'contato',
-        element: <ContactPage />,
+        element: withSuspense(<ContactPage />),
       },
       {
         path: 'login',
         element: (
           <GuestGuard>
-            <LoginPage />
+            {withSuspense(<LoginPage />)}
           </GuestGuard>
         ),
       },
@@ -99,13 +106,13 @@ export const routes: RouteObject[] = [
         path: 'cadastro',
         element: (
           <GuestGuard>
-            <RegisterPage />
+            {withSuspense(<RegisterPage />)}
           </GuestGuard>
         ),
       },
       {
         path: 'recuperar-senha',
-        element: <ForgotPasswordPage />,
+        element: withSuspense(<ForgotPasswordPage />),
       },
     ],
   },
@@ -119,31 +126,31 @@ export const routes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <AppOverviewPage />,
+        element: withSuspense(<AppOverviewPage />),
       },
       {
         path: 'anuncios',
-        element: <AppListingsPage />,
+        element: withSuspense(<AppListingsPage />),
       },
       {
         path: 'anuncios/novo',
-        element: <AppNewListingPage />,
+        element: withSuspense(<AppNewListingPage />),
       },
       {
         path: 'anuncios/:id/editar',
-        element: <AppEditListingPage />,
+        element: withSuspense(<AppEditListingPage />),
       },
       {
         path: 'perguntas',
-        element: <AppQuestionsPage />,
+        element: withSuspense(<AppQuestionsPage />),
       },
       {
         path: 'perfil',
-        element: <AppProfilePage />,
+        element: withSuspense(<AppProfilePage />),
       },
       {
         path: 'configuracoes',
-        element: <AppSettingsPage />,
+        element: withSuspense(<AppSettingsPage />),
       },
     ],
   },
@@ -159,64 +166,64 @@ export const routes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <AdminOverviewPage />,
+        element: withSuspense(<AdminOverviewPage />),
       },
       {
         path: 'anuncios',
-        element: <AdminListingsPage />,
+        element: withSuspense(<AdminListingsPage />),
       },
       {
         path: 'anuncios/novo',
-        element: <AdminNewListingPage />,
+        element: withSuspense(<AdminNewListingPage />),
       },
       {
         path: 'anuncios/:id/editar',
-        element: <AdminEditListingPage />,
+        element: withSuspense(<AdminEditListingPage />),
       },
       {
         path: 'anuncios/:id',
-        element: <AdminListingDetailsPage />,
+        element: withSuspense(<AdminListingDetailsPage />),
       },
       {
         path: 'perguntas',
-        element: <AdminQuestionsPage />,
+        element: withSuspense(<AdminQuestionsPage />),
       },
       {
         path: 'usuarios',
-        element: <AdminUsersPage />,
+        element: withSuspense(<AdminUsersPage />),
       },
       {
         path: 'categorias',
-        element: <AdminCategoriesPage />,
+        element: withSuspense(<AdminCategoriesPage />),
       },
       {
         path: 'materiais',
-        element: <AdminMaterialsPage />,
+        element: withSuspense(<AdminMaterialsPage />),
       },
       {
         path: 'localidades',
-        element: <AdminLocationsPage />,
+        element: withSuspense(<AdminLocationsPage />),
       },
       {
         path: 'blog',
-        element: <AdminBlogPage />,
+        element: withSuspense(<AdminBlogPage />),
       },
       {
         path: 'precos',
-        element: <AdminPricingPage />,
+        element: withSuspense(<AdminPricingPage />),
       },
       {
         path: 'configuracoes',
-        element: <AdminSettingsPage />,
+        element: withSuspense(<AdminSettingsPage />),
       },
       {
         path: 'logs',
-        element: <AdminLogsPage />,
+        element: withSuspense(<AdminLogsPage />),
       },
     ],
   },
   {
     path: '*',
-    element: <NotFoundPage />,
+    element: withSuspense(<NotFoundPage />),
   },
 ]

@@ -3,9 +3,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { paths } from '@/app/paths'
-import { PublicSectionHeading } from '@/components/public/public-section-heading'
+import { PublicAuthShell } from '@/components/public/public-auth-shell'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { signUp } from '@/domains/auth/api'
 import { registerSchema, type RegisterFormValues } from '@/domains/auth/schemas'
@@ -49,80 +48,82 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="space-y-8 lg:space-y-10">
-      <PublicSectionHeading
-        description="Crie sua conta para publicar anúncios, acompanhar perguntas e operar o seu catálogo no portal."
-        eyebrow="Cadastro"
-        title="Abra sua conta de anunciante"
-      />
-
-      <Card className="border-border/80">
-        <CardHeader>
-          <CardTitle>Criar conta</CardTitle>
-          <CardDescription>
+    <PublicAuthShell
+      badge="Cadastro"
+      description="Crie sua conta para publicar anuncios, acompanhar perguntas e operar o seu catalogo no portal."
+      highlights={[
+        'Cadastro aberto para anunciantes do marketplace.',
+        'Fluxo administrativo segue separado e controlado.',
+        'Conta pensada para anunciar, responder perguntas e acompanhar moderacao.',
+      ]}
+      title="Abra sua conta de anunciante"
+    >
+      <div className="space-y-5">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-semibold text-foreground">Criar conta</h2>
+          <p className="text-sm leading-7 text-muted-foreground">
             Cadastro aberto para anunciantes. O papel administrativo continua fechado.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground" htmlFor="register-full-name">
-                Nome completo
-              </label>
-              <Input autoComplete="name" id="register-full-name" {...form.register('fullName')} />
-            </div>
+          </p>
+        </div>
 
+        <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground" htmlFor="register-full-name">
+              Nome completo
+            </label>
+            <Input autoComplete="name" id="register-full-name" {...form.register('fullName')} />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground" htmlFor="register-email">
+              E-mail
+            </label>
+            <Input
+              autoComplete="username"
+              id="register-email"
+              type="email"
+              {...form.register('email')}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground" htmlFor="register-email">
-                E-mail
+              <label className="text-sm font-medium text-foreground" htmlFor="register-password">
+                Senha
               </label>
               <Input
-                autoComplete="username"
-                id="register-email"
-                type="email"
-                {...form.register('email')}
+                autoComplete="new-password"
+                id="register-password"
+                type="password"
+                {...form.register('password')}
               />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground" htmlFor="register-password">
-                  Senha
-                </label>
-                <Input
-                  autoComplete="new-password"
-                  id="register-password"
-                  type="password"
-                  {...form.register('password')}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground" htmlFor="register-confirm-password">
-                  Confirmar senha
-                </label>
-                <Input
-                  autoComplete="new-password"
-                  id="register-confirm-password"
-                  type="password"
-                  {...form.register('confirmPassword')}
-                />
-              </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground" htmlFor="register-confirm-password">
+                Confirmar senha
+              </label>
+              <Input
+                autoComplete="new-password"
+                id="register-confirm-password"
+                type="password"
+                {...form.register('confirmPassword')}
+              />
             </div>
+          </div>
 
-            {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+          {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
 
-            <div className="flex flex-wrap gap-3">
-              <Button disabled={!isSupabaseConfigured || form.formState.isSubmitting} type="submit">
-                {form.formState.isSubmitting ? 'Criando conta...' : 'Criar conta'}
-              </Button>
-              <Button asChild type="button" variant="outline">
-                <Link to={paths.auth.login}>Já tenho conta</Link>
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+          <div className="flex flex-wrap gap-3">
+            <Button disabled={!isSupabaseConfigured || form.formState.isSubmitting} type="submit">
+              {form.formState.isSubmitting ? 'Criando conta...' : 'Criar conta'}
+            </Button>
+            <Button asChild type="button" variant="outline">
+              <Link to={paths.auth.login}>Ja tenho conta</Link>
+            </Button>
+          </div>
+        </form>
+      </div>
+    </PublicAuthShell>
   )
 }

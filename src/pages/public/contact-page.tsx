@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { Mail, Phone } from 'lucide-react'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { Mail, Phone } from 'lucide-react'
 import { PublicSectionHeading } from '@/components/public/public-section-heading'
 import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,7 @@ export function ContactPage() {
     queryKey: ['system-settings', 'public-contact'],
     queryFn: fetchSystemSettings,
   })
+
   const form = useForm<ContactMessageValues>({
     defaultValues: {
       companyWebsite: '',
@@ -68,16 +69,36 @@ export function ContactPage() {
 
   return (
     <div className="space-y-8 lg:space-y-10">
-      <PublicSectionHeading
-        description="Fale com a equipe da Zap Sucatas para duvidas comerciais, suporte de plataforma e orientacao sobre publicacao de anuncios."
-        eyebrow="Contato"
-        title="Canal direto com a operacao"
-      />
+      <section className="overflow-hidden rounded-[2.2rem] border border-[#d8e3d8] bg-[linear-gradient(180deg,#f8fbf7_0%,#f2f6f1_100%)]">
+        <div className="grid gap-6 px-5 py-6 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)] lg:px-8 lg:py-8">
+          <div className="space-y-4">
+            <PublicSectionHeading
+              description="Fale com a equipe da Zap Sucatas para duvidas comerciais, suporte de plataforma e orientacao sobre publicacao de anuncios."
+              eyebrow="Contato"
+              title="Canal direto com a operacao"
+            />
+          </div>
+
+          <Card className="rounded-[1.8rem] border-[#d8e3d8] bg-[linear-gradient(180deg,#173629_0%,#0d241a_100%)] text-white shadow-[0_30px_70px_-40px_rgba(12,34,25,0.9)]">
+            <CardContent className="space-y-4 p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100/72">
+                Operacao comercial
+              </p>
+              <p className="text-2xl font-semibold leading-tight tracking-[-0.03em] text-white">
+                Use este canal para anunciar melhor, resolver duvidas de operacao e falar com a equipe.
+              </p>
+              <p className="text-sm leading-7 text-emerald-50/78">
+                O formulario envia sua mensagem para o backoffice com persistencia real e trilha operacional.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
 
       {feedback ? <OperationFeedback feedback={feedback} /> : null}
 
       <div className="grid gap-5 lg:grid-cols-2">
-        <Card className="border-border/80">
+        <Card className="rounded-[1.85rem] border-border/80">
           <CardContent className="space-y-4 p-6">
             <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <Mail className="size-5" />
@@ -92,7 +113,7 @@ export function ContactPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/80">
+        <Card className="rounded-[1.85rem] border-border/80">
           <CardContent className="space-y-4 p-6">
             <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <Phone className="size-5" />
@@ -108,18 +129,7 @@ export function ContactPage() {
         </Card>
       </div>
 
-      <Card className="border-border/80">
-        <CardContent className="space-y-4 p-6 md:p-8">
-          <h2 className="text-2xl font-semibold text-foreground">Como podemos ajudar?</h2>
-          <p className="text-base leading-8 text-foreground/90">
-            A Zap Sucatas esta estruturada para funcionar como portal comercial especializado. Se voce
-            precisa de ajuda para anunciar, entender a moderacao, consultar precos ou entrar em contato
-            com a operacao, este e o ponto de partida.
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card className="border-border/80">
+      <Card className="rounded-[1.95rem] border-border/80">
         <CardContent className="space-y-6 p-6 md:p-8">
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold text-foreground">Enviar mensagem</h2>

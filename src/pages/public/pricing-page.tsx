@@ -6,6 +6,7 @@ import { PricingHistoryTable } from '@/components/pricing/pricing-history-table'
 import { PricingUpdateOverview } from '@/components/pricing/pricing-update-overview'
 import { CtaBanner } from '@/components/public/cta-banner'
 import { PublicSectionHeading } from '@/components/public/public-section-heading'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { fetchPublicPricingPageData } from '@/domains/pricing/api'
@@ -25,7 +26,7 @@ export function PricingPage() {
     return (
       <Card>
         <CardContent className="p-6 text-sm text-muted-foreground">
-          Carregando tabela de preços...
+          Carregando tabela de precos...
         </CardContent>
       </Card>
     )
@@ -35,7 +36,7 @@ export function PricingPage() {
     return (
       <Card className="border-destructive/20 bg-destructive/5">
         <CardContent className="p-6 text-sm text-destructive">
-          Não foi possível carregar a tabela de preços neste momento.
+          Nao foi possivel carregar a tabela de precos neste momento.
         </CardContent>
       </Card>
     )
@@ -45,16 +46,54 @@ export function PricingPage() {
 
   return (
     <div className="space-y-8 lg:space-y-10">
-      <PublicSectionHeading
-        actions={
-          <Button asChild variant="outline">
-            <Link to={paths.public.listings}>Explorar anúncios</Link>
-          </Button>
-        }
-        description="Ferramenta pública para acompanhar preços manuais de sucata, histórico diário dos metais e referência de atualização do mercado."
-        eyebrow="Tabela de preços"
-        title="Leitura pública de metais e referências comerciais"
-      />
+      <section className="overflow-hidden rounded-[2.2rem] border border-[#d8e3d8] bg-[linear-gradient(180deg,#f8fbf7_0%,#f2f6f1_100%)]">
+        <div className="grid gap-6 px-5 py-6 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)] lg:px-8 lg:py-8">
+          <div className="space-y-4">
+            <PublicSectionHeading
+              actions={
+                <Button asChild variant="outline">
+                  <Link to={paths.public.listings}>Explorar anuncios</Link>
+                </Button>
+              }
+              description="Ferramenta publica para acompanhar precos manuais de sucata, historico dos metais e referencia de atualizacao do mercado."
+              eyebrow="Tabela de precos"
+              title="Leitura publica de metais e referencias comerciais"
+            />
+            <div className="flex flex-wrap gap-2">
+              <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
+                Historico consolidado
+              </Badge>
+              <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
+                Atualizacao operacional
+              </Badge>
+              <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
+                Apoio a negociacao
+              </Badge>
+            </div>
+          </div>
+
+          <Card className="rounded-[1.8rem] border-[#d8e3d8] bg-[linear-gradient(180deg,#173629_0%,#0d241a_100%)] text-white shadow-[0_30px_70px_-40px_rgba(12,34,25,0.9)]">
+            <CardContent className="space-y-4 p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100/72">
+                Janela operacional
+              </p>
+              <div className="space-y-2">
+                <p className="text-3xl font-semibold tracking-[-0.04em] text-white">
+                  {formatPricingDate(data.latestQuotedDate)}
+                </p>
+                <p className="text-sm leading-7 text-emerald-50/78">
+                  Ultima consolidacao disponivel do historico publico de precos.
+                </p>
+              </div>
+              <div className="space-y-2 border-t border-white/12 pt-4 text-sm text-emerald-50/82">
+                <p>Historico: {data.historyWindowLabel}</p>
+                <p>Grafico: {data.chartWindowLabel}</p>
+                <p>Atualizacao manual: {formatPricingDateTime(data.lastManualUpdate)}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
 
       <PricingUpdateOverview
         historySnapshotCount={data.historySnapshotCount}
@@ -67,46 +106,42 @@ export function PricingPage() {
       <div className="grid gap-6 xl:grid-cols-[1.45fr_0.55fr]">
         <PricingChart series={data.chartSeries} />
 
-        <Card className="border-border/80">
+        <Card className="rounded-[1.85rem] border-border/80">
           <CardHeader>
             <CardTitle>Janela operacional</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-[1.5rem] border border-border bg-secondary/40 p-4 text-sm leading-7 text-muted-foreground">
               <p>
-                <span className="font-medium text-foreground">Tabela histórica:</span>{' '}
+                <span className="font-medium text-foreground">Tabela historica:</span>{' '}
                 {data.historyWindowLabel}
               </p>
               <p>
-                <span className="font-medium text-foreground">Gráfico:</span> {data.chartWindowLabel}
+                <span className="font-medium text-foreground">Grafico:</span> {data.chartWindowLabel}
               </p>
               <p>
-                <span className="font-medium text-foreground">Última data consolidada:</span>{' '}
+                <span className="font-medium text-foreground">Ultima data consolidada:</span>{' '}
                 {formatPricingDate(data.latestQuotedDate)}
               </p>
               <p>
-                <span className="font-medium text-foreground">Snapshots no gráfico:</span>{' '}
+                <span className="font-medium text-foreground">Snapshots no grafico:</span>{' '}
                 {data.chartSnapshotCount}
-              </p>
-              <p>
-                <span className="font-medium text-foreground">Atualização manual:</span>{' '}
-                {formatPricingDateTime(data.lastManualUpdate)}
               </p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <PricingHistoryTable rows={data.historyRows} title="Histórico consolidado dos últimos 6 meses" />
+      <PricingHistoryTable rows={data.historyRows} title="Historico consolidado dos ultimos 6 meses" />
 
-      <Card className="overflow-hidden border-border/80">
+      <Card className="overflow-hidden rounded-[1.95rem] border-border/80">
         <CardHeader className="border-b border-border/70">
-          <CardTitle>Referências comerciais de sucata</CardTitle>
+          <CardTitle>Referencias comerciais de sucata</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {data.manualEntries.length === 0 ? (
             <div className="p-6 text-sm text-muted-foreground">
-              Nenhuma referência manual foi publicada ainda.
+              Nenhuma referencia manual foi publicada ainda.
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -114,10 +149,10 @@ export function PricingPage() {
                 <thead>
                   <tr className="bg-[#166246] text-left text-white">
                     <th className="px-4 py-3 font-semibold">Material</th>
-                    <th className="px-4 py-3 font-semibold">Região</th>
-                    <th className="px-4 py-3 font-semibold">Preço</th>
+                    <th className="px-4 py-3 font-semibold">Regiao</th>
+                    <th className="px-4 py-3 font-semibold">Preco</th>
                     <th className="px-4 py-3 font-semibold">Unidade</th>
-                    <th className="px-4 py-3 font-semibold">Vigência</th>
+                    <th className="px-4 py-3 font-semibold">Vigencia</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -153,8 +188,8 @@ export function PricingPage() {
       <CtaBanner
         actionLabel="Criar conta para anunciar"
         actionTo={paths.auth.register}
-        description="Use a leitura de preços para embasar sua negociação e publique seus anúncios em um portal focado no mercado de sucatas e maquinários."
-        title="Quer transformar referência de mercado em oportunidade comercial?"
+        description="Use a leitura de precos para embasar sua negociacao e publique seus anuncios em um portal focado no mercado de sucatas e maquinarios."
+        title="Quer transformar referencia de mercado em oportunidade comercial?"
       />
     </div>
   )

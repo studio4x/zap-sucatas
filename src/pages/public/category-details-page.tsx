@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
 import { paths } from '@/app/paths'
@@ -7,10 +8,13 @@ import { PublicSectionHeading } from '@/components/public/public-section-heading
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { fetchPublicCategoryBySlug } from '@/domains/categories/api'
-import { fetchPublicListings } from '@/domains/listings/api'
+import { fetchPublicListingsPage } from '@/domains/listings/api'
+
+const PAGE_SIZE = 9
 
 export function CategoryDetailsPage() {
   const { slug = '' } = useParams()
+  const [page, setPage] = useState(1)
 
   const categoryQuery = useQuery({
     queryKey: ['categories', 'public', slug],
@@ -19,13 +23,25 @@ export function CategoryDetailsPage() {
   })
 
   const listingsQuery = useQuery({
-    queryKey: ['listings', 'public', 'category', categoryQuery.data?.id],
+    placeholderData: (previousData) => previousData,
+    queryKey: ['listings', 'public', 'category-page', categoryQuery.data?.id, page],
     queryFn: () =>
-      fetchPublicListings({
+      fetchPublicListingsPage({
         categoryId: categoryQuery.data?.id ?? '',
+        page,
+        pageSize: PAGE_SIZE,
       }),
     enabled: Boolean(categoryQuery.data?.id),
   })
+
+  const totalCount = listingsQuery.data?.totalCount ?? 0
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages)
+    }
+  }, [page, totalPages])
 
   if (categoryQuery.isLoading) {
     return (
@@ -41,7 +57,7 @@ export function CategoryDetailsPage() {
     return (
       <Card className="border-destructive/20 bg-destructive/5">
         <CardContent className="p-6 text-sm text-destructive">
-          Não foi possível carregar a categoria solicitada.
+          Nao foi possivel carregar a categoria solicitada.
         </CardContent>
       </Card>
     )
@@ -51,61 +67,89 @@ export function CategoryDetailsPage() {
 
   return (
     <div className="space-y-8 lg:space-y-10">
-      <PublicSectionHeading
-        actions={
-          <Button asChild variant="outline">
-            <Link to={paths.public.categories}>Ver todas as categorias</Link>
-          </Button>
-        }
-        description={
-          category.description ??
-          'Recorte comercial com anúncios aprovados, descoberta direcionada e navegação clara para o segmento.'
-        }
-        eyebrow="Categoria"
-        title={category.name}
-      />
+      <section className="overflow-hidden rounded-[2.2rem] border border-[#d8e3d8] bg-[linear-gradient(180deg,#f8fbf7_0%,#f2f6f1_100%)]">
+        <div className="grid gap-6 px-5 py-6 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)] lg:px-8 lg:py-8">
+          <div className="space-y-4">
+            <PublicSectionHeading
+              actions={
+                <Button asChild variant="outline">
+                  <Link to={paths.public.categories}>Ver todas as categorias</Link>
+                </Button>
+              }
+              description={
+                category.description ??
+                'Recorte comercial com anuncios aprovados, descoberta direcionada e navegacao clara para o segmento.'
+              }
+              eyebrow="Categoria"
+              title={category.name}
+            />
+          </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-border/80">
-          <CardContent className="space-y-2 p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              Anúncios publicados
-            </p>
-            <p className="text-3xl font-semibold text-foreground">{category.approvedListings}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-border/80">
-          <CardContent className="space-y-2 p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              Especialidade
-            </p>
-            <p className="text-sm leading-7 text-muted-foreground">
-              Página dedicada para descoberta rápida e SEO próprio no segmento.
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="border-border/80">
-          <CardContent className="space-y-2 p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              Publicação
-            </p>
-            <p className="text-sm leading-7 text-muted-foreground">
-              O catálogo só mostra anúncios aprovados pela moderação da plataforma.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+            <div className="rounded-[1.5rem] border border-white/85 bg-white/88 p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Anuncios publicados
+              </p>
+              <p className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-foreground">
+                {category.approvedListings}
+              </p>
+            </div>
+            <div className="rounded-[1.5rem] border border-white/85 bg-white/88 p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Descoberta
+              </p>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                Pagina dedicada para leitura setorial e navegacao mais rapida.
+              </p>
+            </div>
+            <div className="rounded-[1.5rem] border border-white/85 bg-white/88 p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Moderacao
+              </p>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                O catalogo so mostra anuncios aprovados pela plataforma.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <ListingGrid
-        emptyDescription="Ainda não há anúncios publicados nesta categoria. Você pode explorar outras categorias ou publicar o primeiro anúncio deste segmento."
-        emptyTitle="Sem anúncios nesta categoria"
-        listings={listingsQuery.data ?? []}
+        emptyDescription="Ainda nao ha anuncios publicados nesta categoria. Voce pode explorar outras categorias ou publicar o primeiro anuncio deste segmento."
+        emptyTitle="Sem anuncios nesta categoria"
+        listings={listingsQuery.data?.items ?? []}
       />
+
+      {totalCount > PAGE_SIZE ? (
+        <div className="flex flex-col gap-3 rounded-[1.7rem] border border-border bg-card/88 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            Pagina {page} de {totalPages}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              className="inline-flex h-11 items-center justify-center rounded-[1.1rem] border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={page <= 1}
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+              type="button"
+            >
+              Anterior
+            </button>
+            <button
+              className="inline-flex h-11 items-center justify-center rounded-[1.1rem] border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={page >= totalPages}
+              onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+              type="button"
+            >
+              Proxima
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <CtaBanner
         actionLabel="Anunciar nesta categoria"
         actionTo={paths.auth.register}
-        description="Publique seu lote com contexto comercial e alcance um público que já navega por este segmento do portal."
+        description="Publique seu lote com contexto comercial e alcance um publico que ja navega por este segmento do portal."
         title={`Tem ${category.name.toLowerCase()} para vender?`}
       />
     </div>
