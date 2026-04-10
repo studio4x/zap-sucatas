@@ -98,10 +98,20 @@ export type ListingListFilters = {
   status?: ListingStatus | 'all'
 }
 
+export type PublicListingSort =
+  | 'featured'
+  | 'oldest'
+  | 'recent'
+  | 'title_asc'
+  | 'title_desc'
+
 export type PublicListingFilters = {
   categoryId?: string
   city?: string
+  page?: number
+  pageSize?: number
   primaryMaterialId?: string
   query?: string
+  sort?: PublicListingSort
   state?: string
 }

@@ -14,6 +14,7 @@ import type {
   ListingListFilters,
   ListingMaterial,
   PublicListingFilters,
+  PublicListingSort,
 } from '@/domains/listings/types'
 import { normalizeListingCity, normalizeListingState } from '@/domains/listings/utils'
 
@@ -450,9 +451,7 @@ export async function fetchAdminListingsPage(input: {
 }
 
 export async function fetchPublicListings(filters: PublicListingFilters = {}) {
-  let query = buildBaseListingQuery()
-    .eq('status', 'approved')
-    .order('published_at', { ascending: false })
+  let query = buildBaseListingQuery().eq('status', 'approved')
 
   if (filters.categoryId) {
     query = query.eq('category_id', filters.categoryId)
@@ -475,6 +474,27 @@ export async function fetchPublicListings(filters: PublicListingFilters = {}) {
     query = query.or(`title.ilike.${search},summary.ilike.${search},description.ilike.${search},city.ilike.${search},state.ilike.${search}`)
   }
 
+  const sort = filters.sort ?? 'recent'
+
+  switch (sort) {
+    case 'oldest':
+      query = query.order('published_at', { ascending: true })
+      break
+    case 'title_asc':
+      query = query.order('title', { ascending: true }).order('published_at', { ascending: false })
+      break
+    case 'title_desc':
+      query = query.order('title', { ascending: false }).order('published_at', { ascending: false })
+      break
+    case 'featured':
+      query = query.order('is_featured', { ascending: false }).order('published_at', { ascending: false })
+      break
+    case 'recent':
+    default:
+      query = query.order('published_at', { ascending: false })
+      break
+  }
+
   const { data, error } = await query
 
   if (error) {
@@ -482,6 +502,103 @@ export async function fetchPublicListings(filters: PublicListingFilters = {}) {
   }
 
   return (data ?? []).map((row) => mapListing(row as ListingRow))
+}
+
+export async function fetchPublicListingsPage(
+  filters: PublicListingFilters = {},
+): Promise<PaginatedResult<Listing>> {
+  const page = filters.page ?? 1
+  const pageSize = filters.pageSize ?? 9
+  const { from, to } = getPaginationRange({ page, pageSize })
+
+  let query = ensureSupabase()
+    .from('listings')
+    .select(
+      `
+        id,
+        user_id,
+        category_id,
+        primary_material_id,
+        title,
+        slug,
+        summary,
+        description,
+        condition_type,
+        price_label,
+        contact_name,
+        contact_phone,
+        city,
+        state,
+        status,
+        rejection_reason,
+        is_featured,
+        published_at,
+        expires_at,
+        created_at,
+        updated_at,
+        listing_categories(name, slug),
+        listing_materials(name, slug),
+        listing_images(id, listing_id, storage_path, sort_order, alt_text, is_cover, created_at)
+      `,
+      { count: 'exact' },
+    )
+    .eq('status', 'approved')
+    .range(from, to)
+
+  if (filters.categoryId) {
+    query = query.eq('category_id', filters.categoryId)
+  }
+
+  if (filters.primaryMaterialId) {
+    query = query.eq('primary_material_id', filters.primaryMaterialId)
+  }
+
+  if (filters.state) {
+    query = query.ilike('state', filters.state)
+  }
+
+  if (filters.city) {
+    query = query.ilike('city', `%${filters.city.trim()}%`)
+  }
+
+  if (filters.query) {
+    const search = `%${filters.query.trim()}%`
+    query = query.or(
+      `title.ilike.${search},summary.ilike.${search},description.ilike.${search},city.ilike.${search},state.ilike.${search}`,
+    )
+  }
+
+  const sort: PublicListingSort = filters.sort ?? 'recent'
+
+  switch (sort) {
+    case 'oldest':
+      query = query.order('published_at', { ascending: true })
+      break
+    case 'title_asc':
+      query = query.order('title', { ascending: true }).order('published_at', { ascending: false })
+      break
+    case 'title_desc':
+      query = query.order('title', { ascending: false }).order('published_at', { ascending: false })
+      break
+    case 'featured':
+      query = query.order('is_featured', { ascending: false }).order('published_at', { ascending: false })
+      break
+    case 'recent':
+    default:
+      query = query.order('published_at', { ascending: false })
+      break
+  }
+
+  const { data, error, count } = await query
+
+  if (error) {
+    throw error
+  }
+
+  return {
+    items: (data ?? []).map((row) => mapListing(row as ListingRow)),
+    totalCount: count ?? 0,
+  }
 }
 
 export async function fetchFeaturedPublicListings(limit = 6) {

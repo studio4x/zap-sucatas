@@ -18,8 +18,8 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
 
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-[2rem] border border-border bg-card">
-        <div className="aspect-[16/10] bg-muted">
+      <div className="overflow-hidden rounded-[2rem] border border-[#d8e3d8] bg-white shadow-[0_28px_64px_-48px_rgba(19,33,23,0.3)]">
+        <div className="relative aspect-[16/10] bg-[linear-gradient(160deg,#edf4ee_0%,#dbe7dc_100%)]">
           {activeImage ? (
             <img
               alt={activeImage.altText ?? listingTitle}
@@ -28,19 +28,22 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              Sem imagens disponíveis
+              Sem imagens disponiveis
             </div>
           )}
+          <div className="absolute bottom-4 right-4 rounded-full bg-slate-950/66 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
+            {images.length > 0 ? `${Math.min(activeIndex + 1, images.length)} / ${images.length}` : 'Galeria'}
+          </div>
         </div>
       </div>
 
       {images.length > 1 ? (
-        <div className="grid gap-3 sm:grid-cols-4">
+        <div className="grid gap-3 grid-cols-4 lg:grid-cols-5">
           {images.map((image, index) => (
             <button
               key={image.id}
               className={cn(
-                'aspect-square overflow-hidden rounded-[1.25rem] border bg-card transition',
+                'aspect-square overflow-hidden rounded-[1.15rem] border bg-white transition',
                 index === activeIndex
                   ? 'border-primary shadow-sm'
                   : 'border-border hover:border-primary/35',

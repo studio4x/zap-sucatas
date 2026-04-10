@@ -5,18 +5,20 @@ import { ListingFilters } from '@/components/public/listing-filters'
 import { ListingGrid } from '@/components/public/listing-grid'
 import { ListingSortBar } from '@/components/public/listing-sort-bar'
 import { PublicSectionHeading } from '@/components/public/public-section-heading'
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { fetchListingReferences, fetchPublicListings } from '@/domains/listings/api'
+import { fetchListingReferences, fetchPublicListingsPage } from '@/domains/listings/api'
+import type { PublicListingSort } from '@/domains/listings/types'
 
 const sortOptions = [
   { label: 'Mais recentes', value: 'recent' },
   { label: 'Mais antigos', value: 'oldest' },
-  { label: 'Título A-Z', value: 'title_asc' },
-  { label: 'Título Z-A', value: 'title_desc' },
+  { label: 'Titulo A-Z', value: 'title_asc' },
+  { label: 'Titulo Z-A', value: 'title_desc' },
   { label: 'Destaques primeiro', value: 'featured' },
 ]
 
-const pageSize = 9
+const PAGE_SIZE = 9
 
 export function ListingsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -25,7 +27,7 @@ export function ListingsPage() {
   const [materialId, setMaterialId] = useState(searchParams.get('material') ?? '')
   const [state, setState] = useState(searchParams.get('uf') ?? '')
   const [city, setCity] = useState(searchParams.get('cidade') ?? '')
-  const [sort, setSort] = useState(searchParams.get('ordem') ?? 'recent')
+  const [sort, setSort] = useState<PublicListingSort>((searchParams.get('ordem') as PublicListingSort) ?? 'recent')
   const [page, setPage] = useState(Number(searchParams.get('pagina') ?? '1'))
 
   const referencesQuery = useQuery({
@@ -34,13 +36,17 @@ export function ListingsPage() {
   })
 
   const listingsQuery = useQuery({
-    queryKey: ['listings', 'public', { categoryId, city, materialId, query, state }],
+    placeholderData: (previousData) => previousData,
+    queryKey: ['listings', 'public', 'page', { categoryId, city, materialId, page, query, sort, state }],
     queryFn: () =>
-      fetchPublicListings({
+      fetchPublicListingsPage({
         categoryId: categoryId || undefined,
         city: city || undefined,
+        page,
+        pageSize: PAGE_SIZE,
         primaryMaterialId: materialId || undefined,
         query: query || undefined,
+        sort,
         state: state || undefined,
       }),
   })
@@ -83,33 +89,34 @@ export function ListingsPage() {
     setPage(1)
   }, [categoryId, city, materialId, query, sort, state])
 
-  const sortedListings = useMemo(() => {
-    const items = [...(listingsQuery.data ?? [])]
+  const listings = listingsQuery.data?.items ?? []
+  const totalCount = listingsQuery.data?.totalCount ?? 0
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
+  const activeFiltersCount = [query.trim(), categoryId, materialId, state, city.trim()].filter(Boolean).length
 
-    switch (sort) {
-      case 'oldest':
-        return items.sort((left, right) => (left.publishedAt ?? '') > (right.publishedAt ?? '') ? 1 : -1)
-      case 'title_asc':
-        return items.sort((left, right) => left.title.localeCompare(right.title, 'pt-BR'))
-      case 'title_desc':
-        return items.sort((left, right) => right.title.localeCompare(left.title, 'pt-BR'))
-      case 'featured':
-        return items.sort((left, right) => {
-          if (left.isFeatured !== right.isFeatured) {
-            return left.isFeatured ? -1 : 1
-          }
-
-          return (left.publishedAt ?? '') < (right.publishedAt ?? '') ? 1 : -1
-        })
-      case 'recent':
-      default:
-        return items.sort((left, right) => (left.publishedAt ?? '') < (right.publishedAt ?? '') ? 1 : -1)
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages)
     }
-  }, [listingsQuery.data, sort])
+  }, [page, totalPages])
 
-  const totalPages = Math.max(1, Math.ceil(sortedListings.length / pageSize))
-  const safePage = Math.min(page, totalPages)
-  const paginatedListings = sortedListings.slice((safePage - 1) * pageSize, safePage * pageSize)
+  const highlightedNumbers = useMemo(
+    () => [
+      {
+        label: 'Anuncios no recorte',
+        value: totalCount,
+      },
+      {
+        label: 'Categorias ativas',
+        value: referencesQuery.data?.categories.length ?? 0,
+      },
+      {
+        label: 'Materiais no filtro',
+        value: referencesQuery.data?.materials.length ?? 0,
+      },
+    ],
+    [referencesQuery.data?.categories.length, referencesQuery.data?.materials.length, totalCount],
+  )
 
   function clearFilters() {
     setQuery('')
@@ -123,11 +130,41 @@ export function ListingsPage() {
 
   return (
     <section className="space-y-6 lg:space-y-8">
-      <PublicSectionHeading
-        description="Explore anúncios aprovados com filtros claros, leitura rápida e navegação pensada para quem compra ou vende no mercado de sucatas e maquinários."
-        eyebrow="Catálogo público"
-        title="Anúncios moderados para negociação real"
-      />
+      <div className="overflow-hidden rounded-[2.25rem] border border-[#d7e2d7] bg-[linear-gradient(180deg,#f6faf5_0%,#eef4ef_100%)]">
+        <div className="grid gap-6 px-5 py-6 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)] lg:px-8 lg:py-8">
+          <div className="space-y-4">
+            <PublicSectionHeading
+              description="Catalogo moderado para negociacao real, com foco em busca, filtragem setorial e leitura comercial rapida."
+              eyebrow="Catalogo publico"
+              title="Anuncios de sucatas, metais e equipamentos com estrutura de marketplace"
+            />
+            <div className="flex flex-wrap gap-2">
+              <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
+                Moderacao antes da publicacao
+              </Badge>
+              <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
+                Busca por categoria, material e localidade
+              </Badge>
+              <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
+                Paginas de anuncio com contexto comercial
+              </Badge>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+            {highlightedNumbers.map((item) => (
+              <div key={item.label} className="rounded-[1.5rem] border border-white/80 bg-white/88 px-4 py-4 shadow-sm">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  {item.label}
+                </p>
+                <p className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-foreground">
+                  {item.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       <ListingFilters
         categories={referencesQuery.data?.categories ?? []}
@@ -146,57 +183,57 @@ export function ListingsPage() {
       />
 
       <ListingSortBar
-        onChange={setSort}
+        onChange={(value) => setSort(value as PublicListingSort)}
         options={sortOptions}
-        resultLabel={`${sortedListings.length} anúncio${sortedListings.length === 1 ? '' : 's'} encontrado${sortedListings.length === 1 ? '' : 's'}`}
+        resultLabel={`${totalCount} anuncio${totalCount === 1 ? '' : 's'} neste recorte${activeFiltersCount > 0 ? ` • ${activeFiltersCount} filtro${activeFiltersCount === 1 ? '' : 's'} ativo${activeFiltersCount === 1 ? '' : 's'}` : ''}`}
         value={sort}
       />
 
       {listingsQuery.isLoading ? (
-        <Card>
+        <Card className="rounded-[1.8rem] border-border/80">
           <CardContent className="p-6 text-sm text-muted-foreground">
-            Carregando catálogo público...
+            Carregando catalogo publico...
           </CardContent>
         </Card>
       ) : null}
 
       {listingsQuery.isError ? (
-        <Card className="border-destructive/20 bg-destructive/5">
+        <Card className="rounded-[1.8rem] border-destructive/20 bg-destructive/5">
           <CardContent className="p-6 text-sm text-destructive">
-            Não foi possível carregar os anúncios públicos neste momento.
+            Nao foi possivel carregar os anuncios publicos neste momento.
           </CardContent>
         </Card>
       ) : null}
 
       {!listingsQuery.isLoading ? (
         <ListingGrid
-          emptyDescription="Ajuste a busca ou limpe os filtros para encontrar outros lotes, materiais e equipamentos já aprovados."
-          emptyTitle="Nenhum anúncio encontrado"
-          listings={paginatedListings}
+          emptyDescription="Ajuste a busca ou limpe os filtros para encontrar outros lotes, materiais e equipamentos aprovados."
+          emptyTitle="Nenhum anuncio encontrado"
+          listings={listings}
         />
       ) : null}
 
-      {sortedListings.length > pageSize ? (
-        <div className="flex flex-col gap-3 rounded-[1.5rem] border border-border bg-card/85 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      {totalCount > PAGE_SIZE ? (
+        <div className="flex flex-col gap-3 rounded-[1.7rem] border border-border bg-card/88 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
-            Página {safePage} de {totalPages}
+            Pagina {page} de {totalPages}
           </p>
           <div className="flex flex-wrap gap-2">
             <button
-              className="inline-flex h-11 items-center justify-center rounded-2xl border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={safePage <= 1}
+              className="inline-flex h-11 items-center justify-center rounded-[1.1rem] border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={page <= 1}
               onClick={() => setPage((current) => Math.max(1, current - 1))}
               type="button"
             >
               Anterior
             </button>
             <button
-              className="inline-flex h-11 items-center justify-center rounded-2xl border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={safePage >= totalPages}
+              className="inline-flex h-11 items-center justify-center rounded-[1.1rem] border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={page >= totalPages}
               onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
               type="button"
             >
-              Próxima
+              Proxima
             </button>
           </div>
         </div>
