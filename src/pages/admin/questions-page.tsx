@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Eye, MessageSquareReply } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -110,18 +110,8 @@ export function AdminQuestionsPage() {
     published: 0,
     total: 0,
   }
-  const selectedQuestion = questions.find((question) => question.id === selectedQuestionId) ?? questions[0] ?? null
-
-  useEffect(() => {
-    if (!selectedQuestion && questions.length > 0) {
-      setSelectedQuestionId(questions[0].id)
-      return
-    }
-
-    if (selectedQuestion && selectedQuestion.id !== selectedQuestionId) {
-      setSelectedQuestionId(selectedQuestion.id)
-    }
-  }, [questions, selectedQuestion, selectedQuestionId])
+  const selectedQuestion =
+    questions.find((question) => question.id === selectedQuestionId) ?? questions[0] ?? null
 
   function mutateStatus(questionId: string, questionStatus: QuestionStatus) {
     clearFeedback()

@@ -236,6 +236,7 @@ export function AdminBlogPage() {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_380px]">
         <AdminBlogPostForm
+          key={editingPost?.id ?? 'new-blog-post'}
           categories={categories}
           defaultValues={postDefaultValues}
           existingPost={editingPost}

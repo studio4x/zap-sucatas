@@ -134,6 +134,7 @@ export function AppEditListingPage() {
 
   return (
     <ListingEditor
+      key={`${id}:${listingQuery.data.updatedAt}:${listingQuery.data.images.length}`}
       cancelTo={paths.app.listings}
       categories={referencesQuery.data.categories}
       defaultValues={listingToFormValues(listingQuery.data)}

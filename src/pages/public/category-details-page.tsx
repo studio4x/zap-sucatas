@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
 import { paths } from '@/app/paths'
@@ -36,12 +36,6 @@ export function CategoryDetailsPage() {
 
   const totalCount = listingsQuery.data?.totalCount ?? 0
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
-
-  useEffect(() => {
-    if (page > totalPages) {
-      setPage(totalPages)
-    }
-  }, [page, totalPages])
 
   if (categoryQuery.isLoading) {
     return (

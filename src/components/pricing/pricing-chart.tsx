@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { PricingChartSeries, PricingSeriesCode } from '@/domains/pricing/types'
@@ -15,13 +15,6 @@ function buildChartPath(points: Array<{ x: number; y: number }>) {
 
 export function PricingChart({ className, series }: PricingChartProps) {
   const [selectedCode, setSelectedCode] = useState<PricingSeriesCode | null>(series[0]?.code ?? null)
-
-  useEffect(() => {
-    if (!series.some((item) => item.code === selectedCode)) {
-      setSelectedCode(series[0]?.code ?? null)
-    }
-  }, [selectedCode, series])
-
   const activeSeries = series.find((item) => item.code === selectedCode) ?? series[0] ?? null
 
   if (!activeSeries) {

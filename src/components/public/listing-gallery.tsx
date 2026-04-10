@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { ListingImage } from '@/domains/listings/types'
 import { cn } from '@/lib/utils'
 
@@ -8,13 +8,12 @@ type ListingGalleryProps = {
 }
 
 export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
-  const [activeIndex, setActiveIndex] = useState(0)
-
-  useEffect(() => {
-    setActiveIndex(0)
-  }, [images])
-
-  const activeImage = images[activeIndex] ?? images[0]
+  const [activeImageId, setActiveImageId] = useState<string | null>(images[0]?.id ?? null)
+  const activeImage = useMemo(
+    () => images.find((image) => image.id === activeImageId) ?? images[0],
+    [activeImageId, images],
+  )
+  const activeIndex = activeImage ? images.findIndex((image) => image.id === activeImage.id) : 0
 
   return (
     <div className="space-y-4">
@@ -48,7 +47,7 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
                   ? 'border-primary shadow-sm'
                   : 'border-border hover:border-primary/35',
               )}
-              onClick={() => setActiveIndex(index)}
+              onClick={() => setActiveImageId(image.id)}
               type="button"
             >
               <img

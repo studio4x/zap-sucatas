@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
@@ -20,41 +20,51 @@ type SettingsFormState = UpdateSystemSettingsInput
 export function AdminSettingsPage() {
   const queryClient = useQueryClient()
   const { clearFeedback, feedback, setErrorFeedback, setSuccessFeedback } = useOperationFeedback()
-  const [formState, setFormState] = useState<SettingsFormState>({
-    allowGuestQuestions: false,
-    maintenanceMode: false,
-    seoDescriptionDefault: '',
-    seoTitleDefault: '',
-    siteName: '',
-    supportEmail: '',
-    supportPhone: '',
-  })
+  const [draftState, setDraftState] = useState<SettingsFormState | null>(null)
 
   const settingsQuery = useQuery({
     queryKey: ['system-settings'],
     queryFn: fetchSystemSettings,
   })
 
-  useEffect(() => {
-    if (!settingsQuery.data) {
-      return
-    }
+  const initialFormState = useMemo<SettingsFormState>(
+    () =>
+      settingsQuery.data
+        ? {
+            allowGuestQuestions: settingsQuery.data.allowGuestQuestions,
+            maintenanceMode: settingsQuery.data.maintenanceMode,
+            seoDescriptionDefault: settingsQuery.data.seoDescriptionDefault ?? '',
+            seoTitleDefault: settingsQuery.data.seoTitleDefault ?? '',
+            siteName: settingsQuery.data.siteName,
+            supportEmail: settingsQuery.data.supportEmail ?? '',
+            supportPhone: settingsQuery.data.supportPhone ?? '',
+          }
+        : {
+            allowGuestQuestions: false,
+            maintenanceMode: false,
+            seoDescriptionDefault: '',
+            seoTitleDefault: '',
+            siteName: '',
+            supportEmail: '',
+            supportPhone: '',
+          },
+    [settingsQuery.data],
+  )
+  const formState = draftState ?? initialFormState
 
-    setFormState({
-      allowGuestQuestions: settingsQuery.data.allowGuestQuestions,
-      maintenanceMode: settingsQuery.data.maintenanceMode,
-      seoDescriptionDefault: settingsQuery.data.seoDescriptionDefault ?? '',
-      seoTitleDefault: settingsQuery.data.seoTitleDefault ?? '',
-      siteName: settingsQuery.data.siteName,
-      supportEmail: settingsQuery.data.supportEmail ?? '',
-      supportPhone: settingsQuery.data.supportPhone ?? '',
-    })
-  }, [settingsQuery.data])
+  function updateDraftState(partial: Partial<SettingsFormState>) {
+    clearFeedback()
+    setDraftState((current) => ({
+      ...(current ?? initialFormState),
+      ...partial,
+    }))
+  }
 
   const updateMutation = useMutation({
     mutationFn: updateSystemSettings,
     onSuccess: async () => {
       setSuccessFeedback('Configurações globais atualizadas com sucesso.')
+      setDraftState(null)
       await queryClient.invalidateQueries({ queryKey: ['system-settings'] })
     },
     onError: (error) => {
@@ -144,10 +154,7 @@ export function AdminSettingsPage() {
               </label>
               <Input
                 id="site-name"
-                onChange={(event) => {
-                  clearFeedback()
-                  setFormState((current) => ({ ...current, siteName: event.target.value }))
-                }}
+                onChange={(event) => updateDraftState({ siteName: event.target.value })}
                 value={formState.siteName}
               />
             </div>
@@ -158,10 +165,7 @@ export function AdminSettingsPage() {
               </label>
               <Input
                 id="support-email"
-                onChange={(event) => {
-                  clearFeedback()
-                  setFormState((current) => ({ ...current, supportEmail: event.target.value }))
-                }}
+                onChange={(event) => updateDraftState({ supportEmail: event.target.value })}
                 value={formState.supportEmail}
               />
             </div>
@@ -172,10 +176,7 @@ export function AdminSettingsPage() {
               </label>
               <Input
                 id="support-phone"
-                onChange={(event) => {
-                  clearFeedback()
-                  setFormState((current) => ({ ...current, supportPhone: event.target.value }))
-                }}
+                onChange={(event) => updateDraftState({ supportPhone: event.target.value })}
                 value={formState.supportPhone}
               />
             </div>
@@ -190,10 +191,7 @@ export function AdminSettingsPage() {
                 </div>
                 <Switch
                   checked={formState.allowGuestQuestions}
-                  onCheckedChange={(checked) => {
-                    clearFeedback()
-                    setFormState((current) => ({ ...current, allowGuestQuestions: checked }))
-                  }}
+                  onCheckedChange={(checked) => updateDraftState({ allowGuestQuestions: checked })}
                 />
               </div>
             </div>
@@ -208,10 +206,7 @@ export function AdminSettingsPage() {
                 </div>
                 <Switch
                   checked={formState.maintenanceMode}
-                  onCheckedChange={(checked) => {
-                    clearFeedback()
-                    setFormState((current) => ({ ...current, maintenanceMode: checked }))
-                  }}
+                  onCheckedChange={(checked) => updateDraftState({ maintenanceMode: checked })}
                 />
               </div>
             </div>
@@ -229,10 +224,7 @@ export function AdminSettingsPage() {
               </label>
               <Input
                 id="seo-title"
-                onChange={(event) => {
-                  clearFeedback()
-                  setFormState((current) => ({ ...current, seoTitleDefault: event.target.value }))
-                }}
+                onChange={(event) => updateDraftState({ seoTitleDefault: event.target.value })}
                 value={formState.seoTitleDefault}
               />
             </div>
@@ -243,13 +235,7 @@ export function AdminSettingsPage() {
               </label>
               <Textarea
                 id="seo-description"
-                onChange={(event) => {
-                  clearFeedback()
-                  setFormState((current) => ({
-                    ...current,
-                    seoDescriptionDefault: event.target.value,
-                  }))
-                }}
+                onChange={(event) => updateDraftState({ seoDescriptionDefault: event.target.value })}
                 value={formState.seoDescriptionDefault}
               />
             </div>

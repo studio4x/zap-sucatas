@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { KeyRound, Trash2 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
@@ -87,13 +87,6 @@ export function AdminUsersPage() {
     queryKey: ['profiles', 'admin', 'stats'],
     queryFn: fetchAdminProfileStats,
   })
-
-  useEffect(() => {
-    const currentItems = profilesQuery.data?.items ?? []
-    if (editingProfile && !currentItems.some((profile) => profile.id === editingProfile.id)) {
-      setEditingProfile(null)
-    }
-  }, [editingProfile, profilesQuery.data?.items])
 
   const createMutation = useMutation({
     mutationFn: createAdminUser,

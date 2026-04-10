@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Eye, FilePlus2, FileSearch, Pencil, Trash2 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
@@ -120,13 +120,14 @@ export function AdminListingsPage() {
     () => listings.filter((listing) => listing.status !== 'archived'),
     [listings],
   )
-  const selectedCount = selectedIds.length
+  const effectiveSelectedIds = useMemo(
+    () => selectedIds.filter((id) => listings.some((listing) => listing.id === id)),
+    [listings, selectedIds],
+  )
+  const selectedCount = effectiveSelectedIds.length
   const allSelectableChecked =
-    selectableListings.length > 0 && selectableListings.every((listing) => selectedIds.includes(listing.id))
-
-  useEffect(() => {
-    setSelectedIds((current) => current.filter((id) => listings.some((listing) => listing.id === id)))
-  }, [listings])
+    selectableListings.length > 0 &&
+    selectableListings.every((listing) => effectiveSelectedIds.includes(listing.id))
 
   function toggleSelection(listingId: string, checked: boolean) {
     setSelectedIds((current) =>
@@ -196,10 +197,10 @@ export function AdminListingsPage() {
                 disabled={archiveMutation.isPending}
                 onClick={() =>
                   requestArchive(
-                    selectedIds,
-                    selectedIds.length === 1
+                    effectiveSelectedIds,
+                    effectiveSelectedIds.length === 1
                       ? 'Remover este anúncio da operação pública? Ele será arquivado e permanecerá apenas no histórico interno.'
-                      : `Remover ${selectedIds.length} anúncios da operação pública? Eles serão arquivados e permanecerão apenas no histórico interno.`,
+                      : `Remover ${effectiveSelectedIds.length} anúncios da operação pública? Eles serão arquivados e permanecerão apenas no histórico interno.`,
                   )
                 }
                 type="button"
@@ -273,7 +274,7 @@ export function AdminListingsPage() {
               listing.status === 'archived' ? null : (
                 <input
                   aria-label={`Selecionar anúncio ${listing.title}`}
-                  checked={selectedIds.includes(listing.id)}
+                  checked={effectiveSelectedIds.includes(listing.id)}
                   className="size-4 rounded border border-border"
                   onChange={(event) => toggleSelection(listing.id, event.target.checked)}
                   type="checkbox"

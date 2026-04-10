@@ -126,6 +126,7 @@ export function AdminNewListingPage() {
       />
 
       <ListingEditor
+        key={`admin-new-listing:${settingsQuery.data?.siteName ?? 'site'}:${settingsQuery.data?.supportPhone ?? 'phone'}`}
         cancelTo={paths.admin.listings}
         categories={referencesQuery.data.categories}
         defaultValues={defaultValues}

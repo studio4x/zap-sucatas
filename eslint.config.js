@@ -20,4 +20,19 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    files: ['src/app/routes.tsx', 'src/app/providers/**/*.tsx', 'src/components/ui/button.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
+    files: ['playwright.config.ts', 'e2e/**/*.ts'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
 ])

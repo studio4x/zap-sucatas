@@ -29,6 +29,7 @@ export function ListingsPage() {
   const [city, setCity] = useState(searchParams.get('cidade') ?? '')
   const [sort, setSort] = useState<PublicListingSort>((searchParams.get('ordem') as PublicListingSort) ?? 'recent')
   const [page, setPage] = useState(Number(searchParams.get('pagina') ?? '1'))
+  const normalizedPage = Number.isFinite(page) && page > 0 ? page : 1
 
   const referencesQuery = useQuery({
     queryKey: ['listing-references'],
@@ -37,12 +38,12 @@ export function ListingsPage() {
 
   const listingsQuery = useQuery({
     placeholderData: (previousData) => previousData,
-    queryKey: ['listings', 'public', 'page', { categoryId, city, materialId, page, query, sort, state }],
+    queryKey: ['listings', 'public', 'page', { categoryId, city, materialId, page: normalizedPage, query, sort, state }],
     queryFn: () =>
       fetchPublicListingsPage({
         categoryId: categoryId || undefined,
         city: city || undefined,
-        page,
+        page: normalizedPage,
         pageSize: PAGE_SIZE,
         primaryMaterialId: materialId || undefined,
         query: query || undefined,
@@ -78,27 +79,17 @@ export function ListingsPage() {
       nextParams.set('ordem', sort)
     }
 
-    if (page > 1) {
-      nextParams.set('pagina', String(page))
+    if (normalizedPage > 1) {
+      nextParams.set('pagina', String(normalizedPage))
     }
 
     setSearchParams(nextParams, { replace: true })
-  }, [categoryId, city, materialId, page, query, setSearchParams, sort, state])
-
-  useEffect(() => {
-    setPage(1)
-  }, [categoryId, city, materialId, query, sort, state])
+  }, [categoryId, city, materialId, normalizedPage, query, setSearchParams, sort, state])
 
   const listings = listingsQuery.data?.items ?? []
   const totalCount = listingsQuery.data?.totalCount ?? 0
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
   const activeFiltersCount = [query.trim(), categoryId, materialId, state, city.trim()].filter(Boolean).length
-
-  useEffect(() => {
-    if (page > totalPages) {
-      setPage(totalPages)
-    }
-  }, [page, totalPages])
 
   const highlightedNumbers = useMemo(
     () => [
@@ -172,18 +163,36 @@ export function ListingsPage() {
         city={city}
         materialId={materialId}
         materials={referencesQuery.data?.materials ?? []}
-        onCategoryChange={setCategoryId}
-        onCityChange={setCity}
+        onCategoryChange={(value) => {
+          setPage(1)
+          setCategoryId(value)
+        }}
+        onCityChange={(value) => {
+          setPage(1)
+          setCity(value)
+        }}
         onClear={clearFilters}
-        onMaterialChange={setMaterialId}
-        onQueryChange={setQuery}
-        onStateChange={setState}
+        onMaterialChange={(value) => {
+          setPage(1)
+          setMaterialId(value)
+        }}
+        onQueryChange={(value) => {
+          setPage(1)
+          setQuery(value)
+        }}
+        onStateChange={(value) => {
+          setPage(1)
+          setState(value)
+        }}
         query={query}
         state={state}
       />
 
       <ListingSortBar
-        onChange={(value) => setSort(value as PublicListingSort)}
+        onChange={(value) => {
+          setPage(1)
+          setSort(value as PublicListingSort)
+        }}
         options={sortOptions}
         resultLabel={`${totalCount} anuncio${totalCount === 1 ? '' : 's'} neste recorte${activeFiltersCount > 0 ? ` • ${activeFiltersCount} filtro${activeFiltersCount === 1 ? '' : 's'} ativo${activeFiltersCount === 1 ? '' : 's'}` : ''}`}
         value={sort}
@@ -216,12 +225,12 @@ export function ListingsPage() {
       {totalCount > PAGE_SIZE ? (
         <div className="flex flex-col gap-3 rounded-[1.7rem] border border-border bg-card/88 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
-            Pagina {page} de {totalPages}
+            Pagina {normalizedPage} de {totalPages}
           </p>
           <div className="flex flex-wrap gap-2">
             <button
               className="inline-flex h-11 items-center justify-center rounded-[1.1rem] border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={page <= 1}
+              disabled={normalizedPage <= 1}
               onClick={() => setPage((current) => Math.max(1, current - 1))}
               type="button"
             >
@@ -229,7 +238,7 @@ export function ListingsPage() {
             </button>
             <button
               className="inline-flex h-11 items-center justify-center rounded-[1.1rem] border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={page >= totalPages}
+              disabled={normalizedPage >= totalPages}
               onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
               type="button"
             >

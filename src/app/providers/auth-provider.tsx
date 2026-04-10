@@ -29,11 +29,28 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (!supabase) {
-      setStatus('unauthenticated')
       return
     }
 
-    void refreshUser()
+    let isMounted = true
+
+    void loadCurrentSessionUser()
+      .then((currentUser) => {
+        if (!isMounted) {
+          return
+        }
+
+        setUser(currentUser)
+        setStatus(currentUser ? 'authenticated' : 'unauthenticated')
+      })
+      .catch(() => {
+        if (!isMounted) {
+          return
+        }
+
+        setUser(null)
+        setStatus('unauthenticated')
+      })
 
     const {
       data: { subscription },
@@ -46,6 +63,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     })
 
     return () => {
+      isMounted = false
       subscription.unsubscribe()
     }
   }, [])

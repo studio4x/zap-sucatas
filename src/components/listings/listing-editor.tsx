@@ -82,6 +82,16 @@ function buildPendingImageKey(clientId: string) {
   return `pending:${clientId}`
 }
 
+function resolveInitialCoverImageKey(images: ListingImage[]) {
+  const coverImage = images.find((image) => image.isCover)
+
+  if (coverImage) {
+    return buildExistingImageKey(coverImage.id)
+  }
+
+  return images[0] ? buildExistingImageKey(images[0].id) : null
+}
+
 function FormField({
   children,
   label,
@@ -126,11 +136,7 @@ export function ListingEditor({
     resolvedExistingImages.map((image) => buildExistingImageKey(image.id)),
   )
   const [coverImageKey, setCoverImageKey] = useState<string | null>(
-    resolvedExistingImages.find((image) => image.isCover)
-      ? buildExistingImageKey(resolvedExistingImages.find((image) => image.isCover)!.id)
-      : resolvedExistingImages[0]
-        ? buildExistingImageKey(resolvedExistingImages[0].id)
-        : null,
+    resolveInitialCoverImageKey(resolvedExistingImages),
   )
   const [feedback, setFeedback] = useState<{ message: string; tone: 'error' | 'success' } | null>(
     null,
@@ -160,10 +166,37 @@ export function ListingEditor({
     [pendingFiles],
   )
 
+  const availableImageKeys = useMemo(
+    () => [
+      ...activeExistingImages.map((image) => buildExistingImageKey(image.id)),
+      ...pendingFiles.map((item) => buildPendingImageKey(item.clientId)),
+    ],
+    [activeExistingImages, pendingFiles],
+  )
+  const normalizedImageOrderKeys = useMemo(() => {
+    const availableSet = new Set(availableImageKeys)
+    const next = imageOrderKeys.filter((key) => availableSet.has(key))
+
+    availableImageKeys.forEach((key) => {
+      if (!next.includes(key)) {
+        next.push(key)
+      }
+    })
+
+    return next
+  }, [availableImageKeys, imageOrderKeys])
+  const resolvedCoverImageKey = useMemo(() => {
+    if (coverImageKey && availableImageKeys.includes(coverImageKey)) {
+      return coverImageKey
+    }
+
+    return normalizedImageOrderKeys[0] ?? null
+  }, [availableImageKeys, coverImageKey, normalizedImageOrderKeys])
+
   const orderedImageItems = useMemo<OrderedImageItem[]>(() => {
     const existingMap = new Map(activeExistingImages.map((image) => [image.id, image]))
 
-    return imageOrderKeys
+    return normalizedImageOrderKeys
       .map((key) => {
         if (key.startsWith('existing:')) {
           const imageId = key.slice('existing:'.length)
@@ -200,20 +233,7 @@ export function ListingEditor({
         return null
       })
       .filter((item): item is OrderedImageItem => item !== null)
-  }, [activeExistingImages, imageOrderKeys, pendingFileMap])
-
-  useEffect(() => {
-    form.reset(defaultValues)
-    setPendingFiles([])
-    setRemovedImageIds([])
-    const nextKeys = resolvedExistingImages.map((image) => buildExistingImageKey(image.id))
-    setImageOrderKeys(nextKeys)
-    const nextCoverKey = resolvedExistingImages.find((image) => image.isCover)
-      ? buildExistingImageKey(resolvedExistingImages.find((image) => image.isCover)!.id)
-      : nextKeys[0] ?? null
-    setCoverImageKey(nextCoverKey)
-    setFeedback(null)
-  }, [defaultValues, resolvedExistingImages, form])
+  }, [activeExistingImages, normalizedImageOrderKeys, pendingFileMap])
 
   useEffect(() => {
     return () => {
@@ -221,42 +241,14 @@ export function ListingEditor({
     }
   }, [pendingFiles])
 
-  useEffect(() => {
-    const availableKeys = [
-      ...activeExistingImages.map((image) => buildExistingImageKey(image.id)),
-      ...pendingFiles.map((item) => buildPendingImageKey(item.clientId)),
-    ]
-    const availableSet = new Set(availableKeys)
-
-    setImageOrderKeys((current) => {
-      const next = current.filter((key) => availableSet.has(key))
-
-      availableKeys.forEach((key) => {
-        if (!next.includes(key)) {
-          next.push(key)
-        }
-      })
-
-      return arraysAreEqual(current, next) ? current : next
-    })
-
-    setCoverImageKey((current) => {
-      if (current && availableSet.has(current)) {
-        return current
-      }
-
-      return availableKeys[0] ?? null
-    })
-  }, [activeExistingImages, pendingFiles])
-
   async function handleSubmit(values: ListingFormSchemaValues, shouldSubmitAfterSave: boolean) {
     try {
       setFeedback(null)
       setSubmitAfterSave(shouldSubmitAfterSave)
 
       await onSubmit({
-        coverImageKey,
-        imageOrderKeys,
+        coverImageKey: resolvedCoverImageKey,
+        imageOrderKeys: normalizedImageOrderKeys,
         newUploads: orderedImageItems
           .filter((item) => item.kind === 'pending')
           .map((item) => ({
@@ -330,7 +322,8 @@ export function ListingEditor({
   }
 
   function moveImage(key: string, direction: 'down' | 'up') {
-    setImageOrderKeys((current) => {
+    setImageOrderKeys(() => {
+      const current = normalizedImageOrderKeys
       const index = current.findIndex((item) => item === key)
 
       if (index === -1) {
@@ -347,7 +340,7 @@ export function ListingEditor({
       const currentValue = next[index]
       next[index] = next[nextIndex]
       next[nextIndex] = currentValue
-      return next
+      return arraysAreEqual(current, next) ? current : next
     })
   }
 
@@ -576,7 +569,7 @@ export function ListingEditor({
               ) : (
                 <div className="grid gap-3">
                   {orderedImageItems.map((item, index) => {
-                    const isCover = coverImageKey === item.key
+                    const isCover = resolvedCoverImageKey === item.key
                     const isFirst = index === 0
                     const isLast = index === orderedImageItems.length - 1
 

@@ -171,6 +171,7 @@ export function AdminEditListingPage() {
       ) : null}
 
       <ListingEditor
+        key={`${id}:${listingQuery.data.updatedAt}:${listingQuery.data.images.length}`}
         cancelTo={paths.admin.listingDetails(id)}
         categories={referencesQuery.data.categories}
         defaultValues={listingToFormValues(listingQuery.data)}

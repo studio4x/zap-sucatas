@@ -49,18 +49,6 @@ function normalizeWhitespace(value: string) {
   return value.replace(/\s+/g, ' ').trim()
 }
 
-function stripHtml(html: string) {
-  return normalizeWhitespace(
-    html
-      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/&nbsp;/gi, ' ')
-      .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
-      .replace(/&amp;/gi, '&'),
-  )
-}
-
 function parseNumericValue(input: string) {
   const sanitized = input.trim().replace(/\s/g, '')
 
@@ -364,6 +352,8 @@ function resolveMode(requestBody: unknown): SyncMode {
 }
 
 Deno.serve(async (request) => {
+  let requestBody: Record<string, unknown> = {}
+
   if (request.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -374,8 +364,8 @@ Deno.serve(async (request) => {
     }
 
     const actor = await requireAdminProfile(request)
-    const body = await request.json().catch(() => ({}))
-    const mode = resolveMode(body)
+    requestBody = await request.json().catch(() => ({}))
+    const mode = resolveMode(requestBody)
     const entries = await resolveSnapshots(mode)
     const admin = createAdminClient()
     const chunks = chunkArray(entries, 500)
@@ -429,7 +419,7 @@ Deno.serve(async (request) => {
       message,
       payload: {
         event: 'pricing_sync_failed',
-        mode: body.mode ?? 'latest',
+        mode: typeof requestBody.mode === 'string' ? requestBody.mode : 'latest',
         severity: 'danger',
       },
       status: 'error',

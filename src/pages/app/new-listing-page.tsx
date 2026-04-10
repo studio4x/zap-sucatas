@@ -99,6 +99,7 @@ export function AppNewListingPage() {
 
   return (
     <ListingEditor
+      key="app-new-listing"
       cancelTo={paths.app.listings}
       categories={referencesQuery.data.categories}
       defaultValues={createEmptyListingFormValues()}
