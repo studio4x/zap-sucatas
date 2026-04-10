@@ -7,6 +7,32 @@ export type BlogContentDocument = {
   version: 1
 }
 
+export function parseBlogTagsInput(value: string) {
+  return Array.from(
+    new Set(
+      value
+        .split(',')
+        .map((item) => item.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  )
+}
+
+export function formatBlogTagsInput(tags: string[]) {
+  return tags.join(', ')
+}
+
+export function estimateBlogReadTime(content: unknown) {
+  const plainText = blogContentToPlainText(content).trim()
+
+  if (plainText.length === 0) {
+    return 1
+  }
+
+  const words = plainText.split(/\s+/).filter(Boolean).length
+  return Math.max(1, Math.ceil(words / 220))
+}
+
 function collectText(value: unknown, bucket: string[]) {
   if (typeof value === 'string') {
     const trimmed = value.trim()

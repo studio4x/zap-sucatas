@@ -14,7 +14,11 @@ import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { fetchAdminLogEventsPage, fetchAdminLogStats } from '@/domains/logs/api'
+import {
+  fetchAdminLogEventsPage,
+  fetchAdminLogStats,
+  fetchAdminOperationalHealth,
+} from '@/domains/logs/api'
 import type { AdminLogEvent } from '@/domains/logs/types'
 
 const PAGE_SIZE = 12
@@ -26,33 +30,34 @@ function formatDateTime(value: string) {
   }).format(new Date(value))
 }
 
+function formatLatestEvent(log: {
+  created_at: string
+  integration_name: string
+  status: string
+} | null) {
+  if (!log) {
+    return 'Sem registro recente.'
+  }
+
+  return `${log.integration_name} · ${log.status} · ${formatDateTime(log.created_at)}`
+}
+
 function getLogTone(log: AdminLogEvent) {
-  if (log.kind === 'audit') {
-    return 'info' as const
-  }
-
-  const normalized = log.secondaryLabel.toLowerCase()
-  if (normalized.includes('error') || normalized.includes('fail') || normalized.includes('blocked')) {
-    return 'danger' as const
-  }
-
-  if (normalized.includes('success') || normalized.includes('ok')) {
-    return 'success' as const
-  }
-
-  return 'warning' as const
+  return log.severity
 }
 
 export function AdminLogsPage() {
   const [query, setQuery] = useState('')
   const [kindFilter, setKindFilter] = useState<'all' | 'audit' | 'integration'>('all')
   const [entityFilter, setEntityFilter] = useState('all')
+  const [severityFilter, setSeverityFilter] = useState<'all' | AdminLogEvent['severity']>('all')
+  const [sourceFilter, setSourceFilter] = useState('all')
   const [page, setPage] = useState(1)
   const [selectedLog, setSelectedLog] = useState<AdminLogEvent | null>(null)
 
   const logsQuery = useQuery({
     placeholderData: (previousData) => previousData,
-    queryKey: ['logs', 'admin', 'page', { entityFilter, kindFilter, page, query }],
+    queryKey: ['logs', 'admin', 'page', { entityFilter, kindFilter, page, query, severityFilter, sourceFilter }],
     queryFn: () =>
       fetchAdminLogEventsPage({
         entityType: entityFilter,
@@ -60,12 +65,19 @@ export function AdminLogsPage() {
         page,
         pageSize: PAGE_SIZE,
         query,
+        severity: severityFilter,
+        source: sourceFilter,
       }),
   })
 
   const statsQuery = useQuery({
     queryKey: ['logs', 'admin', 'stats'],
     queryFn: fetchAdminLogStats,
+  })
+
+  const healthQuery = useQuery({
+    queryKey: ['logs', 'admin', 'health'],
+    queryFn: fetchAdminOperationalHealth,
   })
 
   const logs = logsQuery.data?.items ?? []
@@ -75,11 +87,23 @@ export function AdminLogsPage() {
       ['all', ...new Set(logs.map((log) => log.entityType).filter((value): value is string => Boolean(value)))],
     [logs],
   )
+  const sourceOptions = useMemo(
+    () =>
+      ['all', ...new Set(logs.map((log) => log.sourceName).filter((value): value is string => Boolean(value)))],
+    [logs],
+  )
   const stats = statsQuery.data ?? {
     audits: 0,
     integrations: 0,
     total: 0,
     withErrors: 0,
+  }
+  const health = healthQuery.data ?? {
+    auditEvents24h: 0,
+    contactMessages24h: 0,
+    errors24h: 0,
+    latestIntegrationEvent: null,
+    latestPricingSync: null,
   }
 
   return (
@@ -95,7 +119,7 @@ export function AdminLogsPage() {
             </Button>
           </>
         }
-        description="Trilha administrativa e integracoes com leitura operacional, filtro rapido e contexto suficiente para suporte."
+        description="Trilha administrativa com severidade, origem do evento e sinais operacionais para leitura rapida."
         eyebrow="Admin / logs"
         title="Logs e auditoria"
       />
@@ -107,6 +131,34 @@ export function AdminLogsPage() {
         <AdminStatCard label="Falhas" value={stats.withErrors} />
       </div>
 
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <AdminStatCard
+          description="Eventos bloqueados ou com erro nas ultimas 24h."
+          label="Falhas 24h"
+          value={health.errors24h}
+        />
+        <AdminStatCard
+          description="Entradas recebidas pelo contato publico nas ultimas 24h."
+          label="Contato 24h"
+          value={health.contactMessages24h}
+        />
+        <AdminStatCard
+          description="Acoes administrativas registradas nas ultimas 24h."
+          label="Auditoria 24h"
+          value={health.auditEvents24h}
+        />
+        <AdminStatCard
+          description={formatLatestEvent(health.latestPricingSync)}
+          label="Ultimo sync LME"
+          value={health.latestPricingSync?.status ?? 'Sem sync'}
+        />
+        <AdminStatCard
+          description={formatLatestEvent(health.latestIntegrationEvent)}
+          label="Ultima integracao"
+          value={health.latestIntegrationEvent?.integration_name ?? 'Sem evento'}
+        />
+      </div>
+
       <AdminFilterCard
         actions={
           <Button
@@ -115,6 +167,8 @@ export function AdminLogsPage() {
               setKindFilter('all')
               setPage(1)
               setQuery('')
+              setSeverityFilter('all')
+              setSourceFilter('all')
             }}
             type="button"
             variant="outline"
@@ -122,15 +176,15 @@ export function AdminLogsPage() {
             Limpar filtros
           </Button>
         }
-        description="Filtre por tipo, entidade e termos-chave antes de abrir o detalhe de um evento."
+        description="Filtre por tipo, severidade, origem e entidade antes de abrir o detalhe de um evento."
       >
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_220px]">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_200px_200px_200px_220px]">
           <Input
             onChange={(event) => {
               setPage(1)
               setQuery(event.target.value)
             }}
-            placeholder="Buscar por evento, ator, entidade, status ou detalhe"
+            placeholder="Buscar por evento, origem, acao, entidade ou detalhe"
             value={query}
           />
           <Select
@@ -143,6 +197,19 @@ export function AdminLogsPage() {
             <option value="all">Todos os tipos</option>
             <option value="integration">Integracoes</option>
             <option value="audit">Auditoria</option>
+          </Select>
+          <Select
+            onChange={(event) => {
+              setSeverityFilter(event.target.value as typeof severityFilter)
+              setPage(1)
+            }}
+            value={severityFilter}
+          >
+            <option value="all">Toda severidade</option>
+            <option value="info">Info</option>
+            <option value="success">Sucesso</option>
+            <option value="warning">Aviso</option>
+            <option value="danger">Critico</option>
           </Select>
           <Select
             onChange={(event) => {
@@ -160,25 +227,49 @@ export function AdminLogsPage() {
                 </option>
               ))}
           </Select>
+          <Select
+            onChange={(event) => {
+              setSourceFilter(event.target.value)
+              setPage(1)
+            }}
+            value={sourceFilter}
+          >
+            <option value="all">Toda origem</option>
+            {sourceOptions
+              .filter((source) => source !== 'all')
+              .map((source) => (
+                <option key={source} value={source}>
+                  {source}
+                </option>
+              ))}
+          </Select>
         </div>
       </AdminFilterCard>
 
       <AdminDataTable
         columns={[
           {
-            header: 'Tipo',
-            cell: (log) => (
-              <AdminStatusBadge tone={getLogTone(log)}>
-                {log.kind === 'integration' ? 'Integracao' : 'Auditoria'}
-              </AdminStatusBadge>
-            ),
+            header: 'Severidade',
+            cell: (log) => <AdminStatusBadge tone={getLogTone(log)}>{log.severity}</AdminStatusBadge>,
           },
           {
             header: 'Evento',
             cell: (log) => (
               <div className="space-y-1">
                 <p className="font-medium text-foreground">{log.label}</p>
-                <p className="text-xs text-muted-foreground">{log.secondaryLabel}</p>
+                <p className="text-xs text-muted-foreground">
+                  {log.actionKey ?? log.secondaryLabel ?? 'Sem classificacao complementar'}
+                </p>
+              </div>
+            ),
+          },
+          {
+            header: 'Origem',
+            cell: (log) => (
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <p>{log.sourceName ?? 'sem origem declarada'}</p>
+                <p>Tipo: {log.kind === 'integration' ? 'Integracao' : 'Auditoria'}</p>
+                <p>Ator: {log.actorName ?? log.actorUserId ?? 'Sistema'}</p>
               </div>
             ),
           },
@@ -186,7 +277,6 @@ export function AdminLogsPage() {
             header: 'Contexto',
             cell: (log) => (
               <div className="space-y-1 text-xs text-muted-foreground">
-                <p>Ator: {log.actorName ?? log.actorUserId ?? 'Sistema'}</p>
                 <p>Entidade: {log.entityType ?? 'N/A'}</p>
                 <p>{log.detail ?? 'Sem detalhe adicional'}</p>
               </div>
@@ -223,8 +313,8 @@ export function AdminLogsPage() {
         emptyTitle="Sem logs neste recorte"
         errorMessage="Nao foi possivel carregar a trilha de logs."
         getRowKey={(log) => `${log.kind}-${log.id}`}
-        isError={logsQuery.isError || statsQuery.isError}
-        isLoading={logsQuery.isLoading || statsQuery.isLoading}
+        isError={logsQuery.isError || statsQuery.isError || healthQuery.isError}
+        isLoading={logsQuery.isLoading || statsQuery.isLoading || healthQuery.isLoading}
       />
 
       <AdminPagination

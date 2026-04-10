@@ -1,4 +1,5 @@
 export type AdminLogEvent = {
+  actionKey: string | null
   actorName: string | null
   actorUserId: string | null
   afterData: unknown
@@ -12,4 +13,6 @@ export type AdminLogEvent = {
   label: string
   payload: unknown
   secondaryLabel: string
+  severity: 'danger' | 'info' | 'success' | 'warning'
+  sourceName: string | null
 }

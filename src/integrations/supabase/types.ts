@@ -83,6 +83,7 @@ export type Database = {
           seo_title: string | null
           slug: string
           status: 'archived' | 'draft' | 'published'
+          tags: string[]
           title: string
           updated_at: string
         }
@@ -99,6 +100,7 @@ export type Database = {
           seo_title?: string | null
           slug: string
           status?: 'archived' | 'draft' | 'published'
+          tags?: string[]
           title: string
           updated_at?: string
         }
@@ -115,6 +117,7 @@ export type Database = {
           seo_title?: string | null
           slug?: string
           status?: 'archived' | 'draft' | 'published'
+          tags?: string[]
           title?: string
           updated_at?: string
         }
@@ -630,6 +633,7 @@ export type Database = {
       admin_log_feed: {
         Relationships: []
         Row: {
+          action_key: string | null
           actor_user_id: string | null
           after_data: Json | null
           before_data: Json | null
@@ -642,8 +646,11 @@ export type Database = {
           label: string | null
           payload: Json | null
           secondary_label: string | null
+          severity: string | null
+          source_name: string | null
         }
         Insert: {
+          action_key?: string | null
           actor_user_id?: string | null
           after_data?: Json | null
           before_data?: Json | null
@@ -656,8 +663,11 @@ export type Database = {
           label?: string | null
           payload?: Json | null
           secondary_label?: string | null
+          severity?: string | null
+          source_name?: string | null
         }
         Update: {
+          action_key?: string | null
           actor_user_id?: string | null
           after_data?: Json | null
           before_data?: Json | null
@@ -670,6 +680,8 @@ export type Database = {
           label?: string | null
           payload?: Json | null
           secondary_label?: string | null
+          severity?: string | null
+          source_name?: string | null
         }
       }
       lme_snapshot_months: {

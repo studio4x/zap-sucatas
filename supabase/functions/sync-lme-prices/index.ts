@@ -396,8 +396,10 @@ Deno.serve(async (request) => {
       payload: {
         actor_profile_id: actor.id,
         count: entries.length,
+        event: 'pricing_sync_completed',
         mode,
         providers: Array.from(new Set(entries.map((entry) => entry.provider_name))),
+        severity: 'success',
       },
       status: 'success',
     })
@@ -425,6 +427,11 @@ Deno.serve(async (request) => {
     await insertIntegrationLog({
       integrationName: 'lme',
       message,
+      payload: {
+        event: 'pricing_sync_failed',
+        mode: body.mode ?? 'latest',
+        severity: 'danger',
+      },
       status: 'error',
     })
 

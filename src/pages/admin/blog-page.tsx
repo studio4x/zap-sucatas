@@ -189,6 +189,10 @@ export function AdminBlogPage() {
     () => (editingPost ? blogPostToFormValues(editingPost) : createEmptyBlogPostFormValues()),
     [editingPost],
   )
+  const uniqueTagsCount = useMemo(
+    () => new Set(posts.flatMap((post) => post.tags)).size,
+    [posts],
+  )
 
   return (
     <section className="space-y-6">
@@ -215,12 +219,17 @@ export function AdminBlogPage() {
         title="Gestao do blog"
       />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
         <AdminStatCard label="Total" value={stats.total} />
         <AdminStatCard label="Rascunhos" value={stats.drafts} />
         <AdminStatCard label="Publicados" value={stats.published} />
         <AdminStatCard label="Arquivados" value={stats.archived} />
         <AdminStatCard label="Categorias" value={categories.length} />
+        <AdminStatCard
+          description="Tags visiveis na pagina atual."
+          label="Tags"
+          value={uniqueTagsCount}
+        />
       </div>
 
       {feedback ? <OperationFeedback feedback={feedback} /> : null}
@@ -375,6 +384,30 @@ export function AdminBlogPage() {
           {
             header: 'Categoria',
             cell: (post) => <span className="text-sm text-muted-foreground">{post.categoryName ?? 'Sem categoria'}</span>,
+          },
+          {
+            header: 'Tags',
+            cell: (post) => (
+              <div className="flex flex-wrap gap-2">
+                {post.tags.length > 0 ? (
+                  post.tags.slice(0, 3).map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center rounded-full bg-secondary/70 px-2.5 py-1 text-xs font-medium text-foreground"
+                    >
+                      #{tag}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-sm text-muted-foreground">Sem tags</span>
+                )}
+                {post.tags.length > 3 ? (
+                  <span className="inline-flex items-center rounded-full bg-secondary/40 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                    +{post.tags.length - 3}
+                  </span>
+                ) : null}
+              </div>
+            ),
           },
           {
             header: 'Status',

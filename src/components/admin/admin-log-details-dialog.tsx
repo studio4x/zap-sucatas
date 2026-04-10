@@ -1,10 +1,15 @@
 import type { AdminLogEvent } from '@/domains/logs/types'
+import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { Button } from '@/components/ui/button'
 
 type AdminLogDetailsDialogProps = {
   log: AdminLogEvent | null
   onOpenChange: (open: boolean) => void
   open: boolean
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
 function formatJson(value: unknown) {
@@ -19,6 +24,22 @@ function formatJson(value: unknown) {
   }
 }
 
+function getChangedKeys(beforeData: unknown, afterData: unknown) {
+  if (!isRecord(beforeData) || !isRecord(afterData)) {
+    return []
+  }
+
+  const keys = new Set([...Object.keys(beforeData), ...Object.keys(afterData)])
+
+  return Array.from(keys).filter((key) => {
+    try {
+      return JSON.stringify(beforeData[key]) !== JSON.stringify(afterData[key])
+    } catch {
+      return true
+    }
+  })
+}
+
 export function AdminLogDetailsDialog({
   log,
   onOpenChange,
@@ -28,13 +49,18 @@ export function AdminLogDetailsDialog({
     return null
   }
 
+  const changedKeys = getChangedKeys(log.beforeData, log.afterData)
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6">
       <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-2xl border border-border bg-background shadow-2xl">
         <div className="flex items-start justify-between gap-4 border-b border-border px-6 py-4">
-          <div className="space-y-1">
-            <h2 className="text-lg font-semibold text-foreground">{log.label}</h2>
-            <p className="text-sm text-muted-foreground">{log.secondaryLabel}</p>
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-lg font-semibold text-foreground">{log.label}</h2>
+              <AdminStatusBadge tone={log.severity}>{log.severity}</AdminStatusBadge>
+            </div>
+            <p className="text-sm text-muted-foreground">{log.secondaryLabel || 'Sem classificacao secundaria.'}</p>
           </div>
           <Button onClick={() => onOpenChange(false)} type="button" variant="outline">
             Fechar
@@ -42,7 +68,7 @@ export function AdminLogDetailsDialog({
         </div>
 
         <div className="space-y-6 overflow-y-auto px-6 py-5">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 Tipo
@@ -50,6 +76,18 @@ export function AdminLogDetailsDialog({
               <p className="text-sm text-foreground">
                 {log.kind === 'audit' ? 'Auditoria' : 'Integracao'}
               </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                Origem
+              </p>
+              <p className="text-sm text-foreground">{log.sourceName ?? 'Nao informada'}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                Chave da acao
+              </p>
+              <p className="text-sm text-foreground">{log.actionKey ?? 'Nao informada'}</p>
             </div>
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -88,6 +126,24 @@ export function AdminLogDetailsDialog({
               </p>
               <div className="rounded-2xl border border-border bg-muted/30 px-4 py-3 text-sm text-foreground">
                 {log.detail}
+              </div>
+            </div>
+          ) : null}
+
+          {changedKeys.length > 0 ? (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                Campos alterados
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {changedKeys.map((key) => (
+                  <span
+                    key={key}
+                    className="inline-flex items-center rounded-full bg-secondary/70 px-3 py-1 text-xs font-medium text-foreground"
+                  >
+                    {key}
+                  </span>
+                ))}
               </div>
             </div>
           ) : null}

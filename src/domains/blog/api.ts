@@ -16,6 +16,9 @@ import type {
 import {
   blogContentToPlainText,
   createBlogContentDocument,
+  estimateBlogReadTime,
+  formatBlogTagsInput,
+  parseBlogTagsInput,
   slugifyBlogValue,
 } from '@/domains/blog/utils'
 
@@ -42,6 +45,7 @@ type BlogPostRow = {
   seo_title: string | null
   slug: string
   status: BlogPostStatus
+  tags: string[] | null
   title: string
   updated_at: string
   blog_categories?: { name: string | null } | null
@@ -86,6 +90,7 @@ function mapBlogPost(row: BlogPostRow): BlogPost {
     coverImagePath: row.cover_image_path,
     coverImageUrl: resolveBlogCoverImageUrl(row.cover_image_path),
     createdAt: row.created_at,
+    estimatedReadTime: estimateBlogReadTime(row.content),
     excerpt: row.excerpt,
     id: row.id,
     publishedAt: row.published_at,
@@ -93,6 +98,7 @@ function mapBlogPost(row: BlogPostRow): BlogPost {
     seoTitle: row.seo_title,
     slug: row.slug,
     status: row.status,
+    tags: row.tags ?? [],
     title: row.title,
     updatedAt: row.updated_at,
   }
@@ -146,6 +152,7 @@ function buildBlogPostPayload(input: {
     seo_title: values.seoTitle.trim() || null,
     slug: nextSlug,
     status: nextStatus,
+    tags: parseBlogTagsInput(values.tagsText),
     title: values.title.trim(),
   }
 }
@@ -205,6 +212,7 @@ export function createEmptyBlogPostFormValues(): BlogPostFormValues {
     seoTitle: '',
     slug: '',
     status: 'draft',
+    tagsText: '',
     title: '',
   }
 }
@@ -218,6 +226,7 @@ export function blogPostToFormValues(post: AdminBlogPost): BlogPostFormValues {
     seoTitle: post.seoTitle ?? '',
     slug: post.slug,
     status: post.status,
+    tagsText: formatBlogTagsInput(post.tags),
     title: post.title,
   }
 }
@@ -314,7 +323,7 @@ export async function fetchAdminBlogPosts() {
   const { data, error } = await ensureSupabase()
     .from('blog_posts')
     .select(
-      'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, blog_categories(name)',
+      'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, tags, blog_categories(name)',
     )
     .order('updated_at', { ascending: false })
 
@@ -366,7 +375,7 @@ export async function fetchAdminBlogPostsPage(input: {
   let query = ensureSupabase()
     .from('blog_posts')
     .select(
-      'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, blog_categories(name)',
+      'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, tags, blog_categories(name)',
       { count: 'exact' },
     )
     .order('updated_at', { ascending: false })
@@ -416,7 +425,7 @@ export async function saveAdminBlogPost(input: {
 
   const { data, error } = await query
     .select(
-      'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, blog_categories(name)',
+      'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, tags, blog_categories(name)',
     )
     .single()
 
@@ -442,7 +451,7 @@ export async function saveAdminBlogPost(input: {
       .update({ cover_image_path: nextStoragePath })
       .eq('id', nextRow.id)
       .select(
-        'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, blog_categories(name)',
+        'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, tags, blog_categories(name)',
       )
       .single()
 
@@ -472,7 +481,7 @@ export async function fetchPublicBlogPosts() {
   const { data, error } = await ensureSupabase()
     .from('blog_posts')
     .select(
-      'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, blog_categories(name)',
+      'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, tags, blog_categories(name)',
     )
     .eq('status', 'published')
     .order('published_at', { ascending: false })
@@ -488,7 +497,7 @@ export async function fetchPublicBlogPostBySlug(slug: string) {
   const { data, error } = await ensureSupabase()
     .from('blog_posts')
     .select(
-      'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, blog_categories(name)',
+      'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, tags, blog_categories(name)',
     )
     .eq('slug', slug)
     .eq('status', 'published')

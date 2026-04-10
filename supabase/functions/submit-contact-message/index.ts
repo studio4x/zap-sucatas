@@ -124,7 +124,9 @@ Deno.serve(async (request) => {
         message: 'Rate limit exceeded for contact submission.',
         payload: {
           email: input.email,
+          event: 'contact_rate_limited',
           requestIp,
+          severity: 'warning',
           subject: input.subject,
         },
         status: 'blocked',
@@ -155,8 +157,10 @@ Deno.serve(async (request) => {
       message: 'Contact message submitted successfully.',
       payload: {
         email: input.email,
+        event: 'contact_message_submitted',
         profileId,
         requestIp,
+        severity: 'success',
         subject: input.subject,
       },
       status: 'success',
@@ -168,7 +172,10 @@ Deno.serve(async (request) => {
     await insertIntegrationLog({
       integrationName: 'contact_form',
       message,
-      payload: null,
+      payload: {
+        event: 'contact_message_failed',
+        severity: 'danger',
+      },
       status: 'error',
     })
     return jsonResponse({ error: message }, 400)

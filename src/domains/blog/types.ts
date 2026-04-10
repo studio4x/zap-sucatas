@@ -15,6 +15,7 @@ export type BlogPost = {
   coverImagePath: string | null
   coverImageUrl: string | null
   createdAt: string
+  estimatedReadTime: number
   excerpt: string | null
   id: string
   publishedAt: string | null
@@ -22,6 +23,7 @@ export type BlogPost = {
   seoTitle: string | null
   slug: string
   status: BlogPostStatus
+  tags: string[]
   title: string
   updatedAt: string
 }
