@@ -64,7 +64,10 @@ export async function updateSystemSettings(input: UpdateSystemSettingsInput) {
     support_phone: input.supportPhone.trim() || null,
   }
 
-  const { error } = await ensureSupabase().from('system_settings').update(payload).neq('id', '')
+  const { error } = await ensureSupabase()
+    .from('system_settings')
+    .update(payload)
+    .eq('id', input.id)
 
   if (error) {
     throw error

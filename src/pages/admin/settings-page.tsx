@@ -31,6 +31,7 @@ export function AdminSettingsPage() {
     () =>
       settingsQuery.data
         ? {
+            id: settingsQuery.data.id,
             allowGuestQuestions: settingsQuery.data.allowGuestQuestions,
             maintenanceMode: settingsQuery.data.maintenanceMode,
             seoDescriptionDefault: settingsQuery.data.seoDescriptionDefault ?? '',
@@ -40,6 +41,7 @@ export function AdminSettingsPage() {
             supportPhone: settingsQuery.data.supportPhone ?? '',
           }
         : {
+            id: '',
             allowGuestQuestions: false,
             maintenanceMode: false,
             seoDescriptionDefault: '',

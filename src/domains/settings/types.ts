@@ -32,6 +32,7 @@ export type IntegrationLog = {
 }
 
 export type UpdateSystemSettingsInput = {
+  id: string
   allowGuestQuestions: boolean
   maintenanceMode: boolean
   seoDescriptionDefault: string
