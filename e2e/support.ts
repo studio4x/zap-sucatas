@@ -1,6 +1,11 @@
 import path from 'node:path'
 import { expect, type Page } from '@playwright/test'
 
+export const DEFAULT_E2E_USER_EMAIL = 'qa-user@zapsucatas.local'
+export const DEFAULT_E2E_USER_PASSWORD = 'ZapSucatas@2026!User'
+export const DEFAULT_E2E_ADMIN_EMAIL = 'qa-admin@zapsucatas.local'
+export const DEFAULT_E2E_ADMIN_PASSWORD = 'ZapSucatas@2026!Admin'
+
 export function requireEnv(name: string) {
   const value = process.env[name]
 
@@ -16,6 +21,24 @@ export async function signIn(page: Page, email: string, password: string) {
   await page.getByLabel('E-mail').first().fill(email)
   await page.getByLabel('Senha').fill(password)
   await page.getByRole('button', { name: /^Entrar$/i }).click()
+}
+
+export async function signInAsAdmin(
+  page: Page,
+  email = process.env.E2E_ADMIN_EMAIL ?? DEFAULT_E2E_ADMIN_EMAIL,
+  password = process.env.E2E_ADMIN_PASSWORD ?? DEFAULT_E2E_ADMIN_PASSWORD,
+) {
+  await signIn(page, email, password)
+  await expect(page).toHaveURL(/\/admin(\/|$)/, { timeout: 30000 })
+}
+
+export async function signInAsUser(
+  page: Page,
+  email = process.env.E2E_USER_EMAIL ?? DEFAULT_E2E_USER_EMAIL,
+  password = process.env.E2E_USER_PASSWORD ?? DEFAULT_E2E_USER_PASSWORD,
+) {
+  await signIn(page, email, password)
+  await expect(page).toHaveURL(/\/app(\/|$)/, { timeout: 30000 })
 }
 
 export async function signOut(page: Page) {

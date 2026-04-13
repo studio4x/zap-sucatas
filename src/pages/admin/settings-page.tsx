@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
@@ -51,13 +51,23 @@ export function AdminSettingsPage() {
     [settingsQuery.data],
   )
   const formState = draftState ?? initialFormState
+  const latestFormStateRef = useRef<SettingsFormState>(formState)
+
+  useEffect(() => {
+    latestFormStateRef.current = formState
+  }, [formState])
 
   function updateDraftState(partial: Partial<SettingsFormState>) {
     clearFeedback()
-    setDraftState((current) => ({
-      ...(current ?? initialFormState),
-      ...partial,
-    }))
+    setDraftState((current) => {
+      const nextState = {
+        ...(current ?? initialFormState),
+        ...partial,
+      }
+
+      latestFormStateRef.current = nextState
+      return nextState
+    })
   }
 
   const updateMutation = useMutation({
@@ -97,7 +107,7 @@ export function AdminSettingsPage() {
               disabled={updateMutation.isPending}
               onClick={() => {
                 clearFeedback()
-                updateMutation.mutate(formState)
+                updateMutation.mutate(latestFormStateRef.current)
               }}
               type="button"
             >
@@ -190,6 +200,7 @@ export function AdminSettingsPage() {
                   </p>
                 </div>
                 <Switch
+                  id="allow-guest-questions-switch"
                   checked={formState.allowGuestQuestions}
                   onCheckedChange={(checked) => updateDraftState({ allowGuestQuestions: checked })}
                 />
@@ -205,6 +216,7 @@ export function AdminSettingsPage() {
                   </p>
                 </div>
                 <Switch
+                  id="maintenance-mode-switch"
                   checked={formState.maintenanceMode}
                   onCheckedChange={(checked) => updateDraftState({ maintenanceMode: checked })}
                 />
