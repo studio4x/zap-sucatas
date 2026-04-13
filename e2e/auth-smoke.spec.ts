@@ -1,11 +1,5 @@
-import { expect, test, type Page } from '@playwright/test'
-
-async function signIn(page: Page, email: string, password: string) {
-  await page.goto('/login')
-  await page.getByLabel('E-mail').first().fill(email)
-  await page.getByLabel('Senha').fill(password)
-  await page.getByRole('button', { name: /^Entrar$/i }).click()
-}
+import { expect, test } from '@playwright/test'
+import { signIn } from './support'
 
 test.describe('authenticated smoke', () => {
   test('user credentials reach the dashboard shell', async ({ page }) => {

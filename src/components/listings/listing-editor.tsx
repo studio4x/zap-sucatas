@@ -94,14 +94,18 @@ function resolveInitialCoverImageKey(images: ListingImage[]) {
 
 function FormField({
   children,
+  fieldId,
   label,
 }: {
   children: ReactNode
+  fieldId?: string
   label: string
 }) {
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-foreground">{label}</label>
+      <label className="text-sm font-medium text-foreground" htmlFor={fieldId}>
+        {label}
+      </label>
       {children}
     </div>
   )
@@ -388,16 +392,16 @@ export function ListingEditor({
             title="Dados principais"
           >
             <div className="grid gap-4">
-              <FormField label="Titulo">
-                <Input {...form.register('title')} />
+              <FormField fieldId="listing-title" label="Titulo">
+                <Input id="listing-title" {...form.register('title')} />
                 {form.formState.errors.title ? (
                   <p className="text-sm text-destructive">{form.formState.errors.title.message}</p>
                 ) : null}
               </FormField>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <FormField label="Categoria">
-                  <Select {...form.register('categoryId')}>
+                <FormField fieldId="listing-category" label="Categoria">
+                  <Select id="listing-category" {...form.register('categoryId')}>
                     <option value="">Selecione</option>
                     {categories.map((category) => (
                       <option key={category.id} value={category.id}>
@@ -412,8 +416,8 @@ export function ListingEditor({
                   ) : null}
                 </FormField>
 
-                <FormField label="Material principal">
-                  <Select {...form.register('primaryMaterialId')}>
+                <FormField fieldId="listing-material" label="Material principal">
+                  <Select id="listing-material" {...form.register('primaryMaterialId')}>
                     <option value="">Não informado</option>
                     {materials.map((material) => (
                       <option key={material.id} value={material.id}>
@@ -424,15 +428,20 @@ export function ListingEditor({
                 </FormField>
               </div>
 
-              <FormField label="Resumo comercial">
-                <Textarea {...form.register('summary')} className="min-h-24" maxLength={240} />
+              <FormField fieldId="listing-summary" label="Resumo comercial">
+                <Textarea
+                  id="listing-summary"
+                  {...form.register('summary')}
+                  className="min-h-24"
+                  maxLength={240}
+                />
                 {form.formState.errors.summary ? (
                   <p className="text-sm text-destructive">{form.formState.errors.summary.message}</p>
                 ) : null}
               </FormField>
 
-              <FormField label="Descricao">
-                <Textarea {...form.register('description')} className="min-h-40" />
+              <FormField fieldId="listing-description" label="Descricao">
+                <Textarea id="listing-description" {...form.register('description')} className="min-h-40" />
                 {form.formState.errors.description ? (
                   <p className="text-sm text-destructive">
                     {form.formState.errors.description.message}
@@ -447,37 +456,42 @@ export function ListingEditor({
             title="Localizacao e contato"
           >
             <div className="grid gap-4 md:grid-cols-2">
-              <FormField label="Cidade">
-                <Input {...form.register('city')} />
+              <FormField fieldId="listing-city" label="Cidade">
+                <Input id="listing-city" {...form.register('city')} />
                 {form.formState.errors.city ? (
                   <p className="text-sm text-destructive">{form.formState.errors.city.message}</p>
                 ) : null}
               </FormField>
 
-              <FormField label="Estado">
-                <Input {...form.register('state')} maxLength={2} placeholder="SP" />
+              <FormField fieldId="listing-state" label="Estado">
+                <Input id="listing-state" {...form.register('state')} maxLength={2} placeholder="SP" />
                 {form.formState.errors.state ? (
                   <p className="text-sm text-destructive">{form.formState.errors.state.message}</p>
                 ) : null}
               </FormField>
 
-              <FormField label="Nome de contato">
-                <Input {...form.register('contactName')} />
+              <FormField fieldId="listing-contact-name" label="Nome de contato">
+                <Input id="listing-contact-name" {...form.register('contactName')} />
               </FormField>
 
-              <FormField label="Telefone de contato">
-                <Input {...form.register('contactPhone')} />
+              <FormField fieldId="listing-contact-phone" label="Telefone de contato">
+                <Input id="listing-contact-phone" {...form.register('contactPhone')} />
               </FormField>
 
-              <FormField label="Condicao">
+              <FormField fieldId="listing-condition" label="Condicao">
                 <Input
+                  id="listing-condition"
                   {...form.register('conditionType')}
                   placeholder="Ex.: usado, em lote, sucata prensada"
                 />
               </FormField>
 
-              <FormField label="Faixa de preço">
-                <Input {...form.register('priceLabel')} placeholder="Ex.: sob consulta, a combinar" />
+              <FormField fieldId="listing-price" label="Faixa de preço">
+                <Input
+                  id="listing-price"
+                  {...form.register('priceLabel')}
+                  placeholder="Ex.: sob consulta, a combinar"
+                />
               </FormField>
             </div>
           </DashboardFormSection>

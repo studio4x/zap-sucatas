@@ -181,6 +181,22 @@ function buildQuestionsQuery() {
     `)
 }
 
+async function fetchListingIdsMatchingQuestionSearch(search: string) {
+  const { data, error } = await ensureSupabase()
+    .from('listings')
+    .select('id')
+    .ilike('title', search)
+    .limit(100)
+
+  if (error) {
+    throw error
+  }
+
+  return (data ?? [])
+    .map((row) => row.id)
+    .filter((value): value is string => typeof value === 'string' && value.length > 0)
+}
+
 export async function fetchQuestionSettings(): Promise<PublicQuestionSettings> {
   const { data, error } = await ensureSupabase()
     .from('system_settings')
@@ -293,9 +309,15 @@ export async function fetchAdminQuestionsPage(input: {
 
   if (input.query?.trim()) {
     const search = `%${input.query.trim()}%`
-    query = query.or(
-      `question_text.ilike.${search},guest_name.ilike.${search},guest_email.ilike.${search},listings.title.ilike.${search}`,
-    )
+    const listingIds = await fetchListingIdsMatchingQuestionSearch(search)
+    const orConditions = [
+      `question_text.ilike.${search}`,
+      `guest_name.ilike.${search}`,
+      `guest_email.ilike.${search}`,
+      ...(listingIds.length > 0 ? [`listing_id.in.(${listingIds.join(',')})`] : []),
+    ]
+
+    query = query.or(orConditions.join(','))
   }
 
   const { data, error, count } = await query
