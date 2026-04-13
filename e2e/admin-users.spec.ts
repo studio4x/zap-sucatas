@@ -5,6 +5,11 @@ test.describe('admin user management', () => {
   test.describe.configure({ mode: 'serial' })
 
   test('admin can create, edit, reset password and delete a user account', async ({ browser, page }) => {
+    test.skip(
+      process.env.E2E_RUN_ADMIN_USERS !== '1',
+      'Set E2E_RUN_ADMIN_USERS=1 after redeploying manage-user-account in Supabase.',
+    )
+
     const initialName = buildQaTitle('QA usuario')
     const updatedName = `${initialName} revisado`
     const initialEmail = buildQaEmail('qa-user-admin-flow')
