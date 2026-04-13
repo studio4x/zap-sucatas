@@ -106,15 +106,22 @@ export function AdminListingsPage() {
     },
   })
 
-  const listings = listingsQuery.data?.items ?? []
+  const listings = useMemo(() => listingsQuery.data?.items ?? [], [listingsQuery.data])
   const totalCount = listingsQuery.data?.totalCount ?? 0
-  const stateOptions = ['all', ...(stateOptionsQuery.data ?? [])]
-  const stats = statsQuery.data ?? {
-    approved: 0,
-    pending: 0,
-    rejected: 0,
-    total: 0,
-  }
+  const stateOptions = useMemo(
+    () => ['all', ...(stateOptionsQuery.data ?? [])],
+    [stateOptionsQuery.data],
+  )
+  const stats = useMemo(
+    () =>
+      statsQuery.data ?? {
+        approved: 0,
+        pending: 0,
+        rejected: 0,
+        total: 0,
+      },
+    [statsQuery.data],
+  )
 
   const selectableListings = useMemo(
     () => listings.filter((listing) => listing.status !== 'archived'),

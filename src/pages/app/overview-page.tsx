@@ -30,8 +30,8 @@ export function AppOverviewPage() {
     enabled: Boolean(user?.profileId),
   })
 
-  const listings = listingsQuery.data ?? []
-  const questions = questionsQuery.data ?? []
+  const listings = useMemo(() => listingsQuery.data ?? [], [listingsQuery.data])
+  const questions = useMemo(() => questionsQuery.data ?? [], [questionsQuery.data])
   const stats = useMemo(
     () => ({
       approved: listings.filter((listing) => listing.status === 'approved').length,

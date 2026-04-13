@@ -142,7 +142,7 @@ export function AdminMaterialsPage() {
     },
   })
 
-  const materials = materialsQuery.data ?? []
+  const materials = useMemo(() => materialsQuery.data ?? [], [materialsQuery.data])
   const filteredMaterials = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
 

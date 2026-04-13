@@ -55,7 +55,9 @@ export function AdminOverviewPage() {
     queryFn: fetchAdminProfiles,
   })
 
-  const listings = listingsQuery.data ?? []
+  const listings = useMemo(() => listingsQuery.data ?? [], [listingsQuery.data])
+  const questions = useMemo(() => questionsQuery.data ?? [], [questionsQuery.data])
+  const profiles = useMemo(() => profilesQuery.data ?? [], [profilesQuery.data])
   const filteredListings = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
 
@@ -76,11 +78,11 @@ export function AdminOverviewPage() {
   const stats = useMemo(
     () => ({
       pendingListings: listings.filter((listing) => listing.status === 'pending_review').length,
-      publishedQuestions: (questionsQuery.data ?? []).filter((question) => question.status === 'published').length,
-      totalAdmins: (profilesQuery.data ?? []).filter((profile) => profile.role === 'admin').length,
-      totalUsers: profilesQuery.data?.length ?? 0,
+      publishedQuestions: questions.filter((question) => question.status === 'published').length,
+      totalAdmins: profiles.filter((profile) => profile.role === 'admin').length,
+      totalUsers: profiles.length,
     }),
-    [listings, profilesQuery.data, questionsQuery.data],
+    [listings, profiles, questions],
   )
 
   return (

@@ -102,7 +102,7 @@ export function AppListingsPage() {
     },
   })
 
-  const listings = listingsQuery.data ?? []
+  const listings = useMemo(() => listingsQuery.data ?? [], [listingsQuery.data])
   const filteredListings = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
 

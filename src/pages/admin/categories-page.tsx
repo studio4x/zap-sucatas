@@ -163,7 +163,7 @@ export function AdminCategoriesPage() {
     },
   })
 
-  const categories = categoriesQuery.data ?? []
+  const categories = useMemo(() => categoriesQuery.data ?? [], [categoriesQuery.data])
   const filteredCategories = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
 

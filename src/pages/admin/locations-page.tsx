@@ -34,7 +34,7 @@ export function AdminLocationsPage() {
     queryFn: fetchAdminLocations,
   })
 
-  const locations = locationsQuery.data ?? []
+  const locations = useMemo(() => locationsQuery.data ?? [], [locationsQuery.data])
   const stateOptions = useMemo(
     () => ['all', ...new Set(locations.map((location) => location.state))],
     [locations],

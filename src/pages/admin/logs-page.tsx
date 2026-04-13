@@ -80,7 +80,7 @@ export function AdminLogsPage() {
     queryFn: fetchAdminOperationalHealth,
   })
 
-  const logs = logsQuery.data?.items ?? []
+  const logs = useMemo(() => logsQuery.data?.items ?? [], [logsQuery.data])
   const totalCount = logsQuery.data?.totalCount ?? 0
   const entityOptions = useMemo(
     () =>
@@ -92,19 +92,27 @@ export function AdminLogsPage() {
       ['all', ...new Set(logs.map((log) => log.sourceName).filter((value): value is string => Boolean(value)))],
     [logs],
   )
-  const stats = statsQuery.data ?? {
-    audits: 0,
-    integrations: 0,
-    total: 0,
-    withErrors: 0,
-  }
-  const health = healthQuery.data ?? {
-    auditEvents24h: 0,
-    contactMessages24h: 0,
-    errors24h: 0,
-    latestIntegrationEvent: null,
-    latestPricingSync: null,
-  }
+  const stats = useMemo(
+    () =>
+      statsQuery.data ?? {
+        audits: 0,
+        integrations: 0,
+        total: 0,
+        withErrors: 0,
+      },
+    [statsQuery.data],
+  )
+  const health = useMemo(
+    () =>
+      healthQuery.data ?? {
+        auditEvents24h: 0,
+        contactMessages24h: 0,
+        errors24h: 0,
+        latestIntegrationEvent: null,
+        latestPricingSync: null,
+      },
+    [healthQuery.data],
+  )
 
   return (
     <section className="space-y-6">

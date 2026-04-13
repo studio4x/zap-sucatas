@@ -18,7 +18,7 @@ export function BlogPage() {
     queryFn: fetchPublicBlogPosts,
   })
 
-  const posts = blogQuery.data ?? []
+  const posts = useMemo(() => blogQuery.data ?? [], [blogQuery.data])
 
   const categories = useMemo(
     () => Array.from(new Set(posts.map((post) => post.categoryName).filter((value): value is string => Boolean(value)))).sort(),

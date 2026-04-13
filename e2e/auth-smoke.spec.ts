@@ -29,6 +29,7 @@ test.describe('authenticated smoke', () => {
     await signIn(page, email ?? '', password ?? '')
 
     await expect(page).toHaveURL(/\/admin(\/|$)/)
-    await expect(page.getByText(/gestao|anuncios|usuarios|configuracoes/i).first()).toBeVisible()
+    await expect(page.getByText(/painel admin/i)).toBeVisible()
+    await expect(page.getByRole('navigation').getByRole('link', { name: /an[uú]ncios/i })).toBeVisible()
   })
 })

@@ -171,15 +171,19 @@ export function AdminBlogPage() {
     },
   })
 
-  const posts = blogQuery.data?.items ?? []
+  const posts = useMemo(() => blogQuery.data?.items ?? [], [blogQuery.data])
   const totalCount = blogQuery.data?.totalCount ?? 0
-  const categories = categoriesQuery.data ?? []
-  const stats = statsQuery.data ?? {
-    archived: 0,
-    drafts: 0,
-    published: 0,
-    total: 0,
-  }
+  const categories = useMemo(() => categoriesQuery.data ?? [], [categoriesQuery.data])
+  const stats = useMemo(
+    () =>
+      statsQuery.data ?? {
+        archived: 0,
+        drafts: 0,
+        published: 0,
+        total: 0,
+      },
+    [statsQuery.data],
+  )
 
   const categoryDefaultValues = useMemo(
     () => (editingCategory ? blogCategoryToFormValues(editingCategory) : createEmptyBlogCategoryFormValues()),

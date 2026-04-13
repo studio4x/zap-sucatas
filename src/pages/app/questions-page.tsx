@@ -50,7 +50,7 @@ export function AppQuestionsPage() {
     },
   })
 
-  const questions = questionsQuery.data ?? []
+  const questions = useMemo(() => questionsQuery.data ?? [], [questionsQuery.data])
   const filteredQuestions = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
 
