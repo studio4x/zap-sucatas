@@ -77,6 +77,17 @@ export function buildQaTitle(prefix: string) {
   return `${prefix} ${Date.now()}`
 }
 
+export function buildQaEmail(prefix: string) {
+  const normalized = prefix
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+
+  return `${normalized}-${Date.now()}@zapsucatas.local`
+}
+
 async function selectFirstRealOption(page: Page, selector: string) {
   const value = await page.locator(`${selector} option:nth-child(2)`).getAttribute('value')
 

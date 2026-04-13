@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client'
+import { env } from '@/lib/env'
 import type { PaginatedResult } from '@/lib/pagination'
 import { getPaginationRange } from '@/lib/pagination'
 import type { AdminProfileSummary, Profile } from '@/domains/profiles/types'
@@ -22,6 +23,37 @@ function ensureSupabase() {
   }
 
   return supabase
+}
+
+async function getFreshAccessToken() {
+  const client = ensureSupabase()
+  const {
+    data: { session },
+  } = await client.auth.getSession()
+
+  if (!session?.refresh_token) {
+    if (!session?.access_token) {
+      throw new Error('Sessao invalida. Faca login novamente.')
+    }
+
+    return session.access_token
+  }
+
+  const { data, error } = await client.auth.refreshSession({
+    refresh_token: session.refresh_token,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  const accessToken = data.session?.access_token ?? session.access_token
+
+  if (!accessToken) {
+    throw new Error('Sessao invalida. Faca login novamente.')
+  }
+
+  return accessToken
 }
 
 async function unwrapFunctionError(error: unknown) {
@@ -287,15 +319,43 @@ export async function fetchAdminProfilesPage(input: {
 }
 
 async function invokeUserManagementFunction(body: Record<string, unknown>) {
-  const { data, error } = await ensureSupabase().functions.invoke('manage-user-account', {
-    body,
-  })
+  ensureSupabase()
 
-  if (error) {
-    await unwrapFunctionError(error)
+  if (!env.supabaseUrl || !env.supabaseAnonKey) {
+    throw new Error('Supabase nao configurado no ambiente atual.')
   }
 
-  return data as { profileId: string; success: boolean }
+  const accessToken = await getFreshAccessToken()
+  const response = await fetch(`${env.supabaseUrl}/functions/v1/manage-user-account`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      apikey: env.supabaseAnonKey,
+    },
+    body: JSON.stringify({
+      ...body,
+      access_token: accessToken,
+    }),
+  })
+
+  if (!response.ok) {
+    try {
+      const payload = (await response.json()) as { error?: string }
+
+      if (payload.error) {
+        throw new Error(payload.error)
+      }
+    } catch (parseError) {
+      if (parseError instanceof Error && parseError.message) {
+        throw parseError
+      }
+    }
+
+    throw new Error('Edge Function returned a non-2xx status code')
+  }
+
+  return (await response.json()) as { profileId: string; success: boolean }
 }
 
 export async function createAdminUser(input: {
