@@ -1,0 +1,48 @@
+import { expect, test } from '@playwright/test'
+import { buildQaTitle, signInAsAdmin } from './support'
+
+test.describe('contact inbox operational flow', () => {
+  test('public contact message can be triaged in admin inbox', async ({ browser, page }) => {
+    test.skip(
+      process.env.E2E_RUN_CONTACT_INBOX !== '1',
+      'Set E2E_RUN_CONTACT_INBOX=1 to run the contact inbox flow because it creates real contact messages.',
+    )
+
+    const subject = buildQaTitle('QA contato')
+    const email = `contato-${Date.now()}@zapsucatas.local`
+
+    await page.goto('/contato')
+    await page.locator('#contact-full-name').fill('QA Contato Inbox')
+    await page.locator('#contact-email').fill(email)
+    await page.locator('#contact-phone').fill('(11) 96666-0000')
+    await page.locator('#contact-subject').fill(subject)
+    await page.locator('#contact-message').fill(
+      'Mensagem criada automaticamente para validar triagem operacional do inbox administrativo.',
+    )
+    await page.getByRole('button', { name: /enviar mensagem/i }).click()
+    await expect(page.getByText(/mensagem enviada com sucesso/i)).toBeVisible()
+
+    const adminContext = await browser.newContext()
+    const adminPage = await adminContext.newPage()
+
+    try {
+      await signInAsAdmin(adminPage)
+      await adminPage.goto('/admin/contato')
+      await adminPage.getByPlaceholder(/buscar por nome, e-mail, telefone, assunto ou mensagem/i).fill(subject)
+
+      const row = adminPage.locator('tr', { hasText: subject }).first()
+      await expect(row).toBeVisible()
+      await expect(row).toContainText(/nova/i)
+
+      await row.getByRole('button', { name: /resolver/i }).click()
+      await expect(adminPage.getByText(/status da mensagem atualizado com sucesso/i)).toBeVisible()
+      await expect(row).toContainText(/resolvida/i)
+
+      await row.getByRole('button', { name: /abrir/i }).click()
+      await expect(adminPage.getByText(subject)).toBeVisible()
+      await expect(adminPage.getByText(email)).toBeVisible()
+    } finally {
+      await adminContext.close()
+    }
+  })
+})

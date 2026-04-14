@@ -35,6 +35,7 @@ export const paths = {
     listingDetails: (id: string) => `/admin/anuncios/${id}`,
     questions: '/admin/perguntas',
     users: '/admin/usuarios',
+    contactMessages: '/admin/contato',
     categories: '/admin/categorias',
     materials: '/admin/materiais',
     locations: '/admin/localidades',

@@ -2,6 +2,7 @@ import {
   Boxes,
   LayoutDashboard,
   Logs,
+  Mailbox,
   Menu,
   MapPinned,
   MessagesSquare,
@@ -40,6 +41,11 @@ const adminNavItems = [
     to: paths.admin.users,
     label: 'Usuários',
     icon: UsersRound,
+  },
+  {
+    to: paths.admin.contactMessages,
+    label: 'Contato',
+    icon: Mailbox,
   },
   {
     to: paths.admin.categories,

@@ -21,6 +21,7 @@ const AppQuestionsPage = lazy(() => import('@/pages/app/questions-page').then((m
 const AppSettingsPage = lazy(() => import('@/pages/app/settings-page').then((module) => ({ default: module.AppSettingsPage })))
 const AdminBlogPage = lazy(() => import('@/pages/admin/blog-page').then((module) => ({ default: module.AdminBlogPage })))
 const AdminCategoriesPage = lazy(() => import('@/pages/admin/categories-page').then((module) => ({ default: module.AdminCategoriesPage })))
+const AdminContactMessagesPage = lazy(() => import('@/pages/admin/contact-messages-page').then((module) => ({ default: module.AdminContactMessagesPage })))
 const AdminEditListingPage = lazy(() => import('@/pages/admin/edit-listing-page').then((module) => ({ default: module.AdminEditListingPage })))
 const AdminListingDetailsPage = lazy(() => import('@/pages/admin/listing-details-page').then((module) => ({ default: module.AdminListingDetailsPage })))
 const AdminListingsPage = lazy(() => import('@/pages/admin/listings-page').then((module) => ({ default: module.AdminListingsPage })))
@@ -191,6 +192,10 @@ export const routes: RouteObject[] = [
       {
         path: 'usuarios',
         element: withSuspense(<AdminUsersPage />),
+      },
+      {
+        path: 'contato',
+        element: withSuspense(<AdminContactMessagesPage />),
       },
       {
         path: 'categorias',
