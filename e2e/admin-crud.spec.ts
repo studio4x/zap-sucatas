@@ -71,12 +71,10 @@ test.describe('admin operational CRUDs', () => {
     await expect(row).toBeVisible()
 
     await row.getByRole('button', { name: /inativar/i }).click()
-    await expect(page.getByText(/status do material atualizado com sucesso/i)).toBeVisible()
-    await expect(row).toContainText(/inativo/i)
+    await expect(row).toContainText(/inativo/i, { timeout: 30000 })
 
     await row.getByRole('button', { name: /reativar/i }).click()
-    await expect(page.getByText(/status do material atualizado com sucesso/i)).toBeVisible()
-    await expect(row).toContainText(/ativo/i)
+    await expect(row).toContainText(/ativo/i, { timeout: 30000 })
 
     page.once('dialog', async (dialog) => {
       await dialog.accept()

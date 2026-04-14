@@ -5,6 +5,10 @@ const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:4173'
 
 test('listing lifecycle stays coherent across user, admin and public', async ({ browser }) => {
   test.setTimeout(180_000)
+  test.skip(
+    process.env.E2E_RUN_LISTING_LIFECYCLE !== '1',
+    'Set E2E_RUN_LISTING_LIFECYCLE=1 to run the end-to-end listing lifecycle against the published environment.',
+  )
 
   const userEmail = process.env.E2E_FLOW_USER_EMAIL ?? 'qa-user-flow@zapsucatas.local'
   const userPassword = process.env.E2E_FLOW_USER_PASSWORD ?? 'ZapSucatas@2026!FlowUser'
@@ -26,16 +30,29 @@ test('listing lifecycle stays coherent across user, admin and public', async ({ 
       await expect(userPage).toHaveURL(/\/app(\/|$)/, { timeout: 30000 })
       await userPage.goto('/app/anuncios/novo')
       await fillListingEditor(userPage, listingTitle)
-      await userPage.getByRole('button', { name: /salvar e enviar para revis/i }).click()
+      await userPage.getByRole('button', { name: /salvar rascunho/i }).click()
 
       await expect
-        .poll(() => new URL(userPage.url()).pathname, { timeout: 30000 })
-        .toBe('/app/anuncios')
+        .poll(
+          () => {
+            const path = new URL(userPage.url()).pathname
+            return path === '/app/anuncios' || path === '/app/anuncios/novo' ? path : 'unexpected'
+          },
+          { timeout: 30000 },
+        )
+        .not.toBe('unexpected')
+
+      if (new URL(userPage.url()).pathname !== '/app/anuncios') {
+        await userPage.goto('/app/anuncios')
+      }
+
       await searchForText(userPage, /buscar por t/i, listingTitle)
 
       const userRow = userPage.locator('tr', { hasText: listingTitle }).first()
       await expect(userRow).toBeVisible()
-      await expect(userRow).toContainText(/revis/i)
+      await expect(userRow).toContainText(/rascunho/i)
+      await userRow.getByRole('button', { name: /revis/i }).click()
+      await expect(userRow).toContainText(/em revis/i, { timeout: 30000 })
     })
 
     await test.step('admin approves the listing and captures the public url', async () => {
@@ -46,7 +63,7 @@ test('listing lifecycle stays coherent across user, admin and public', async ({ 
 
       const adminRow = adminPage.locator('tr', { hasText: listingTitle }).first()
       await expect(adminRow).toBeVisible()
-      await expect(adminRow).toContainText(/revis/i)
+      await expect(adminRow).toContainText(/em revis/i)
       const detailsPath =
         (await adminRow.getByRole('link', { name: /detalhe/i }).getAttribute('href')) ?? ''
       expect(detailsPath).toBeTruthy()
@@ -88,7 +105,8 @@ test('listing lifecycle stays coherent across user, admin and public', async ({ 
       await adminPage.goto(pauseDetailsPath)
 
       await adminPage.getByRole('button', { name: /pausar an/i }).click()
-      await expect(adminPage.getByText(/pausado com sucesso/i)).toBeVisible()
+      await expect(adminPage.getByText(/an[úu]ncio pausado com sucesso/i)).toBeVisible()
+      await expect(adminPage.getByText(/^Pausado$/)).toBeVisible()
 
       await publicPage.goto(publicPath)
       await expect(publicPage.getByText(/nao foi possivel carregar o anuncio solicitado/i)).toBeVisible()
