@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { MessageSquare, Search, Trash2 } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
 import { AdminFilterCard } from '@/components/admin/admin-filter-card'
@@ -18,9 +19,11 @@ import { defaultSupportConfig, formatSupportDateTime, getSupportCategoryMeta, ge
 
 export function AdminSupportTicketsPage() {
   const queryClient = useQueryClient()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | SupportTicketStatus>('all')
   const [categoryFilter, setCategoryFilter] = useState<'all' | SupportTicketCategory>('all')
+  const [slaFilter, setSlaFilter] = useState<'all' | 'overdue'>(() => (searchParams.get('sla') === 'overdue' ? 'overdue' : 'all'))
   const [sortBy, setSortBy] = useState<'date' | 'priority' | 'sla'>('sla')
   const [deletingTicket, setDeletingTicket] = useState<SupportTicketWithUser | null>(null)
 
@@ -50,6 +53,21 @@ export function AdminSupportTicketsPage() {
   })
 
   const config = configQuery.data ?? defaultSupportConfig
+  useEffect(() => {
+    setSlaFilter(searchParams.get('sla') === 'overdue' ? 'overdue' : 'all')
+  }, [searchParams])
+
+  function updateSlaFilter(nextValue: 'all' | 'overdue') {
+    setSlaFilter(nextValue)
+    const nextParams = new URLSearchParams(searchParams)
+    if (nextValue === 'overdue') {
+      nextParams.set('sla', 'overdue')
+    } else {
+      nextParams.delete('sla')
+    }
+    setSearchParams(nextParams, { replace: true })
+  }
+
   const tickets = useMemo(() => {
     const rows = [...(ticketsQuery.data ?? [])]
       .filter((ticket) => {
@@ -58,7 +76,8 @@ export function AdminSupportTicketsPage() {
         const matchesQuery = normalizedQuery.length === 0 ? true : haystack.includes(normalizedQuery)
         const matchesStatus = statusFilter === 'all' ? true : ticket.status === statusFilter
         const matchesCategory = categoryFilter === 'all' ? true : ticket.category === categoryFilter
-        return matchesQuery && matchesStatus && matchesCategory
+        const matchesSla = slaFilter === 'all' ? true : ticket.slaStatus === 'overdue'
+        return matchesQuery && matchesStatus && matchesCategory && matchesSla
       })
 
     rows.sort((left, right) => {
@@ -90,7 +109,7 @@ export function AdminSupportTicketsPage() {
     })
 
     return rows
-  }, [categoryFilter, query, sortBy, statusFilter, ticketsQuery.data])
+  }, [categoryFilter, query, slaFilter, sortBy, statusFilter, ticketsQuery.data])
 
   const overdueCount = tickets.filter((ticket) => ticket.slaStatus === 'overdue').length
 
@@ -110,10 +129,33 @@ export function AdminSupportTicketsPage() {
       </div>
 
       <AdminFilterCard
-        actions={<Button onClick={() => { setQuery(''); setStatusFilter('all'); setCategoryFilter('all'); setSortBy('sla') }} type="button" variant="outline">Limpar filtros</Button>}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => updateSlaFilter(slaFilter === 'overdue' ? 'all' : 'overdue')}
+              type="button"
+              variant={slaFilter === 'overdue' ? 'default' : 'outline'}
+            >
+              Somente SLA vencido
+            </Button>
+            <Button
+              onClick={() => {
+                setQuery('')
+                setStatusFilter('all')
+                setCategoryFilter('all')
+                updateSlaFilter('all')
+                setSortBy('sla')
+              }}
+              type="button"
+              variant="outline"
+            >
+              Limpar filtros
+            </Button>
+          </div>
+        }
         description="Busque por assunto, nome ou e-mail e organize a fila pela urgencia operacional do backoffice."
       >
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <div className="relative">
             <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input className="pl-10" onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por assunto, nome ou e-mail..." value={query} />
@@ -133,6 +175,9 @@ export function AdminSupportTicketsPage() {
             <option value="priority">Ordenar por prioridade</option>
             <option value="date">Ordenar por data</option>
           </Select>
+          <div className="flex items-center rounded-xl border border-border bg-background px-4 text-sm text-muted-foreground">
+            {slaFilter === 'overdue' ? 'Filtro rapido: SLA vencido' : 'Filtro rapido desativado'}
+          </div>
         </div>
       </AdminFilterCard>
 

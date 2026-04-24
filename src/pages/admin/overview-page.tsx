@@ -114,6 +114,43 @@ export function AdminOverviewPage() {
         title="Operação administrativa"
       />
 
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Suporte no topo da fila</p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm text-foreground">
+              <LifeBuoy className="size-4 text-primary" />
+              {stats.unresolvedSupportTickets} ticket{stats.unresolvedSupportTickets === 1 ? '' : 's'} em aberto
+            </div>
+            <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm ${
+              stats.overdueSupportTickets > 0
+                ? 'border-[#e7c1b9] bg-[#fff5f2] text-[#8f3326]'
+                : 'border-[#b8d8c7] bg-[#eaf5ef] text-[#1f6d4b]'
+            }`}>
+              {stats.overdueSupportTickets} com SLA vencido
+            </div>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            {stats.overdueSupportTickets > 0
+              ? 'A central de suporte exige triagem imediata para evitar aumento de fila e atraso operacional.'
+              : 'A fila de suporte está controlada neste momento, sem chamados vencidos no SLA de primeira resposta.'}
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Ação rápida</p>
+          <p className="mt-2 text-sm leading-6 text-foreground">Abra a central de tickets para responder a fila pendente ou revisar os chamados vencidos.</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button asChild type="button">
+              <Link to={paths.admin.support}>Abrir tickets</Link>
+            </Button>
+            <Button asChild type="button" variant="outline">
+              <Link to={`${paths.admin.support}?sla=overdue`}>Ver SLA vencido</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <AdminStatCard
           description="Itens que exigem decisao editorial imediata."
