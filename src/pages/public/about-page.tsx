@@ -8,7 +8,7 @@ import { fetchSystemSettings } from '@/domains/settings/api'
 
 const pillars = [
   {
-    description: 'Portal focado em sucatas, metais, reciclaveis e maquinarios, sem dispersar o produto para segmentos genericos.',
+    description: 'Portal focado em sucatas, metais e recicláveis, sem dispersar o produto para segmentos genéricos.',
     icon: Factory,
     title: 'Especializacao setorial',
   },
@@ -36,7 +36,7 @@ export function AboutPage() {
         <div className="grid gap-6 px-5 py-6 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)] lg:px-8 lg:py-8">
           <div className="space-y-4">
             <PublicSectionHeading
-              description="A Zap Sucatas nasce para elevar a experiencia digital do mercado de sucatas e maquinarios, unindo descoberta, confianca comercial e leitura operacional."
+              description="A Zap Sucatas nasce para elevar a experiência digital do mercado de sucatas, unindo descoberta, confiança comercial e leitura operacional."
               eyebrow="Sobre a plataforma"
               title="Um portal comercial construido para o mercado industrial"
             />
@@ -95,7 +95,7 @@ export function AboutPage() {
       <CtaBanner
         actionLabel="Criar conta"
         actionTo={paths.auth.register}
-        description="Se voce movimenta sucatas, metais ou equipamentos, publique seus anuncios em uma plataforma desenhada para descoberta comercial."
+        description="Se você movimenta sucatas e metais, publique seus anúncios em uma plataforma desenhada para descoberta comercial."
         secondaryAction={
           <div className="inline-flex items-center gap-2 text-sm text-white/80">
             <CheckCircle2 className="size-4" />

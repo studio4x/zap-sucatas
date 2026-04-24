@@ -163,7 +163,7 @@ export function ListingDetailsPage() {
                 {listing.title}
               </h1>
               <p className="max-w-3xl text-base leading-8 text-muted-foreground">
-                {listing.summary || 'Pagina comercial com galeria, ficha tecnica, localidade e perguntas para apoiar negociacao real no setor de sucatas e equipamentos.'}
+                {listing.summary || 'Página comercial com galeria, ficha técnica, localidade e perguntas para apoiar negociação real no setor de sucatas.'}
               </p>
             </div>
 

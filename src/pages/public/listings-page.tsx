@@ -127,7 +127,7 @@ export function ListingsPage() {
             <PublicSectionHeading
               description="Catalogo moderado para negociacao real, com foco em busca, filtragem setorial e leitura comercial rapida."
               eyebrow="Catalogo publico"
-              title="Anuncios de sucatas, metais e equipamentos com estrutura de marketplace"
+              title="Anúncios de sucatas e metais com estrutura de marketplace"
             />
             <div className="flex flex-wrap gap-2">
               <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
@@ -216,7 +216,7 @@ export function ListingsPage() {
 
       {!listingsQuery.isLoading ? (
         <ListingGrid
-          emptyDescription="Ajuste a busca ou limpe os filtros para encontrar outros lotes, materiais e equipamentos aprovados."
+          emptyDescription="Ajuste a busca ou limpe os filtros para encontrar outros lotes e materiais aprovados."
           emptyTitle="Nenhum anuncio encontrado"
           listings={listings}
         />

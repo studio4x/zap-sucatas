@@ -16,7 +16,7 @@ const quickSearches = ['cobre', 'alumínio', 'sucata ferrosa', 'prensa', 'empilh
 
 const trustItems = [
   'Anúncios moderados antes da publicação',
-  'Catálogo especializado em sucatas, metais e maquinários',
+  'Catálogo especializado no mercado de sucatas',
   'Tabela de preços e conteúdo para leitura de mercado',
 ]
 
@@ -29,7 +29,7 @@ const marketSignals = [
   {
     icon: Wrench,
     title: 'Recorte industrial real',
-    text: 'Metais, lotes, sucatas e equipamentos no mesmo fluxo comercial.',
+    text: 'Sucatas, metais e recicláveis em um fluxo comercial especializado.',
   },
   {
     icon: TrendingUp,
@@ -63,7 +63,7 @@ export function HeroSearchSection({
           <div className="mx-auto max-w-4xl space-y-8">
             <div className="space-y-5">
               <Badge className="rounded-full border-emerald-800/12 bg-emerald-800/8 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-950" variant="outline">
-                Marketplace especializado em sucatas, metais e maquinários
+                  Marketplace especializado em sucatas
               </Badge>
 
               <div className="space-y-4">
@@ -71,7 +71,7 @@ export function HeroSearchSection({
                   Compre e venda sucatas com inteligência.
                 </h1>
                 <p className="mx-auto max-w-2xl text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
-                  Conectamos geradores de resíduos industriais a compradores qualificados em um marketplace transparente e eficiente.
+                  Conectamos geradores de resíduos industriais a compradores qualificados em um marketplace transparente e eficiente para o mercado de sucatas.
                 </p>
               </div>
             </div>

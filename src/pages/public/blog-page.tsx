@@ -63,7 +63,7 @@ export function BlogPage() {
   return (
     <div className="space-y-8 lg:space-y-10">
       <PublicSectionHeading
-        description="Conteudo editorial para fortalecer autoridade, SEO e leitura de mercado sobre sucatas, metais, reciclaveis e equipamentos."
+        description="Conteúdo editorial para fortalecer autoridade, SEO e leitura de mercado sobre sucatas, metais e recicláveis."
         eyebrow="Blog"
         title="Conteudo setorial da Zap Sucatas"
       />

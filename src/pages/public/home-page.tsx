@@ -44,7 +44,7 @@ const faqItems = [
   {
     answer:
       'A busca pública ajuda a filtrar por categoria, material e localização. Cada detalhe de anúncio organiza fotos, descrição, atributos técnicos e perguntas.',
-    question: 'Como encontro um lote ou equipamento específico?',
+    question: 'Como encontro um lote ou material específico?',
   },
   {
     answer:
@@ -274,7 +274,7 @@ export function HomePage() {
                 Anúncios em destaque
               </h2>
               <p className="text-sm leading-7 text-muted-foreground sm:text-base">
-                Leitura rápida dos lotes e equipamentos mais relevantes do portal.
+                Leitura rápida dos anúncios e lotes mais relevantes do portal.
               </p>
             </div>
 
@@ -359,7 +359,7 @@ export function HomePage() {
             </div>
           ) : (
             <PublicEmptyState
-              description="Assim que houver anúncios publicados, esta vitrine vai destacar os lotes e equipamentos mais relevantes do portal."
+              description="Assim que houver anúncios publicados, esta vitrine vai destacar os lotes mais relevantes do portal."
               title="O catálogo público ainda está ganhando volume"
             />
           )}

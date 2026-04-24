@@ -188,7 +188,7 @@ export function PricingPage() {
       <CtaBanner
         actionLabel="Criar conta para anunciar"
         actionTo={paths.auth.register}
-        description="Use a leitura de precos para embasar sua negociacao e publique seus anuncios em um portal focado no mercado de sucatas e maquinarios."
+        description="Use a leitura de preços para embasar sua negociação e publique seus anúncios em um portal focado no mercado de sucatas."
         title="Quer transformar referencia de mercado em oportunidade comercial?"
       />
     </div>

@@ -43,7 +43,7 @@ export function ListingFilters({
               Busca e filtros
             </p>
             <p className="text-sm leading-7 text-muted-foreground">
-              Use o catalogo como ferramenta de operacao: encontre lotes, materiais e equipamentos por recorte comercial.
+              Use o catálogo como ferramenta de operação: encontre lotes e materiais por recorte comercial.
             </p>
           </div>
           <div className="inline-flex items-center gap-2 text-sm font-medium text-foreground">

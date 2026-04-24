@@ -101,7 +101,7 @@ export function CategoriesPage() {
       <CtaBanner
         actionLabel="Quero publicar um anuncio"
         actionTo={paths.auth.register}
-        description="Se voce atua no mercado de sucatas ou equipamentos, publique seu lote em uma plataforma pensada para descoberta e negociacao."
+        description="Se você atua no mercado de sucatas, publique seu lote em uma plataforma pensada para descoberta e negociação."
         title="Leve seu anuncio para um portal especializado em mercado industrial."
       />
     </div>
