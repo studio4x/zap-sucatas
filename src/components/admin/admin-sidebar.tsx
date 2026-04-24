@@ -56,7 +56,7 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
               cn(
                 'flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-medium transition-colors',
                 isActive
-                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  ? 'bg-primary text-white shadow-sm [&_svg]:text-white'
                   : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground',
               )
             }
