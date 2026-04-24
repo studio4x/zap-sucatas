@@ -109,9 +109,9 @@ export function AdminLayout() {
         ) : null}
 
         <div className="min-w-0">
-          <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card px-4 shadow-sm lg:hidden">
+          <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card/95 px-4 shadow-sm backdrop-blur lg:hidden">
             <div className="flex items-center gap-3">
-              <div className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
                 <SquareTerminal className="size-4" />
               </div>
               <div>

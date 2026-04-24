@@ -40,7 +40,7 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
         ) : null}
       </div>
 
-      <div className="mt-4 rounded-lg border border-sidebar-border bg-background px-3 py-3">
+      <div className="mt-4 rounded-[1rem] border border-sidebar-border bg-background/92 px-3 py-3 shadow-[0_12px_30px_-24px_rgba(19,33,23,0.18)]">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           Painel admin
         </p>
@@ -54,7 +54,7 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
           <NavLink
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition-colors',
+                'flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-medium transition-colors',
                 isActive
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground',
@@ -71,7 +71,7 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
         ))}
       </nav>
 
-      <div className="mt-4 rounded-lg border border-sidebar-border bg-background px-3 py-3">
+      <div className="mt-4 rounded-[1rem] border border-sidebar-border bg-background/92 px-3 py-3 shadow-[0_12px_30px_-24px_rgba(19,33,23,0.18)]">
         <p className="text-sm font-semibold text-foreground">
           {user?.fullName?.trim() || 'Sessão administrativa'}
         </p>

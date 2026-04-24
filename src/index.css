@@ -206,56 +206,58 @@ a {
 }
 
 .admin-theme {
-  --background: #f9fafb;
-  --foreground: #1d2530;
+  --background: #f3f4ef;
+  --foreground: #1b2a20;
   --card: #ffffff;
-  --card-foreground: #1d2530;
+  --card-foreground: #1b2a20;
   --popover: #ffffff;
-  --popover-foreground: #1d2530;
-  --primary: #007bff;
-  --primary-foreground: #ffffff;
-  --secondary: #f0f2f4;
-  --secondary-foreground: #32414f;
-  --muted: #ebedf0;
-  --muted-foreground: #65707e;
-  --accent: #28af60;
-  --accent-foreground: #ffffff;
-  --destructive: #ef4343;
+  --popover-foreground: #1b2a20;
+  --primary: #166246;
+  --primary-foreground: #f8fbf8;
+  --secondary: #e8ede7;
+  --secondary-foreground: #284337;
+  --muted: #eff2eb;
+  --muted-foreground: #637166;
+  --accent: #d6e5d6;
+  --accent-foreground: #1f3428;
+  --destructive: #d24837;
   --destructive-foreground: #ffffff;
-  --border: #e1e7ef;
-  --input: #e1e7ef;
-  --ring: #007bff;
-  --radius: 12px;
-  --sidebar: #fafafa;
-  --sidebar-foreground: #3f3f46;
-  --sidebar-primary: #007bff;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f0f2f4;
-  --sidebar-accent-foreground: #32414f;
-  --sidebar-border: #e1e7ef;
-  --sidebar-ring: #007bff;
+  --border: #d8dfd4;
+  --input: #d8dfd4;
+  --ring: #166246;
+  --radius: 14px;
+  --sidebar: #f8faf7;
+  --sidebar-foreground: #2b3c32;
+  --sidebar-primary: #166246;
+  --sidebar-primary-foreground: #f8fbf8;
+  --sidebar-accent: #ebf0e9;
+  --sidebar-accent-foreground: #284337;
+  --sidebar-border: #d8dfd4;
+  --sidebar-ring: #166246;
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: "IBM Plex Sans", sans-serif;
 }
 
 .admin-theme .font-display {
-  font-family: 'Inter', system-ui, sans-serif;
-  letter-spacing: normal;
+  font-family: "Space Grotesk", sans-serif;
+  letter-spacing: -0.02em;
 }
 
 .admin-theme [data-slot='card'] {
-  border-radius: 12px;
+  border-radius: 16px;
   border-color: var(--border);
   background: var(--card);
-  box-shadow: 0 2px 8px -2px rgba(29, 37, 48, 0.1), 0 1px 2px -1px rgba(29, 37, 48, 0.05);
+  box-shadow:
+    0 18px 42px -32px rgba(19, 33, 23, 0.2),
+    0 8px 18px -16px rgba(22, 98, 70, 0.12);
 }
 
 .admin-theme [data-slot='button'],
 .admin-theme [data-slot='input'],
 .admin-theme [data-slot='textarea'],
 .admin-theme [data-slot='select'] {
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 .admin-theme [data-slot='button'] {
@@ -263,11 +265,11 @@ a {
 }
 
 .admin-theme [data-slot='badge'] {
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
 .admin-theme [data-slot='card-title'] {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: "IBM Plex Sans", sans-serif;
   font-size: 18px;
   font-weight: 600;
 }
