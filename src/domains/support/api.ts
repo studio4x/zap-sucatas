@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client'
+import type { Database } from '@/integrations/supabase/types'
 import { env } from '@/lib/env'
 import { defaultSupportBusinessHours, defaultSupportCategories, defaultSupportConfig } from '@/lib/support-sla'
 import type {
@@ -14,40 +15,9 @@ import type {
   SupportTicketWithUser,
 } from '@/domains/support/types'
 
-type SupportTicketRow = {
-  attachment_name: string | null
-  attachment_url: string | null
-  category: SupportTicketCategory
-  created_at: string
-  description: string | null
-  first_response_at: string | null
-  first_response_due_at: string | null
-  id: string
-  priority: SupportTicketPriority
-  sla_policy_key: string
-  sla_status: 'answered' | 'at_risk' | 'on_time' | 'overdue'
-  status: SupportTicketStatus
-  subject: string
-  updated_at: string
-  user_id: string
-}
-
-type SupportMessageRow = {
-  attachment_name: string | null
-  attachment_url: string | null
-  created_at: string
-  id: string
-  message: string
-  sender_id: string
-  ticket_id: string
-}
-
-type ProfileLookupRow = {
-  email: string | null
-  full_name: string
-  id: string
-  role: 'admin' | 'user'
-}
+type SupportTicketRow = Database['public']['Tables']['support_tickets']['Row']
+type SupportMessageRow = Database['public']['Tables']['support_messages']['Row']
+type ProfileLookupRow = Pick<Database['public']['Tables']['profiles']['Row'], 'email' | 'full_name' | 'id' | 'role'>
 
 type SupportSettingsRow = {
   crisis_protocol_config: { headline?: string; note?: string } | null
@@ -81,16 +51,16 @@ function mapSupportTicket(row: SupportTicketRow): SupportTicket {
   return {
     attachmentName: row.attachment_name,
     attachmentUrl: row.attachment_url,
-    category: row.category,
+    category: row.category as SupportTicketCategory,
     createdAt: row.created_at,
     description: row.description,
     firstResponseAt: row.first_response_at,
     firstResponseDueAt: row.first_response_due_at,
     id: row.id,
-    priority: row.priority,
+    priority: row.priority as SupportTicketPriority,
     slaPolicyKey: row.sla_policy_key,
-    slaStatus: row.sla_status,
-    status: row.status,
+    slaStatus: row.sla_status as SupportTicket['slaStatus'],
+    status: row.status as SupportTicketStatus,
     subject: row.subject,
     updatedAt: row.updated_at,
     userId: row.user_id,
@@ -109,7 +79,7 @@ function mapSupportMessage(row: SupportMessageRow, profileMap: Map<string, Profi
     senderEmail: sender?.email ?? null,
     senderId: row.sender_id,
     senderName: sender?.full_name ?? null,
-    senderRole: sender?.role ?? 'user',
+    senderRole: (sender?.role === 'admin' ? 'admin' : 'user'),
     ticketId: row.ticket_id,
   }
 }
@@ -221,7 +191,7 @@ export async function fetchSupportConfig(): Promise<SupportConfig> {
 }
 
 export async function fetchMySupportTickets(profileId: string) {
-  const client = ensureSupabase() as any
+  const client = ensureSupabase()
   const { data, error } = await client
     .from('support_tickets')
     .select('*')
@@ -236,7 +206,7 @@ export async function fetchMySupportTickets(profileId: string) {
 }
 
 export async function fetchAdminSupportTickets() {
-  const client = ensureSupabase() as any
+  const client = ensureSupabase()
   const { data: tickets, error: ticketsError } = await client
     .from('support_tickets')
     .select('*')
@@ -272,7 +242,7 @@ export async function fetchAdminSupportTickets() {
 }
 
 export async function fetchSupportTicketDetail(ticketId: string): Promise<SupportTicketDetail> {
-  const client = ensureSupabase() as any
+  const client = ensureSupabase()
   const { data: ticketData, error: ticketError } = await client
     .from('support_tickets')
     .select('*')
@@ -284,19 +254,22 @@ export async function fetchSupportTicketDetail(ticketId: string): Promise<Suppor
   }
 
   const ticket = mapSupportTicket(ticketData as SupportTicketRow)
-
-  const [{ data: messages, error: messagesError }, { data: profiles, error: profilesError }] =
-    await Promise.all([
-      client.from('support_messages').select('*').eq('ticket_id', ticketId).order('created_at', { ascending: true }),
-      client
-        .from('profiles')
-        .select('id, full_name, email, role')
-        .in('id', Array.from(new Set([ticket.userId, ...(((await client.from('support_messages').select('sender_id').eq('ticket_id', ticketId)).data ?? []) as Array<{ sender_id: string }>).map((row) => row.sender_id)]))),
-    ])
+  const { data: messages, error: messagesError } = await client
+    .from('support_messages')
+    .select('*')
+    .eq('ticket_id', ticketId)
+    .order('created_at', { ascending: true })
 
   if (messagesError) {
     throw messagesError
   }
+
+  const senderIds = ((messages ?? []) as SupportMessageRow[]).map((row) => row.sender_id)
+  const profileIds = Array.from(new Set([ticket.userId, ...senderIds]))
+  const { data: profiles, error: profilesError } = await client
+    .from('profiles')
+    .select('id, full_name, email, role')
+    .in('id', profileIds)
 
   if (profilesError) {
     throw profilesError
@@ -347,7 +320,7 @@ export async function createSupportTicket(input: {
   subject: string
   userId: string
 }) {
-  const client = ensureSupabase() as any
+  const client = ensureSupabase()
   const { data, error } = await client
     .from('support_tickets')
     .insert({
@@ -378,7 +351,7 @@ export async function sendSupportMessage(input: {
   senderId: string
   ticketId: string
 }) {
-  const client = ensureSupabase() as any
+  const client = ensureSupabase()
   const { data, error } = await client
     .from('support_messages')
     .insert({
@@ -401,7 +374,7 @@ export async function sendSupportMessage(input: {
 }
 
 export async function updateSupportTicketStatus(input: { status: SupportTicketStatus; ticketId: string }) {
-  const client = ensureSupabase() as any
+  const client = ensureSupabase()
   const { data, error } = await client
     .from('support_tickets')
     .update({ status: input.status })
@@ -421,7 +394,7 @@ export async function updateSupportTicketStatus(input: { status: SupportTicketSt
 }
 
 export async function deleteSupportTicket(ticketId: string) {
-  const client = ensureSupabase() as any
+  const client = ensureSupabase()
   const { error } = await client.from('support_tickets').delete().eq('id', ticketId)
 
   if (error) {

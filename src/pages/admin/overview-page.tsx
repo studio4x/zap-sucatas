@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { Eye, FileClock, MessageSquare, ShieldCheck, SlidersHorizontal } from 'lucide-react'
+import { Eye, FileClock, LifeBuoy, MessageSquare, ShieldCheck, SlidersHorizontal } from 'lucide-react'
 import { paths } from '@/app/paths'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
 import { AdminFilterCard } from '@/components/admin/admin-filter-card'
@@ -17,6 +17,7 @@ import { fetchAdminListings } from '@/domains/listings/api'
 import { formatListingDate } from '@/domains/listings/utils'
 import { fetchAdminProfiles } from '@/domains/profiles/api'
 import { fetchAdminQuestions } from '@/domains/questions/api'
+import { fetchAdminSupportTickets } from '@/domains/support/api'
 
 const PAGE_SIZE = 8
 
@@ -54,10 +55,15 @@ export function AdminOverviewPage() {
     queryKey: ['profiles', 'admin'],
     queryFn: fetchAdminProfiles,
   })
+  const supportTicketsQuery = useQuery({
+    queryKey: ['support', 'admin', 'overview'],
+    queryFn: fetchAdminSupportTickets,
+  })
 
   const listings = useMemo(() => listingsQuery.data ?? [], [listingsQuery.data])
   const questions = useMemo(() => questionsQuery.data ?? [], [questionsQuery.data])
   const profiles = useMemo(() => profilesQuery.data ?? [], [profilesQuery.data])
+  const supportTickets = useMemo(() => supportTicketsQuery.data ?? [], [supportTicketsQuery.data])
   const filteredListings = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
 
@@ -79,10 +85,12 @@ export function AdminOverviewPage() {
     () => ({
       pendingListings: listings.filter((listing) => listing.status === 'pending_review').length,
       publishedQuestions: questions.filter((question) => question.status === 'published').length,
+      overdueSupportTickets: supportTickets.filter((ticket) => ticket.slaStatus === 'overdue').length,
+      unresolvedSupportTickets: supportTickets.filter((ticket) => ticket.status !== 'closed').length,
       totalAdmins: profiles.filter((profile) => profile.role === 'admin').length,
       totalUsers: profiles.length,
     }),
-    [listings, profiles, questions],
+    [listings, profiles, questions, supportTickets],
   )
 
   return (
@@ -106,7 +114,7 @@ export function AdminOverviewPage() {
         title="Operação administrativa"
       />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <AdminStatCard
           description="Itens que exigem decisao editorial imediata."
           label="Anúncios pendentes"
@@ -121,6 +129,21 @@ export function AdminOverviewPage() {
           description="Perfis com acesso administrativo ativo."
           label="Admins"
           value={stats.totalAdmins}
+        />
+        <AdminStatCard
+          className={stats.overdueSupportTickets > 0 ? 'border-[#e7c1b9] bg-[#fff7f4]' : undefined}
+          description={
+            stats.overdueSupportTickets > 0
+              ? 'Tickets sem primeira resposta dentro do SLA configurado.'
+              : 'Nenhum ticket com primeira resposta fora do prazo.'
+          }
+          helper={
+            <Link className="text-primary hover:underline" to={paths.admin.support}>
+              Abrir central de suporte
+            </Link>
+          }
+          label="Tickets pendentes"
+          value={stats.unresolvedSupportTickets}
         />
         <AdminStatCard
           description="Base autenticada do marketplace no momento."
@@ -252,7 +275,7 @@ export function AdminOverviewPage() {
         totalItems={filteredListings.length}
       />
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard
           description="Atalho rápido para threads pendentes de moderação."
           helper={
@@ -262,6 +285,16 @@ export function AdminOverviewPage() {
           }
           label="Moderação de perguntas"
           value={<MessageSquare className="size-6" />}
+        />
+        <AdminStatCard
+          description="Fila de suporte com leitura rápida de pendências e SLA."
+          helper={
+            <Link className="text-primary hover:underline" to={paths.admin.support}>
+              Ver tickets
+            </Link>
+          }
+          label="Suporte"
+          value={<LifeBuoy className="size-6" />}
         />
         <AdminStatCard
           description="Estado geral de controle e governança da operação."

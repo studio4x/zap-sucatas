@@ -75,7 +75,7 @@ export function SupportTicketDetailPage() {
                 senderEmail: sender?.email ?? null,
                 senderId: row.sender_id,
                 senderName: sender?.full_name ?? null,
-                senderRole: sender?.role ?? 'user',
+                senderRole: sender?.role === 'admin' ? 'admin' : 'user',
                 ticketId: row.ticket_id,
               },
             ],

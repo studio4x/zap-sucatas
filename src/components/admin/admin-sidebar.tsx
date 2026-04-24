@@ -1,8 +1,11 @@
 import type { LucideIcon } from 'lucide-react'
 import { LogOut, PanelLeftClose } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { NavLink } from 'react-router-dom'
+import { paths } from '@/app/paths'
 import { Brand } from '@/components/navigation/brand'
 import { Button } from '@/components/ui/button'
+import { fetchAdminSupportTickets } from '@/domains/support/api'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 
@@ -24,6 +27,13 @@ function getRoleLabel(role: 'admin' | 'user') {
 
 export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
   const { signOut, user } = useAuth()
+  const supportQueueQuery = useQuery({
+    queryKey: ['support', 'admin', 'sidebar-summary'],
+    queryFn: fetchAdminSupportTickets,
+    staleTime: 30_000,
+  })
+  const unresolvedTickets = (supportQueueQuery.data ?? []).filter((ticket) => ticket.status !== 'closed').length
+  const overdueTickets = (supportQueueQuery.data ?? []).filter((ticket) => ticket.slaStatus === 'overdue').length
 
   return (
     <aside className="flex h-full flex-col bg-sidebar px-4 py-4 text-sidebar-foreground">
@@ -66,10 +76,29 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
             to={to}
           >
             <Icon className="size-4" />
-            {label}
+            <span className="truncate">{label}</span>
+            {to === paths.admin.support && unresolvedTickets > 0 ? (
+              <span
+                className={cn(
+                  'ml-auto inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-[10px] font-semibold',
+                  overdueTickets > 0 ? 'bg-white/18 text-white ring-1 ring-white/25' : 'bg-sidebar-accent text-foreground',
+                )}
+              >
+                {unresolvedTickets}
+              </span>
+            ) : null}
           </NavLink>
         ))}
       </nav>
+
+      {overdueTickets > 0 ? (
+        <div className="mt-3 rounded-[1rem] border border-[#e7c1b9] bg-[#fff5f2] px-3 py-3 text-xs text-[#8f3326] shadow-[0_12px_30px_-24px_rgba(143,51,38,0.22)]">
+          <p className="font-semibold uppercase tracking-[0.14em]">SLA em atraso</p>
+          <p className="mt-2 leading-5">
+            {overdueTickets} chamado{overdueTickets > 1 ? 's' : ''} precisa{overdueTickets > 1 ? 'm' : ''} de primeira resposta.
+          </p>
+        </div>
+      ) : null}
 
       <div className="mt-4 rounded-[1rem] border border-sidebar-border bg-background/92 px-3 py-3 shadow-[0_12px_30px_-24px_rgba(19,33,23,0.18)]">
         <p className="text-sm font-semibold text-foreground">
