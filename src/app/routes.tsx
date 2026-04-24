@@ -19,6 +19,7 @@ const AppOverviewPage = lazy(() => import('@/pages/app/overview-page').then((mod
 const AppProfilePage = lazy(() => import('@/pages/app/profile-page').then((module) => ({ default: module.AppProfilePage })))
 const AppQuestionsPage = lazy(() => import('@/pages/app/questions-page').then((module) => ({ default: module.AppQuestionsPage })))
 const AppSettingsPage = lazy(() => import('@/pages/app/settings-page').then((module) => ({ default: module.AppSettingsPage })))
+const AppSupportTicketsPage = lazy(() => import('@/pages/app/support-tickets-page').then((module) => ({ default: module.AppSupportTicketsPage })))
 const AdminBlogPage = lazy(() => import('@/pages/admin/blog-page').then((module) => ({ default: module.AdminBlogPage })))
 const AdminCategoriesPage = lazy(() => import('@/pages/admin/categories-page').then((module) => ({ default: module.AdminCategoriesPage })))
 const AdminContactMessagesPage = lazy(() => import('@/pages/admin/contact-messages-page').then((module) => ({ default: module.AdminContactMessagesPage })))
@@ -33,6 +34,7 @@ const AdminOverviewPage = lazy(() => import('@/pages/admin/overview-page').then(
 const AdminPricingPage = lazy(() => import('@/pages/admin/pricing-page').then((module) => ({ default: module.AdminPricingPage })))
 const AdminQuestionsPage = lazy(() => import('@/pages/admin/questions-page').then((module) => ({ default: module.AdminQuestionsPage })))
 const AdminSettingsPage = lazy(() => import('@/pages/admin/settings-page').then((module) => ({ default: module.AdminSettingsPage })))
+const AdminSupportTicketsPage = lazy(() => import('@/pages/admin/support-tickets-page').then((module) => ({ default: module.AdminSupportTicketsPage })))
 const AdminUsersPage = lazy(() => import('@/pages/admin/users-page').then((module) => ({ default: module.AdminUsersPage })))
 const AboutPage = lazy(() => import('@/pages/public/about-page').then((module) => ({ default: module.AboutPage })))
 const BlogPage = lazy(() => import('@/pages/public/blog-page').then((module) => ({ default: module.BlogPage })))
@@ -44,7 +46,9 @@ const HomePage = lazy(() => import('@/pages/public/home-page').then((module) => 
 const ListingDetailsPage = lazy(() => import('@/pages/public/listing-details-page').then((module) => ({ default: module.ListingDetailsPage })))
 const ListingsPage = lazy(() => import('@/pages/public/listings-page').then((module) => ({ default: module.ListingsPage })))
 const PricingPage = lazy(() => import('@/pages/public/pricing-page').then((module) => ({ default: module.PricingPage })))
+const SupportPage = lazy(() => import('@/pages/public/support-page').then((module) => ({ default: module.SupportPage })))
 const NotFoundPage = lazy(() => import('@/pages/shared/not-found-page').then((module) => ({ default: module.NotFoundPage })))
+const SupportTicketDetailPage = lazy(() => import('@/pages/shared/support-ticket-detail-page').then((module) => ({ default: module.SupportTicketDetailPage })))
 
 function withSuspense(element: ReactNode) {
   return <Suspense fallback={<RouteLoadingScreen />}>{element}</Suspense>
@@ -94,6 +98,10 @@ export const routes: RouteObject[] = [
       {
         path: 'contato',
         element: withSuspense(<ContactPage />),
+      },
+      {
+        path: 'suporte',
+        element: withSuspense(<SupportPage />),
       },
       {
         path: 'login',
@@ -146,6 +154,14 @@ export const routes: RouteObject[] = [
         element: withSuspense(<AppQuestionsPage />),
       },
       {
+        path: 'suporte',
+        element: withSuspense(<AppSupportTicketsPage />),
+      },
+      {
+        path: 'suporte/:id',
+        element: withSuspense(<SupportTicketDetailPage />),
+      },
+      {
         path: 'perfil',
         element: withSuspense(<AppProfilePage />),
       },
@@ -196,6 +212,14 @@ export const routes: RouteObject[] = [
       {
         path: 'contato',
         element: withSuspense(<AdminContactMessagesPage />),
+      },
+      {
+        path: 'suporte',
+        element: withSuspense(<AdminSupportTicketsPage />),
+      },
+      {
+        path: 'suporte/:id',
+        element: withSuspense(<SupportTicketDetailPage />),
       },
       {
         path: 'categorias',

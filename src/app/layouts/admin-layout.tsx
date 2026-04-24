@@ -7,6 +7,7 @@ import {
   MapPinned,
   MessagesSquare,
   Newspaper,
+  LifeBuoy,
   ShieldCheck,
   SlidersHorizontal,
   SquareTerminal,
@@ -46,6 +47,11 @@ const adminNavItems = [
     to: paths.admin.contactMessages,
     label: 'Contato',
     icon: Mailbox,
+  },
+  {
+    to: paths.admin.support,
+    label: 'Tickets',
+    icon: LifeBuoy,
   },
   {
     to: paths.admin.categories,

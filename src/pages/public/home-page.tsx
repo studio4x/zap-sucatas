@@ -473,7 +473,7 @@ export function HomePage() {
               <Link to={paths.auth.register}>Criar conta e anunciar</Link>
             </Button>
             <Button asChild className="rounded-xl px-6" variant="outline">
-              <Link to={paths.public.contact}>
+              <Link to={paths.public.support}>
                 <CircleHelp className="size-4" />
                 Falar com suporte
               </Link>

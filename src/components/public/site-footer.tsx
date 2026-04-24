@@ -37,6 +37,7 @@ export function SiteFooter() {
           </h3>
           <div className="grid gap-3 text-sm text-white/78">
             <Link to={paths.public.about}>Sobre a Zap Sucatas</Link>
+            <Link to={paths.public.support}>Suporte</Link>
             <Link to={paths.public.contact}>Contato</Link>
             <Link to={paths.auth.login}>Entrar</Link>
             <Link to={paths.auth.register}>Criar conta</Link>

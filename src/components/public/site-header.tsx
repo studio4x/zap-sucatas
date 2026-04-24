@@ -12,6 +12,7 @@ const navItems = [
   { label: 'Preços', to: paths.public.pricing },
   { label: 'Blog', to: paths.public.blog },
   { label: 'Sobre', to: paths.public.about },
+  { label: 'Suporte', to: paths.public.support },
   { label: 'Contato', to: paths.public.contact },
 ]
 

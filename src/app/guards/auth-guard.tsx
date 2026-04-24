@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/use-auth'
 export function AuthGuard({ children }: PropsWithChildren) {
   const location = useLocation()
   const { isAuthenticated, status, user } = useAuth()
+  const isSupportRoute = location.pathname.startsWith(paths.app.support)
 
   if (status === 'loading') {
     return <GuardFallback title="Validando acesso" />
@@ -16,7 +17,7 @@ export function AuthGuard({ children }: PropsWithChildren) {
     return <Navigate replace state={{ from: location }} to={paths.auth.login} />
   }
 
-  if (user?.status === 'under_review') {
+  if (user?.status === 'under_review' && !isSupportRoute) {
     return (
       <GuardFallback
         description="Seu perfil foi criado, mas ainda nao esta liberado para uso operacional."
@@ -26,7 +27,7 @@ export function AuthGuard({ children }: PropsWithChildren) {
     )
   }
 
-  if (user?.status === 'suspended') {
+  if (user?.status === 'suspended' && !isSupportRoute) {
     return (
       <GuardFallback
         description="Seu acesso foi suspenso. Entre em contato com a administracao para revisar a conta."

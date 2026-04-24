@@ -2,6 +2,7 @@ import {
   CircleUserRound,
   FilePlus2,
   House,
+  LifeBuoy,
   MessageSquareMore,
   Rows4,
   Settings2,
@@ -36,6 +37,11 @@ const dashboardNavItems = [
     icon: MessageSquareMore,
   },
   {
+    to: paths.app.support,
+    label: 'Suporte',
+    icon: LifeBuoy,
+  },
+  {
     to: paths.app.profile,
     label: 'Perfil',
     icon: CircleUserRound,
@@ -50,13 +56,19 @@ const dashboardNavItems = [
 export function DashboardLayout() {
   const { user } = useAuth()
   const { isLoading, maintenanceMode } = useSystemSettings()
-  const quickNavItems = [
-    dashboardNavItems[0],
-    dashboardNavItems[1],
-    dashboardNavItems[2],
-    dashboardNavItems[3],
-    dashboardNavItems[4],
-  ]
+  const hasRestrictedAccess = user?.status === 'under_review' || user?.status === 'suspended'
+  const visibleNavItems = hasRestrictedAccess
+    ? dashboardNavItems.filter((item) => item.to === paths.app.support)
+    : dashboardNavItems
+  const quickNavItems = hasRestrictedAccess
+    ? [dashboardNavItems[4]]
+    : [
+        dashboardNavItems[0],
+        dashboardNavItems[1],
+        dashboardNavItems[2],
+        dashboardNavItems[3],
+        dashboardNavItems[4],
+      ]
 
   if (!isLoading && maintenanceMode && user?.role !== 'admin') {
     return (
@@ -69,7 +81,7 @@ export function DashboardLayout() {
   }
 
   return (
-    <DashboardShell navItems={dashboardNavItems} quickNavItems={quickNavItems}>
+    <DashboardShell navItems={visibleNavItems} quickNavItems={quickNavItems}>
       <Outlet />
     </DashboardShell>
   )
