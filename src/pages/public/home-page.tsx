@@ -383,7 +383,7 @@ export function HomePage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Button asChild className="bg-white text-[#0f5038] hover:bg-white/90">
+              <Button asChild className="bg-white !text-[#0f5038] hover:bg-white/90" style={{ color: '#0f5038' }}>
                 <Link to={paths.public.pricing}>Ver relatório completo</Link>
               </Button>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-4 py-2 text-sm text-emerald-50/88">

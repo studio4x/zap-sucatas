@@ -28,7 +28,7 @@ export function CtaBanner({
           <p className="max-w-2xl text-sm leading-7 text-primary-foreground/86">{description}</p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-          <Button asChild className="bg-white text-[#0f3a29] hover:bg-white/90">
+          <Button asChild className="bg-white !text-[#0f3a29] hover:bg-white/90" style={{ color: '#0f3a29' }}>
             <Link to={actionTo}>{actionLabel}</Link>
           </Button>
           {secondaryAction}

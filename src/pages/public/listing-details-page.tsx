@@ -228,14 +228,14 @@ export function ListingDetailsPage() {
 
               <div className="grid gap-3">
                 {listing.contactPhone ? (
-                  <Button asChild className="h-12 rounded-[1.1rem] bg-white text-slate-950 hover:bg-white/90">
+                  <Button asChild className="h-12 rounded-[1.1rem] bg-white !text-slate-950 hover:bg-white/90" style={{ color: '#020617' }}>
                     <a href={`tel:${listing.contactPhone}`}>
                       <Phone className="size-4" />
                       Ligar para o anunciante
                     </a>
                   </Button>
                 ) : null}
-                <Button asChild className="h-12 rounded-[1.1rem] border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white" variant="outline">
+                <Button asChild className="h-12 rounded-[1.1rem] border-white/20 bg-transparent !text-white hover:bg-white/10 hover:!text-white" style={{ color: '#ffffff' }} variant="outline">
                   <Link to={paths.auth.login}>Entrar para perguntar</Link>
                 </Button>
               </div>

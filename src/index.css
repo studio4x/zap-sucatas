@@ -184,7 +184,7 @@ a {
 .public-theme [data-slot='card'] {
   border-radius: 24px;
   border-color: rgba(216, 223, 212, 0.9);
-  background: rgba(255, 255, 255, 0.92);
+  background-color: rgba(255, 255, 255, 0.92);
   box-shadow:
     0 22px 54px -30px rgba(19, 33, 23, 0.22),
     0 10px 24px -18px rgba(22, 98, 70, 0.16);

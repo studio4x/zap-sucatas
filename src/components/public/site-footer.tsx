@@ -14,7 +14,7 @@ export function SiteFooter() {
             Catálogo moderado, páginas de anúncio robustas, referência de preços e estrutura comercial
             pensada para o mercado de sucatas e equipamentos.
           </p>
-          <Button asChild className="bg-white text-[#163a2d] hover:bg-white/90">
+          <Button asChild className="bg-white !text-[#163a2d] hover:bg-white/90" style={{ color: '#163a2d' }}>
             <Link to={paths.auth.register}>Publicar anúncio</Link>
           </Button>
         </div>
