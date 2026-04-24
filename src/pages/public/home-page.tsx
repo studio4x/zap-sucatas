@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowRight, CircleHelp, Newspaper } from 'lucide-react'
+import { ArrowRight, CircleHelp, Handshake, Newspaper, Search, ShieldCheck } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { BlogPostCard } from '@/components/public/blog-post-card'
@@ -23,18 +23,18 @@ import { formatPricingDate, formatPricingNumber, pricingSeriesCatalog } from '@/
 const faqItems = [
   {
     answer:
-      'Voce cria sua conta, monta o anuncio com informacoes comerciais e envia para revisao. Depois da aprovacao, o anuncio entra no catalogo publico.',
+      'Você cria sua conta, monta o anúncio com informações comerciais e envia para revisão. Depois da aprovação, o anúncio entra no catálogo público.',
     question: 'Como funciona para anunciar na Zap Sucatas?',
   },
   {
     answer:
-      'A busca publica ajuda a filtrar por categoria, material e localizacao. Cada detalhe de anuncio organiza fotos, descricao, atributos tecnicos e perguntas.',
-    question: 'Como encontro um lote ou equipamento especifico?',
+      'A busca pública ajuda a filtrar por categoria, material e localização. Cada detalhe de anúncio organiza fotos, descrição, atributos técnicos e perguntas.',
+    question: 'Como encontro um lote ou equipamento específico?',
   },
   {
     answer:
-      'A tabela publica mostra referencias manuais e historico consolidado de metais, ajudando na leitura comercial do mercado.',
-    question: 'A tabela de precos serve como referencia de mercado?',
+      'A tabela pública mostra referências manuais e histórico consolidado de metais, ajudando na leitura comercial do mercado.',
+    question: 'A tabela de preços serve como referência de mercado?',
   },
 ]
 
@@ -74,78 +74,68 @@ export function HomePage() {
 
   const latestPricingEntries = pricingQuery.data?.manualEntries.slice(0, 4) ?? []
 
-  const marketStrip = useMemo(
-    () => [
-      {
-        label: 'Categorias ativas',
-        value: categoriesQuery.data?.length ?? 0,
-      },
-      {
-        label: 'Destaques na vitrine',
-        value: featuredListingsQuery.data?.length ?? 0,
-      },
-      {
-        label: 'Serie publica de metais',
-        value: pricingSeriesCatalog.length,
-      },
-      {
-        label: 'Artigos publicados',
-        value: blogQuery.data?.length ?? 0,
-      },
-    ],
-    [blogQuery.data?.length, categoriesQuery.data?.length, featuredListingsQuery.data?.length],
-  )
-
   return (
     <div className="space-y-12 lg:space-y-16">
       <HeroSearchSection onSearchSubmit={handleHeroSearch} query={query} setQuery={setQuery} />
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {marketStrip.map((item) => (
-          <div
-            key={item.label}
-            className="rounded-[1.7rem] border border-[#d8e3d8] bg-[linear-gradient(180deg,#fbfdfb_0%,#f4f8f3_100%)] px-5 py-5 shadow-[0_22px_48px_-42px_rgba(19,33,23,0.26)]"
-          >
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              {item.label}
-            </p>
-            <p className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-foreground">
-              {item.value}
-            </p>
-          </div>
-        ))}
-      </section>
+      <section className="space-y-6">
+        <PublicSectionHeading
+          description="Um processo simples e transparente para transformar resíduos em receita ou matéria-prima."
+          eyebrow="Como funciona"
+          title="Como o Zap Sucatas funciona"
+        />
 
-      <section className="overflow-hidden rounded-[2.2rem] border border-[#d8e3d8] bg-[linear-gradient(180deg,#f8fbf7_0%,#f2f6f1_100%)]">
-        <div className="grid gap-6 px-5 py-6 md:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.95fr)] lg:px-8 lg:py-8">
-          <div className="space-y-4">
-            <PublicSectionHeading
-              description="A area publica foi desenhada para responder rapido o que voce encontra aqui, como buscar e por que confiar no portal."
-              eyebrow="Posicionamento"
-              title="Uma estrutura comercial pensada para o mercado de sucatas"
-            />
-          </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card className="rounded-[1.7rem] border-[#d8e3d8] bg-[linear-gradient(180deg,#fbfdfb_0%,#f3f8f2_100%)] shadow-[0_22px_48px_-42px_rgba(19,33,23,0.26)]">
+            <CardContent className="space-y-4 p-6">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  1
+                </span>
+                <span className="inline-flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <Search className="size-5" />
+                </span>
+              </div>
+              <h3 className="font-display text-2xl tracking-tight text-foreground">Busque ou publique</h3>
+              <p className="text-sm leading-7 text-muted-foreground">
+                Encontre ofertas no catálogo ou publique seu estoque com fotos, especificações e contexto comercial.
+              </p>
+            </CardContent>
+          </Card>
 
-          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-            <div className="rounded-[1.5rem] border border-white/80 bg-white/88 p-4 shadow-sm">
-              <p className="text-sm font-semibold text-foreground">Busca protagonista</p>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                O catalogo parte de uma busca forte e filtros orientados ao trabalho real de compra e venda.
+          <Card className="rounded-[1.7rem] border-[#d8e3d8] bg-[linear-gradient(180deg,#fbfdfb_0%,#f3f8f2_100%)] shadow-[0_22px_48px_-42px_rgba(19,33,23,0.26)]">
+            <CardContent className="space-y-4 p-6">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  2
+                </span>
+                <span className="inline-flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <ShieldCheck className="size-5" />
+                </span>
+              </div>
+              <h3 className="font-display text-2xl tracking-tight text-foreground">Moderação e validação</h3>
+              <p className="text-sm leading-7 text-muted-foreground">
+                A plataforma valida anúncios e dados operacionais para melhorar segurança e qualidade da vitrine pública.
               </p>
-            </div>
-            <div className="rounded-[1.5rem] border border-white/80 bg-white/88 p-4 shadow-sm">
-              <p className="text-sm font-semibold text-foreground">Catalogo vivo</p>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                Categorias, anuncios e detalhe comercial foram organizados para leitura rapida e navegacao previsivel.
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-[1.7rem] border-[#d8e3d8] bg-[linear-gradient(180deg,#fbfdfb_0%,#f3f8f2_100%)] shadow-[0_22px_48px_-42px_rgba(19,33,23,0.26)]">
+            <CardContent className="space-y-4 p-6">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  3
+                </span>
+                <span className="inline-flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <Handshake className="size-5" />
+                </span>
+              </div>
+              <h3 className="font-display text-2xl tracking-tight text-foreground">Negociação</h3>
+              <p className="text-sm leading-7 text-muted-foreground">
+                Compradores e anunciantes avançam com mais contexto técnico, leitura de mercado e contato direto.
               </p>
-            </div>
-            <div className="rounded-[1.5rem] border border-white/80 bg-white/88 p-4 shadow-sm">
-              <p className="text-sm font-semibold text-foreground">Confianca operacional</p>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                Moderacao, tabela de precos e conteudo editorial reforcam a percepcao de mercado real.
-              </p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
@@ -153,22 +143,22 @@ export function HomePage() {
         <CategoryHighlights categories={highlightedCategories} />
       ) : (
         <PublicEmptyState
-          description="As categorias principais aparecerao aqui assim que o catalogo publico estiver mais preenchido."
-          title="Categorias em preparacao"
+          description="As categorias principais aparecerão aqui assim que o catálogo público estiver mais preenchido."
+          title="Categorias em preparação"
         />
       )}
 
       {featuredListingsQuery.data?.length ? (
         <FeaturedListingsSection
-          description="Leitura rapida de anuncios moderados para quem quer encontrar sucatas, metais e equipamentos com mais contexto."
-          eyebrow="Catalogo"
+          description="Leitura rápida de anúncios moderados para quem quer encontrar sucatas, metais e equipamentos com mais contexto."
+          eyebrow="Catálogo"
           listings={featuredListingsQuery.data}
-          title="Anuncios recentes e em destaque"
+          title="Anúncios recentes e em destaque"
         />
       ) : (
         <PublicEmptyState
-          description="Assim que houver anuncios publicados, esta vitrine vai destacar os lotes e equipamentos mais relevantes do portal."
-          title="O catalogo publico ainda esta ganhando volume"
+          description="Assim que houver anúncios publicados, esta vitrine vai destacar os lotes e equipamentos mais relevantes do portal."
+          title="O catálogo público ainda está ganhando volume"
         />
       )}
 
@@ -180,9 +170,9 @@ export function HomePage() {
                 <Link to={paths.public.pricing}>Abrir tabela completa</Link>
               </Button>
             }
-            description="Acompanhe rapidamente a leitura diaria dos metais e as referencias comerciais publicadas pela operacao."
-            eyebrow="Precos"
-            title="Ferramenta publica de mercado"
+            description="Acompanhe rapidamente a leitura diária dos metais e as referências comerciais publicadas pela operação."
+            eyebrow="Preços"
+            title="Inteligência de mercado"
           />
 
           <Card className="rounded-[1.95rem] border-[#d8e3d8] bg-white shadow-[0_22px_50px_-42px_rgba(19,33,23,0.26)]">
@@ -207,13 +197,13 @@ export function HomePage() {
           <CardContent className="space-y-5 p-6">
             <div className="space-y-2">
               <Badge className="border-white/16 bg-white/8 text-white" variant="outline">
-                Atualizacao mais recente
+                Atualização mais recente
               </Badge>
               <h2 className="font-display text-3xl tracking-tight text-white">
                 {formatPricingDate(pricingQuery.data?.latestQuotedDate ?? null)}
               </h2>
               <p className="text-sm leading-7 text-emerald-50/76">
-                Ultima consolidacao disponivel do historico publico de precos.
+                Última consolidação disponível do histórico público de preços.
               </p>
             </div>
 
@@ -235,7 +225,7 @@ export function HomePage() {
                 ))
               ) : (
                 <p className="text-sm leading-7 text-emerald-50/76">
-                  As referencias manuais aparecerao aqui assim que forem publicadas no modulo de precos.
+                  As referências manuais aparecerão aqui assim que forem publicadas no módulo de preços.
                 </p>
               )}
             </div>
@@ -248,14 +238,14 @@ export function HomePage() {
           actions={
             <Button asChild variant="outline">
               <Link to={paths.public.blog}>
-                Ver conteudo
+                Ver conteúdo
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
           }
-          description="Conteudo editorial para fortalecer confianca, SEO e leitura de mercado no segmento de sucatas e maquinarios."
-          eyebrow="Conteudo"
-          title="Blog e inteligencia setorial"
+          description="Conteúdo editorial para fortalecer confiança, SEO e leitura de mercado no segmento de sucatas e maquinários."
+          eyebrow="Conteúdo"
+          title="Blog e inteligência setorial"
         />
 
         {blogQuery.data?.length ? (
@@ -266,15 +256,15 @@ export function HomePage() {
           </div>
         ) : (
           <PublicEmptyState
-            description="O blog aparecera aqui com artigos sobre mercado, reciclagem, metais e operacao comercial."
+            description="O blog aparecerá aqui com artigos sobre mercado, reciclagem, metais e operação comercial."
             icon={Newspaper}
-            title="Conteudo editorial em preparacao"
+            title="Conteúdo editorial em preparação"
           />
         )}
       </section>
 
       <FaqSection
-        description="Respostas objetivas para quem quer entender o funcionamento do portal e negociar com mais confianca."
+        description="Respostas objetivas para quem quer entender o funcionamento do portal e negociar com mais confiança."
         items={faqItems}
         title="Perguntas frequentes sobre o portal"
       />
@@ -282,7 +272,7 @@ export function HomePage() {
       <CtaBanner
         actionLabel="Criar conta e anunciar"
         actionTo={paths.auth.register}
-        description="Publique lotes, sucatas ou maquinarios em uma plataforma construida para o mercado industrial e preparada para operacao real."
+        description="Publique lotes, sucatas ou maquinários em uma plataforma construída para o mercado industrial e preparada para operação real."
         secondaryAction={
           <Button asChild className="border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white" variant="outline">
             <Link to={paths.public.contact}>

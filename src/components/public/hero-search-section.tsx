@@ -12,19 +12,19 @@ type HeroSearchSectionProps = {
   setQuery: (value: string) => void
 }
 
-const quickSearches = ['cobre', 'aluminio', 'sucata ferrosa', 'prensa', 'empilhadeira']
+const quickSearches = ['cobre', 'alumínio', 'sucata ferrosa', 'prensa', 'empilhadeira']
 
 const trustItems = [
-  'Anuncios moderados antes da publicacao',
-  'Catalogo especializado em sucatas, metais e maquinarios',
-  'Tabela de precos e conteudo para leitura de mercado',
+  'Anúncios moderados antes da publicação',
+  'Catálogo especializado em sucatas, metais e maquinários',
+  'Tabela de preços e conteúdo para leitura de mercado',
 ]
 
 const marketSignals = [
   {
     icon: ShieldCheck,
-    title: 'Operacao moderada',
-    text: 'Mais confianca para navegar e negociar no portal.',
+    title: 'Operação moderada',
+    text: 'Mais confiança para navegar e negociar no portal.',
   },
   {
     icon: Wrench,
@@ -34,7 +34,7 @@ const marketSignals = [
   {
     icon: TrendingUp,
     title: 'Leitura de mercado',
-    text: 'Preco, conteudo e catalogo integrados na descoberta.',
+    text: 'Preço, conteúdo e catálogo integrados na descoberta.',
   },
 ]
 
@@ -64,7 +64,7 @@ export function HeroSearchSection({
             <div className="space-y-7">
               <div className="space-y-5">
                 <Badge className="rounded-full border-emerald-800/12 bg-emerald-800/8 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-950" variant="outline">
-                  Marketplace especializado em sucatas, metais e maquinarios
+                  Marketplace especializado em sucatas, metais e maquinários
                 </Badge>
 
                 <div className="space-y-4">
@@ -72,7 +72,7 @@ export function HeroSearchSection({
                     Busque lotes, sucatas e equipamentos em um portal comercial feito para o setor.
                   </h1>
                   <p className="max-w-3xl text-base leading-8 text-slate-700 lg:text-[17px]">
-                    A Zap Sucatas conecta compradores e anunciantes em um catalogo moderado, com busca protagonista, paginas de anuncio fortes e sinais reais de mercado.
+                    A Zap Sucatas conecta compradores e anunciantes em um catálogo moderado, com busca protagonista, páginas de anúncio fortes e sinais reais de mercado.
                   </p>
                 </div>
               </div>
@@ -84,18 +84,18 @@ export function HeroSearchSection({
                     <Input
                       className="h-16 rounded-[1.25rem] border-0 bg-[#f9fbf8] pl-14 pr-5 text-base shadow-none placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-emerald-700/25"
                       onChange={(event) => setQuery(event.target.value)}
-                      placeholder="Busque por material, sucata, maquina, lote ou cidade"
+                      placeholder="Busque por material, sucata, máquina, lote ou cidade"
                       value={query}
                     />
                   </div>
                   <Button className="h-16 rounded-[1.25rem] px-7 text-base font-semibold" type="submit">
-                    Explorar anuncios
+                    Explorar anúncios
                   </Button>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2.5">
                   <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Buscas rapidas
+                    Buscas rápidas
                   </span>
                   {quickSearches.map((term) => (
                     <button
@@ -112,7 +112,7 @@ export function HeroSearchSection({
 
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Button asChild className="h-12 rounded-full px-6">
-                  <Link to={paths.public.listings}>Explorar catalogo</Link>
+                  <Link to={paths.public.listings}>Explorar catálogo</Link>
                 </Button>
                 <Button asChild className="h-12 rounded-full px-6" variant="outline">
                   <Link to={paths.auth.register}>
@@ -126,10 +126,10 @@ export function HeroSearchSection({
             <div className="space-y-4 rounded-[2rem] border border-[#d5e0d5] bg-white/78 p-5 shadow-[0_24px_56px_-44px_rgba(19,33,23,0.28)] backdrop-blur-sm">
               <div className="space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/75">
-                  Sinais de confianca
+                  Sinais de confiança
                 </p>
                 <p className="text-2xl font-semibold leading-tight tracking-[-0.03em] text-foreground">
-                  Menos vitrine institucional. Mais catalogo vivo, busca e operacao comercial.
+                  Menos vitrine institucional. Mais catálogo vivo, busca e operação comercial.
                 </p>
               </div>
 
