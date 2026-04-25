@@ -1,6 +1,7 @@
 export type NotificationPriority = 'high' | 'low' | 'normal' | 'urgent'
 export type NotificationChannel = 'email' | 'in-app' | 'push' | 'whatsapp'
 export type NotificationQueueStatus = 'bounced' | 'delivered' | 'failed' | 'pending' | 'retry' | 'sent'
+export type NotificationDispatchOrigin = 'automatic' | 'manual' | 'unknown'
 
 export type NotificationItem = {
   actionUrl: string | null
@@ -66,4 +67,23 @@ export type NotificationQueueStats = {
   retrying: number
   sent: number
   total: number
+}
+
+export type NotificationHistoryItem = {
+  body: string
+  category: string
+  channels: NotificationChannel[]
+  createdAt: string
+  id: string
+  origin: NotificationDispatchOrigin
+  priority: NotificationPriority
+  queueItems: number
+  status: NotificationQueueStatus | 'mixed' | 'widget_only'
+  title: string
+  updatedAt: string
+}
+
+export type NotificationHistoryPage = {
+  items: NotificationHistoryItem[]
+  totalCount: number
 }

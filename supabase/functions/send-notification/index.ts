@@ -203,6 +203,8 @@ Deno.serve(async (request) => {
           payload: {
             action_url: payload.actionUrl,
             category: payload.category,
+            dispatch_origin: 'manual',
+            dispatch_type: 'admin_broadcast',
             notification_id: notificationRow.id,
             priority: payload.priority,
             title: payload.title,

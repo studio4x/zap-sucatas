@@ -3,6 +3,8 @@ import type { Database } from '@/integrations/supabase/types'
 import { env } from '@/lib/env'
 import type {
   NotificationCenterResponse,
+  NotificationHistoryItem,
+  NotificationHistoryPage,
   NotificationPreferences,
   NotificationQueueItem,
   NotificationQueuePage,
@@ -73,6 +75,42 @@ function mapQueueRow(row: NotificationQueueRow): NotificationQueueItem {
     updatedAt: row.updated_at,
     userId: row.user_id,
   }
+}
+
+function parseQueuePayload(payload: unknown) {
+  if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+    return payload as Record<string, unknown>
+  }
+
+  return {}
+}
+
+function deriveDispatchOrigin(rows: NotificationQueueRow[]): NotificationHistoryItem['origin'] {
+  for (const row of rows) {
+    const payload = parseQueuePayload(row.payload)
+    const origin = payload.dispatch_origin
+
+    if (origin === 'manual' || origin === 'automatic') {
+      return origin
+    }
+  }
+
+  return 'unknown'
+}
+
+function deriveHistoryStatus(rows: NotificationQueueRow[]): NotificationHistoryItem['status'] {
+  if (rows.length === 0) {
+    return 'widget_only'
+  }
+
+  const normalized = new Set(rows.map((row) => row.status))
+  const values = Array.from(normalized)
+
+  if (values.length === 1) {
+    return values[0] as NotificationHistoryItem['status']
+  }
+
+  return 'mixed'
 }
 
 async function getFreshAccessToken() {
@@ -371,6 +409,121 @@ export async function fetchAdminNotificationQueueStats(): Promise<NotificationQu
     retrying,
     sent,
     total,
+  }
+}
+
+export async function fetchAdminNotificationHistoryPage(input: {
+  category?: string
+  channel?: NotificationQueueItem['channel'] | 'all'
+  origin?: NotificationHistoryItem['origin'] | 'all'
+  page: number
+  pageSize: number
+  query?: string
+  status?: NotificationQueueItem['status'] | 'all'
+}): Promise<NotificationHistoryPage> {
+  const client = ensureSupabase()
+
+  let queueQuery = client
+    .from('notification_queue')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (input.channel && input.channel !== 'all') {
+    queueQuery = queueQuery.eq('channel', input.channel)
+  }
+
+  if (input.status && input.status !== 'all') {
+    queueQuery = queueQuery.eq('status', input.status)
+  }
+
+  if (input.category && input.category !== 'all') {
+    queueQuery = queueQuery.eq('category', input.category)
+  }
+
+  const { data: queueData, error: queueError } = await queueQuery.limit(3000)
+
+  if (queueError) {
+    throw queueError
+  }
+
+  const queueRows = (queueData ?? []) as NotificationQueueRow[]
+  if (queueRows.length === 0) {
+    return {
+      items: [],
+      totalCount: 0,
+    }
+  }
+
+  const grouped = new Map<string, NotificationQueueRow[]>()
+  for (const row of queueRows) {
+    const rows = grouped.get(row.notification_id) ?? []
+    rows.push(row)
+    grouped.set(row.notification_id, rows)
+  }
+
+  const notificationIds = Array.from(grouped.keys())
+  const { data: notificationsData, error: notificationsError } = await client
+    .from('notifications')
+    .select('id, title, body, category, priority, created_at')
+    .in('id', notificationIds)
+
+  if (notificationsError) {
+    throw notificationsError
+  }
+
+  const notificationsMap = new Map((notificationsData ?? []).map((row) => [row.id, row]))
+
+  let items: NotificationHistoryItem[] = notificationIds
+    .map((notificationId) => {
+      const notification = notificationsMap.get(notificationId)
+      if (!notification) {
+        return null
+      }
+
+      const rows = grouped.get(notificationId) ?? []
+      const channels = Array.from(new Set(rows.map((row) => row.channel))) as NotificationQueueItem['channel'][]
+      const latestUpdatedAt = rows
+        .map((row) => row.updated_at)
+        .sort((left, right) => right.localeCompare(left))[0] ?? notification.created_at
+
+      return {
+        body: notification.body,
+        category: notification.category,
+        channels,
+        createdAt: notification.created_at,
+        id: notification.id,
+        origin: deriveDispatchOrigin(rows),
+        priority: notification.priority as NotificationHistoryItem['priority'],
+        queueItems: rows.length,
+        status: deriveHistoryStatus(rows),
+        title: notification.title,
+        updatedAt: latestUpdatedAt,
+      }
+    })
+    .filter((item): item is NotificationHistoryItem => Boolean(item))
+
+  if (input.origin && input.origin !== 'all') {
+    items = items.filter((item) => item.origin === input.origin)
+  }
+
+  if (input.query && input.query.trim().length > 0) {
+    const q = input.query.trim().toLowerCase()
+    items = items.filter((item) =>
+      item.title.toLowerCase().includes(q) ||
+      item.body.toLowerCase().includes(q) ||
+      item.category.toLowerCase().includes(q),
+    )
+  }
+
+  items.sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+
+  const totalCount = items.length
+  const from = (input.page - 1) * input.pageSize
+  const pagedItems = items.slice(from, from + input.pageSize)
+
+  return {
+    items: pagedItems,
+    totalCount,
   }
 }
 
