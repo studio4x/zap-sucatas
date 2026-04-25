@@ -96,6 +96,59 @@ export type Database = {
           },
         ]
       }
+      analytics_events: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          event_type: string
+          id: string
+          language: string | null
+          pathname: string
+          profile_id: string | null
+          referrer: string | null
+          session_id: string
+          target: string | null
+          timezone: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          event_type: string
+          id?: string
+          language?: string | null
+          pathname: string
+          profile_id?: string | null
+          referrer?: string | null
+          session_id: string
+          target?: string | null
+          timezone?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          event_type?: string
+          id?: string
+          language?: string | null
+          pathname?: string
+          profile_id?: string | null
+          referrer?: string | null
+          session_id?: string
+          target?: string | null
+          timezone?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_events_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_categories: {
         Row: {
           created_at: string

@@ -3,11 +3,13 @@ import { paths } from '@/app/paths'
 import { SiteFooter } from '@/components/public/site-footer'
 import { SiteHeader } from '@/components/public/site-header'
 import { MaintenanceScreen } from '@/components/shared/maintenance-screen'
+import { useAnalyticsTracker } from '@/hooks/use-analytics-tracker'
 import { useSystemSettings } from '@/hooks/use-system-settings'
 
 export function PublicLayout() {
   const location = useLocation()
   const { isLoading, maintenanceMode } = useSystemSettings()
+  useAnalyticsTracker('public')
   const allowDuringMaintenance = [paths.auth.login, paths.auth.forgotPassword] as string[]
 
   if (!isLoading && maintenanceMode && !allowDuringMaintenance.includes(location.pathname)) {

@@ -22,6 +22,7 @@ const AppNotificationsPage = lazy(() => import('@/pages/app/notifications-page')
 const AppSettingsPage = lazy(() => import('@/pages/app/settings-page').then((module) => ({ default: module.AppSettingsPage })))
 const AppSupportTicketsPage = lazy(() => import('@/pages/app/support-tickets-page').then((module) => ({ default: module.AppSupportTicketsPage })))
 const AdminBlogPage = lazy(() => import('@/pages/admin/blog-page').then((module) => ({ default: module.AdminBlogPage })))
+const AdminAnalyticsPage = lazy(() => import('@/pages/admin/analytics-page').then((module) => ({ default: module.AdminAnalyticsPage })))
 const AdminCategoriesPage = lazy(() => import('@/pages/admin/categories-page').then((module) => ({ default: module.AdminCategoriesPage })))
 const AdminContactMessagesPage = lazy(() => import('@/pages/admin/contact-messages-page').then((module) => ({ default: module.AdminContactMessagesPage })))
 const AdminEditListingPage = lazy(() => import('@/pages/admin/edit-listing-page').then((module) => ({ default: module.AdminEditListingPage })))
@@ -214,6 +215,10 @@ export const routes: RouteObject[] = [
       {
         path: 'usuarios',
         element: withSuspense(<AdminUsersPage />),
+      },
+      {
+        path: 'estatisticas',
+        element: withSuspense(<AdminAnalyticsPage />),
       },
       {
         path: 'contato',

@@ -1,4 +1,5 @@
 import {
+  ChartNoAxesColumn,
   Bell,
   Boxes,
   LayoutDashboard,
@@ -21,6 +22,7 @@ import { paths } from '@/app/paths'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { BuildVersionBadge } from '@/components/shared/build-version-badge'
 import { Button } from '@/components/ui/button'
+import { useAnalyticsTracker } from '@/hooks/use-analytics-tracker'
 
 const adminNavItems = [
   {
@@ -43,6 +45,11 @@ const adminNavItems = [
     to: paths.admin.users,
     label: 'Usuários',
     icon: UsersRound,
+  },
+  {
+    to: paths.admin.analytics,
+    label: 'Estatísticas',
+    icon: ChartNoAxesColumn,
   },
   {
     to: paths.admin.contactMessages,
@@ -98,6 +105,7 @@ const adminNavItems = [
 
 export function AdminLayout() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  useAnalyticsTracker('admin')
 
   return (
     <div className="admin-theme min-h-screen bg-background text-foreground">

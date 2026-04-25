@@ -12,6 +12,7 @@ import { Outlet } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { DashboardShell } from '@/components/dashboard/dashboard-shell'
 import { MaintenanceScreen } from '@/components/shared/maintenance-screen'
+import { useAnalyticsTracker } from '@/hooks/use-analytics-tracker'
 import { useAuth } from '@/hooks/use-auth'
 import { useSystemSettings } from '@/hooks/use-system-settings'
 
@@ -62,6 +63,7 @@ const dashboardNavItems = [
 export function DashboardLayout() {
   const { user } = useAuth()
   const { isLoading, maintenanceMode } = useSystemSettings()
+  useAnalyticsTracker('dashboard')
   const hasRestrictedAccess = user?.status === 'under_review' || user?.status === 'suspended'
   const visibleNavItems = hasRestrictedAccess
     ? dashboardNavItems.filter((item) => item.to === paths.app.support)

@@ -39,6 +39,7 @@ export const paths = {
     listingDetails: (id: string) => `/admin/anuncios/${id}`,
     questions: '/admin/perguntas',
     users: '/admin/usuarios',
+    analytics: '/admin/estatisticas',
     contactMessages: '/admin/contato',
     support: '/admin/suporte',
     supportDetail: (id: string) => `/admin/suporte/${id}`,
