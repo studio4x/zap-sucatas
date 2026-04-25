@@ -18,6 +18,7 @@ const AppNewListingPage = lazy(() => import('@/pages/app/new-listing-page').then
 const AppOverviewPage = lazy(() => import('@/pages/app/overview-page').then((module) => ({ default: module.AppOverviewPage })))
 const AppProfilePage = lazy(() => import('@/pages/app/profile-page').then((module) => ({ default: module.AppProfilePage })))
 const AppQuestionsPage = lazy(() => import('@/pages/app/questions-page').then((module) => ({ default: module.AppQuestionsPage })))
+const AppNotificationsPage = lazy(() => import('@/pages/app/notifications-page').then((module) => ({ default: module.AppNotificationsPage })))
 const AppSettingsPage = lazy(() => import('@/pages/app/settings-page').then((module) => ({ default: module.AppSettingsPage })))
 const AppSupportTicketsPage = lazy(() => import('@/pages/app/support-tickets-page').then((module) => ({ default: module.AppSupportTicketsPage })))
 const AdminBlogPage = lazy(() => import('@/pages/admin/blog-page').then((module) => ({ default: module.AdminBlogPage })))
@@ -33,6 +34,7 @@ const AdminMaterialsPage = lazy(() => import('@/pages/admin/materials-page').the
 const AdminOverviewPage = lazy(() => import('@/pages/admin/overview-page').then((module) => ({ default: module.AdminOverviewPage })))
 const AdminPricingPage = lazy(() => import('@/pages/admin/pricing-page').then((module) => ({ default: module.AdminPricingPage })))
 const AdminQuestionsPage = lazy(() => import('@/pages/admin/questions-page').then((module) => ({ default: module.AdminQuestionsPage })))
+const AdminNotificationsPage = lazy(() => import('@/pages/admin/notifications-page').then((module) => ({ default: module.AdminNotificationsPage })))
 const AdminSettingsPage = lazy(() => import('@/pages/admin/settings-page').then((module) => ({ default: module.AdminSettingsPage })))
 const AdminSupportTicketsPage = lazy(() => import('@/pages/admin/support-tickets-page').then((module) => ({ default: module.AdminSupportTicketsPage })))
 const AdminUsersPage = lazy(() => import('@/pages/admin/users-page').then((module) => ({ default: module.AdminUsersPage })))
@@ -154,6 +156,10 @@ export const routes: RouteObject[] = [
         element: withSuspense(<AppQuestionsPage />),
       },
       {
+        path: 'notificacoes',
+        element: withSuspense(<AppNotificationsPage />),
+      },
+      {
         path: 'suporte',
         element: withSuspense(<AppSupportTicketsPage />),
       },
@@ -216,6 +222,10 @@ export const routes: RouteObject[] = [
       {
         path: 'suporte',
         element: withSuspense(<AdminSupportTicketsPage />),
+      },
+      {
+        path: 'notificacoes',
+        element: withSuspense(<AdminNotificationsPage />),
       },
       {
         path: 'suporte/:id',

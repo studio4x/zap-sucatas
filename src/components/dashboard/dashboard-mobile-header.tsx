@@ -1,5 +1,6 @@
 import { Menu } from 'lucide-react'
 import type { SessionUser } from '@/domains/auth/types'
+import { AppNotificationBell } from '@/components/notifications/app-notification-bell'
 import { Button } from '@/components/ui/button'
 
 type DashboardMobileHeaderProps = {
@@ -22,9 +23,12 @@ export function DashboardMobileHeader({
             {user?.fullName?.trim() || user?.email || 'Área do anunciante'}
           </p>
         </div>
-        <Button onClick={onMenuOpen} size="icon" type="button" variant="outline">
-          <Menu className="size-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <AppNotificationBell />
+          <Button onClick={onMenuOpen} size="icon" type="button" variant="outline">
+            <Menu className="size-4" />
+          </Button>
+        </div>
       </div>
     </header>
   )

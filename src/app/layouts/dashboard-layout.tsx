@@ -1,4 +1,5 @@
 import {
+  Bell,
   CircleUserRound,
   FilePlus2,
   House,
@@ -37,6 +38,11 @@ const dashboardNavItems = [
     icon: MessageSquareMore,
   },
   {
+    to: paths.app.notifications,
+    label: 'Notificações',
+    icon: Bell,
+  },
+  {
     to: paths.app.support,
     label: 'Suporte',
     icon: LifeBuoy,
@@ -60,14 +66,15 @@ export function DashboardLayout() {
   const visibleNavItems = hasRestrictedAccess
     ? dashboardNavItems.filter((item) => item.to === paths.app.support)
     : dashboardNavItems
+  const supportNavItem = dashboardNavItems.find((item) => item.to === paths.app.support)
   const quickNavItems = hasRestrictedAccess
-    ? [dashboardNavItems[4]]
+    ? supportNavItem ? [supportNavItem] : []
     : [
         dashboardNavItems[0],
         dashboardNavItems[1],
-        dashboardNavItems[2],
         dashboardNavItems[3],
         dashboardNavItems[4],
+        dashboardNavItems[5],
       ]
 
   if (!isLoading && maintenanceMode && user?.role !== 'admin') {

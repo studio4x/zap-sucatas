@@ -55,6 +55,47 @@ export type Database = {
           },
         ]
       }
+      admin_notification_actions: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string
+          filters_snapshot: Json | null
+          id: string
+          metadata: Json | null
+          target_ids: Json | null
+          target_type: string
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string
+          filters_snapshot?: Json | null
+          id?: string
+          metadata?: Json | null
+          target_ids?: Json | null
+          target_type: string
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string
+          filters_snapshot?: Json | null
+          id?: string
+          metadata?: Json | null
+          target_ids?: Json | null
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_notification_actions_admin_user_id_fkey"
+            columns: ["admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_categories: {
         Row: {
           created_at: string
@@ -589,6 +630,231 @@ export type Database = {
           source_payload?: Json | null
         }
         Relationships: []
+      }
+      notification_delivery_logs: {
+        Row: {
+          attempt_number: number
+          channel: string
+          created_at: string
+          delivered_at: string | null
+          error_message: string | null
+          id: string
+          queue_id: string
+          response_status_code: number | null
+          retry_attempt: number
+          status: string
+        }
+        Insert: {
+          attempt_number: number
+          channel: string
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          queue_id: string
+          response_status_code?: number | null
+          retry_attempt?: number
+          status: string
+        }
+        Update: {
+          attempt_number?: number
+          channel?: string
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          queue_id?: string
+          response_status_code?: number | null
+          retry_attempt?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_delivery_logs_queue_id_fkey"
+            columns: ["queue_id"]
+            isOneToOne: false
+            referencedRelation: "notification_queue"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email_digest: string
+          email_enabled: boolean
+          in_app_enabled: boolean
+          push_enabled: boolean
+          quiet_hours_enabled: boolean
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          quiet_hours_timezone: string
+          updated_at: string
+          user_id: string
+          whatsapp_enabled: boolean
+        }
+        Insert: {
+          created_at?: string
+          email_digest?: string
+          email_enabled?: boolean
+          in_app_enabled?: boolean
+          push_enabled?: boolean
+          quiet_hours_enabled?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          quiet_hours_timezone?: string
+          updated_at?: string
+          user_id: string
+          whatsapp_enabled?: boolean
+        }
+        Update: {
+          created_at?: string
+          email_digest?: string
+          email_enabled?: boolean
+          in_app_enabled?: boolean
+          push_enabled?: boolean
+          quiet_hours_enabled?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          quiet_hours_timezone?: string
+          updated_at?: string
+          user_id?: string
+          whatsapp_enabled?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_queue: {
+        Row: {
+          attempt_count: number
+          body: string
+          category: string
+          channel: string
+          created_at: string
+          final_error: string | null
+          id: string
+          last_attempt_at: string | null
+          next_retry_at: string
+          notification_id: string
+          payload: Json
+          priority: string
+          provider_message_id: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempt_count?: number
+          body: string
+          category?: string
+          channel: string
+          created_at?: string
+          final_error?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          next_retry_at?: string
+          notification_id: string
+          payload?: Json
+          priority?: string
+          provider_message_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempt_count?: number
+          body?: string
+          category?: string
+          channel?: string
+          created_at?: string
+          final_error?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          next_retry_at?: string
+          notification_id?: string
+          payload?: Json
+          priority?: string
+          provider_message_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_queue_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_queue_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          action_url: string | null
+          body: string
+          category: string
+          created_at: string
+          id: string
+          is_actionable: boolean
+          priority: string
+          read_at: string | null
+          read_by_channels: Json
+          title: string
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          body: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_actionable?: boolean
+          priority?: string
+          read_at?: string | null
+          read_by_channels?: Json
+          title: string
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          body?: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_actionable?: boolean
+          priority?: string
+          read_at?: string | null
+          read_by_channels?: Json
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

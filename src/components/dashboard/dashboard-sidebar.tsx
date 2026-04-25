@@ -1,9 +1,12 @@
 import { CircleHelp, LogOut } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { NavLink } from 'react-router-dom'
+import { paths } from '@/app/paths'
 import type { DashboardNavItem } from '@/components/dashboard/dashboard-quick-nav'
 import { Brand } from '@/components/navigation/brand'
 import type { SessionUser } from '@/domains/auth/types'
 import { Button } from '@/components/ui/button'
+import { fetchUnreadNotificationsCount } from '@/domains/notifications/api'
 import { cn } from '@/lib/utils'
 
 type DashboardSidebarProps = {
@@ -31,6 +34,14 @@ export function DashboardSidebar({
   onSignOut,
   user,
 }: DashboardSidebarProps) {
+  const unreadQuery = useQuery({
+    queryKey: ['notifications', 'unread-count', user?.profileId],
+    queryFn: fetchUnreadNotificationsCount,
+    enabled: Boolean(user?.profileId),
+    refetchInterval: 30_000,
+  })
+  const unreadCount = unreadQuery.data ?? 0
+
   return (
     <aside className="flex h-full flex-col bg-card px-4 py-5">
       <div className="border-b border-border pb-4">
@@ -66,7 +77,12 @@ export function DashboardSidebar({
             to={to}
           >
             <Icon className="size-4" />
-            {label}
+            <span className="truncate">{label}</span>
+            {to === paths.app.notifications && unreadCount > 0 ? (
+              <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            ) : null}
           </NavLink>
         ))}
       </nav>

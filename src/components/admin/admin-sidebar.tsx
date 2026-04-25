@@ -5,6 +5,7 @@ import { NavLink } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { Brand } from '@/components/navigation/brand'
 import { Button } from '@/components/ui/button'
+import { fetchAdminNotificationQueueStats } from '@/domains/notifications/api'
 import { fetchAdminSupportTickets } from '@/domains/support/api'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
@@ -34,6 +35,12 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
   })
   const unresolvedTickets = (supportQueueQuery.data ?? []).filter((ticket) => ticket.status !== 'closed').length
   const overdueTickets = (supportQueueQuery.data ?? []).filter((ticket) => ticket.slaStatus === 'overdue').length
+  const notificationStatsQuery = useQuery({
+    queryKey: ['notifications', 'admin', 'sidebar-stats'],
+    queryFn: fetchAdminNotificationQueueStats,
+    staleTime: 30_000,
+  })
+  const pendingNotifications = (notificationStatsQuery.data?.pending ?? 0) + (notificationStatsQuery.data?.retrying ?? 0)
 
   return (
     <aside className="flex h-full flex-col bg-sidebar px-4 py-4 text-sidebar-foreground">
@@ -85,6 +92,11 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
                 )}
               >
                 {unresolvedTickets}
+              </span>
+            ) : null}
+            {to === paths.admin.notifications && pendingNotifications > 0 ? (
+              <span className="ml-auto inline-flex min-w-6 items-center justify-center rounded-full bg-sidebar-accent px-2 py-0.5 text-[10px] font-semibold text-foreground">
+                {pendingNotifications > 99 ? '99+' : pendingNotifications}
               </span>
             ) : null}
           </NavLink>

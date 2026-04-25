@@ -1,4 +1,5 @@
 import {
+  Bell,
   Boxes,
   LayoutDashboard,
   Logs,
@@ -52,6 +53,11 @@ const adminNavItems = [
     to: paths.admin.support,
     label: 'Tickets',
     icon: LifeBuoy,
+  },
+  {
+    to: paths.admin.notifications,
+    label: 'Notificações',
+    icon: Bell,
   },
   {
     to: paths.admin.categories,
