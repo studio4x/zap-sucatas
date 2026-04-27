@@ -41,3 +41,20 @@ export type UpdateSystemSettingsInput = {
   supportEmail: string
   supportPhone: string
 }
+
+export type VisualAssetKind = 'favicon' | 'logoDark' | 'logoLight'
+
+export type VisualAssetItem = {
+  contentType: string | null
+  name: string
+  path: string
+  publicUrl: string
+  sizeBytes: number | null
+  updatedAt: string | null
+}
+
+export type AdminVisualSettings = {
+  favicon: VisualAssetItem | null
+  logoDark: VisualAssetItem | null
+  logoLight: VisualAssetItem | null
+}
