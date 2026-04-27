@@ -156,6 +156,10 @@ export async function fetchAdminVisualSettings(): Promise<AdminVisualSettings> {
   }
 }
 
+export async function fetchVisualSettings() {
+  return fetchAdminVisualSettings()
+}
+
 export async function uploadAdminVisualAsset(input: {
   file: File
   kind: VisualAssetKind

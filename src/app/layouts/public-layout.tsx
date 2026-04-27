@@ -1,7 +1,10 @@
+import { useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Outlet, useLocation } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { SiteFooter } from '@/components/public/site-footer'
 import { SiteHeader } from '@/components/public/site-header'
+import { fetchVisualSettings } from '@/domains/settings/api'
 import { MaintenanceScreen } from '@/components/shared/maintenance-screen'
 import { useAnalyticsTracker } from '@/hooks/use-analytics-tracker'
 import { useSystemSettings } from '@/hooks/use-system-settings'
@@ -9,8 +12,27 @@ import { useSystemSettings } from '@/hooks/use-system-settings'
 export function PublicLayout() {
   const location = useLocation()
   const { isLoading, maintenanceMode } = useSystemSettings()
+  const visualSettingsQuery = useQuery({
+    queryKey: ['visual-settings', 'layout-public'],
+    queryFn: fetchVisualSettings,
+    staleTime: 60_000,
+  })
   useAnalyticsTracker('public')
   const allowDuringMaintenance = [paths.auth.login, paths.auth.forgotPassword] as string[]
+  const faviconHref = visualSettingsQuery.data?.favicon?.publicUrl ?? '/favicon.ico'
+
+  useEffect(() => {
+    const existingLink = document.querySelector("link[rel='icon']") as HTMLLinkElement | null
+    if (existingLink) {
+      existingLink.href = faviconHref
+      return
+    }
+
+    const link = document.createElement('link')
+    link.rel = 'icon'
+    link.href = faviconHref
+    document.head.appendChild(link)
+  }, [faviconHref])
 
   if (!isLoading && maintenanceMode && !allowDuringMaintenance.includes(location.pathname)) {
     return (
