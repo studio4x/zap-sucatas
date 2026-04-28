@@ -1,48 +1,42 @@
-# AGENTS.md
+# AGENTS.md — Zap Sucatas
+
+## Função deste arquivo
+
+Este arquivo orienta o Codex dentro do repositório.
+
+Ele NÃO deve repetir o blueprint do projeto.  
+A fonte de verdade do MVP está em:
+
+- `docs/architecture/zapsucatas-blueprint-mvp.md`
+- `docs/architecture/admin-spec.md`
+- `docs/mvp-execution-plan.md`
+
+Antes de implementar qualquer tarefa relevante, consulte esses documentos.
+
+---
 
 ## Projeto
 
-Zap Sucatas e uma plataforma web de classificados e marketplace de sucatas e maquinarios.
+Zap Sucatas é uma plataforma web de classificados e marketplace de sucatas e maquinários.
 
-Este repositorio deve seguir os documentos-base abaixo:
+O MVP possui três áreas principais:
 
-- `docs/architecture/zapsucatas-blueprint-mvp.md`
-- `docs/architecture/admin-spec.md`
+- área pública;
+- dashboard do anunciante;
+- painel administrativo.
 
-Esse arquivo e a principal fonte de verdade do MVP.
+O fluxo central é:
 
----
-
-## Regra principal
-
-Antes de implementar qualquer modulo, leia integralmente:
-
-- `docs/architecture/zapsucatas-blueprint-mvp.md`
-- `docs/architecture/admin-spec.md`
-
-Use esses arquivos como referencia para:
-
-- escopo do MVP;
-- mapa de paginas;
-- dominios do sistema;
-- modelagem inicial do banco;
-- Edge Functions;
-- regras de seguranca;
-- ordem de implementacao;
-- direcao visual e estrutural do admin.
-
-Nao invente modulos fora do escopo sem sinalizar isso claramente.
-
-Quando houver lacuna no blueprint:
-- adote a opcao mais segura e escalavel;
-- explicite a premissa adotada;
-- mantenha aderencia ao MVP.
+1. usuário cria anúncio;
+2. anúncio fica em rascunho ou vai para revisão;
+3. admin aprova ou rejeita;
+4. apenas anúncios aprovados ficam públicos.
 
 ---
 
-## Stack obrigatoria
+## Stack obrigatória
 
-Salvo instrucao contraria explicita, usar:
+Usar, salvo instrução contrária:
 
 - React
 - TypeScript
@@ -60,18 +54,9 @@ Salvo instrucao contraria explicita, usar:
 
 ---
 
-## Arquitetura obrigatoria
+## Estrutura esperada
 
-Separar claramente:
-
-- area publica;
-- dashboard do usuario;
-- painel admin;
-- backend sensivel em Edge Functions;
-- banco como fonte central da regra persistida;
-- storage organizado por contexto.
-
-Estrutura alvo:
+Manter a organização por domínio:
 
 - `src/app`
 - `src/components`
@@ -83,66 +68,80 @@ Estrutura alvo:
 - `supabase/functions`
 - `supabase/migrations`
 
-Preferir organizacao por dominio para regras, hooks, queries, mutations, tipos e componentes especificos.
+Sempre que possível, colocar regras, tipos, hooks, queries, mutations e componentes específicos dentro de `src/domains`.
 
 ---
 
 ## Modo de trabalho
 
-Antes de sair criando arquivos, sempre:
+Antes de implementar:
 
-1. ler o blueprint;
-2. resumir o que sera implementado;
-3. identificar entidades afetadas;
-4. identificar impacto em frontend, backend, banco e seguranca;
-5. implementar por etapas pequenas e coerentes.
+1. entenda a tarefa;
+2. consulte os documentos base quando necessário;
+3. identifique arquivos afetados;
+4. implemente apenas o escopo solicitado;
+5. evite alterações amplas sem necessidade.
 
-Sempre que a tarefa for ampla, primeiro produzir:
-- plano curto de execucao;
-- lista dos arquivos a criar/alterar;
-- dependencias tecnicas da etapa.
+Para tarefas grandes, primeiro apresente:
+
+- resumo do que será feito;
+- arquivos que serão criados/editados;
+- dependências técnicas;
+- riscos ou lacunas.
 
 ---
 
-## Seguranca obrigatoria
+## Regras de escopo
 
-Nunca concentrar regra critica apenas no frontend.
+Não criar funcionalidades fora do MVP sem avisar.
+
+Se houver conflito:
+
+1. priorizar o blueprint;
+2. depois o execution plan;
+3. depois a instrução direta do usuário.
+
+Se o blueprint estiver incompleto:
+
+- adote a solução mais segura;
+- registre a premissa;
+- não expanda o escopo silenciosamente.
+
+---
+
+## Segurança
+
+Nunca colocar regra crítica apenas no frontend.
 
 Sempre considerar:
 
-- autenticacao obrigatoria em areas privadas;
-- autorizacao por `role`, `is_admin` e status operacional;
-- RLS em tabelas sensiveis;
-- validacao dupla em fluxos criticos;
-- Edge Functions para acoes administrativas e integracoes externas;
-- segredos nunca expostos no cliente;
-- logs/auditoria para acoes criticas.
-
-Leitura publica so quando realmente necessaria.
+- autenticação em áreas privadas;
+- autorização por `role` e `is_admin`;
+- RLS em tabelas sensíveis;
+- Edge Functions para ações administrativas ou com segredo;
+- service role apenas no backend;
+- segredos nunca no cliente;
+- auditoria para ações críticas.
 
 ---
 
 ## Banco de dados
 
-O banco deve ser mantido por migrations SQL versionadas.
+Toda alteração estrutural deve ser feita via migration SQL em `supabase/migrations`.
 
-Toda mudanca estrutural relevante deve gerar migration.
-
-Sempre prever quando fizer sentido:
+Sempre avaliar:
 
 - foreign keys;
-- indices;
+- índices;
 - constraints;
 - `created_at`;
 - `updated_at`;
-- status explicitos;
 - trigger de `updated_at`;
 - RLS;
 - policies;
-- logs de auditoria;
-- idempotencia para automacoes.
+- logs de auditoria.
 
-Nao depender de configuracao manual no painel como fonte oficial da estrutura.
+Não depender de configuração manual no painel do Supabase como fonte oficial.
 
 ---
 
@@ -150,142 +149,125 @@ Nao depender de configuracao manual no painel como fonte oficial da estrutura.
 
 Usar Edge Functions para:
 
-- aprovacao/reprovacao administrativa;
-- notificacoes;
-- integracoes externas;
-- sincronizacoes;
-- rotinas agendadas;
-- qualquer operacao que exija service role ou segredo.
+- aprovação de anúncio;
+- rejeição de anúncio;
+- envio para revisão;
+- resposta de pergunta quando houver regra sensível;
+- sincronizações;
+- notificações;
+- ações administrativas;
+- operações com segredo ou service role.
 
-Cada funcao deve ter responsabilidade clara, validacao explicita e logs uteis.
+Cada função deve ter:
+
+- responsabilidade única;
+- validação explícita;
+- checagem de permissão;
+- retorno JSON claro;
+- logs úteis.
 
 ---
 
 ## UI/UX
 
-A interface deve seguir padrao profissional, limpo, comercial e escalavel.
+A interface deve ser:
 
-Prioridades:
+- limpa;
+- responsiva;
+- profissional;
+- consistente entre público, dashboard e admin.
 
-- responsividade real;
-- clareza de navegacao;
-- estados de loading, erro, vazio e sucesso;
-- consistencia entre publico, dashboard e admin;
-- formularios bem agrupados;
-- tabelas e filtros operacionais no admin;
-- foco em acao no dashboard.
+Sempre prever estados de:
 
-Evitar aparencia generica e improvisada.
+- loading;
+- erro;
+- vazio;
+- sucesso.
 
----
-
-## Sequencia preferida de implementacao
-
-Seguir preferencialmente esta ordem:
-
-1. fundacao do projeto;
-2. auth e perfis;
-3. catalogo e anuncios;
-4. moderacao admin;
-5. perguntas e respostas;
-6. blog;
-7. tabela de precos;
-8. integracoes e automacoes;
-9. hardening de seguranca, SEO e UX final.
+Antes de concluir qualquer tarefa visual, revisar textos, acentuação, ortografia e microcopy.
 
 ---
 
-## Regras para implementacao
+## Ordem preferencial de implementação
 
-Ao implementar:
+Seguir o `mvp-execution-plan.md`.
 
-- nao apagar estrutura existente sem motivo claro;
-- nao introduzir dependencia desnecessaria;
-- nao criar abstracao excessiva cedo demais;
-- nao deixar TODO generico sem contexto;
-- nao usar mocks permanentes em fluxo real.
+Resumo:
 
-Se criar placeholder, ele deve ser curto, explicito e facil de substituir.
-
----
-
-## Publicacao obrigatoria
-
-Ao concluir uma tarefa:
-
-- sempre fazer `commit` e `push` no GitHub;
-- sempre aplicar deploy no Supabase quando houver mudanca relevante em migrations, Edge Functions, policies, storage ou qualquer backend sensivel associado a entrega;
-- nao deixar alteracoes prontas apenas no workspace local quando a entrega depender de publicacao para funcionar.
+1. fundação;
+2. banco e segurança;
+3. auth e perfis;
+4. catálogo público;
+5. dashboard do anunciante;
+6. admin e moderação;
+7. acabamento operacional.
 
 ---
 
-## Versao de build obrigatoria
+## Build version
 
-Toda entrega que altere o produto deve atualizar obrigatoriamente:
+Toda entrega que altere o produto deve atualizar:
 
 - `src/lib/build-version.ts`
 
-Regras:
+A versão deve aparecer discretamente no rodapé da área pública, dashboard e admin.
 
-- a versao do build deve aparecer de forma discreta no rodape da area publica, do dashboard e do admin;
-- antes de publicar qualquer alteracao, atualizar o valor de `BUILD_VERSION`;
-- nao concluir tarefa com mudanca de produto sem revisar e incrementar essa versao.
+Não concluir alteração de produto sem revisar e incrementar `BUILD_VERSION`.
 
 ---
 
-## Regras para resposta dentro do repositorio
+## Publicação
 
-Quando receber uma tarefa, responder de forma objetiva e tecnica.
+Ao concluir tarefa que precise estar funcional fora do ambiente local:
 
-Sempre que util, informar:
-- o que foi entendido;
-- o que sera alterado;
-- quais arquivos serao criados/editados;
-- quais premissas foram assumidas;
-- quais riscos ou lacunas existem.
+- fazer commit;
+- fazer push;
+- aplicar migrations quando houver;
+- fazer deploy de Edge Functions quando houver;
+- validar impacto no Supabase/Vercel quando necessário.
 
----
-
-## Fonte de verdade do MVP
-
-Se houver conflito entre implementacao ad hoc e o blueprint:
-
-- priorizar `zapsucatas_blueprint_execucao_mvp`;
-- se o blueprint estiver insuficiente, registrar a premissa adotada no codigo ou na resposta;
-- nao expandir escopo sem avisar.
+Não considerar pronto algo que dependa de publicação e ficou apenas local.
 
 ---
 
-## Revisao textual obrigatoria
+## Resposta esperada do Codex
 
-Antes de concluir qualquer entrega que altere interface visivel, sempre revisar os textos das areas afetadas para corrigir acentuacao, ortografia e microcopy.
+Responder de forma objetiva.
 
-Essa revisao deve acontecer obrigatoriamente no dashboard do usuario e no painel admin antes de considerar a tarefa pronta.
+Sempre que útil, informar:
 
-## Edge Function 401 Playbook (Admin Sync Actions)
-- If an admin-triggered Edge Function returns `401` from `functions/v1/...`, do this first:
-  1. Treat browser-extension logs (e.g., Kaspersky `inspector.js`) as noise unless they reference your own domain/function.
-  2. Ensure frontend sends a fresh session token:
-     - Call `supabase.auth.getSession()` + `supabase.auth.refreshSession()`.
-     - Send `Authorization: Bearer <access_token>`.
-     - Prefer `fetch` with explicit headers over `supabase.functions.invoke` when diagnosing auth problems.
-  3. Include fallback token in body: `{ access_token: <access_token> }`.
+- o que entendeu;
+- o que alterou;
+- arquivos criados/editados;
+- premissas adotadas;
+- pendências ou riscos.
 
-- If gateway-level `401` persists, use this hardened pattern:
-  1. Deploy function with `--no-verify-jwt`.
-  2. Inside the function, validate auth manually:
-     - Read token from `Authorization` header OR request body `access_token`.
-     - Validate with `supabaseAdmin.auth.getUser(token)`.
-     - Enforce admin permission from `profiles` (`is_admin` or `role === "admin"`).
-     - Return explicit JSON errors (`401 token ausente/invalido`, `403 acesso negado`).
-  3. Keep function secure by requiring token and role checks before any privileged SQL.
+Evitar explicações longas quando a tarefa for simples.
 
-- Required deploy pattern for this scenario:
-  - `npx supabase functions deploy <function-name> --project-ref <ref> --no-verify-jwt`
+---
 
-- Frontend request pattern for admin sync functions:
-  - `POST ${SUPABASE_URL}/functions/v1/<function-name>`
-  - Headers: `Content-Type: application/json`, `apikey`, `Authorization: Bearer <access_token>`
-  - Body: `{ access_token: <access_token> }`
+## Playbook: Edge Function 401 em ações admin
 
-- Apply this technique to all future "admin maintenance/sync/setup" functions when auth instability appears.
+Se uma Edge Function admin retornar `401`:
+
+1. verificar se o frontend envia sessão atualizada;
+2. usar `supabase.auth.getSession()`;
+3. se necessário, usar `supabase.auth.refreshSession()`;
+4. enviar `Authorization: Bearer <access_token>`;
+5. preferir `fetch` com headers explícitos em diagnóstico;
+6. incluir fallback no body: `{ access_token }`.
+
+Se o erro persistir no gateway:
+
+1. publicar a função com `--no-verify-jwt`;
+2. validar manualmente o token dentro da função;
+3. usar `supabaseAdmin.auth.getUser(token)`;
+4. checar `profiles.is_admin` ou `profiles.role === "admin"`;
+5. retornar erros JSON claros:
+   - `401 token ausente ou inválido`;
+   - `403 acesso negado`.
+
+Deploy:
+
+```bash
+npx supabase functions deploy <function-name> --project-ref <ref> --no-verify-jwt
