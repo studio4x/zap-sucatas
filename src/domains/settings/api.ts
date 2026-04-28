@@ -29,11 +29,25 @@ function ensureSupabase() {
 }
 
 const SITE_ASSETS_BUCKET = 'site-assets'
+const VISUAL_MANIFEST_PATH = 'site/branding/manifest.json'
 
 const visualAssetFolders: Record<VisualAssetKind, string> = {
   favicon: 'site/branding/favicon',
   logoDark: 'site/branding/logo-dark',
   logoLight: 'site/branding/logo-light',
+}
+
+type VisualManifest = {
+  faviconPath: string | null
+  logoDarkPath: string | null
+  logoLightPath: string | null
+  updatedAt: string
+}
+
+const visualManifestKeyByKind: Record<VisualAssetKind, keyof VisualManifest> = {
+  favicon: 'faviconPath',
+  logoDark: 'logoDarkPath',
+  logoLight: 'logoLightPath',
 }
 
 function fileFromStorage(path: string, item: {
@@ -53,6 +67,21 @@ function fileFromStorage(path: string, item: {
     publicUrl: data.publicUrl,
     sizeBytes: typeof metadata.size === 'number' ? metadata.size : null,
     updatedAt: item.updated_at ?? null,
+  }
+}
+
+function fileFromPath(path: string): VisualAssetItem {
+  const client = ensureSupabase()
+  const { data } = client.storage.from(SITE_ASSETS_BUCKET).getPublicUrl(path)
+  const pathParts = path.split('/')
+
+  return {
+    contentType: null,
+    name: pathParts[pathParts.length - 1] ?? path,
+    path,
+    publicUrl: data.publicUrl,
+    sizeBytes: null,
+    updatedAt: null,
   }
 }
 
@@ -86,6 +115,37 @@ async function resolveLatestAsset(kind: VisualAssetKind) {
 
   const latest = files[0]
   return fileFromStorage(`${folder}/${latest.name}`, latest)
+}
+
+function normalizeVisualManifest(value: unknown): VisualManifest | null {
+  if (!value || typeof value !== 'object') {
+    return null
+  }
+
+  const candidate = value as Partial<VisualManifest>
+  return {
+    faviconPath: typeof candidate.faviconPath === 'string' ? candidate.faviconPath : null,
+    logoDarkPath: typeof candidate.logoDarkPath === 'string' ? candidate.logoDarkPath : null,
+    logoLightPath: typeof candidate.logoLightPath === 'string' ? candidate.logoLightPath : null,
+    updatedAt: typeof candidate.updatedAt === 'string' ? candidate.updatedAt : new Date().toISOString(),
+  }
+}
+
+async function fetchVisualManifest(): Promise<VisualManifest | null> {
+  const client = ensureSupabase()
+  const { data } = client.storage.from(SITE_ASSETS_BUCKET).getPublicUrl(VISUAL_MANIFEST_PATH)
+
+  try {
+    const response = await fetch(data.publicUrl, { cache: 'no-store' })
+    if (!response.ok) {
+      return null
+    }
+
+    const json = (await response.json()) as unknown
+    return normalizeVisualManifest(json)
+  } catch {
+    return null
+  }
 }
 
 function mapSystemSettings(row: SystemSettingsRow): SystemSettings {
@@ -143,17 +203,49 @@ export async function updateSystemSettings(input: UpdateSystemSettingsInput) {
 }
 
 export async function fetchAdminVisualSettings(): Promise<AdminVisualSettings> {
-  const [logoLight, logoDark, favicon] = await Promise.all([
-    resolveLatestAsset('logoLight'),
-    resolveLatestAsset('logoDark'),
-    resolveLatestAsset('favicon'),
+  const manifest = await fetchVisualManifest()
+
+  const manifestAssets: AdminVisualSettings = {
+    favicon: manifest?.faviconPath ? fileFromPath(manifest.faviconPath) : null,
+    logoDark: manifest?.logoDarkPath ? fileFromPath(manifest.logoDarkPath) : null,
+    logoLight: manifest?.logoLightPath ? fileFromPath(manifest.logoLightPath) : null,
+  }
+
+  const [logoLightFallback, logoDarkFallback, faviconFallback] = await Promise.all([
+    manifestAssets.logoLight ? Promise.resolve(null) : resolveLatestAsset('logoLight'),
+    manifestAssets.logoDark ? Promise.resolve(null) : resolveLatestAsset('logoDark'),
+    manifestAssets.favicon ? Promise.resolve(null) : resolveLatestAsset('favicon'),
   ])
 
-  return {
-    favicon,
-    logoDark,
-    logoLight,
+  const resolvedSettings: AdminVisualSettings = {
+    favicon: manifestAssets.favicon ?? faviconFallback,
+    logoDark: manifestAssets.logoDark ?? logoDarkFallback,
+    logoLight: manifestAssets.logoLight ?? logoLightFallback,
   }
+
+  if (!manifest) {
+    const nextManifest: VisualManifest = {
+      faviconPath: resolvedSettings.favicon?.path ?? null,
+      logoDarkPath: resolvedSettings.logoDark?.path ?? null,
+      logoLightPath: resolvedSettings.logoLight?.path ?? null,
+      updatedAt: new Date().toISOString(),
+    }
+
+    if (nextManifest.faviconPath || nextManifest.logoDarkPath || nextManifest.logoLightPath) {
+      const manifestFile = new Blob([JSON.stringify(nextManifest)], { type: 'application/json' })
+      await ensureSupabase()
+        .storage
+        .from(SITE_ASSETS_BUCKET)
+        .upload(VISUAL_MANIFEST_PATH, manifestFile, {
+          cacheControl: '300',
+          contentType: 'application/json',
+          upsert: true,
+        })
+        .catch(() => undefined)
+    }
+  }
+
+  return resolvedSettings
 }
 
 export async function fetchVisualSettings() {
@@ -205,5 +297,27 @@ export async function uploadAdminVisualAsset(input: {
     if (removeError) {
       throw removeError
     }
+  }
+
+  const currentManifest = await fetchVisualManifest()
+  const nextManifest: VisualManifest = {
+    faviconPath: currentManifest?.faviconPath ?? null,
+    logoDarkPath: currentManifest?.logoDarkPath ?? null,
+    logoLightPath: currentManifest?.logoLightPath ?? null,
+    updatedAt: new Date().toISOString(),
+  }
+  nextManifest[visualManifestKeyByKind[input.kind]] = storagePath
+
+  const manifestFile = new Blob([JSON.stringify(nextManifest)], { type: 'application/json' })
+  const { error: manifestUploadError } = await client.storage
+    .from(SITE_ASSETS_BUCKET)
+    .upload(VISUAL_MANIFEST_PATH, manifestFile, {
+      cacheControl: '300',
+      contentType: 'application/json',
+      upsert: true,
+    })
+
+  if (manifestUploadError) {
+    throw manifestUploadError
   }
 }
