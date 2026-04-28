@@ -211,6 +211,8 @@ Toda entrega que altere o produto deve atualizar:
 - `src/lib/build-version.ts`
 
 A versão deve aparecer discretamente no rodapé da área pública, dashboard e admin.
+A exibição no rodapé deve incluir também o hash curto do commit atual, no formato:
+`Build <BUILD_VERSION>-<COMMIT_SHA_CURTO>` (ex.: `Build 2026.04.28-004-11859c5f`).
 
 Não concluir alteração de produto sem revisar e incrementar `BUILD_VERSION`.
 

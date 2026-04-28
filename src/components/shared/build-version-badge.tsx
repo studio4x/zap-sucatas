@@ -1,4 +1,4 @@
-import { BUILD_VERSION } from '@/lib/build-version'
+import { BUILD_VERSION_DISPLAY } from '@/lib/build-version'
 import { cn } from '@/lib/utils'
 
 type BuildVersionBadgeProps = {
@@ -18,7 +18,7 @@ export function BuildVersionBadge({
         className,
       )}
     >
-      Build {BUILD_VERSION}
+      Build {BUILD_VERSION_DISPLAY}
     </span>
   )
 }
