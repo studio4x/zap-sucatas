@@ -45,7 +45,7 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
   return (
     <aside className="flex h-full flex-col bg-sidebar px-4 py-4 text-sidebar-foreground">
       <div className="flex items-start justify-between gap-3 border-b border-sidebar-border pb-4">
-        <Brand subtitle="Backoffice operacional" />
+        <Brand layout="stacked" subtitle="Backoffice operacional" />
         {onClose ? (
           <button
             className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition hover:bg-secondary hover:text-foreground lg:hidden"

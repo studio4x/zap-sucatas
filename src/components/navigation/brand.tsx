@@ -8,10 +8,11 @@ import { cn } from '@/lib/utils'
 
 type BrandProps = {
   subtitle: string
+  layout?: 'inline' | 'stacked'
   tone?: 'default' | 'inverse'
 }
 
-export function Brand({ subtitle, tone = 'default' }: BrandProps) {
+export function Brand({ subtitle, layout = 'inline', tone = 'default' }: BrandProps) {
   const isInverse = tone === 'inverse'
   const [logoLoadError, setLogoLoadError] = useState(false)
   const visualSettingsQuery = useQuery({
@@ -28,8 +29,13 @@ export function Brand({ subtitle, tone = 'default' }: BrandProps) {
     setLogoLoadError(false)
   }, [logo?.publicUrl])
 
+  const isStacked = layout === 'stacked'
+
   return (
-    <Link className="inline-flex items-center gap-3" to={paths.public.home}>
+    <Link
+      className={cn('inline-flex min-w-0 gap-3', isStacked ? 'flex-col items-start' : 'items-center')}
+      to={paths.public.home}
+    >
       {!logo || logoLoadError ? (
         <div
           className={cn(
@@ -49,7 +55,7 @@ export function Brand({ subtitle, tone = 'default' }: BrandProps) {
           />
         </div>
       )}
-      <div>
+      <div className="min-w-0">
         {!logo || logoLoadError ? (
           <p
             className={cn(
@@ -60,7 +66,7 @@ export function Brand({ subtitle, tone = 'default' }: BrandProps) {
             Zap Sucatas
           </p>
         ) : null}
-        <p className={cn('text-sm', isInverse ? 'text-white/72' : 'text-muted-foreground')}>
+        <p className={cn('text-sm leading-tight', isInverse ? 'text-white/72' : 'text-muted-foreground')}>
           {subtitle}
         </p>
       </div>
