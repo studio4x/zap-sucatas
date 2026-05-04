@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { RefreshCcw, Upload } from 'lucide-react'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
@@ -76,6 +76,7 @@ export function AdminPricingPage() {
   const [providerFilter, setProviderFilter] = useState('all')
   const [manualPage, setManualPage] = useState(1)
   const [snapshotPage, setSnapshotPage] = useState(1)
+  const autoSyncAttemptedRef = useRef(false)
 
   const pricingQuery = useQuery({
     queryKey: ['pricing', 'admin'],
@@ -173,6 +174,16 @@ export function AdminPricingPage() {
     [editingEntry],
   )
   const manualSnapshotDefaults = useMemo(() => toSnapshotFormValues(), [])
+
+  useEffect(() => {
+    if (!pricingQuery.data || autoSyncAttemptedRef.current || latestSyncMutation.isPending) {
+      return
+    }
+
+    autoSyncAttemptedRef.current = true
+    clearFeedback()
+    latestSyncMutation.mutate()
+  }, [clearFeedback, latestSyncMutation, pricingQuery.data])
 
   if (pricingQuery.isLoading) {
     return (
