@@ -112,6 +112,15 @@ function average(values: number[]) {
   return values.reduce((sum, current) => sum + current, 0) / values.length
 }
 
+function formatDayMonth(quotedDate: string) {
+  const parsed = new Date(`${quotedDate}T12:00:00`)
+
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+  }).format(parsed)
+}
+
 function buildDailyRows(snapshots: LmePriceSnapshot[]) {
   const map = new Map<string, DailySnapshotRow>()
 
@@ -149,13 +158,23 @@ function buildWeeklyAverageRow(rows: DailySnapshotRow[], isoWeek: number, isoYea
     {},
   )
 
+  const orderedWeekRows = [...rows].sort((left, right) =>
+    left.quotedDate > right.quotedDate ? 1 : left.quotedDate < right.quotedDate ? -1 : 0,
+  )
+  const firstDay = orderedWeekRows[0]?.quotedDate ?? null
+  const lastDay = orderedWeekRows[orderedWeekRows.length - 1]?.quotedDate ?? null
+  const weekRange =
+    firstDay && lastDay
+      ? `${formatDayMonth(firstDay)} a ${formatDayMonth(lastDay)}`
+      : 'Período não informado'
+
   return {
     label: 'Média da semana',
     quotedDate: null,
     monthKey: null,
     rowType: 'weekly_average',
     values,
-    weekLabel: `${isoWeek} / ${isoYear}`,
+    weekLabel: `Semana ${isoWeek}/${isoYear} • ${weekRange}`,
   }
 }
 
