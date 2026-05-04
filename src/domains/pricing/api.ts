@@ -59,7 +59,12 @@ type PricingSyncStatusRow = {
 
 type PricingSyncStatusQueryResult = {
   data: PricingSyncStatusRow | null
-  error: Error | null
+  error: {
+    code?: string
+    details?: string
+    message: string
+    status?: number
+  } | null
 }
 
 type PricingSyncStatusQueryBuilder = {
@@ -336,7 +341,12 @@ export async function fetchAdminPricingDashboard(): Promise<PricingAdminDashboar
     throw recentResponse.error
   }
 
-  if (syncStatusResponse.error) {
+  const isMissingSyncStatusTable =
+    syncStatusResponse.error?.status === 404 ||
+    syncStatusResponse.error?.code === 'PGRST205' ||
+    syncStatusResponse.error?.message.toLowerCase().includes('pricing_sync_status') === true
+
+  if (syncStatusResponse.error && !isMissingSyncStatusTable) {
     throw syncStatusResponse.error
   }
 
@@ -346,7 +356,7 @@ export async function fetchAdminPricingDashboard(): Promise<PricingAdminDashboar
   const recentSnapshots = (recentResponse.data ?? []).map((row) =>
     mapSnapshot(row as unknown as LmePriceSnapshotRow),
   )
-  const syncStatus = syncStatusResponse.data
+  const syncStatus = !isMissingSyncStatusTable && syncStatusResponse.data
     ? mapPricingSyncStatus(syncStatusResponse.data as unknown as PricingSyncStatusRow)
     : null
   const model = await buildPricingDashboardData(manualEntries, latestQuotedDate)
