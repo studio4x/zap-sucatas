@@ -221,6 +221,26 @@ function buildPeriodAverageRow(rows: DailySnapshotRow[]): PricingTableRow | null
   }
 }
 
+function buildLatestValues(snapshots: LmePriceSnapshot[]) {
+  return pricingSeriesCatalog.reduce<Partial<Record<PricingSeriesCode, number>>>((accumulator, series) => {
+    const latestSnapshot = [...snapshots]
+      .filter((snapshot) => snapshot.metalCode === series.code)
+      .sort((left, right) => {
+        if (left.quotedDate !== right.quotedDate) {
+          return left.quotedDate < right.quotedDate ? 1 : -1
+        }
+
+        return left.quotedAt < right.quotedAt ? 1 : left.quotedAt > right.quotedAt ? -1 : 0
+      })[0]
+
+    if (latestSnapshot) {
+      accumulator[series.code] = latestSnapshot.priceValue
+    }
+
+    return accumulator
+  }, {})
+}
+
 export function buildPricingHistoryRows(snapshots: LmePriceSnapshot[]) {
   const rows = buildDailyRows(snapshots)
 
@@ -340,16 +360,7 @@ export function buildPricingPageModel(input: {
   const latestSnapshot = [...input.historySnapshots].sort((left, right) =>
     left.quotedDate < right.quotedDate ? 1 : left.quotedDate > right.quotedDate ? -1 : 0,
   )[0]
-
-  const latestValues =
-    latestSnapshot === undefined
-      ? {}
-      : input.historySnapshots
-          .filter((snapshot) => snapshot.quotedDate === latestSnapshot.quotedDate)
-          .reduce<Partial<Record<PricingSeriesCode, number>>>((accumulator, snapshot) => {
-            accumulator[snapshot.metalCode] = snapshot.priceValue
-            return accumulator
-          }, {})
+  const latestValues = buildLatestValues(input.historySnapshots)
 
   return {
     chartSeries,

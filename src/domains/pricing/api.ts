@@ -7,6 +7,7 @@ import type {
   PricingSeriesCode,
   PricingSyncMode,
   PricingSyncResult,
+  PricingSyncStatus,
   SaveManualLmeSnapshotsInput,
   ScrapPriceEntry,
   UpsertScrapPriceEntryInput,
@@ -43,6 +44,33 @@ type LmePriceSnapshotRow = {
   quoted_at: string
   quoted_date: string
   source_payload: unknown
+}
+
+type PricingSyncStatusRow = {
+  job_name: string
+  last_message: string | null
+  last_run_at: string | null
+  last_snapshot_count: number
+  last_status: PricingSyncStatus['lastStatus']
+  last_success_at: string | null
+  last_triggered_at: string | null
+  updated_at: string
+}
+
+type PricingSyncStatusQueryResult = {
+  data: PricingSyncStatusRow | null
+  error: Error | null
+}
+
+type PricingSyncStatusQueryBuilder = {
+  eq(column: 'job_name', value: string): {
+    maybeSingle(): Promise<PricingSyncStatusQueryResult>
+  }
+  select(columns: string): PricingSyncStatusQueryBuilder
+}
+
+type PricingSyncStatusQueryClient = {
+  from(relation: 'pricing_sync_status'): PricingSyncStatusQueryBuilder
 }
 
 function ensureSupabase() {
@@ -155,6 +183,19 @@ function mapSnapshot(row: LmePriceSnapshotRow): LmePriceSnapshot {
   }
 }
 
+function mapPricingSyncStatus(row: PricingSyncStatusRow): PricingSyncStatus {
+  return {
+    jobName: row.job_name,
+    lastMessage: row.last_message,
+    lastRunAt: row.last_run_at,
+    lastSnapshotCount: row.last_snapshot_count,
+    lastStatus: row.last_status,
+    lastSuccessAt: row.last_success_at,
+    lastTriggeredAt: row.last_triggered_at,
+    updatedAt: row.updated_at,
+  }
+}
+
 async function fetchLatestQuotedDate() {
   const { data, error } = await ensureSupabase()
     .from('lme_price_snapshots')
@@ -259,6 +300,15 @@ export async function fetchPublicPricingPageData(): Promise<PricingPageData> {
 }
 
 export async function fetchAdminPricingDashboard(): Promise<PricingAdminDashboard> {
+  const syncStatusClient = ensureSupabase() as unknown as PricingSyncStatusQueryClient
+  const syncStatusQuery = syncStatusClient
+    .from('pricing_sync_status')
+    .select(
+      'job_name, last_message, last_run_at, last_snapshot_count, last_status, last_success_at, last_triggered_at, updated_at',
+    )
+    .eq('job_name', 'pricing_auto_sync')
+    .maybeSingle()
+
   const [manualResponse, recentResponse, latestQuotedDate] = await Promise.all([
     ensureSupabase()
       .from('scrap_price_entries')
@@ -276,6 +326,7 @@ export async function fetchAdminPricingDashboard(): Promise<PricingAdminDashboar
       .limit(70),
     fetchLatestQuotedDate(),
   ])
+  const syncStatusResponse = await syncStatusQuery
 
   if (manualResponse.error) {
     throw manualResponse.error
@@ -285,17 +336,25 @@ export async function fetchAdminPricingDashboard(): Promise<PricingAdminDashboar
     throw recentResponse.error
   }
 
+  if (syncStatusResponse.error) {
+    throw syncStatusResponse.error
+  }
+
   const manualEntries = (manualResponse.data ?? []).map((row) =>
     mapScrapPriceEntry(row as unknown as ScrapPriceEntryRow),
   )
   const recentSnapshots = (recentResponse.data ?? []).map((row) =>
     mapSnapshot(row as unknown as LmePriceSnapshotRow),
   )
+  const syncStatus = syncStatusResponse.data
+    ? mapPricingSyncStatus(syncStatusResponse.data as unknown as PricingSyncStatusRow)
+    : null
   const model = await buildPricingDashboardData(manualEntries, latestQuotedDate)
 
   return {
     manualEntries,
     recentSnapshots,
+    syncStatus,
     ...model,
   }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { RefreshCcw, Upload } from 'lucide-react'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
@@ -77,12 +77,6 @@ export function AdminPricingPage() {
   const [providerFilter, setProviderFilter] = useState('all')
   const [manualPage, setManualPage] = useState(1)
   const [snapshotPage, setSnapshotPage] = useState(1)
-  const autoSyncAttemptedRef = useRef(false)
-  const [autoSyncStatus, setAutoSyncStatus] = useState<
-    'idle' | 'running' | 'success' | 'error'
-  >('idle')
-  const [autoSyncMessage, setAutoSyncMessage] = useState('Aguardando primeira sincronização automática.')
-  const [autoSyncLastAttemptAt, setAutoSyncLastAttemptAt] = useState<string | null>(null)
 
   const pricingQuery = useQuery({
     queryKey: ['pricing', 'admin'],
@@ -145,17 +139,7 @@ export function AdminPricingPage() {
 
   const latestSyncMutation = useMutation({
     mutationFn: () => runPricingSync('latest'),
-    onMutate: () => {
-      setAutoSyncStatus('running')
-      setAutoSyncLastAttemptAt(new Date().toISOString())
-      setAutoSyncMessage('Sincronização automática em andamento.')
-    },
     onSuccess: async (result) => {
-      setAutoSyncStatus('success')
-      setAutoSyncLastAttemptAt(new Date().toISOString())
-      setAutoSyncMessage(
-        `Sincronização automática concluída com ${result.inserted} snapshots. Providers: ${result.providers.join(', ')}.`,
-      )
       const providersLabel = result.providers.join(', ')
       setSuccessFeedback(
         `Sincronização concluída com ${result.inserted} snapshots. Providers: ${providersLabel}.`,
@@ -163,11 +147,6 @@ export function AdminPricingPage() {
       await invalidatePricing()
     },
     onError: (error) => {
-      setAutoSyncStatus('error')
-      setAutoSyncLastAttemptAt(new Date().toISOString())
-      setAutoSyncMessage(
-        error instanceof Error ? error.message : 'Sincronização automática retornou erro.',
-      )
       setErrorFeedback(error, 'Não foi possível sincronizar os preços agora.')
     },
   })
@@ -196,16 +175,6 @@ export function AdminPricingPage() {
   )
   const manualSnapshotDefaults = useMemo(() => toSnapshotFormValues(), [])
 
-  useEffect(() => {
-    if (!pricingQuery.data || autoSyncAttemptedRef.current || latestSyncMutation.isPending) {
-      return
-    }
-
-    autoSyncAttemptedRef.current = true
-    clearFeedback()
-    latestSyncMutation.mutate()
-  }, [clearFeedback, latestSyncMutation, pricingQuery.data])
-
   if (pricingQuery.isLoading) {
     return (
       <div className="rounded-lg border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
@@ -223,6 +192,7 @@ export function AdminPricingPage() {
   }
 
   const data = pricingQuery.data
+  const syncStatus = data.syncStatus
   const providerOptions = ['all', ...new Set(data.recentSnapshots.map((snapshot) => snapshot.providerName))]
   const filteredManualEntries = data.manualEntries.filter((entry) => {
     const normalizedQuery = manualQuery.trim().toLowerCase()
@@ -295,41 +265,59 @@ export function AdminPricingPage() {
               Sincronização automática
             </p>
             <p className="text-lg font-semibold text-foreground">
-              {autoSyncStatus === 'running'
+              {syncStatus?.lastStatus === 'running'
                 ? 'Em execução'
-                : autoSyncStatus === 'success'
-                  ? 'Funcionando'
-                  : autoSyncStatus === 'error'
-                    ? 'Com falha'
-                    : 'Aguardando'}
+                : syncStatus?.lastStatus === 'queued'
+                  ? 'Agendada'
+                  : syncStatus?.lastStatus === 'success'
+                    ? 'Funcionando'
+                    : syncStatus?.lastStatus === 'error'
+                      ? 'Com falha'
+                      : 'Aguardando'}
             </p>
-            <p className="text-sm leading-6 text-muted-foreground">{autoSyncMessage}</p>
+            <p className="text-sm leading-6 text-muted-foreground">
+              {syncStatus?.lastMessage ?? 'A sincronização automática ainda não executou.'}
+            </p>
           </div>
 
           <div className="rounded-[1.25rem] border border-border/70 bg-muted/30 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Última tentativa
-            </p>
-            <p className="mt-2 text-sm font-medium text-foreground">
-              {autoSyncLastAttemptAt ? formatPricingDateTime(autoSyncLastAttemptAt) : 'Ainda não executada'}
-            </p>
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Última tentativa
+              </p>
+              <p className="text-sm font-medium text-foreground">
+                {syncStatus?.lastTriggeredAt
+                  ? formatPricingDateTime(syncStatus.lastTriggeredAt)
+                  : 'Ainda não executada'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Última conclusão:{' '}
+                {syncStatus?.lastRunAt ? formatPricingDateTime(syncStatus.lastRunAt) : 'Não informada'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Snapshots processados:{' '}
+                {typeof syncStatus?.lastSnapshotCount === 'number' ? syncStatus.lastSnapshotCount : 0}
+              </p>
+            </div>
             <div className="mt-3">
               <AdminStatusBadge
                 tone={
-                  autoSyncStatus === 'success'
+                  syncStatus?.lastStatus === 'success'
                     ? 'success'
-                    : autoSyncStatus === 'error'
+                    : syncStatus?.lastStatus === 'error'
                       ? 'danger'
                       : 'neutral'
                 }
               >
-                {autoSyncStatus === 'running'
+                {syncStatus?.lastStatus === 'running'
                   ? 'Sincronizando'
-                  : autoSyncStatus === 'success'
-                    ? 'Ativa'
-                    : autoSyncStatus === 'error'
-                      ? 'Falhou'
-                      : 'Sem tentativa'}
+                  : syncStatus?.lastStatus === 'queued'
+                    ? 'Na fila'
+                    : syncStatus?.lastStatus === 'success'
+                      ? 'Ativa'
+                      : syncStatus?.lastStatus === 'error'
+                        ? 'Falhou'
+                        : 'Sem tentativa'}
               </AdminStatusBadge>
             </div>
           </div>

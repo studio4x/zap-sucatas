@@ -1,6 +1,6 @@
 /// <reference types="jsr:@supabase/functions-js/edge-runtime.d.ts" />
 
-import { requireAdminProfile, resolveHttpErrorStatus } from '../_shared/auth.ts'
+import { HttpError, requireAdminProfile, resolveHttpErrorStatus } from '../_shared/auth.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertAdminAuditLog, insertIntegrationLog } from '../_shared/logging.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
@@ -16,6 +16,19 @@ type RawSnapshot = {
   quoted_at: string
   source_payload: unknown
 }
+
+type PricingSyncRequestBody = {
+  job_name?: string
+  mode?: SyncMode
+  trigger?: 'cron' | 'manual'
+}
+
+type PricingSyncSecretRow = {
+  cron_key: string
+  job_name: string
+}
+
+const PRICING_SYNC_JOB_NAME = 'pricing_auto_sync'
 
 const WESTMETALL_URL = 'https://www.westmetall.com/en/markdaten.php/en/en/markdaten.php'
 const BCB_PTAX_PERIOD_URL =
@@ -351,8 +364,75 @@ function resolveMode(requestBody: unknown): SyncMode {
   return 'latest'
 }
 
+async function validatePricingSyncAccess(request: Request) {
+  const admin = createAdminClient()
+  const body = (await request.clone().json().catch(() => ({}))) as PricingSyncRequestBody
+  const cronKey = request.headers.get('x-cron-key')
+
+  if (cronKey) {
+    const { data, error } = await admin
+      .from('pricing_sync_secrets')
+      .select('job_name, cron_key')
+      .eq('job_name', PRICING_SYNC_JOB_NAME)
+      .maybeSingle()
+
+    if (error) {
+      throw error
+    }
+
+    const secretRow = data as PricingSyncSecretRow | null
+
+    if (!secretRow || secretRow.cron_key !== cronKey) {
+      throw new HttpError('token ausente ou invalido', 401)
+    }
+
+    return {
+      actorUserId: null as string | null,
+      accessSource: 'cron' as const,
+      body,
+      admin,
+    }
+  }
+
+  const actor = await requireAdminProfile(request)
+
+  return {
+    actorUserId: actor.id,
+    accessSource: 'manual' as const,
+    body,
+    admin,
+  }
+}
+
+async function updatePricingSyncStatus(
+  admin: ReturnType<typeof createAdminClient>,
+  patch: {
+    lastMessage?: string | null
+    lastRunAt?: string | null
+    lastSnapshotCount?: number
+    lastStatus?: 'error' | 'never' | 'queued' | 'running' | 'success'
+    lastSuccessAt?: string | null
+    lastTriggeredAt?: string | null
+  },
+) {
+  const { error } = await admin
+    .from('pricing_sync_status')
+    .update({
+      ...patch,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('job_name', PRICING_SYNC_JOB_NAME)
+
+  if (error) {
+    throw error
+  }
+}
+
 Deno.serve(async (request) => {
   let requestBody: Record<string, unknown> = {}
+  let accessSource: 'cron' | 'manual' | null = null
+  let actorUserId: string | null = null
+  let admin = createAdminClient()
 
   if (request.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -363,11 +443,22 @@ Deno.serve(async (request) => {
       return jsonResponse({ error: 'Method not allowed.' }, 405)
     }
 
-    const actor = await requireAdminProfile(request)
-    requestBody = await request.json().catch(() => ({}))
+    const access = await validatePricingSyncAccess(request)
+    accessSource = access.accessSource
+    actorUserId = access.actorUserId
+    admin = access.admin
+    requestBody = access.body as Record<string, unknown>
     const mode = resolveMode(requestBody)
+    await updatePricingSyncStatus(admin, {
+      lastMessage:
+        accessSource === 'cron'
+          ? 'Sincronizacao automatica em andamento.'
+          : 'Sincronizacao manual em andamento.',
+      lastRunAt: new Date().toISOString(),
+      lastStatus: 'running',
+      lastTriggeredAt: new Date().toISOString(),
+    })
     const entries = await resolveSnapshots(mode)
-    const admin = createAdminClient()
     const chunks = chunkArray(entries, 500)
 
     for (const chunk of chunks) {
@@ -384,10 +475,11 @@ Deno.serve(async (request) => {
       integrationName: 'lme',
       message: `Pricing sync completed in ${mode} mode with ${entries.length} snapshots.`,
       payload: {
-        actor_profile_id: actor.id,
+        actor_profile_id: actorUserId,
         count: entries.length,
         event: 'pricing_sync_completed',
         mode,
+        source: accessSource,
         providers: Array.from(new Set(entries.map((entry) => entry.provider_name))),
         severity: 'success',
       },
@@ -396,13 +488,26 @@ Deno.serve(async (request) => {
 
     await insertAdminAuditLog({
       action: 'sync_lme_prices',
-      actorUserId: actor.id,
+      actorUserId,
       afterData: {
         count: entries.length,
         mode,
+        source: accessSource,
         providers: Array.from(new Set(entries.map((entry) => entry.provider_name))),
       },
       entityType: 'pricing',
+    })
+
+    await updatePricingSyncStatus(admin, {
+      lastMessage:
+        accessSource === 'cron'
+          ? `Sincronizacao automatica concluida com ${entries.length} snapshots.`
+          : `Sincronizacao manual concluida com ${entries.length} snapshots.`,
+      lastRunAt: new Date().toISOString(),
+      lastSnapshotCount: entries.length,
+      lastStatus: 'success',
+      lastSuccessAt: new Date().toISOString(),
+      lastTriggeredAt: new Date().toISOString(),
     })
 
     return jsonResponse({
@@ -414,12 +519,21 @@ Deno.serve(async (request) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected pricing sync error.'
 
+    if (accessSource) {
+      await updatePricingSyncStatus(admin, {
+        lastMessage: message,
+        lastRunAt: new Date().toISOString(),
+        lastStatus: 'error',
+        lastTriggeredAt: new Date().toISOString(),
+      }).catch(() => null)
+    }
+
     await insertIntegrationLog({
       integrationName: 'lme',
       message,
       payload: {
         event: 'pricing_sync_failed',
-        mode: typeof requestBody.mode === 'string' ? requestBody.mode : 'latest',
+        mode: typeof requestBody['mode'] === 'string' ? requestBody['mode'] : 'latest',
         severity: 'danger',
       },
       status: 'error',

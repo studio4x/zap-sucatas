@@ -2,6 +2,19 @@ export type PricingSeriesCode = 'AL' | 'CU' | 'NI' | 'PB' | 'SN' | 'USD' | 'ZN'
 
 export type PricingSyncMode = 'backfill' | 'latest'
 
+export type PricingSyncStatusState = 'error' | 'never' | 'queued' | 'running' | 'success'
+
+export type PricingSyncStatus = {
+  jobName: string
+  lastMessage: string | null
+  lastRunAt: string | null
+  lastSnapshotCount: number
+  lastStatus: PricingSyncStatusState
+  lastSuccessAt: string | null
+  lastTriggeredAt: string | null
+  updatedAt: string
+}
+
 export type ScrapPriceEntry = {
   createdAt: string
   effectiveDate: string
@@ -67,6 +80,7 @@ export type PricingPageData = {
 
 export type PricingAdminDashboard = PricingPageData & {
   recentSnapshots: LmePriceSnapshot[]
+  syncStatus: PricingSyncStatus | null
 }
 
 export type UpsertScrapPriceEntryInput = {
