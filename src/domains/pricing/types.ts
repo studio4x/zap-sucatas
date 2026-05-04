@@ -41,11 +41,12 @@ export type PricingChartSeries = {
   points: PricingChartPoint[]
 }
 
-export type PricingTableRowType = 'daily' | 'period_average' | 'weekly_average'
+export type PricingTableRowType = 'daily' | 'monthly_average' | 'period_average' | 'weekly_average'
 
 export type PricingTableRow = {
   label: string
   quotedDate: string | null
+  monthKey: string | null
   rowType: PricingTableRowType
   values: Partial<Record<PricingSeriesCode, number>>
   weekLabel: string | null

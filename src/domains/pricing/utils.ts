@@ -70,6 +70,11 @@ export function formatMonthLabel(monthStart: string) {
   return label.charAt(0).toUpperCase() + label.slice(1)
 }
 
+export function getMonthStart(quotedDate: string) {
+  const [year, month] = quotedDate.split('-')
+  return `${year}-${month}-01`
+}
+
 export function addDays(quotedDate: string, amount: number) {
   const [year, month, day] = quotedDate.split('-').map(Number)
   const date = new Date(Date.UTC(year, month - 1, day))
@@ -84,7 +89,7 @@ export function subtractMonths(quotedDate: string, amount: number) {
   return date.toISOString().slice(0, 10)
 }
 
-function getIsoWeekParts(quotedDate: string) {
+export function getIsoWeekParts(quotedDate: string) {
   const [year, month, day] = quotedDate.split('-').map(Number)
   const date = new Date(Date.UTC(year, month - 1, day))
   const dayNumber = (date.getUTCDay() + 6) % 7
@@ -147,9 +152,41 @@ function buildWeeklyAverageRow(rows: DailySnapshotRow[], isoWeek: number, isoYea
   return {
     label: 'Média da semana',
     quotedDate: null,
+    monthKey: null,
     rowType: 'weekly_average',
     values,
     weekLabel: `${isoWeek} / ${isoYear}`,
+  }
+}
+
+function buildMonthlyAverageRow(rows: DailySnapshotRow[], monthKey: string): PricingTableRow | null {
+  const values = pricingSeriesCatalog.reduce<Partial<Record<PricingSeriesCode, number>>>(
+    (accumulator, series) => {
+      const collected = rows
+        .map((row) => row.values[series.code])
+        .filter((value): value is number => typeof value === 'number')
+      const result = average(collected)
+
+      if (typeof result === 'number') {
+        accumulator[series.code] = result
+      }
+
+      return accumulator
+    },
+    {},
+  )
+
+  if (Object.keys(values).length === 0) {
+    return null
+  }
+
+  return {
+    label: 'Média do mês',
+    monthKey,
+    quotedDate: null,
+    rowType: 'monthly_average',
+    values,
+    weekLabel: null,
   }
 }
 
@@ -176,6 +213,7 @@ function buildPeriodAverageRow(rows: DailySnapshotRow[]): PricingTableRow | null
 
   return {
     label: 'Média do período',
+    monthKey: null,
     quotedDate: null,
     rowType: 'period_average',
     values,
@@ -190,38 +228,60 @@ export function buildPricingHistoryRows(snapshots: LmePriceSnapshot[]) {
     return [] as PricingTableRow[]
   }
 
-  const byWeek = new Map<string, DailySnapshotRow[]>()
+  const byMonth = new Map<string, DailySnapshotRow[]>()
 
   for (const row of rows) {
-    const { isoWeek, isoYear } = getIsoWeekParts(row.quotedDate)
-    const key = `${isoYear}-${String(isoWeek).padStart(2, '0')}`
-    const weekRows = byWeek.get(key) ?? []
-    weekRows.push(row)
-    byWeek.set(key, weekRows)
+    const key = getMonthStart(row.quotedDate)
+    const monthRows = byMonth.get(key) ?? []
+    monthRows.push(row)
+    byMonth.set(key, monthRows)
   }
 
   const historyRows: PricingTableRow[] = []
-  const orderedWeeks = Array.from(byWeek.entries()).sort(([left], [right]) =>
+  const orderedMonths = Array.from(byMonth.entries()).sort(([left], [right]) =>
     left < right ? 1 : left > right ? -1 : 0,
   )
 
-  for (const [key, weekRows] of orderedWeeks) {
-    const [isoYear, isoWeekString] = key.split('-')
-    const isoWeek = Number(isoWeekString)
+  for (const [monthKey, monthRows] of orderedMonths) {
+    const byWeek = new Map<string, DailySnapshotRow[]>()
 
-    for (const row of weekRows.sort((left, right) =>
-      left.quotedDate < right.quotedDate ? 1 : left.quotedDate > right.quotedDate ? -1 : 0,
-    )) {
-      historyRows.push({
-        label: formatPricingDate(row.quotedDate),
-        quotedDate: row.quotedDate,
-        rowType: 'daily',
-        values: row.values,
-        weekLabel: null,
-      })
+    for (const row of monthRows) {
+      const { isoWeek, isoYear } = getIsoWeekParts(row.quotedDate)
+      const key = `${isoYear}-${String(isoWeek).padStart(2, '0')}`
+      const weekRows = byWeek.get(key) ?? []
+      weekRows.push(row)
+      byWeek.set(key, weekRows)
     }
 
-    historyRows.push(buildWeeklyAverageRow(weekRows, isoWeek, Number(isoYear)))
+    const orderedWeeks = Array.from(byWeek.entries()).sort(([left], [right]) =>
+      left < right ? 1 : left > right ? -1 : 0,
+    )
+
+    for (const [key, weekRows] of orderedWeeks) {
+      const [isoYear, isoWeekString] = key.split('-')
+      const isoWeek = Number(isoWeekString)
+
+      for (const row of weekRows.sort((left, right) =>
+        left.quotedDate < right.quotedDate ? 1 : left.quotedDate > right.quotedDate ? -1 : 0,
+      )) {
+        historyRows.push({
+          label: formatPricingDate(row.quotedDate),
+          monthKey: null,
+          quotedDate: row.quotedDate,
+          rowType: 'daily',
+          values: row.values,
+          weekLabel: null,
+        })
+      }
+
+      historyRows.push(buildWeeklyAverageRow(weekRows, isoWeek, Number(isoYear)))
+    }
+
+    const monthlyAverage = buildMonthlyAverageRow(monthRows, monthKey)
+
+    if (monthlyAverage) {
+      historyRows.push(monthlyAverage)
+    }
   }
 
   const periodAverage = buildPeriodAverageRow(rows)

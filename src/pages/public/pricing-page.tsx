@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
-import { PricingChart } from '@/components/pricing/pricing-chart'
+import { PricingMonthlyIndicators } from '@/components/pricing/pricing-monthly-indicators'
 import { PricingHistoryTable } from '@/components/pricing/pricing-history-table'
 import { PricingUpdateOverview } from '@/components/pricing/pricing-update-overview'
 import { CtaBanner } from '@/components/public/cta-banner'
@@ -87,7 +87,6 @@ export function PricingPage() {
               </div>
               <div className="space-y-2 border-t border-white/12 pt-4 text-sm text-emerald-50/82">
                 <p>Historico: {data.historyWindowLabel}</p>
-                <p>Grafico: {data.chartWindowLabel}</p>
                 <p>Atualizacao manual: {formatPricingDateTime(data.lastManualUpdate)}</p>
               </div>
             </CardContent>
@@ -103,34 +102,7 @@ export function PricingPage() {
         latestValues={data.latestValues}
       />
 
-      <div className="grid gap-6 xl:grid-cols-[1.45fr_0.55fr]">
-        <PricingChart series={data.chartSeries} />
-
-        <Card className="rounded-[1.85rem] border-border/80">
-          <CardHeader>
-            <CardTitle>Janela operacional</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-[1.5rem] border border-border bg-secondary/40 p-4 text-sm leading-7 text-muted-foreground">
-              <p>
-                <span className="font-medium text-foreground">Tabela historica:</span>{' '}
-                {data.historyWindowLabel}
-              </p>
-              <p>
-                <span className="font-medium text-foreground">Grafico:</span> {data.chartWindowLabel}
-              </p>
-              <p>
-                <span className="font-medium text-foreground">Ultima data consolidada:</span>{' '}
-                {formatPricingDate(data.latestQuotedDate)}
-              </p>
-              <p>
-                <span className="font-medium text-foreground">Snapshots no grafico:</span>{' '}
-                {data.chartSnapshotCount}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <PricingMonthlyIndicators rows={data.historyRows} />
 
       <PricingHistoryTable rows={data.historyRows} title="Historico consolidado dos ultimos 6 meses" />
 
