@@ -62,6 +62,14 @@ function toSnapshotFormValues(): ManualSnapshotFormValues {
   }
 }
 
+function getNextHourlySyncTimestamp(referenceIso?: string | null) {
+  const base = referenceIso ? new Date(referenceIso) : new Date()
+  const next = new Date(base)
+  next.setMinutes(0, 0, 0)
+  next.setHours(next.getHours() + 1)
+  return next.toISOString()
+}
+
 export function AdminPricingPage() {
   const queryClient = useQueryClient()
   const {
@@ -193,6 +201,7 @@ export function AdminPricingPage() {
 
   const data = pricingQuery.data
   const syncStatus = data.syncStatus
+  const nextSyncAt = getNextHourlySyncTimestamp(syncStatus?.lastTriggeredAt ?? null)
   const providerOptions = ['all', ...new Set(data.recentSnapshots.map((snapshot) => snapshot.providerName))]
   const filteredManualEntries = data.manualEntries.filter((entry) => {
     const normalizedQuery = manualQuery.trim().toLowerCase()
@@ -297,6 +306,9 @@ export function AdminPricingPage() {
               <p className="text-xs text-muted-foreground">
                 Snapshots processados:{' '}
                 {typeof syncStatus?.lastSnapshotCount === 'number' ? syncStatus.lastSnapshotCount : 0}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Próxima sincronização automática: {formatPricingDateTime(nextSyncAt)}
               </p>
             </div>
             <div className="mt-3">

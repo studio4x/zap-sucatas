@@ -418,7 +418,12 @@ async function updatePricingSyncStatus(
   const { error } = await admin
     .from('pricing_sync_status')
     .update({
-      ...patch,
+      last_message: patch.lastMessage,
+      last_run_at: patch.lastRunAt,
+      last_snapshot_count: patch.lastSnapshotCount,
+      last_status: patch.lastStatus,
+      last_success_at: patch.lastSuccessAt,
+      last_triggered_at: patch.lastTriggeredAt,
       updated_at: new Date().toISOString(),
     })
     .eq('job_name', PRICING_SYNC_JOB_NAME)

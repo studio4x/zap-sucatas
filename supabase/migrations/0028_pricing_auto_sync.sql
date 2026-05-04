@@ -106,8 +106,16 @@ begin
 end;
 $$;
 
-select cron.schedule(
-  'pricing-auto-sync',
-  '0 * * * *',
-  $$ select public.queue_pricing_auto_sync(); $$
-);
+do $$
+begin
+  if exists(select 1 from cron.job where jobname = 'pricing-auto-sync') then
+    perform cron.unschedule('pricing-auto-sync');
+  end if;
+
+  perform cron.schedule(
+    'pricing-auto-sync',
+    '0 * * * *',
+    $cron$ select public.queue_pricing_auto_sync(); $cron$
+  );
+end;
+$$;
