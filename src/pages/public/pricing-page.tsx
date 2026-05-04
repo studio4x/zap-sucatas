@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { PricingMonthlyIndicators } from '@/components/pricing/pricing-monthly-indicators'
 import { PricingHistoryTable } from '@/components/pricing/pricing-history-table'
-import { PricingUpdateOverview } from '@/components/pricing/pricing-update-overview'
 import { CtaBanner } from '@/components/public/cta-banner'
 import { PublicSectionHeading } from '@/components/public/public-section-heading'
 import { Badge } from '@/components/ui/badge'
@@ -93,14 +92,6 @@ export function PricingPage() {
           </Card>
         </div>
       </section>
-
-      <PricingUpdateOverview
-        historySnapshotCount={data.historySnapshotCount}
-        historyWindowLabel={data.historyWindowLabel}
-        lastManualUpdate={data.lastManualUpdate}
-        latestQuotedDate={data.latestQuotedDate}
-        latestValues={data.latestValues}
-      />
 
       <PricingMonthlyIndicators rows={data.historyRows} />
 
