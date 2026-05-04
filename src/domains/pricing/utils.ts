@@ -112,13 +112,17 @@ function average(values: number[]) {
   return values.reduce((sum, current) => sum + current, 0) / values.length
 }
 
-function formatDayMonth(quotedDate: string) {
-  const parsed = new Date(`${quotedDate}T12:00:00`)
-
-  return new Intl.DateTimeFormat('pt-BR', {
+function formatWeeklyRange(firstDate: string, lastDate: string) {
+  const first = new Date(`${firstDate}T12:00:00`)
+  const last = new Date(`${lastDate}T12:00:00`)
+  const sameMonth = first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()
+  const format = new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
     month: '2-digit',
-  }).format(parsed)
+    ...(sameMonth ? {} : { year: 'numeric' }),
+  })
+
+  return `${format.format(first)} a ${format.format(last)}`
 }
 
 function buildDailyRows(snapshots: LmePriceSnapshot[]) {
@@ -165,7 +169,7 @@ function buildWeeklyAverageRow(rows: DailySnapshotRow[], isoWeek: number, isoYea
   const lastDay = orderedWeekRows[orderedWeekRows.length - 1]?.quotedDate ?? null
   const weekRange =
     firstDay && lastDay
-      ? `${formatDayMonth(firstDay)} a ${formatDayMonth(lastDay)}`
+      ? formatWeeklyRange(firstDay, lastDay)
       : 'Período não informado'
 
   return {
