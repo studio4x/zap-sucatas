@@ -14,6 +14,7 @@ import { PricingManualSnapshotForm } from '@/components/pricing/pricing-manual-s
 import { PricingUpdateOverview } from '@/components/pricing/pricing-update-overview'
 import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
 import { OperationFeedback } from '@/components/shared/operation-feedback'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
@@ -26,7 +27,7 @@ import {
 } from '@/domains/pricing/api'
 import type { ManualSnapshotFormValues, ScrapPriceEntryFormValues } from '@/domains/pricing/schemas'
 import type { LmePriceSnapshot, ScrapPriceEntry } from '@/domains/pricing/types'
-import { formatPricingDate, formatPricingNumber } from '@/domains/pricing/utils'
+import { formatPricingDate, formatPricingDateTime, formatPricingNumber } from '@/domains/pricing/utils'
 import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 
 const MANUAL_PAGE_SIZE = 8
@@ -77,6 +78,11 @@ export function AdminPricingPage() {
   const [manualPage, setManualPage] = useState(1)
   const [snapshotPage, setSnapshotPage] = useState(1)
   const autoSyncAttemptedRef = useRef(false)
+  const [autoSyncStatus, setAutoSyncStatus] = useState<
+    'idle' | 'running' | 'success' | 'error'
+  >('idle')
+  const [autoSyncMessage, setAutoSyncMessage] = useState('Aguardando primeira sincronização automática.')
+  const [autoSyncLastAttemptAt, setAutoSyncLastAttemptAt] = useState<string | null>(null)
 
   const pricingQuery = useQuery({
     queryKey: ['pricing', 'admin'],
@@ -139,7 +145,17 @@ export function AdminPricingPage() {
 
   const latestSyncMutation = useMutation({
     mutationFn: () => runPricingSync('latest'),
+    onMutate: () => {
+      setAutoSyncStatus('running')
+      setAutoSyncLastAttemptAt(new Date().toISOString())
+      setAutoSyncMessage('Sincronização automática em andamento.')
+    },
     onSuccess: async (result) => {
+      setAutoSyncStatus('success')
+      setAutoSyncLastAttemptAt(new Date().toISOString())
+      setAutoSyncMessage(
+        `Sincronização automática concluída com ${result.inserted} snapshots. Providers: ${result.providers.join(', ')}.`,
+      )
       const providersLabel = result.providers.join(', ')
       setSuccessFeedback(
         `Sincronização concluída com ${result.inserted} snapshots. Providers: ${providersLabel}.`,
@@ -147,6 +163,11 @@ export function AdminPricingPage() {
       await invalidatePricing()
     },
     onError: (error) => {
+      setAutoSyncStatus('error')
+      setAutoSyncLastAttemptAt(new Date().toISOString())
+      setAutoSyncMessage(
+        error instanceof Error ? error.message : 'Sincronização automática retornou erro.',
+      )
       setErrorFeedback(error, 'Não foi possível sincronizar os preços agora.')
     },
   })
@@ -266,6 +287,54 @@ export function AdminPricingPage() {
       />
 
       <OperationFeedback feedback={feedback} />
+
+      <Card className="overflow-hidden rounded-[1.85rem] border-border/80">
+        <CardContent className="grid gap-4 p-5 md:grid-cols-[1.15fr_0.85fr] md:items-center">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Sincronização automática
+            </p>
+            <p className="text-lg font-semibold text-foreground">
+              {autoSyncStatus === 'running'
+                ? 'Em execução'
+                : autoSyncStatus === 'success'
+                  ? 'Funcionando'
+                  : autoSyncStatus === 'error'
+                    ? 'Com falha'
+                    : 'Aguardando'}
+            </p>
+            <p className="text-sm leading-6 text-muted-foreground">{autoSyncMessage}</p>
+          </div>
+
+          <div className="rounded-[1.25rem] border border-border/70 bg-muted/30 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Última tentativa
+            </p>
+            <p className="mt-2 text-sm font-medium text-foreground">
+              {autoSyncLastAttemptAt ? formatPricingDateTime(autoSyncLastAttemptAt) : 'Ainda não executada'}
+            </p>
+            <div className="mt-3">
+              <AdminStatusBadge
+                tone={
+                  autoSyncStatus === 'success'
+                    ? 'success'
+                    : autoSyncStatus === 'error'
+                      ? 'danger'
+                      : 'neutral'
+                }
+              >
+                {autoSyncStatus === 'running'
+                  ? 'Sincronizando'
+                  : autoSyncStatus === 'success'
+                    ? 'Ativa'
+                    : autoSyncStatus === 'error'
+                      ? 'Falhou'
+                      : 'Sem tentativa'}
+              </AdminStatusBadge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <PricingUpdateOverview
         historySnapshotCount={data.historySnapshotCount}
