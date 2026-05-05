@@ -26,6 +26,7 @@ supabase/.temp
 *.sw?
 
 .vercel
+supabase/templates/
 playwright-report
 test-results
 

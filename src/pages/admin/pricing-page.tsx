@@ -270,6 +270,11 @@ export function AdminPricingPage() {
 
       <OperationFeedback feedback={feedback} />
 
+      <p className="text-sm text-muted-foreground">
+        <span className="font-medium text-foreground">Backfill histórico:</span> importa cotações antigas
+        dos providers para preencher lacunas no histórico (ex.: dias faltantes em meses anteriores).
+      </p>
+
       <Card className="overflow-hidden rounded-[1.85rem] border-border/80">
         <CardContent className="grid gap-4 p-5 md:grid-cols-[1.15fr_0.85fr] md:items-center">
           <div className="space-y-2">

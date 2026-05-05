@@ -230,6 +230,15 @@ Ao concluir tarefa que precise estar funcional fora do ambiente local:
 
 Não considerar pronto algo que dependa de publicação e ficou apenas local.
 
+### Validação de deploy em produção
+
+Antes de encerrar qualquer entrega que afete o produto:
+
+- confirmar que o deploy em produção está `READY`;
+- confirmar que o domínio canônico aponta para o deploy mais recente;
+- confirmar que a revisão ativa em produção corresponde ao `HEAD` atual;
+- corrigir alias/domínio antes de encerrar se houver divergência entre `HEAD`, deploy e produção.
+
 ---
 
 ## Resposta esperada do Codex
