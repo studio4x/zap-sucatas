@@ -23,6 +23,11 @@ type PricingSyncRequestBody = {
   trigger?: 'cron' | 'manual'
 }
 
+type SyncResolution = {
+  entries: RawSnapshot[]
+  warningMessage: string | null
+}
+
 type PricingSyncSecretRow = {
   cron_key: string
   job_name: string
@@ -340,15 +345,35 @@ async function resolveSnapshots(mode: SyncMode) {
       fetchUsdBackfillSnapshots(),
     ])
 
-    return dedupeSnapshots([...metalSnapshots, ...usdSnapshots])
+    return {
+      entries: dedupeSnapshots([...metalSnapshots, ...usdSnapshots]),
+      warningMessage: null,
+    } satisfies SyncResolution
   }
 
-  const [metalSnapshots, usdSnapshot] = await Promise.all([
-    fetchLatestWestmetallSnapshots(),
-    fetchLatestUsdSnapshot(),
-  ])
+  const usdSnapshot = await fetchLatestUsdSnapshot()
 
-  return dedupeSnapshots([...metalSnapshots, usdSnapshot])
+  try {
+    const metalSnapshots = await fetchLatestWestmetallSnapshots()
+
+    return {
+      entries: dedupeSnapshots([...metalSnapshots, usdSnapshot]),
+      warningMessage: null,
+    } satisfies SyncResolution
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+
+    // Westmetall can temporarily return placeholders ("-") before publishing values.
+    if (message.includes('Westmetall parser returned 0 rows')) {
+      return {
+        entries: dedupeSnapshots([usdSnapshot]),
+        warningMessage:
+          'Westmetall sem cotacoes numericas no momento; sincronizacao parcial concluida (apenas dolar).',
+      } satisfies SyncResolution
+    }
+
+    throw error
+  }
 }
 
 function resolveMode(requestBody: unknown): SyncMode {
@@ -410,7 +435,7 @@ async function updatePricingSyncStatus(
     lastMessage?: string | null
     lastRunAt?: string | null
     lastSnapshotCount?: number
-    lastStatus?: 'error' | 'never' | 'queued' | 'running' | 'success'
+    lastStatus?: 'error' | 'never' | 'queued' | 'running' | 'success' | 'warning'
     lastSuccessAt?: string | null
     lastTriggeredAt?: string | null
   },
@@ -463,7 +488,8 @@ Deno.serve(async (request) => {
       lastStatus: 'running',
       lastTriggeredAt: new Date().toISOString(),
     })
-    const entries = await resolveSnapshots(mode)
+    const resolution = await resolveSnapshots(mode)
+    const entries = resolution.entries
     const chunks = chunkArray(entries, 500)
 
     for (const chunk of chunks) {
@@ -478,17 +504,20 @@ Deno.serve(async (request) => {
 
     await insertIntegrationLog({
       integrationName: 'lme',
-      message: `Pricing sync completed in ${mode} mode with ${entries.length} snapshots.`,
+      message:
+        resolution.warningMessage ??
+        `Pricing sync completed in ${mode} mode with ${entries.length} snapshots.`,
       payload: {
         actor_profile_id: actorUserId,
         count: entries.length,
         event: 'pricing_sync_completed',
         mode,
         source: accessSource,
+        warning: resolution.warningMessage,
         providers: Array.from(new Set(entries.map((entry) => entry.provider_name))),
-        severity: 'success',
+        severity: resolution.warningMessage ? 'warning' : 'success',
       },
-      status: 'success',
+      status: resolution.warningMessage ? 'warning' : 'success',
     })
 
     await insertAdminAuditLog({
@@ -504,13 +533,14 @@ Deno.serve(async (request) => {
     })
 
     await updatePricingSyncStatus(admin, {
-      lastMessage:
-        accessSource === 'cron'
+      lastMessage: resolution.warningMessage
+        ? resolution.warningMessage
+        : accessSource === 'cron'
           ? `Sincronizacao automatica concluida com ${entries.length} snapshots.`
           : `Sincronizacao manual concluida com ${entries.length} snapshots.`,
       lastRunAt: new Date().toISOString(),
       lastSnapshotCount: entries.length,
-      lastStatus: 'success',
+      lastStatus: resolution.warningMessage ? 'warning' : 'success',
       lastSuccessAt: new Date().toISOString(),
       lastTriggeredAt: new Date().toISOString(),
     })

@@ -2,7 +2,7 @@ export type PricingSeriesCode = 'AL' | 'CU' | 'NI' | 'PB' | 'SN' | 'USD' | 'ZN'
 
 export type PricingSyncMode = 'backfill' | 'latest'
 
-export type PricingSyncStatusState = 'error' | 'never' | 'queued' | 'running' | 'success'
+export type PricingSyncStatusState = 'error' | 'never' | 'queued' | 'running' | 'success' | 'warning'
 
 export type PricingSyncStatus = {
   jobName: string
