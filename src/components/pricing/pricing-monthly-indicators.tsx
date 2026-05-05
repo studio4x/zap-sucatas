@@ -177,13 +177,15 @@ function MiniTrendChart({ color, points }: MiniTrendChartProps) {
 }
 
 function TrendCard({
-  color,
+  backgroundColor,
+  chartColor,
   summary,
   subtitle,
   unitLabel,
   palette,
 }: {
-  color: string
+  backgroundColor: string
+  chartColor: string
   summary: TrendSummary
   subtitle: string
   unitLabel: string
@@ -197,7 +199,7 @@ function TrendCard({
     <Card
       className="overflow-hidden shadow-sm"
       style={{
-        background: `linear-gradient(180deg, ${color} 0%, ${color}dd 100%)`,
+        background: `linear-gradient(180deg, ${backgroundColor} 0%, ${backgroundColor}dd 100%)`,
         borderColor: palette.border,
       }}
     >
@@ -243,7 +245,7 @@ function TrendCard({
           <span>{variation === null ? 'Sem comparação suficiente' : `${variation > 0 ? '+' : ''}${variation.toFixed(2)} %`}</span>
         </div>
 
-        <MiniTrendChart color={color} points={summary.points} />
+        <MiniTrendChart color={chartColor} points={summary.points} />
       </CardContent>
     </Card>
   )
@@ -484,7 +486,8 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
         <div className="grid gap-4 xl:grid-cols-3">
           {dailySummary ? (
             <TrendCard
-              color="#FFFFFF"
+              backgroundColor={selectedSeries.color}
+              chartColor="#FFFFFF"
               summary={dailySummary}
               subtitle={`Dentro de ${selectedMonth.label}`}
               unitLabel={activeSeriesUnitLabel}
@@ -493,7 +496,8 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
           ) : null}
           {weeklySummary ? (
             <TrendCard
-              color="#FFFFFF"
+              backgroundColor={selectedSeries.color}
+              chartColor="#FFFFFF"
               summary={weeklySummary}
               subtitle={`Semanas de ${selectedMonth.label}`}
               unitLabel={activeSeriesUnitLabel}
@@ -502,7 +506,8 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
           ) : null}
           {monthlySummary ? (
             <TrendCard
-              color="#FFFFFF"
+              backgroundColor={selectedSeries.color}
+              chartColor="#FFFFFF"
               summary={monthlySummary}
               subtitle="Comparação com os meses carregados"
               unitLabel={activeSeriesUnitLabel}
