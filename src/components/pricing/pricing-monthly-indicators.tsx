@@ -38,6 +38,10 @@ type MiniTrendChartProps = {
   points: TrendPoint[]
 }
 
+function getSeriesUnitLabel(seriesCode: PricingSeriesCode) {
+  return seriesCode === 'USD' ? 'Dólar: BRL por USD' : 'Metais LME: USD por tonelada'
+}
+
 function isMonthlyAverageRow(row: PricingTableRow): row is MonthlyIndicatorRow {
   return row.rowType === 'monthly_average' && typeof row.monthKey === 'string'
 }
@@ -136,10 +140,12 @@ function TrendCard({
   color,
   summary,
   subtitle,
+  unitLabel,
 }: {
   color: string
   summary: TrendSummary
   subtitle: string
+  unitLabel: string
 }) {
   const variation = calculateVariation(summary.previousValue, summary.currentValue)
   const trendTone =
@@ -153,6 +159,7 @@ function TrendCard({
             {summary.title}
           </p>
           <p className="text-sm text-muted-foreground">{subtitle}</p>
+          <p className="text-xs text-muted-foreground/90">{unitLabel}</p>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -330,6 +337,7 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
     pricingSeriesCatalog.find((series) => series.code === selectedSeriesCode) ?? pricingSeriesCatalog[0]
   const activeMonthKey = selectedMonth?.value ?? ''
   const activeSeriesCode = selectedSeries?.code ?? pricingSeriesCatalog[0]?.code ?? 'CU'
+  const activeSeriesUnitLabel = getSeriesUnitLabel(activeSeriesCode)
 
   const dailySummary = selectedMonth
     ? buildDailySummary(rows, activeSeriesCode, activeMonthKey)
@@ -420,6 +428,7 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
               color={selectedSeries.color}
               summary={dailySummary}
               subtitle={`Dentro de ${selectedMonth.label}`}
+              unitLabel={activeSeriesUnitLabel}
             />
           ) : null}
           {weeklySummary ? (
@@ -427,6 +436,7 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
               color={selectedSeries.color}
               summary={weeklySummary}
               subtitle={`Semanas de ${selectedMonth.label}`}
+              unitLabel={activeSeriesUnitLabel}
             />
           ) : null}
           {monthlySummary ? (
@@ -434,6 +444,7 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
               color={selectedSeries.color}
               summary={monthlySummary}
               subtitle="Comparação com os meses carregados"
+              unitLabel={activeSeriesUnitLabel}
             />
           ) : null}
         </div>
