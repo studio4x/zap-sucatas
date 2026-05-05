@@ -214,16 +214,6 @@ function MiniTrendChart({ color, points }: MiniTrendChartProps) {
                 y1={tickY}
                 y2={tickY}
               />
-              <text
-                fill="rgba(255, 255, 255, 0.9)"
-                fontSize="10"
-                fontWeight="600"
-                textAnchor="end"
-                x={paddingLeft - 8}
-                y={tickY + 3}
-              >
-                {formatPricingNumber(tickValue, 2)}
-              </text>
             </g>
           )
         })}
@@ -233,10 +223,24 @@ function MiniTrendChart({ color, points }: MiniTrendChartProps) {
           fontSize="10"
           fontWeight="700"
           letterSpacing="0.14em"
-          transform={`translate(14 ${height / 2}) rotate(-90)`}
           textAnchor="middle"
+          x={paddingLeft / 2}
+          y={paddingTop + (height - paddingTop - paddingBottom) / 2}
+          transform={`rotate(-90 ${paddingLeft / 2} ${paddingTop + (height - paddingTop - paddingBottom) / 2})`}
         >
           Eixo do valor
+        </text>
+
+        <text
+          fill="rgba(255, 255, 255, 0.95)"
+          fontSize="10"
+          fontWeight="700"
+          letterSpacing="0.14em"
+          textAnchor="middle"
+          x={(paddingLeft + width - paddingRight) / 2}
+          y={height - 6}
+        >
+          Eixo do tempo
         </text>
 
         <path
