@@ -202,6 +202,9 @@ export function AdminPricingPage() {
   const data = pricingQuery.data
   const syncStatus = data.syncStatus
   const nextSyncAt = getNextHourlySyncTimestamp(syncStatus?.lastTriggeredAt ?? null)
+  const isWestmetallUnavailable =
+    syncStatus?.lastStatus === 'warning' &&
+    (syncStatus.lastMessage ?? '').toLowerCase().includes('westmetall sem cotacoes numericas')
   const providerOptions = ['all', ...new Set(data.recentSnapshots.map((snapshot) => snapshot.providerName))]
   const filteredManualEntries = data.manualEntries.filter((entry) => {
     const normalizedQuery = manualQuery.trim().toLowerCase()
@@ -311,6 +314,10 @@ export function AdminPricingPage() {
               </p>
               <p className="text-xs text-muted-foreground">
                 Próxima sincronização automática: {formatPricingDateTime(nextSyncAt)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Fonte Westmetall:{' '}
+                {isWestmetallUnavailable ? 'Indisponível no último ciclo' : 'Disponível'}
               </p>
             </div>
             <div className="mt-3">
