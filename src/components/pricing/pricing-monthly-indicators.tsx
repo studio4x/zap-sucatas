@@ -104,6 +104,8 @@ function buildChartPath(points: Array<{ x: number; y: number }>) {
 }
 
 function MiniTrendChart({ color, points }: MiniTrendChartProps) {
+  const [activePointIndex, setActivePointIndex] = useState<number | null>(null)
+
   if (points.length === 0) {
     return (
       <div className="flex h-24 items-center justify-center rounded-[1.25rem] border border-dashed border-border/70 bg-background/50 text-xs text-muted-foreground">
@@ -113,66 +115,159 @@ function MiniTrendChart({ color, points }: MiniTrendChartProps) {
   }
 
   const width = 320
-  const height = 112
-  const paddingX = 18
-  const paddingY = 14
+  const height = 160
+  const paddingLeft = 48
+  const paddingRight = 18
+  const paddingTop = 14
+  const paddingBottom = 28
   const values = points.map((point) => point.value)
   const minValue = Math.min(...values)
   const maxValue = Math.max(...values)
   const spread = maxValue - minValue || Math.max(maxValue * 0.04, 1)
+  const tickCount = 4
+  const tickValues = Array.from({ length: tickCount }, (_, index) => {
+    return maxValue - (index * (maxValue - minValue)) / (tickCount - 1)
+  })
   const normalizedPoints = points.map((point, index, array) => {
     const x =
       array.length === 1
         ? width / 2
-        : paddingX + (index * (width - paddingX * 2)) / Math.max(array.length - 1, 1)
-    const y =
-      height -
-      paddingY -
-      ((point.value - (minValue - spread * 0.1)) / (spread * 1.2)) * (height - paddingY * 2)
+        : paddingLeft + (index * (width - paddingLeft - paddingRight)) / Math.max(array.length - 1, 1)
+    const chartHeight = height - paddingTop - paddingBottom
 
     return {
       ...point,
       x,
-      y,
+      y: paddingTop + chartHeight - ((point.value - (minValue - spread * 0.1)) / (spread * 1.2)) * chartHeight,
     }
   })
+  const activePoint = activePointIndex !== null ? normalizedPoints[activePointIndex] : null
+  const activePointLabel = activePoint?.label ?? ''
+  const activePointValue = activePoint ? formatPricingNumber(activePoint.value, 2) : ''
 
   return (
-    <svg className="h-24 w-full" fill="none" viewBox={`0 0 ${width} ${height}`} xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id={`trend-${color.replace('#', '')}`} x1="0%" x2="100%" y1="0%" y2="0%">
-          <stop offset="0%" stopColor={color} stopOpacity="0.25" />
-          <stop offset="100%" stopColor={color} stopOpacity="0.95" />
-        </linearGradient>
-      </defs>
-      <path
-        d={buildChartPath(normalizedPoints)}
+    <div className="relative">
+      {activePoint ? (
+        <div
+          className="pointer-events-none absolute z-10 rounded-2xl border border-white/50 bg-white px-3 py-2 text-xs text-slate-900 shadow-lg"
+          style={{
+            left: `${(activePoint.x / width) * 100}%`,
+            top: `${(activePoint.y / height) * 100}%`,
+            transform: activePoint.y < height / 2 ? 'translate(-50%, 12px)' : 'translate(-50%, -100%)',
+          }}
+        >
+          <p className="font-semibold">{activePointLabel}</p>
+          <p className="mt-1 text-sm font-bold">{activePointValue}</p>
+        </div>
+      ) : null}
+
+      <svg
+        className="h-40 w-full"
         fill="none"
-        stroke={`url(#trend-${color.replace('#', '')})`}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="3"
-      />
-      {normalizedPoints.map((point) => (
-        <circle
-          key={`${point.label}-${point.value}`}
-          cx={point.x}
-          cy={point.y}
-          fill="white"
-          r="4"
-          stroke={color}
+        viewBox={`0 0 ${width} ${height}`}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id={`trend-${color.replace('#', '')}`} x1="0%" x2="100%" y1="0%" y2="0%">
+            <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.95" />
+          </linearGradient>
+        </defs>
+
+        <line
+          stroke="rgba(255, 255, 255, 0.95)"
           strokeWidth="2"
+          x1={paddingLeft}
+          x2={paddingLeft}
+          y1={paddingTop}
+          y2={height - paddingBottom}
         />
-      ))}
-      <line
-        stroke="rgba(15, 23, 42, 0.08)"
-        strokeDasharray="4 6"
-        x1={paddingX}
-        x2={width - paddingX}
-        y1={height - paddingY}
-        y2={height - paddingY}
-      />
-    </svg>
+        <line
+          stroke="rgba(255, 255, 255, 0.95)"
+          strokeWidth="2"
+          x1={paddingLeft}
+          x2={width - paddingRight}
+          y1={height - paddingBottom}
+          y2={height - paddingBottom}
+        />
+
+        {tickValues.map((tickValue, index) => {
+          const tickY =
+            paddingTop +
+            (height - paddingTop - paddingBottom) -
+            ((tickValue - (minValue - spread * 0.1)) / (spread * 1.2)) * (height - paddingTop - paddingBottom)
+
+          return (
+            <g key={`${tickValue}-${index}`}>
+              <line
+                stroke="rgba(255, 255, 255, 0.18)"
+                strokeDasharray="4 6"
+                x1={paddingLeft}
+                x2={width - paddingRight}
+                y1={tickY}
+                y2={tickY}
+              />
+              <line
+                stroke="rgba(255, 255, 255, 0.95)"
+                x1={paddingLeft - 5}
+                x2={paddingLeft}
+                y1={tickY}
+                y2={tickY}
+              />
+              <text
+                fill="rgba(255, 255, 255, 0.9)"
+                fontSize="10"
+                fontWeight="600"
+                textAnchor="end"
+                x={paddingLeft - 8}
+                y={tickY + 3}
+              >
+                {formatPricingNumber(tickValue, 2)}
+              </text>
+            </g>
+          )
+        })}
+
+        <text
+          fill="rgba(255, 255, 255, 0.95)"
+          fontSize="10"
+          fontWeight="700"
+          letterSpacing="0.14em"
+          transform={`translate(14 ${height / 2}) rotate(-90)`}
+          textAnchor="middle"
+        >
+          Eixo do valor
+        </text>
+
+        <path
+          d={buildChartPath(normalizedPoints)}
+          fill="none"
+          stroke={`url(#trend-${color.replace('#', '')})`}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="3"
+        />
+
+        {normalizedPoints.map((point, index) => (
+          <circle
+            key={`${point.label}-${point.value}`}
+            cx={point.x}
+            cy={point.y}
+            fill="white"
+            onFocus={() => setActivePointIndex(index)}
+            onBlur={() => setActivePointIndex(null)}
+            onMouseEnter={() => setActivePointIndex(index)}
+            onMouseLeave={() => setActivePointIndex(null)}
+            r="4"
+            stroke={color}
+            strokeWidth="2"
+            tabIndex={0}
+          >
+            <title>{`${point.label}: ${formatPricingNumber(point.value, 2)}`}</title>
+          </circle>
+        ))}
+      </svg>
+    </div>
   )
 }
 
