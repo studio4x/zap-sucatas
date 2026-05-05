@@ -68,10 +68,10 @@ function hexToRgb(hexColor: string) {
   }
 }
 
-function getContrastPalette(hexColor: string): ContrastPalette {
+function getContrastPalette(hexColor: string, forceLightText = false): ContrastPalette {
   const { r, g, b } = hexToRgb(hexColor)
   const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
-  const isDark = luminance < 0.55
+  const isDark = forceLightText || luminance < 0.55
 
   return {
     strongText: isDark ? '#f8fafc' : '#0f172a',
@@ -386,7 +386,7 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
   const activeMonthKey = selectedMonth?.value ?? ''
   const activeSeriesCode = selectedSeries?.code ?? pricingSeriesCatalog[0]?.code ?? 'CU'
   const activeSeriesUnitLabel = getSeriesUnitLabel(activeSeriesCode)
-  const activeSeriesPalette = getContrastPalette(selectedSeries.color)
+  const activeSeriesPalette = getContrastPalette(selectedSeries.color, activeSeriesCode === 'SN')
 
   const dailySummary = selectedMonth
     ? buildDailySummary(rows, activeSeriesCode, activeMonthKey)
@@ -463,7 +463,7 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
                       borderColor: `${series.color}66`,
                       color:
                         series.code === activeSeriesCode
-                          ? getContrastPalette(series.color).strongText
+                          ? getContrastPalette(series.color, series.code === 'SN').strongText
                           : '#0f172a',
                     }}
                   >
@@ -484,7 +484,7 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
         <div className="grid gap-4 xl:grid-cols-3">
           {dailySummary ? (
             <TrendCard
-              color={selectedSeries.color}
+              color="#FFFFFF"
               summary={dailySummary}
               subtitle={`Dentro de ${selectedMonth.label}`}
               unitLabel={activeSeriesUnitLabel}
@@ -493,7 +493,7 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
           ) : null}
           {weeklySummary ? (
             <TrendCard
-              color={selectedSeries.color}
+              color="#FFFFFF"
               summary={weeklySummary}
               subtitle={`Semanas de ${selectedMonth.label}`}
               unitLabel={activeSeriesUnitLabel}
@@ -502,7 +502,7 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
           ) : null}
           {monthlySummary ? (
             <TrendCard
-              color={selectedSeries.color}
+              color="#FFFFFF"
               summary={monthlySummary}
               subtitle="Comparação com os meses carregados"
               unitLabel={activeSeriesUnitLabel}
