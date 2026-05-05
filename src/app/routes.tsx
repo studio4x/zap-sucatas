@@ -7,6 +7,7 @@ import { AdminLayout } from '@/app/layouts/admin-layout'
 import { DashboardLayout } from '@/app/layouts/dashboard-layout'
 import { PublicLayout } from '@/app/layouts/public-layout'
 import { paths } from '@/app/paths'
+import { RouteErrorScreen } from '@/components/shared/route-error-screen'
 import { RouteLoadingScreen } from '@/components/shared/route-loading-screen'
 
 const ForgotPasswordPage = lazy(() => import('@/pages/auth/forgot-password-page').then((module) => ({ default: module.ForgotPasswordPage })))
@@ -61,6 +62,7 @@ export const routes: RouteObject[] = [
   {
     path: paths.public.home,
     element: <PublicLayout />,
+    errorElement: <RouteErrorScreen />,
     children: [
       {
         index: true,
@@ -135,6 +137,7 @@ export const routes: RouteObject[] = [
         <DashboardLayout />
       </AuthGuard>
     ),
+    errorElement: <RouteErrorScreen />,
     children: [
       {
         index: true,
@@ -187,6 +190,7 @@ export const routes: RouteObject[] = [
         </RoleGuard>
       </AuthGuard>
     ),
+    errorElement: <RouteErrorScreen />,
     children: [
       {
         index: true,
@@ -269,5 +273,6 @@ export const routes: RouteObject[] = [
   {
     path: '*',
     element: withSuspense(<NotFoundPage />),
+    errorElement: <RouteErrorScreen />,
   },
 ]

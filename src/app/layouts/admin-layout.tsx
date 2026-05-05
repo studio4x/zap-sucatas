@@ -23,6 +23,7 @@ import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { BuildVersionBadge } from '@/components/shared/build-version-badge'
 import { Button } from '@/components/ui/button'
 import { useAnalyticsTracker } from '@/hooks/use-analytics-tracker'
+import { useVisualFavicon } from '@/hooks/use-visual-favicon'
 
 const adminNavItems = [
   {
@@ -105,6 +106,7 @@ const adminNavItems = [
 
 export function AdminLayout() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  useVisualFavicon('layout-admin')
   useAnalyticsTracker('admin')
 
   return (
