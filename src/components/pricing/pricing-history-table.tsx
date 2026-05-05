@@ -27,7 +27,12 @@ export function PricingHistoryTable({ rows, title = 'Tabela histórica' }: Prici
   return (
     <Card className="overflow-hidden">
       <CardHeader className="border-b border-border/70">
-        <CardTitle>{title}</CardTitle>
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <CardTitle>{title}</CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Metais LME: USD por tonelada | Dólar: BRL por USD
+          </p>
+        </div>
       </CardHeader>
       <CardContent className="p-0">
         {rows.length === 0 ? (
