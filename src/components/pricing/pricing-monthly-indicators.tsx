@@ -38,8 +38,48 @@ type MiniTrendChartProps = {
   points: TrendPoint[]
 }
 
+type ContrastPalette = {
+  strongText: string
+  mutedText: string
+  softSurface: string
+  border: string
+  chipSurface: string
+}
+
 function getSeriesUnitLabel(seriesCode: PricingSeriesCode) {
   return seriesCode === 'USD' ? 'Dólar: BRL por USD' : 'Metais LME: USD por tonelada'
+}
+
+function hexToRgb(hexColor: string) {
+  const normalized = hexColor.replace('#', '')
+  const hex =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map((character) => `${character}${character}`)
+          .join('')
+      : normalized
+  const parsed = Number.parseInt(hex, 16)
+
+  return {
+    r: (parsed >> 16) & 255,
+    g: (parsed >> 8) & 255,
+    b: parsed & 255,
+  }
+}
+
+function getContrastPalette(hexColor: string): ContrastPalette {
+  const { r, g, b } = hexToRgb(hexColor)
+  const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+  const isDark = luminance < 0.55
+
+  return {
+    strongText: isDark ? '#f8fafc' : '#0f172a',
+    mutedText: isDark ? 'rgba(248,250,252,0.88)' : 'rgba(15,23,42,0.72)',
+    softSurface: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.45)',
+    border: isDark ? 'rgba(248,250,252,0.22)' : 'rgba(15,23,42,0.18)',
+    chipSurface: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.55)',
+  }
 }
 
 function isMonthlyAverageRow(row: PricingTableRow): row is MonthlyIndicatorRow {
@@ -141,41 +181,49 @@ function TrendCard({
   summary,
   subtitle,
   unitLabel,
+  palette,
 }: {
   color: string
   summary: TrendSummary
   subtitle: string
   unitLabel: string
+  palette: ContrastPalette
 }) {
   const variation = calculateVariation(summary.previousValue, summary.currentValue)
   const trendTone =
     variation === null ? 'neutral' : variation > 0 ? 'positive' : variation < 0 ? 'negative' : 'neutral'
 
   return (
-    <Card className="overflow-hidden border-border/70 bg-[linear-gradient(180deg,#fdfdfd_0%,#f4f7f4_100%)] shadow-sm">
+    <Card
+      className="overflow-hidden shadow-sm"
+      style={{
+        background: `linear-gradient(180deg, ${color} 0%, ${color}dd 100%)`,
+        borderColor: palette.border,
+      }}
+    >
       <CardContent className="space-y-4 p-5">
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: palette.mutedText }}>
             {summary.title}
           </p>
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
-          <p className="text-xs text-muted-foreground/90">{unitLabel}</p>
+          <p className="text-sm" style={{ color: palette.mutedText }}>{subtitle}</p>
+          <p className="text-xs" style={{ color: palette.mutedText }}>{unitLabel}</p>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-[1.25rem] border border-border/70 bg-white/85 p-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+          <div className="rounded-[1.25rem] border p-4" style={{ backgroundColor: palette.softSurface, borderColor: palette.border }}>
+            <p className="text-xs uppercase tracking-[0.18em]" style={{ color: palette.mutedText }}>
               {summary.previousLabel}
             </p>
-            <p className="mt-2 text-2xl font-semibold text-foreground">
+            <p className="mt-2 text-2xl font-semibold" style={{ color: palette.strongText }}>
               {summary.previousValue === null ? '-' : formatPricingNumber(summary.previousValue, 2)}
             </p>
           </div>
-          <div className="rounded-[1.25rem] border border-border/70 bg-white/85 p-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+          <div className="rounded-[1.25rem] border p-4" style={{ backgroundColor: palette.softSurface, borderColor: palette.border }}>
+            <p className="text-xs uppercase tracking-[0.18em]" style={{ color: palette.mutedText }}>
               {summary.currentLabel}
             </p>
-            <p className="mt-2 text-2xl font-semibold text-foreground">
+            <p className="mt-2 text-2xl font-semibold" style={{ color: palette.strongText }}>
               {summary.currentValue === null ? '-' : formatPricingNumber(summary.currentValue, 2)}
             </p>
           </div>
@@ -338,6 +386,7 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
   const activeMonthKey = selectedMonth?.value ?? ''
   const activeSeriesCode = selectedSeries?.code ?? pricingSeriesCatalog[0]?.code ?? 'CU'
   const activeSeriesUnitLabel = getSeriesUnitLabel(activeSeriesCode)
+  const activeSeriesPalette = getContrastPalette(selectedSeries.color)
 
   const dailySummary = selectedMonth
     ? buildDailySummary(rows, activeSeriesCode, activeMonthKey)
@@ -406,7 +455,17 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
                       'rounded-full px-3',
                       series.code === activeSeriesCode && 'shadow-sm',
                     )}
-                    style={series.code === activeSeriesCode ? { backgroundColor: series.color } : undefined}
+                    style={{
+                      backgroundColor:
+                        series.code === activeSeriesCode
+                          ? series.color
+                          : `${series.color}1f`,
+                      borderColor: `${series.color}66`,
+                      color:
+                        series.code === activeSeriesCode
+                          ? getContrastPalette(series.color).strongText
+                          : '#0f172a',
+                    }}
                   >
                     {series.label}
                   </Button>
@@ -429,6 +488,7 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
               summary={dailySummary}
               subtitle={`Dentro de ${selectedMonth.label}`}
               unitLabel={activeSeriesUnitLabel}
+              palette={activeSeriesPalette}
             />
           ) : null}
           {weeklySummary ? (
@@ -437,6 +497,7 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
               summary={weeklySummary}
               subtitle={`Semanas de ${selectedMonth.label}`}
               unitLabel={activeSeriesUnitLabel}
+              palette={activeSeriesPalette}
             />
           ) : null}
           {monthlySummary ? (
@@ -445,6 +506,7 @@ export function PricingMonthlyIndicators({ rows }: { rows: PricingTableRow[] }) 
               summary={monthlySummary}
               subtitle="Comparação com os meses carregados"
               unitLabel={activeSeriesUnitLabel}
+              palette={activeSeriesPalette}
             />
           ) : null}
         </div>
