@@ -165,7 +165,7 @@ export function HomePage() {
     <div className="space-y-20 pb-6 lg:space-y-24">
       <HeroSearchSection onSearchSubmit={handleHeroSearch} query={query} setQuery={setQuery} />
 
-      <section className="rounded-[2.5rem] bg-secondary/55 px-5 py-14 sm:px-8 lg:px-12">
+      <section className="rounded-[2.5rem] bg-white px-5 py-14 sm:px-8 lg:px-12">
         <div className="mx-auto max-w-5xl space-y-10">
           <div className="space-y-3 text-center">
             <h2 className="font-display text-3xl tracking-tight text-foreground sm:text-[2.2rem]">
@@ -366,27 +366,27 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[2.6rem] bg-[linear-gradient(135deg,#27a51f_0%,#0d6b33_100%)] px-6 py-8 text-white shadow-[0_28px_70px_-42px_rgba(12,60,44,0.8)] md:px-10 md:py-10">
+      <section className="overflow-hidden rounded-[2.6rem] bg-white px-6 py-8 text-foreground shadow-[0_28px_70px_-42px_rgba(12,60,44,0.12)] md:px-10 md:py-10">
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="space-y-6">
-            <Badge className="w-fit border-white/10 bg-white/10 text-white" variant="outline">
+            <Badge className="w-fit border-primary/15 bg-primary/5 text-primary" variant="outline">
               Atualizado em {formatPricingDate(pricingQuery.data?.latestQuotedDate ?? null)}
             </Badge>
 
             <div className="space-y-3">
-              <h2 className="font-display text-3xl tracking-tight text-white sm:text-[2.3rem]">
+              <h2 className="font-display text-3xl tracking-tight text-foreground sm:text-[2.3rem]">
                 Inteligência de mercado
               </h2>
-              <p className="max-w-xl text-sm leading-7 text-emerald-50/82 sm:text-base">
+              <p className="max-w-xl text-sm leading-7 text-muted-foreground sm:text-base">
                 Acompanhe as tendências de preço das principais commodities e referências públicas do mercado de sucata.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Button asChild className="bg-white !text-[#072456] hover:bg-white/90" style={{ color: '#072456' }}>
+              <Button asChild className="bg-primary !text-white hover:bg-primary/90" style={{ color: '#ffffff' }}>
                 <Link to={paths.public.pricing}>Ver relatório completo</Link>
               </Button>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-4 py-2 text-sm text-emerald-50/88">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-4 py-2 text-sm text-foreground">
                 <Clock3 className="size-4" />
                 {latestPricingEntries.length > 0 ? `${latestPricingEntries.length} referências manuais ativas` : 'Novas referências em breve'}
               </div>
@@ -397,12 +397,12 @@ export function HomePage() {
             {marketCards.map((card, index) => (
               <div
                 key={card.code}
-                className="rounded-[1.9rem] border border-white/12 bg-white/8 p-5 backdrop-blur-sm"
+                className="rounded-[1.9rem] border border-border bg-background p-5 shadow-sm"
               >
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm font-medium text-white/86">{card.label}</p>
-                    <p className="mt-2 text-2xl font-semibold text-white">
+                    <p className="text-sm font-medium text-foreground/80">{card.label}</p>
+                    <p className="mt-2 text-2xl font-semibold text-foreground">
                       {typeof pricingQuery.data?.latestValues[card.code] === 'number'
                         ? formatPricingNumber(pricingQuery.data.latestValues[card.code] ?? 0, 2)
                         : '--'}

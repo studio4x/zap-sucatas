@@ -15,7 +15,7 @@ export function SellerCard({
 }: SellerCardProps) {
   return (
     <ListingSidebarCard title="Anunciante">
-      <div className="flex items-center gap-4 rounded-[1.4rem] border border-[#cfe0ca] bg-[linear-gradient(180deg,#f8fdf6_0%,#eaf6e5_100%)] p-4">
+      <div className="flex items-center gap-4 rounded-[1.4rem] border border-border bg-white p-4">
         <div className="flex size-14 items-center justify-center rounded-[1.2rem] bg-primary/10 text-primary">
           <UserRound className="size-6" />
         </div>

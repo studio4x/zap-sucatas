@@ -139,7 +139,7 @@ export function ListingDetailsPage() {
         </Link>
       </Button>
 
-      <section className="overflow-hidden rounded-[2.25rem] border border-[#cfe0ca] bg-[linear-gradient(180deg,#f8fdf6_0%,#eaf6e5_100%)]">
+      <section className="overflow-hidden rounded-[2.25rem] border border-border bg-white">
         <div className="grid gap-6 px-5 py-6 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:px-8 lg:py-8">
           <div className="space-y-5">
             <div className="flex flex-wrap gap-2">
