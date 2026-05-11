@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Search } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
-import { ListingFilters } from '@/components/public/listing-filters'
 import { ListingGrid } from '@/components/public/listing-grid'
 import { ListingSidebarCard } from '@/components/public/listing-sidebar-card'
 import { ListingSortBar } from '@/components/public/listing-sort-bar'
@@ -9,6 +9,7 @@ import { PublicSectionHeading } from '@/components/public/public-section-heading
 import { FeaturedListingsSection } from '@/components/public/featured-listings-section'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { fetchFeaturedPublicListings, fetchListingReferences, fetchPublicListingsPage } from '@/domains/listings/api'
 import type { PublicListingSort } from '@/domains/listings/types'
 
@@ -26,7 +27,6 @@ export function ListingsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [query, setQuery] = useState(searchParams.get('q') ?? '')
   const [categoryId, setCategoryId] = useState(searchParams.get('categoria') ?? '')
-  const [materialId, setMaterialId] = useState(searchParams.get('material') ?? '')
   const [state, setState] = useState(searchParams.get('uf') ?? '')
   const [city, setCity] = useState(searchParams.get('cidade') ?? '')
   const [sort, setSort] = useState<PublicListingSort>((searchParams.get('ordem') as PublicListingSort) ?? 'recent')
@@ -40,14 +40,13 @@ export function ListingsPage() {
 
   const listingsQuery = useQuery({
     placeholderData: (previousData) => previousData,
-    queryKey: ['listings', 'public', 'page', { categoryId, city, materialId, page: normalizedPage, query, sort, state }],
+    queryKey: ['listings', 'public', 'page', { categoryId, city, page: normalizedPage, query, sort, state }],
     queryFn: () =>
       fetchPublicListingsPage({
         categoryId: categoryId || undefined,
         city: city || undefined,
         page: normalizedPage,
         pageSize: PAGE_SIZE,
-        primaryMaterialId: materialId || undefined,
         query: query || undefined,
         sort,
         state: state || undefined,
@@ -87,10 +86,6 @@ export function ListingsPage() {
       nextParams.set('categoria', categoryId)
     }
 
-    if (materialId) {
-      nextParams.set('material', materialId)
-    }
-
     if (state) {
       nextParams.set('uf', state)
     }
@@ -108,12 +103,12 @@ export function ListingsPage() {
     }
 
     setSearchParams(nextParams, { replace: true })
-  }, [categoryId, city, materialId, normalizedPage, query, setSearchParams, sort, state])
+  }, [categoryId, city, normalizedPage, query, setSearchParams, sort, state])
 
   const listings = listingsQuery.data?.items ?? []
   const totalCount = listingsQuery.data?.totalCount ?? 0
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
-  const activeFiltersCount = [query.trim(), categoryId, materialId, state, city.trim()].filter(Boolean).length
+  const activeFiltersCount = [query.trim(), categoryId, state, city.trim()].filter(Boolean).length
 
   const visibleCities = useMemo(() => {
     const allCities = referencesQuery.data?.cities ?? []
@@ -124,16 +119,6 @@ export function ListingsPage() {
 
     return allCities.filter((item) => item.toLowerCase().includes(city.trim().toLowerCase()) || !city.trim())
   }, [city, referencesQuery.data?.cities, state])
-
-  function clearFilters() {
-    setQuery('')
-    setCategoryId('')
-    setMaterialId('')
-    setState('')
-    setCity('')
-    setSort('recent')
-    setPage(1)
-  }
 
   return (
     <section className="space-y-6 lg:space-y-8">
@@ -237,44 +222,30 @@ export function ListingsPage() {
         </aside>
 
         <div className="space-y-6">
-          {featuredListingsQuery.data?.length ? (
-            <FeaturedListingsSection
-              description="Anuncios com maior prioridade de exibicao no catalogo."
-              listings={featuredListingsQuery.data}
-              title="Anúncios em destaque"
-            />
-          ) : null}
+          <div className="sticky top-20 z-20 rounded-[1.25rem] border border-[#c8d8c8] bg-white/95 p-3 shadow-[0_18px_45px_-36px_rgba(19,33,23,0.4)] backdrop-blur">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                className="h-12 rounded-[1rem] border-[#d5e1d5] bg-white pl-12 pr-4"
+                onChange={(event) => {
+                  setPage(1)
+                  setQuery(event.target.value)
+                }}
+                placeholder="Busque por material, sucata, maquina, lote, resumo ou cidade"
+                value={query}
+              />
+            </div>
+          </div>
 
-          <ListingFilters
-            categories={referencesQuery.data?.categories ?? []}
-            categoryId={categoryId}
-            city={city}
-            materialId={materialId}
-            materials={referencesQuery.data?.materials ?? []}
-            onCategoryChange={(value) => {
-              setPage(1)
-              setCategoryId(value)
-            }}
-            onCityChange={(value) => {
-              setPage(1)
-              setCity(value)
-            }}
-            onClear={clearFilters}
-            onMaterialChange={(value) => {
-              setPage(1)
-              setMaterialId(value)
-            }}
-            onQueryChange={(value) => {
-              setPage(1)
-              setQuery(value)
-            }}
-            onStateChange={(value) => {
-              setPage(1)
-              setState(value)
-            }}
-            query={query}
-            state={state}
-          />
+          {featuredListingsQuery.data?.length ? (
+            <div className="rounded-[2rem] border border-amber-200 bg-[linear-gradient(180deg,#fff9ec_0%,#fff3d6_100%)] p-5 shadow-[0_26px_55px_-42px_rgba(168,111,0,0.45)] md:p-6">
+              <FeaturedListingsSection
+                description="Anuncios com maior prioridade de exibicao no catalogo."
+                listings={featuredListingsQuery.data}
+                title="Anúncios em destaque"
+              />
+            </div>
+          ) : null}
 
           <ListingSortBar
             onChange={(value) => {
