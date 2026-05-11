@@ -15,6 +15,8 @@ import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
+import { fetchAdminFeaturedPayments } from '@/domains/featured-payments/api'
+import type { AdminFeaturedPaymentItem } from '@/domains/featured-payments/types'
 import {
   archiveListing,
   fetchAdminListingStateOptions,
@@ -25,6 +27,7 @@ import { formatListingDate, listingStatusFilterOptions } from '@/domains/listing
 import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 
 const PAGE_SIZE = 12
+const BRL_FORMATTER = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
 
 function getListingStatusMeta(status: string) {
   switch (status) {
@@ -79,6 +82,10 @@ export function AdminListingsPage() {
     queryKey: ['listings', 'admin', 'stats'],
     queryFn: fetchAdminListingStats,
   })
+  const featuredPaymentsQuery = useQuery({
+    queryKey: ['featured-payments', 'admin'],
+    queryFn: fetchAdminFeaturedPayments,
+  })
 
   const archiveMutation = useMutation({
     mutationFn: async (listingIds: string[]) => {
@@ -122,6 +129,23 @@ export function AdminListingsPage() {
       },
     [statsQuery.data],
   )
+  const latestPaymentByListingId = useMemo(() => {
+    const map = new Map<string, AdminFeaturedPaymentItem>()
+
+    for (const payment of featuredPaymentsQuery.data ?? []) {
+      const current = map.get(payment.listing.id)
+      if (!current) {
+        map.set(payment.listing.id, payment)
+        continue
+      }
+
+      if (new Date(payment.createdAt).getTime() > new Date(current.createdAt).getTime()) {
+        map.set(payment.listing.id, payment)
+      }
+    }
+
+    return map
+  }, [featuredPaymentsQuery.data])
 
   const selectableListings = useMemo(
     () => listings.filter((listing) => listing.status !== 'archived'),
@@ -325,6 +349,26 @@ export function AdminListingsPage() {
             },
           },
           {
+            header: 'Destaque',
+            cell: (listing) => (
+              <div className="space-y-1 text-xs">
+                <p className={listing.isFeatured ? 'font-semibold text-emerald-700' : 'text-muted-foreground'}>
+                  {listing.isFeatured ? 'Ativo' : 'Inativo'}
+                </p>
+                {latestPaymentByListingId.get(listing.id) ? (
+                  <p className="text-muted-foreground">
+                    {latestPaymentByListingId.get(listing.id)?.status === 'paid'
+                      ? 'Pagamento confirmado'
+                      : 'Pagamento pendente'}{' '}
+                    • {BRL_FORMATTER.format(latestPaymentByListingId.get(listing.id)?.amount ?? 0)}
+                  </p>
+                ) : (
+                  <p className="text-muted-foreground">Sem pagamento de destaque</p>
+                )}
+              </div>
+            ),
+          },
+          {
             header: 'Atualizado',
             cell: (listing) => (
               <span className="text-sm text-muted-foreground">{formatListingDate(listing.updatedAt)}</span>
@@ -390,8 +434,18 @@ export function AdminListingsPage() {
         emptyTitle="Sem anúncios no recorte atual"
         errorMessage="Não foi possível carregar os anúncios administrativos."
         getRowKey={(listing) => listing.id}
-        isError={listingsQuery.isError || stateOptionsQuery.isError || statsQuery.isError}
-        isLoading={listingsQuery.isLoading || stateOptionsQuery.isLoading || statsQuery.isLoading}
+        isError={
+          listingsQuery.isError ||
+          stateOptionsQuery.isError ||
+          statsQuery.isError ||
+          featuredPaymentsQuery.isError
+        }
+        isLoading={
+          listingsQuery.isLoading ||
+          stateOptionsQuery.isLoading ||
+          statsQuery.isLoading ||
+          featuredPaymentsQuery.isLoading
+        }
         rowClassName={(listing) => (listing.status === 'pending_review' ? 'bg-sky-50/30' : undefined)}
       />
 

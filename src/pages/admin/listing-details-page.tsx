@@ -9,6 +9,7 @@ import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
+import { fetchAdminFeaturedPayments } from '@/domains/featured-payments/api'
 import {
   approveListing,
   archiveListing,
@@ -17,6 +18,7 @@ import {
   rejectListing,
 } from '@/domains/listings/api'
 import { formatListingDate } from '@/domains/listings/utils'
+const BRL_FORMATTER = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
 
 function getListingStatusMeta(status: string) {
   switch (status) {
@@ -53,6 +55,10 @@ export function AdminListingDetailsPage() {
     queryKey: ['listing', 'admin', id],
     queryFn: () => fetchListingDetailsForAdmin(id),
     enabled: Boolean(id),
+  })
+  const featuredPaymentsQuery = useQuery({
+    queryKey: ['featured-payments', 'admin'],
+    queryFn: fetchAdminFeaturedPayments,
   })
 
   async function invalidateListing() {
@@ -144,6 +150,9 @@ export function AdminListingDetailsPage() {
   }
 
   const listing = listingQuery.data
+  const featuredPayment = (featuredPaymentsQuery.data ?? [])
+    .filter((item) => item.listing.id === listing.id)
+    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())[0]
   const statusMeta = getListingStatusMeta(listing.status)
   const isBusy =
     approveMutation.isPending ||
@@ -309,6 +318,46 @@ export function AdminListingDetailsPage() {
                 <p className="font-medium text-foreground">Publicado em</p>
                 <p className="text-muted-foreground">{formatListingDate(listing.publishedAt)}</p>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Pagamento de destaque</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3 text-sm">
+              <div>
+                <p className="font-medium text-foreground">Destaque no anúncio</p>
+                <p className={listing.isFeatured ? 'text-emerald-700' : 'text-muted-foreground'}>
+                  {listing.isFeatured ? 'Ativo automaticamente por pagamento confirmado' : 'Inativo'}
+                </p>
+              </div>
+              {featuredPayment ? (
+                <>
+                  <div>
+                    <p className="font-medium text-foreground">Status do pagamento</p>
+                    <p className="text-muted-foreground">{featuredPayment.status}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Valor</p>
+                    <p className="text-muted-foreground">{BRL_FORMATTER.format(featuredPayment.amount)}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Forma</p>
+                    <p className="text-muted-foreground">{featuredPayment.billingType}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Vencimento</p>
+                    <p className="text-muted-foreground">{formatListingDate(featuredPayment.dueDate)}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Pago em</p>
+                    <p className="text-muted-foreground">{formatListingDate(featuredPayment.paidAt)}</p>
+                  </div>
+                </>
+              ) : (
+                <p className="text-muted-foreground">Nenhum pagamento de destaque associado a este anúncio.</p>
+              )}
             </CardContent>
           </Card>
 
