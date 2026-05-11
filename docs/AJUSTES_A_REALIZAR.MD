@@ -4,6 +4,9 @@
 
 [OK] t2 - Remova a seção de artigos do blog da home
 
-[ ] T3 - Precisamos implementar no crud de anuncios, a possibilidade do cliente pagar para ter o anuncio dele em destaque. Implemente tudo que precisará para que essa funcionalidade seja implementada, inclusive a parte de pagamento.. Para esta, vamos considerar integrar via api com o Asaas.
+[OK] T3 - Precisamos implementar no crud de anuncios, a possibilidade do cliente pagar para ter o anuncio dele em destaque. Implemente tudo que precisará para que essa funcionalidade seja implementada, inclusive a parte de pagamento.. Para esta, vamos considerar integrar via api com o Asaas.
 
 [OK] T4 - insira sombras nas seções da home para não ficar tudo um branco só.
+
+[ ] T5 - Vamos ajustar a página de anúncios. Devemos ter uma barra lateral do lado esquerdo, com a listagem das categorias, estados e cidades. Uma exemplo de como deve ficar é o site https://www.mfrural.com.br/produtos. No inicio dos anuncios, deverá ter uma seção com os anuncios em destaques. Na hero da página de anuncios, vamos remover as informações de quantidades, e também os textos: Catalogo moderado para negociacao real, com foco em busca, filtragem setorial e leitura comercial rapida.
+Moderacao antes da publicacao. Busca por categoria, material e localidade. Paginas de anuncio com contexto comercial. Mantenha o filtro de ordenação.

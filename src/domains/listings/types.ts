@@ -115,3 +115,17 @@ export type PublicListingFilters = {
   sort?: PublicListingSort
   state?: string
 }
+
+export type ListingFeaturedPaymentSummary = {
+  amount: number
+  billingType: string
+  createdAt: string
+  dueDate: string | null
+  id: string
+  invoiceUrl: string | null
+  isPaid: boolean
+  listingId: string
+  paidAt: string | null
+  pixCopyPaste: string | null
+  status: 'pending' | 'paid' | 'expired' | 'canceled' | 'failed'
+}

@@ -165,3 +165,12 @@ verify_jwt = false
 [functions.process-notifications]
 verify_jwt = false
 
+[functions.create-featured-listing-payment]
+verify_jwt = false
+
+[functions.list-featured-listing-payments]
+verify_jwt = false
+
+[functions.asaas-payment-webhook]
+verify_jwt = false
+

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Archive, Eye, FilePlus2, PauseCircle, SendHorizontal } from 'lucide-react'
+import { Archive, Eye, FilePlus2, PauseCircle, SendHorizontal, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { DashboardActionCard } from '@/components/dashboard/dashboard-action-card'
@@ -15,7 +15,15 @@ import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { archiveListing, fetchUserListings, pauseListing, submitListingForReview } from '@/domains/listings/api'
+import {
+  archiveListing,
+  createFeaturedListingPayment,
+  fetchUserListings,
+  listFeaturedListingPayments,
+  pauseListing,
+  submitListingForReview,
+} from '@/domains/listings/api'
+import type { ListingFeaturedPaymentSummary } from '@/domains/listings/types'
 import { formatListingDate, listingStatusFilterOptions } from '@/domains/listings/utils'
 import { useAuth } from '@/hooks/use-auth'
 
@@ -39,6 +47,11 @@ export function AppListingsPage() {
   const listingsQuery = useQuery({
     queryKey: ['listings', 'owner', user?.profileId],
     queryFn: () => fetchUserListings(user?.profileId ?? ''),
+    enabled: Boolean(user?.profileId),
+  })
+  const featuredPaymentsQuery = useQuery({
+    queryKey: ['listing-featured-payments', 'owner', user?.profileId],
+    queryFn: listFeaturedListingPayments,
     enabled: Boolean(user?.profileId),
   })
 
@@ -101,8 +114,41 @@ export function AppListingsPage() {
       setListingPendingArchive(null)
     },
   })
+  const createFeaturedPaymentMutation = useMutation({
+    mutationFn: createFeaturedListingPayment,
+    onError: (error) => {
+      setFeedback({
+        message: error instanceof Error ? error.message : 'Não foi possível gerar a cobrança de destaque.',
+        tone: 'error',
+      })
+    },
+    onSuccess: async (payload) => {
+      setFeedback({
+        message: payload.payment.invoiceUrl
+          ? 'Cobrança de destaque gerada. Abra o link para concluir o pagamento.'
+          : 'Cobrança de destaque gerada com sucesso.',
+        tone: 'success',
+      })
+
+      if (payload.payment.invoiceUrl) {
+        window.open(payload.payment.invoiceUrl, '_blank', 'noopener,noreferrer')
+      }
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['listing-featured-payments', 'owner', user?.profileId] }),
+        queryClient.invalidateQueries({ queryKey: ['listings', 'owner', user?.profileId] }),
+      ])
+    },
+  })
 
   const listings = useMemo(() => listingsQuery.data ?? [], [listingsQuery.data])
+  const featuredPaymentByListingId = useMemo(() => {
+    const map = new Map<string, ListingFeaturedPaymentSummary>()
+    ;(featuredPaymentsQuery.data ?? []).forEach((payment) => {
+      map.set(payment.listingId, payment)
+    })
+    return map
+  }, [featuredPaymentsQuery.data])
   const filteredListings = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
 
@@ -120,16 +166,23 @@ export function AppListingsPage() {
       approved: listings.filter((listing) => listing.status === 'approved').length,
       archived: listings.filter((listing) => listing.status === 'archived').length,
       drafts: listings.filter((listing) => listing.status === 'draft').length,
+      featured: listings.filter((listing) => listing.isFeatured).length,
+      featuredPending: listings.filter((listing) => featuredPaymentByListingId.get(listing.id)?.status === 'pending')
+        .length,
       pending: listings.filter((listing) => listing.status === 'pending_review').length,
       total: listings.length,
     }),
-    [listings],
+    [featuredPaymentByListingId, listings],
   )
 
   const requiresAttention = listings.find(
     (listing) => listing.status === 'rejected' || listing.status === 'draft',
   )
-  const isBusy = submitMutation.isPending || pauseMutation.isPending || archiveMutation.isPending
+  const isBusy =
+    submitMutation.isPending ||
+    pauseMutation.isPending ||
+    archiveMutation.isPending ||
+    createFeaturedPaymentMutation.isPending
 
   return (
     <section className="space-y-6">
@@ -187,6 +240,14 @@ export function AppListingsPage() {
         <DashboardStatCard label="Em revisão" tone={stats.pending > 0 ? 'warning' : 'default'} value={stats.pending} />
         <DashboardStatCard label="Aprovados" tone={stats.approved > 0 ? 'success' : 'default'} value={stats.approved} />
         <DashboardStatCard label="Arquivados" tone={stats.archived > 0 ? 'warning' : 'default'} value={stats.archived} />
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <DashboardStatCard label="Em destaque" tone={stats.featured > 0 ? 'success' : 'default'} value={stats.featured} />
+        <DashboardStatCard
+          label="Destaque pendente"
+          tone={stats.featuredPending > 0 ? 'warning' : 'default'}
+          value={stats.featuredPending}
+        />
       </div>
 
       <DashboardFilterCard
@@ -256,7 +317,15 @@ export function AppListingsPage() {
               header: 'Anúncio',
               cell: (listing) => (
                 <div className="space-y-1">
-                  <p className="font-medium text-foreground">{listing.title}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-foreground">{listing.title}</p>
+                    {listing.isFeatured ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                        <Star className="size-3.5" />
+                        Destaque ativo
+                      </span>
+                    ) : null}
+                  </div>
                   <p className="text-xs text-muted-foreground">{listing.summary || listing.description}</p>
                 </div>
               ),
@@ -287,6 +356,9 @@ export function AppListingsPage() {
                 const canEdit = listing.status !== 'archived'
                 const canPause = listing.status === 'approved'
                 const canArchive = listing.status !== 'archived'
+                const latestFeaturedPayment = featuredPaymentByListingId.get(listing.id)
+                const hasPendingFeaturedPayment = latestFeaturedPayment?.status === 'pending'
+                const canRequestFeaturedPayment = listing.status === 'approved' && !listing.isFeatured
 
                 return (
                   <div className="flex justify-end gap-2">
@@ -346,6 +418,26 @@ export function AppListingsPage() {
                       >
                         <Archive className="size-4" />
                         {archiveMutation.isPending ? 'Arquivando...' : 'Arquivar'}
+                      </Button>
+                    ) : null}
+
+                    {canRequestFeaturedPayment ? (
+                      <Button
+                        disabled={isBusy}
+                        onClick={() => {
+                          setFeedback(null)
+                          createFeaturedPaymentMutation.mutate(listing.id)
+                        }}
+                        size="sm"
+                        type="button"
+                        variant={hasPendingFeaturedPayment ? 'outline' : 'default'}
+                      >
+                        <Star className="size-4" />
+                        {hasPendingFeaturedPayment
+                          ? 'Ver cobrança'
+                          : createFeaturedPaymentMutation.isPending
+                            ? 'Gerando...'
+                            : 'Destacar'}
                       </Button>
                     ) : null}
                   </div>

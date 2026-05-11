@@ -10,6 +10,7 @@ import type {
   ListingDetails,
   ListingFormAttribute,
   ListingFormValues,
+  ListingFeaturedPaymentSummary,
   ListingImage,
   ListingListFilters,
   ListingMaterial,
@@ -943,6 +944,38 @@ export async function archiveListing(listingId: string) {
       listingId,
     },
   )
+}
+
+export async function createFeaturedListingPayment(listingId: string) {
+  return invokeListingFunction<
+    { listingId: string },
+    {
+      listingId: string
+      payment: {
+        amount: number
+        bankSlipUrl: string | null
+        billingType: string
+        dueDate: string | null
+        id: string
+        invoiceUrl: string | null
+        isPaid: boolean
+        pixCopyPaste: string | null
+        pixQrCode: string | null
+        status: ListingFeaturedPaymentSummary['status']
+      }
+      reusedPendingPayment: boolean
+      success: boolean
+    }
+  >('create-featured-listing-payment', { listingId })
+}
+
+export async function listFeaturedListingPayments() {
+  const response = await invokeListingFunction<
+    Record<string, never>,
+    { items: ListingFeaturedPaymentSummary[]; success: boolean }
+  >('list-featured-listing-payments', {})
+
+  return response.items
 }
 
 export function getListingEditPath(listingId: string) {
