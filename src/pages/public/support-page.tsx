@@ -33,7 +33,7 @@ export function SupportPage() {
 
   return (
     <div className="space-y-8 lg:space-y-10">
-      <section className="rounded-[2.25rem] border border-[#d8e3d8] bg-[linear-gradient(180deg,#f8fbf7_0%,#f1f5ef_100%)] px-5 py-8 md:px-8 lg:px-10 lg:py-10">
+      <section className="rounded-[2.25rem] border border-[#d8e3d8] bg-[linear-gradient(180deg,#fbfcfa_0%,#eef5ef_100%)] px-5 py-8 md:px-8 lg:px-10 lg:py-10">
         <div className="mx-auto max-w-5xl space-y-6 text-center">
           <div className="mx-auto flex size-16 items-center justify-center rounded-[1.6rem] bg-primary text-primary-foreground shadow-sm">
             <LifeBuoy className="size-7" />
@@ -77,7 +77,7 @@ export function SupportPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-[1.9rem] border-[#d8e3d8] bg-[linear-gradient(180deg,#173629_0%,#10271d_100%)] text-white shadow-[0_30px_80px_-40px_rgba(9,27,20,0.9)]">
+        <Card className="rounded-[1.9rem] border-[#d8e3d8] bg-[linear-gradient(180deg,#27991f_0%,#0f5038_100%)] text-white shadow-[0_30px_80px_-40px_rgba(9,27,20,0.9)]">
           <CardContent className="space-y-4 p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-100/70">Casos sensiveis</p>
             <h2 className="text-2xl font-semibold leading-tight tracking-[-0.03em] text-white">Use o chamado para registrar fraude, risco operacional ou bloqueios que exigem trilha.</h2>

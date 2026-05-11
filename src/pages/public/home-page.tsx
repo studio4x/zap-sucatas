@@ -298,7 +298,7 @@ export function HomePage() {
                     to={getListingHref(listing)}
                   >
                     <Card className="h-full overflow-hidden rounded-[1.7rem] border-border/80 bg-white transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_36px_-24px_rgba(19,33,23,0.28)]">
-                      <div className="relative aspect-[4/3] overflow-hidden bg-[linear-gradient(160deg,#edf4ee_0%,#e0ebe1_100%)]">
+                      <div className="relative aspect-[4/3] overflow-hidden bg-[linear-gradient(160deg,#f2f7f2_0%,#dfeade_100%)]">
                         {imageUrl ? (
                           <img
                             alt={listing.title}
@@ -366,7 +366,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[2.6rem] bg-[linear-gradient(135deg,#166246_0%,#0f5038_100%)] px-6 py-8 text-white shadow-[0_28px_70px_-42px_rgba(12,60,44,0.8)] md:px-10 md:py-10">
+      <section className="overflow-hidden rounded-[2.6rem] bg-[linear-gradient(135deg,#27991f_0%,#0f5038_100%)] px-6 py-8 text-white shadow-[0_28px_70px_-42px_rgba(12,60,44,0.8)] md:px-10 md:py-10">
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="space-y-6">
             <Badge className="w-fit border-white/10 bg-white/10 text-white" variant="outline">
@@ -383,7 +383,7 @@ export function HomePage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <Button asChild className="bg-white !text-[#0f5038] hover:bg-white/90" style={{ color: '#0f5038' }}>
+              <Button asChild className="bg-white !text-[#072456] hover:bg-white/90" style={{ color: '#072456' }}>
                 <Link to={paths.public.pricing}>Ver relatório completo</Link>
               </Button>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-4 py-2 text-sm text-emerald-50/88">

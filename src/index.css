@@ -1,35 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #f3f4ef;
-  --foreground: #132117;
+  --background: #f9faf8;
+  --foreground: #072456;
   --card: #ffffff;
-  --card-foreground: #132117;
+  --card-foreground: #072456;
   --popover: oklch(1 0 0);
-  --popover-foreground: #132117;
-  --primary: #166246;
-  --primary-foreground: #f8fbf8;
-  --secondary: #e8ede7;
-  --secondary-foreground: #284337;
-  --muted: #eff2eb;
-  --muted-foreground: #637166;
-  --accent: #d6e5d6;
-  --accent-foreground: #1f3428;
+  --popover-foreground: #072456;
+  --primary: #27991f;
+  --primary-foreground: #ffffff;
+  --secondary: #edf6ef;
+  --secondary-foreground: #0f2447;
+  --muted: #f2f6f1;
+  --muted-foreground: #60707a;
+  --accent: #15cd72;
+  --accent-foreground: #072456;
   --destructive: oklch(0.57 0.22 28);
   --destructive-foreground: oklch(0.985 0.003 95);
-  --border: #d8dfd4;
-  --input: #d8dfd4;
-  --ring: #166246;
+  --border: #d8e3d8;
+  --input: #d8e3d8;
+  --ring: #27991f;
   --radius: 1.125rem;
-  --sidebar: #f8faf7;
-  --sidebar-foreground: #132117;
-  --sidebar-primary: #166246;
-  --sidebar-primary-foreground: #f8fbf8;
-  --sidebar-accent: #ebf0e9;
-  --sidebar-accent-foreground: #284337;
-  --sidebar-border: #d8dfd4;
-  --sidebar-ring: #166246;
+  --sidebar: #f8fbf8;
+  --sidebar-foreground: #072456;
+  --sidebar-primary: #27991f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eef7ef;
+  --sidebar-accent-foreground: #0f2447;
+  --sidebar-border: #d8e3d8;
+  --sidebar-ring: #27991f;
 }
 
 .dark {
@@ -63,8 +63,8 @@
 }
 
 @theme inline {
-  --font-sans: "IBM Plex Sans", sans-serif;
-  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "Poppins", sans-serif;
+  --font-display: "Poppins", sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -111,10 +111,10 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at top, rgba(22, 98, 70, 0.1), transparent 34%),
-    linear-gradient(180deg, #f7f7f2 0%, #eef1ea 100%);
+    radial-gradient(circle at top, rgba(39, 153, 31, 0.08), transparent 34%),
+    linear-gradient(180deg, #fbfcfa 0%, #f1f5ef 100%);
   color: var(--foreground);
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: "Poppins", sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -142,42 +142,44 @@ a {
 }
 
 .public-theme {
-  --background: #f3f4ef;
-  --foreground: #132117;
+  --background: #f9faf8;
+  --foreground: #072456;
   --card: #ffffff;
-  --card-foreground: #132117;
+  --card-foreground: #072456;
   --popover: #ffffff;
-  --popover-foreground: #132117;
-  --primary: #166246;
-  --primary-foreground: #f8fbf8;
-  --secondary: #e8ede7;
-  --secondary-foreground: #284337;
-  --muted: #eff2eb;
-  --muted-foreground: #637166;
-  --accent: #d6e5d6;
-  --accent-foreground: #1f3428;
-  --destructive: #d24837;
+  --popover-foreground: #072456;
+  --primary: #27991f;
+  --primary-foreground: #ffffff;
+  --secondary: #edf6ef;
+  --secondary-foreground: #0f2447;
+  --muted: #f2f6f1;
+  --muted-foreground: #60707a;
+  --accent: #15cd72;
+  --accent-foreground: #072456;
+  --destructive: #d94b3f;
   --destructive-foreground: #ffffff;
-  --border: #d8dfd4;
-  --input: #d8dfd4;
-  --ring: #166246;
+  --border: #d8e3d8;
+  --input: #d8e3d8;
+  --ring: #27991f;
   --radius: 18px;
-  --sidebar: #f8faf7;
-  --sidebar-foreground: #132117;
-  --sidebar-primary: #166246;
-  --sidebar-primary-foreground: #f8fbf8;
-  --sidebar-accent: #ebf0e9;
-  --sidebar-accent-foreground: #284337;
-  --sidebar-border: #d8dfd4;
-  --sidebar-ring: #166246;
+  --sidebar: #f8fbf8;
+  --sidebar-foreground: #072456;
+  --sidebar-primary: #27991f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eef7ef;
+  --sidebar-accent-foreground: #0f2447;
+  --sidebar-border: #d8e3d8;
+  --sidebar-ring: #27991f;
+  --font-sans: "Poppins", sans-serif;
+  --font-display: "Poppins", sans-serif;
   background:
-    radial-gradient(circle at top, rgba(22, 98, 70, 0.1), transparent 34%),
-    linear-gradient(180deg, #f7f7f2 0%, #eef1ea 100%);
+    radial-gradient(circle at top, rgba(39, 153, 31, 0.08), transparent 34%),
+    linear-gradient(180deg, #fbfcfa 0%, #f1f5ef 100%);
   color: var(--foreground);
 }
 
 .public-theme .font-display {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Poppins", sans-serif;
   letter-spacing: -0.03em;
 }
 
@@ -206,41 +208,43 @@ a {
 }
 
 .admin-theme {
-  --background: #f3f4ef;
-  --foreground: #1b2a20;
+  --background: #f9faf8;
+  --foreground: #072456;
   --card: #ffffff;
-  --card-foreground: #1b2a20;
+  --card-foreground: #072456;
   --popover: #ffffff;
-  --popover-foreground: #1b2a20;
-  --primary: #166246;
-  --primary-foreground: #f8fbf8;
-  --secondary: #e8ede7;
-  --secondary-foreground: #284337;
-  --muted: #eff2eb;
-  --muted-foreground: #637166;
-  --accent: #d6e5d6;
-  --accent-foreground: #1f3428;
-  --destructive: #d24837;
+  --popover-foreground: #072456;
+  --primary: #27991f;
+  --primary-foreground: #ffffff;
+  --secondary: #edf6ef;
+  --secondary-foreground: #0f2447;
+  --muted: #f2f6f1;
+  --muted-foreground: #60707a;
+  --accent: #15cd72;
+  --accent-foreground: #072456;
+  --destructive: #d94b3f;
   --destructive-foreground: #ffffff;
-  --border: #d8dfd4;
-  --input: #d8dfd4;
-  --ring: #166246;
+  --border: #d8e3d8;
+  --input: #d8e3d8;
+  --ring: #27991f;
   --radius: 14px;
-  --sidebar: #f8faf7;
-  --sidebar-foreground: #2b3c32;
-  --sidebar-primary: #166246;
-  --sidebar-primary-foreground: #f8fbf8;
-  --sidebar-accent: #ebf0e9;
-  --sidebar-accent-foreground: #284337;
-  --sidebar-border: #d8dfd4;
-  --sidebar-ring: #166246;
+  --sidebar: #f8fbf8;
+  --sidebar-foreground: #072456;
+  --sidebar-primary: #27991f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eef7ef;
+  --sidebar-accent-foreground: #0f2447;
+  --sidebar-border: #d8e3d8;
+  --sidebar-ring: #27991f;
+  --font-sans: "Poppins", sans-serif;
+  --font-display: "Poppins", sans-serif;
   background: var(--background);
   color: var(--foreground);
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .admin-theme .font-display {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Poppins", sans-serif;
   letter-spacing: -0.02em;
 }
 
@@ -269,7 +273,7 @@ a {
 }
 
 .admin-theme [data-slot='card-title'] {
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 18px;
   font-weight: 600;
 }
@@ -303,6 +307,8 @@ a {
   --sidebar-accent-foreground: #32414f;
   --sidebar-border: #e1e7ef;
   --sidebar-ring: #007bff;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Inter", system-ui, sans-serif;
   background: var(--background);
   color: var(--foreground);
   font-family: 'Inter', system-ui, sans-serif;

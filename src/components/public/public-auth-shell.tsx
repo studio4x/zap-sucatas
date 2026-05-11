@@ -19,7 +19,7 @@ export function PublicAuthShell({
 }: PublicAuthShellProps) {
   return (
     <section className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] xl:items-start">
-      <div className="overflow-hidden rounded-[2.2rem] border border-[#d8e3d8] bg-[linear-gradient(180deg,#f8fbf7_0%,#f2f6f1_100%)]">
+      <div className="overflow-hidden rounded-[2.2rem] border border-[#d8e3d8] bg-[linear-gradient(180deg,#fbfcfa_0%,#eef5ef_100%)]">
         <div className="space-y-6 px-6 py-7 md:px-7 md:py-8">
           <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
             {badge}
