@@ -262,7 +262,11 @@ async function syncListingAttributes(listingId: string, attributes: ListingFormA
 
 export async function fetchListingReferences() {
   const client = ensureSupabase()
-  const [{ data: categories, error: categoryError }, { data: materials, error: materialError }] =
+  const [
+    { data: categories, error: categoryError },
+    { data: materials, error: materialError },
+    { data: locations, error: locationError },
+  ] =
     await Promise.all([
       client
         .from('listing_categories')
@@ -274,6 +278,12 @@ export async function fetchListingReferences() {
         .select('id, name, slug')
         .eq('is_active', true)
         .order('name', { ascending: true }),
+      client
+        .from('listings')
+        .select('state, city')
+        .eq('status', 'approved')
+        .order('state', { ascending: true })
+        .order('city', { ascending: true }),
     ])
 
   if (categoryError) {
@@ -284,9 +294,31 @@ export async function fetchListingReferences() {
     throw materialError
   }
 
+  if (locationError) {
+    throw locationError
+  }
+
+  const states = [
+    ...new Set(
+      (locations ?? [])
+        .map((item) => item.state?.trim().toUpperCase())
+        .filter((value): value is string => Boolean(value)),
+    ),
+  ]
+
+  const cities = [
+    ...new Set(
+      (locations ?? [])
+        .map((item) => item.city?.trim())
+        .filter((value): value is string => Boolean(value)),
+    ),
+  ]
+
   return {
     categories: (categories ?? []) as ListingCategory[],
+    cities,
     materials: (materials ?? []) as ListingMaterial[],
+    states,
   }
 }
 
