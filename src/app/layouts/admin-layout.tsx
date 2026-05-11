@@ -12,6 +12,7 @@ import {
   LifeBuoy,
   ShieldCheck,
   SlidersHorizontal,
+  WalletCards,
   SquareTerminal,
   Tags,
   UsersRound,
@@ -86,6 +87,11 @@ const adminNavItems = [
     to: paths.admin.blog,
     label: 'Blog',
     icon: Newspaper,
+  },
+  {
+    to: paths.admin.featuredPayments,
+    label: 'Pagamentos',
+    icon: WalletCards,
   },
   {
     to: paths.admin.pricing,

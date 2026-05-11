@@ -174,3 +174,9 @@ verify_jwt = false
 [functions.asaas-payment-webhook]
 verify_jwt = false
 
+[functions.list-admin-featured-payments]
+verify_jwt = false
+
+[functions.validate-asaas-integration]
+verify_jwt = false
+

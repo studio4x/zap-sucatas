@@ -35,6 +35,7 @@ const AdminLogsPage = lazy(() => import('@/pages/admin/logs-page').then((module)
 const AdminMaterialsPage = lazy(() => import('@/pages/admin/materials-page').then((module) => ({ default: module.AdminMaterialsPage })))
 const AdminOverviewPage = lazy(() => import('@/pages/admin/overview-page').then((module) => ({ default: module.AdminOverviewPage })))
 const AdminPricingPage = lazy(() => import('@/pages/admin/pricing-page').then((module) => ({ default: module.AdminPricingPage })))
+const AdminFeaturedPaymentsPage = lazy(() => import('@/pages/admin/featured-payments-page').then((module) => ({ default: module.AdminFeaturedPaymentsPage })))
 const AdminQuestionsPage = lazy(() => import('@/pages/admin/questions-page').then((module) => ({ default: module.AdminQuestionsPage })))
 const AdminNotificationsPage = lazy(() => import('@/pages/admin/notifications-page').then((module) => ({ default: module.AdminNotificationsPage })))
 const AdminSettingsPage = lazy(() => import('@/pages/admin/settings-page').then((module) => ({ default: module.AdminSettingsPage })))
@@ -255,6 +256,10 @@ export const routes: RouteObject[] = [
       {
         path: 'blog',
         element: withSuspense(<AdminBlogPage />),
+      },
+      {
+        path: 'pagamentos',
+        element: withSuspense(<AdminFeaturedPaymentsPage />),
       },
       {
         path: 'precos',

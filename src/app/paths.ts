@@ -48,6 +48,7 @@ export const paths = {
     materials: '/admin/materiais',
     locations: '/admin/localidades',
     blog: '/admin/blog',
+    featuredPayments: '/admin/pagamentos',
     pricing: '/admin/precos',
     settings: '/admin/configuracoes',
     logs: '/admin/logs',

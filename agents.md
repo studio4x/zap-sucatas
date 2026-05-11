@@ -230,6 +230,17 @@ Ao concluir tarefa que precise estar funcional fora do ambiente local:
 
 Não considerar pronto algo que dependa de publicação e ficou apenas local.
 
+### Regra obrigatória por entrega
+
+Para **toda implementação concluída** (sem exceção), é obrigatório:
+
+1. realizar commit;
+2. realizar push;
+3. publicar os deploys necessários (Vercel e/ou Supabase);
+4. validar que a versão publicada está funcional.
+
+Não encerrar entrega apenas com alteração local.
+
 ### Validação de deploy em produção
 
 Antes de encerrar qualquer entrega que afete o produto:
