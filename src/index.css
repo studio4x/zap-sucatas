@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f9faf8;
+  --background: #f6fbf4;
   --foreground: #072456;
   --card: #ffffff;
   --card-foreground: #072456;
@@ -10,25 +10,25 @@
   --popover-foreground: #072456;
   --primary: #27991f;
   --primary-foreground: #ffffff;
-  --secondary: #edf6ef;
+  --secondary: #e3f2dc;
   --secondary-foreground: #0f2447;
-  --muted: #f2f6f1;
+  --muted: #ebf7e7;
   --muted-foreground: #60707a;
   --accent: #15cd72;
   --accent-foreground: #072456;
   --destructive: oklch(0.57 0.22 28);
   --destructive-foreground: oklch(0.985 0.003 95);
-  --border: #d8e3d8;
-  --input: #d8e3d8;
+  --border: #cfe0ca;
+  --input: #cfe0ca;
   --ring: #27991f;
   --radius: 1.125rem;
-  --sidebar: #f8fbf8;
+  --sidebar: #f7fbf5;
   --sidebar-foreground: #072456;
   --sidebar-primary: #27991f;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eef7ef;
+  --sidebar-accent: #e0f0da;
   --sidebar-accent-foreground: #0f2447;
-  --sidebar-border: #d8e3d8;
+  --sidebar-border: #cfe0ca;
   --sidebar-ring: #27991f;
 }
 
@@ -111,8 +111,8 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at top, rgba(39, 153, 31, 0.08), transparent 34%),
-    linear-gradient(180deg, #fbfcfa 0%, #f1f5ef 100%);
+    radial-gradient(circle at top, rgba(39, 153, 31, 0.12), transparent 34%),
+    linear-gradient(180deg, #f8fdf6 0%, #eaf6e5 100%);
   color: var(--foreground);
   font-family: "Poppins", sans-serif;
   text-rendering: optimizeLegibility;
@@ -142,7 +142,7 @@ a {
 }
 
 .public-theme {
-  --background: #f9faf8;
+  --background: #f6fbf4;
   --foreground: #072456;
   --card: #ffffff;
   --card-foreground: #072456;
@@ -150,31 +150,31 @@ a {
   --popover-foreground: #072456;
   --primary: #27991f;
   --primary-foreground: #ffffff;
-  --secondary: #edf6ef;
+  --secondary: #e3f2dc;
   --secondary-foreground: #0f2447;
-  --muted: #f2f6f1;
+  --muted: #ebf7e7;
   --muted-foreground: #60707a;
   --accent: #15cd72;
   --accent-foreground: #072456;
   --destructive: #d94b3f;
   --destructive-foreground: #ffffff;
-  --border: #d8e3d8;
-  --input: #d8e3d8;
+  --border: #cfe0ca;
+  --input: #cfe0ca;
   --ring: #27991f;
   --radius: 18px;
-  --sidebar: #f8fbf8;
+  --sidebar: #f7fbf5;
   --sidebar-foreground: #072456;
   --sidebar-primary: #27991f;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eef7ef;
+  --sidebar-accent: #e0f0da;
   --sidebar-accent-foreground: #0f2447;
-  --sidebar-border: #d8e3d8;
+  --sidebar-border: #cfe0ca;
   --sidebar-ring: #27991f;
   --font-sans: "Poppins", sans-serif;
   --font-display: "Poppins", sans-serif;
   background:
-    radial-gradient(circle at top, rgba(39, 153, 31, 0.08), transparent 34%),
-    linear-gradient(180deg, #fbfcfa 0%, #f1f5ef 100%);
+    radial-gradient(circle at top, rgba(39, 153, 31, 0.12), transparent 34%),
+    linear-gradient(180deg, #f8fdf6 0%, #eaf6e5 100%);
   color: var(--foreground);
 }
 
@@ -208,7 +208,7 @@ a {
 }
 
 .admin-theme {
-  --background: #f9faf8;
+  --background: #f6fbf4;
   --foreground: #072456;
   --card: #ffffff;
   --card-foreground: #072456;
@@ -216,25 +216,25 @@ a {
   --popover-foreground: #072456;
   --primary: #27991f;
   --primary-foreground: #ffffff;
-  --secondary: #edf6ef;
+  --secondary: #e3f2dc;
   --secondary-foreground: #0f2447;
-  --muted: #f2f6f1;
+  --muted: #ebf7e7;
   --muted-foreground: #60707a;
   --accent: #15cd72;
   --accent-foreground: #072456;
   --destructive: #d94b3f;
   --destructive-foreground: #ffffff;
-  --border: #d8e3d8;
-  --input: #d8e3d8;
+  --border: #cfe0ca;
+  --input: #cfe0ca;
   --ring: #27991f;
   --radius: 14px;
-  --sidebar: #f8fbf8;
+  --sidebar: #f7fbf5;
   --sidebar-foreground: #072456;
   --sidebar-primary: #27991f;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eef7ef;
+  --sidebar-accent: #e0f0da;
   --sidebar-accent-foreground: #0f2447;
-  --sidebar-border: #d8e3d8;
+  --sidebar-border: #cfe0ca;
   --sidebar-ring: #27991f;
   --font-sans: "Poppins", sans-serif;
   --font-display: "Poppins", sans-serif;

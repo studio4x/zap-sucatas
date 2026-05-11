@@ -45,7 +45,7 @@ export function PricingPage() {
 
   return (
     <div className="space-y-8 lg:space-y-10">
-      <section className="overflow-hidden rounded-[2.2rem] border border-[#d8e3d8] bg-[linear-gradient(180deg,#fbfcfa_0%,#eef5ef_100%)]">
+      <section className="overflow-hidden rounded-[2.2rem] border border-[#cfe0ca] bg-[linear-gradient(180deg,#f8fdf6_0%,#eaf6e5_100%)]">
         <div className="grid gap-6 px-5 py-6 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)] lg:px-8 lg:py-8">
           <div className="space-y-4">
             <PublicSectionHeading
@@ -71,7 +71,7 @@ export function PricingPage() {
             </div>
           </div>
 
-          <Card className="rounded-[1.8rem] border-[#d8e3d8] bg-[linear-gradient(180deg,#27991f_0%,#0f5038_100%)] text-white shadow-[0_30px_70px_-40px_rgba(12,34,25,0.9)]">
+          <Card className="rounded-[1.8rem] border-[#cfe0ca] bg-[linear-gradient(180deg,#27a51f_0%,#0d6b33_100%)] text-white shadow-[0_30px_70px_-40px_rgba(12,34,25,0.9)]">
             <CardContent className="space-y-4 p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100/72">
                 Janela operacional
@@ -110,7 +110,7 @@ export function PricingPage() {
             <div className="overflow-x-auto">
               <table className="min-w-[780px] border-collapse text-sm">
                 <thead>
-                  <tr className="bg-[#27991f] text-left text-white">
+                  <tr className="bg-[#27a51f] text-left text-white">
                     <th className="px-4 py-3 font-semibold">Material</th>
                     <th className="px-4 py-3 font-semibold">Regiao</th>
                     <th className="px-4 py-3 font-semibold">Preco</th>

@@ -54,7 +54,7 @@ export function HeroSearchSection({
   }
 
   return (
-    <section className="-mx-4 overflow-hidden border-y border-[#dce5dc] bg-[linear-gradient(180deg,#fbfcfa_0%,#eef5ef_60%,#f8faf7_100%)] md:-mx-6 lg:-mx-8">
+    <section className="-mx-4 overflow-hidden border-y border-[#cfe0ca] bg-[linear-gradient(180deg,#f8fdf6_0%,#eaf6e5_60%,#f6fbf4_100%)] md:-mx-6 lg:-mx-8">
       <div className="relative">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(31,99,69,0.1),transparent_32%),radial-gradient(circle_at_50%_100%,rgba(18,54,39,0.06),transparent_24%)]" />
         <div className="absolute inset-x-0 bottom-0 h-px bg-[linear-gradient(90deg,transparent,rgba(19,54,40,0.16),transparent)]" />

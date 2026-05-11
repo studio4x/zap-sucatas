@@ -17,8 +17,8 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
 
   return (
     <Link className="group block h-full focus-visible:outline-none" to={targetPath}>
-      <Card className="h-full overflow-hidden rounded-[1.85rem] border-[#d8e3d8] bg-white transition duration-200 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_26px_60px_-36px_rgba(19,33,23,0.35)] group-focus-visible:ring-2 group-focus-visible:ring-primary/30">
-        <div className="relative aspect-[16/10] overflow-hidden bg-[linear-gradient(160deg,#f2f7f2_0%,#dfeade_100%)]">
+      <Card className="h-full overflow-hidden rounded-[1.85rem] border-[#cfe0ca] bg-white transition duration-200 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_26px_60px_-36px_rgba(19,33,23,0.35)] group-focus-visible:ring-2 group-focus-visible:ring-primary/30">
+        <div className="relative aspect-[16/10] overflow-hidden bg-[linear-gradient(160deg,#f0f8ed_0%,#d6ebd1_100%)]">
           {coverImage ? (
             <img
               alt={listing.title}

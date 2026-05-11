@@ -17,8 +17,8 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
 
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-[2rem] border border-[#d8e3d8] bg-white shadow-[0_28px_64px_-48px_rgba(19,33,23,0.3)]">
-        <div className="relative aspect-[16/10] bg-[linear-gradient(160deg,#f2f7f2_0%,#dfeade_100%)]">
+      <div className="overflow-hidden rounded-[2rem] border border-[#cfe0ca] bg-white shadow-[0_28px_64px_-48px_rgba(19,33,23,0.3)]">
+        <div className="relative aspect-[16/10] bg-[linear-gradient(160deg,#f0f8ed_0%,#d6ebd1_100%)]">
           {activeImage ? (
             <img
               alt={activeImage.altText ?? listingTitle}

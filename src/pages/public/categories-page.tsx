@@ -28,7 +28,7 @@ export function CategoriesPage() {
 
   return (
     <div className="space-y-8 lg:space-y-10">
-      <section className="overflow-hidden rounded-[2.2rem] border border-[#d8e3d8] bg-[linear-gradient(180deg,#fbfcfa_0%,#eef5ef_100%)]">
+      <section className="overflow-hidden rounded-[2.2rem] border border-[#cfe0ca] bg-[linear-gradient(180deg,#f8fdf6_0%,#eaf6e5_100%)]">
         <div className="grid gap-6 px-5 py-6 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)] lg:px-8 lg:py-8">
           <div className="space-y-4">
             <PublicSectionHeading

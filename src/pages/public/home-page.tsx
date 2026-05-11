@@ -165,7 +165,7 @@ export function HomePage() {
     <div className="space-y-20 pb-6 lg:space-y-24">
       <HeroSearchSection onSearchSubmit={handleHeroSearch} query={query} setQuery={setQuery} />
 
-      <section className="rounded-[2.5rem] bg-secondary/35 px-5 py-14 sm:px-8 lg:px-12">
+      <section className="rounded-[2.5rem] bg-secondary/55 px-5 py-14 sm:px-8 lg:px-12">
         <div className="mx-auto max-w-5xl space-y-10">
           <div className="space-y-3 text-center">
             <h2 className="font-display text-3xl tracking-tight text-foreground sm:text-[2.2rem]">
@@ -298,7 +298,7 @@ export function HomePage() {
                     to={getListingHref(listing)}
                   >
                     <Card className="h-full overflow-hidden rounded-[1.7rem] border-border/80 bg-white transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_36px_-24px_rgba(19,33,23,0.28)]">
-                      <div className="relative aspect-[4/3] overflow-hidden bg-[linear-gradient(160deg,#f2f7f2_0%,#dfeade_100%)]">
+                      <div className="relative aspect-[4/3] overflow-hidden bg-[linear-gradient(160deg,#f0f8ed_0%,#d6ebd1_100%)]">
                         {imageUrl ? (
                           <img
                             alt={listing.title}
@@ -366,7 +366,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[2.6rem] bg-[linear-gradient(135deg,#27991f_0%,#0f5038_100%)] px-6 py-8 text-white shadow-[0_28px_70px_-42px_rgba(12,60,44,0.8)] md:px-10 md:py-10">
+      <section className="overflow-hidden rounded-[2.6rem] bg-[linear-gradient(135deg,#27a51f_0%,#0d6b33_100%)] px-6 py-8 text-white shadow-[0_28px_70px_-42px_rgba(12,60,44,0.8)] md:px-10 md:py-10">
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="space-y-6">
             <Badge className="w-fit border-white/10 bg-white/10 text-white" variant="outline">
