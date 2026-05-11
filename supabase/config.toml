@@ -180,3 +180,6 @@ verify_jwt = false
 [functions.validate-asaas-integration]
 verify_jwt = false
 
+[functions.update-asaas-environment]
+verify_jwt = false
+

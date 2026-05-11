@@ -22,6 +22,7 @@ export type AdminFeaturedPaymentItem = {
 
 export type AsaasIntegrationValidation = {
   config: {
+    asaasEnvironment: 'production' | 'sandbox'
     apiKeyConfigured: boolean
     apiUrl: string
     billingType: string

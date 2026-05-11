@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { fetchAdminFeaturedPayments, validateAsaasIntegration } from '@/domains/featured-payments/api'
+import { fetchAdminFeaturedPayments, updateAsaasEnvironment, validateAsaasIntegration } from '@/domains/featured-payments/api'
 import type { AdminFeaturedPaymentItem } from '@/domains/featured-payments/types'
 
 type TabKey = 'config' | 'payments'
@@ -77,6 +77,12 @@ export function AdminFeaturedPaymentsPage() {
 
   const validationMutation = useMutation({
     mutationFn: validateAsaasIntegration,
+  })
+  const updateEnvironmentMutation = useMutation({
+    mutationFn: updateAsaasEnvironment,
+    onSuccess: () => {
+      validationMutation.mutate()
+    },
   })
 
   const filteredPayments = useMemo(() => {
@@ -300,14 +306,55 @@ export function AdminFeaturedPaymentsPage() {
                 Execute um teste para validar variaveis de ambiente e conectividade do backend com a API do Asaas.
               </p>
 
+              <div className="rounded-lg border border-border bg-muted/25 p-4">
+                <p className="text-sm font-semibold text-foreground">Modo da integracao</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Escolha o ambiente ativo da integracao. Voce pode alternar entre sandbox e producao.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button
+                    disabled={
+                      updateEnvironmentMutation.isPending ||
+                      validationMutation.isPending ||
+                      validationMutation.data?.config.asaasEnvironment === 'sandbox'
+                    }
+                    onClick={() => updateEnvironmentMutation.mutate('sandbox')}
+                    type="button"
+                    variant={validationMutation.data?.config.asaasEnvironment === 'sandbox' ? 'default' : 'outline'}
+                  >
+                    Sandbox
+                  </Button>
+                  <Button
+                    disabled={
+                      updateEnvironmentMutation.isPending ||
+                      validationMutation.isPending ||
+                      validationMutation.data?.config.asaasEnvironment === 'production'
+                    }
+                    onClick={() => updateEnvironmentMutation.mutate('production')}
+                    type="button"
+                    variant={validationMutation.data?.config.asaasEnvironment === 'production' ? 'default' : 'outline'}
+                  >
+                    Producao
+                  </Button>
+                </div>
+              </div>
+
               <Button
-                disabled={validationMutation.isPending}
+                disabled={validationMutation.isPending || updateEnvironmentMutation.isPending}
                 onClick={() => validationMutation.mutate()}
                 type="button"
               >
                 <RefreshCcw className="size-4" />
                 {validationMutation.isPending ? 'Validando...' : 'Validar integracao'}
               </Button>
+
+              {updateEnvironmentMutation.isError ? (
+                <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                  {updateEnvironmentMutation.error instanceof Error
+                    ? updateEnvironmentMutation.error.message
+                    : 'Falha ao atualizar o ambiente Asaas.'}
+                </div>
+              ) : null}
 
               {validationMutation.isError ? (
                 <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -332,6 +379,12 @@ export function AdminFeaturedPaymentsPage() {
                   </div>
 
                   <div className="grid gap-3 md:grid-cols-2">
+                    <div className="rounded-lg border border-border bg-card p-4 text-sm">
+                      <p className="font-medium text-foreground">Ambiente ativo</p>
+                      <p className="mt-1 text-muted-foreground">
+                        {validationMutation.data.config.asaasEnvironment === 'production' ? 'Producao' : 'Sandbox'}
+                      </p>
+                    </div>
                     <div className="rounded-lg border border-border bg-card p-4 text-sm">
                       <p className="font-medium text-foreground">ASAAS_API_URL</p>
                       <p className="mt-1 text-muted-foreground">{validationMutation.data.config.apiUrl}</p>

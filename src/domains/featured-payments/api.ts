@@ -90,3 +90,10 @@ export async function validateAsaasIntegration() {
     {},
   )
 }
+
+export async function updateAsaasEnvironment(mode: 'production' | 'sandbox') {
+  return invokeFeaturedPaymentFunction<
+    { mode: 'production' | 'sandbox' },
+    { mode: 'production' | 'sandbox'; success: boolean }
+  >('update-asaas-environment', { mode })
+}

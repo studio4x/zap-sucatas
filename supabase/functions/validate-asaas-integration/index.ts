@@ -3,6 +3,7 @@
 import { asaasRequest, resolveFeaturedBillingType, resolveFeaturedDueDays, resolveFeaturedPriceValue } from '../_shared/asaas.ts'
 import { requireAdminProfile, resolveHttpErrorStatus } from '../_shared/auth.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
+import { createAdminClient } from '../_shared/supabase.ts'
 
 function hasEnv(name: string) {
   const value = Deno.env.get(name)
@@ -16,10 +17,27 @@ Deno.serve(async (request) => {
 
   try {
     await requireAdminProfile(request)
+    const admin = createAdminClient()
+    const { data: settings, error: settingsError } = await admin
+      .from('system_settings')
+      .select('asaas_environment')
+      .limit(1)
+      .single()
+
+    if (settingsError || !settings) {
+      throw settingsError ?? new Error('System settings not found.')
+    }
+
+    const asaasEnvironment = settings.asaas_environment === 'production' ? 'production' : 'sandbox'
+    const defaultApiUrl =
+      asaasEnvironment === 'production'
+        ? 'https://api.asaas.com/v3'
+        : 'https://api-sandbox.asaas.com/v3'
 
     const config = {
+      asaasEnvironment,
       apiKeyConfigured: hasEnv('ASAAS_API_KEY'),
-      apiUrl: Deno.env.get('ASAAS_API_URL')?.trim() || 'https://api-sandbox.asaas.com/v3',
+      apiUrl: Deno.env.get('ASAAS_API_URL')?.trim() || defaultApiUrl,
       billingType: resolveFeaturedBillingType(),
       dueDays: resolveFeaturedDueDays(),
       featuredPrice: resolveFeaturedPriceValue(),
@@ -53,6 +71,7 @@ Deno.serve(async (request) => {
     return jsonResponse(
       {
         config: {
+          asaasEnvironment: 'sandbox',
           apiKeyConfigured: hasEnv('ASAAS_API_KEY'),
           apiUrl: Deno.env.get('ASAAS_API_URL')?.trim() || 'https://api-sandbox.asaas.com/v3',
           billingType: resolveFeaturedBillingType(),
