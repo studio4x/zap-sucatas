@@ -9,7 +9,6 @@ import {
   Factory,
   Handshake,
   MapPin,
-  Newspaper,
   Recycle,
   ScanSearch,
   Search,
@@ -19,14 +18,12 @@ import {
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { paths } from '@/app/paths'
-import { BlogPostCard } from '@/components/public/blog-post-card'
 import { FaqSection } from '@/components/public/faq-section'
 import { HeroSearchSection } from '@/components/public/hero-search-section'
 import { PublicEmptyState } from '@/components/public/public-empty-state'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { fetchPublicBlogPosts } from '@/domains/blog/api'
 import { fetchPublicCategories } from '@/domains/categories/api'
 import type { PublicListingCategory } from '@/domains/categories/types'
 import { fetchFeaturedPublicListings } from '@/domains/listings/api'
@@ -143,11 +140,6 @@ export function HomePage() {
     queryFn: fetchPublicPricingPageData,
   })
 
-  const blogQuery = useQuery({
-    queryKey: ['blog', 'public', 'home'],
-    queryFn: fetchPublicBlogPosts,
-  })
-
   function handleHeroSearch(nextQuery: string) {
     const trimmed = nextQuery.trim()
     navigate(trimmed ? `${paths.public.listings}?q=${encodeURIComponent(trimmed)}` : paths.public.listings)
@@ -165,108 +157,7 @@ export function HomePage() {
     <div className="space-y-20 pb-6 lg:space-y-24">
       <HeroSearchSection onSearchSubmit={handleHeroSearch} query={query} setQuery={setQuery} />
 
-      <section className="rounded-[2.5rem] bg-white px-5 py-14 sm:px-8 lg:px-12">
-        <div className="mx-auto max-w-5xl space-y-10">
-          <div className="space-y-3 text-center">
-            <h2 className="font-display text-3xl tracking-tight text-foreground sm:text-[2.2rem]">
-              Como o Zap Sucatas funciona
-            </h2>
-            <p className="mx-auto max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-              Um processo simples e transparente para transformar resíduos em receita ou matéria-prima.
-            </p>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-3">
-            {processSteps.map((step, index) => {
-              const Icon = step.icon
-
-              return (
-                <Card
-                  key={step.title}
-                  className="relative rounded-[2rem] border-border/80 bg-white/96 text-center shadow-[0_20px_40px_-32px_rgba(19,33,23,0.25)]"
-                >
-                  <span className="absolute -left-3 top-5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                    {index + 1}
-                  </span>
-                  <CardContent className="flex flex-col items-center gap-5 p-8">
-                    <span className="inline-flex size-16 items-center justify-center rounded-[1.35rem] bg-accent/75 text-primary">
-                      <Icon className="size-7" />
-                    </span>
-                    <div className="space-y-2">
-                      <h3 className="font-display text-[1.75rem] tracking-tight text-foreground">
-                        {step.title}
-                      </h3>
-                      <p className="text-sm leading-7 text-muted-foreground">{step.description}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section className="space-y-8">
-        <div className="space-y-2">
-          <h2 className="font-display text-3xl tracking-tight text-foreground sm:text-[2.15rem]">
-            Categorias estratégicas
-          </h2>
-          <p className="text-sm leading-7 text-muted-foreground sm:text-base">
-            Explore por tipo de material industrial.
-          </p>
-        </div>
-
-        {highlightedCategories.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-            {highlightedCategories.map((category) => {
-              const Icon = getCategoryIcon(category)
-
-              return (
-                <Link
-                  key={category.id}
-                  className="group block"
-                  to={paths.public.categoryDetails(category.slug)}
-                >
-                  <Card className="h-full rounded-[1.7rem] border-border/80 bg-white transition duration-200 hover:-translate-y-1 hover:border-primary/25 hover:shadow-[0_18px_32px_-26px_rgba(19,33,23,0.28)]">
-                    <CardContent className="flex flex-col items-center gap-4 p-5 text-center">
-                      <span className="inline-flex size-14 items-center justify-center rounded-full bg-background text-primary transition group-hover:bg-accent/75">
-                        <Icon className="size-5" />
-                      </span>
-                      <div className="space-y-1">
-                        <h3 className="font-display text-lg tracking-tight text-foreground">{category.name}</h3>
-                        <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                          {category.approvedListings} anúncios
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              )
-            })}
-
-            <Card className="rounded-[1.7rem] border-dashed border-border bg-secondary/30">
-              <CardContent className="flex h-full flex-col items-center justify-center gap-3 p-5 text-center">
-                <span className="inline-flex size-14 items-center justify-center rounded-full bg-white text-muted-foreground">
-                  <CircleEllipsis className="size-5" />
-                </span>
-                <div className="space-y-1">
-                  <h3 className="font-display text-lg tracking-tight text-foreground">Mais setores</h3>
-                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                    Carregando...
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          <PublicEmptyState
-            description="As categorias principais aparecerão aqui assim que o catálogo público estiver mais preenchido."
-            title="Categorias em preparação"
-          />
-        )}
-      </section>
-
-      <section className="-mx-4 rounded-[2.6rem] bg-white px-4 py-16 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
+      <section className="-mx-4 rounded-[2.6rem] border border-border/70 bg-white px-4 py-16 shadow-[0_28px_70px_-42px_rgba(12,60,44,0.14)] md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
         <div className="space-y-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2">
@@ -366,7 +257,108 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[2.6rem] bg-white px-6 py-8 text-foreground shadow-[0_28px_70px_-42px_rgba(12,60,44,0.12)] md:px-10 md:py-10">
+      <section className="space-y-8 rounded-[2.6rem] border border-border/70 bg-white px-5 py-8 shadow-[0_24px_60px_-40px_rgba(12,60,44,0.12)] sm:px-8 lg:px-10 lg:py-10">
+        <div className="space-y-2">
+          <h2 className="font-display text-3xl tracking-tight text-foreground sm:text-[2.15rem]">
+            Categorias estratégicas
+          </h2>
+          <p className="text-sm leading-7 text-muted-foreground sm:text-base">
+            Explore por tipo de material industrial.
+          </p>
+        </div>
+
+        {highlightedCategories.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+            {highlightedCategories.map((category) => {
+              const Icon = getCategoryIcon(category)
+
+              return (
+                <Link
+                  key={category.id}
+                  className="group block"
+                  to={paths.public.categoryDetails(category.slug)}
+                >
+                  <Card className="h-full rounded-[1.7rem] border-border/80 bg-white transition duration-200 hover:-translate-y-1 hover:border-primary/25 hover:shadow-[0_18px_32px_-26px_rgba(19,33,23,0.28)]">
+                    <CardContent className="flex flex-col items-center gap-4 p-5 text-center">
+                      <span className="inline-flex size-14 items-center justify-center rounded-full bg-background text-primary transition group-hover:bg-accent/75">
+                        <Icon className="size-5" />
+                      </span>
+                      <div className="space-y-1">
+                        <h3 className="font-display text-lg tracking-tight text-foreground">{category.name}</h3>
+                        <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                          {category.approvedListings} anúncios
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )
+            })}
+
+            <Card className="rounded-[1.7rem] border-dashed border-border bg-secondary/30">
+              <CardContent className="flex h-full flex-col items-center justify-center gap-3 p-5 text-center">
+                <span className="inline-flex size-14 items-center justify-center rounded-full bg-white text-muted-foreground">
+                  <CircleEllipsis className="size-5" />
+                </span>
+                <div className="space-y-1">
+                  <h3 className="font-display text-lg tracking-tight text-foreground">Mais setores</h3>
+                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    Carregando...
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <PublicEmptyState
+            description="As categorias principais aparecerão aqui assim que o catálogo público estiver mais preenchido."
+            title="Categorias em preparação"
+          />
+        )}
+      </section>
+
+      <section className="rounded-[2.5rem] border border-border/70 bg-white px-5 py-14 shadow-[0_24px_60px_-40px_rgba(12,60,44,0.12)] sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-5xl space-y-10">
+          <div className="space-y-3 text-center">
+            <h2 className="font-display text-3xl tracking-tight text-foreground sm:text-[2.2rem]">
+              Como o Zap Sucatas funciona
+            </h2>
+            <p className="mx-auto max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+              Um processo simples e transparente para transformar resíduos em receita ou matéria-prima.
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-3">
+            {processSteps.map((step, index) => {
+              const Icon = step.icon
+
+              return (
+                <Card
+                  key={step.title}
+                  className="relative rounded-[2rem] border-border/80 bg-white/96 text-center shadow-[0_20px_40px_-32px_rgba(19,33,23,0.25)]"
+                >
+                  <span className="absolute -left-3 top-5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                    {index + 1}
+                  </span>
+                  <CardContent className="flex flex-col items-center gap-5 p-8">
+                    <span className="inline-flex size-16 items-center justify-center rounded-[1.35rem] bg-accent/75 text-primary">
+                      <Icon className="size-7" />
+                    </span>
+                    <div className="space-y-2">
+                      <h3 className="font-display text-[1.75rem] tracking-tight text-foreground">
+                        {step.title}
+                      </h3>
+                      <p className="text-sm leading-7 text-muted-foreground">{step.description}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="overflow-hidden rounded-[2.6rem] border border-border/70 bg-white px-6 py-8 text-foreground shadow-[0_28px_70px_-42px_rgba(12,60,44,0.14)] md:px-10 md:py-10">
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="space-y-6">
             <Badge className="w-fit border-primary/15 bg-primary/5 text-primary" variant="outline">
@@ -420,44 +412,13 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="space-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-2">
-            <h2 className="font-display text-3xl tracking-tight text-foreground sm:text-[2.15rem]">
-              Conteúdo especializado
-            </h2>
-            <p className="text-sm leading-7 text-muted-foreground sm:text-base">
-              Insights sobre reciclagem, mercado industrial e gestão de resíduos.
-            </p>
-          </div>
-
-          <Button asChild className="self-start rounded-full px-5" variant="outline">
-            <Link to={paths.public.blog}>Ver conteúdo</Link>
-          </Button>
-        </div>
-
-        {blogQuery.data?.length ? (
-          <div className="grid gap-5 lg:grid-cols-3">
-            {blogQuery.data.slice(0, 3).map((post) => (
-              <BlogPostCard key={post.id} post={post} />
-            ))}
-          </div>
-        ) : (
-          <PublicEmptyState
-            description="O blog aparecerá aqui com artigos sobre mercado, reciclagem, metais e operação comercial."
-            icon={Newspaper}
-            title="Conteúdo editorial em preparação"
-          />
-        )}
-      </section>
-
       <FaqSection
         description="Respostas objetivas para quem quer entender o funcionamento do portal e negociar com mais confiança."
         items={faqItems}
         title="Perguntas frequentes"
       />
 
-      <section className="rounded-[2.6rem] border border-primary/10 bg-accent/55 px-6 py-14 text-center md:px-10">
+      <section className="rounded-[2.6rem] border border-primary/10 bg-accent/55 px-6 py-14 text-center shadow-[0_24px_60px_-42px_rgba(12,60,44,0.18)] md:px-10">
         <div className="mx-auto max-w-3xl space-y-6">
           <div className="space-y-3">
             <h2 className="font-display text-3xl tracking-tight text-foreground sm:text-[2.15rem]">
