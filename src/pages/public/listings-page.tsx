@@ -130,8 +130,95 @@ export function ListingsPage() {
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
-        <aside className="space-y-4">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
+        <div className="space-y-6">
+          {featuredListingsQuery.data?.length ? (
+            <div className="rounded-[2rem] border border-amber-200 bg-[linear-gradient(180deg,#fff9ec_0%,#fff3d6_100%)] p-5 shadow-[0_26px_55px_-42px_rgba(168,111,0,0.45)] md:p-6">
+              <FeaturedListingsSection
+                description="Anuncios com maior prioridade de exibicao no catalogo."
+                listings={featuredListingsQuery.data}
+                title="Anúncios em destaque"
+              />
+            </div>
+          ) : null}
+
+          <ListingSortBar
+            onChange={(value) => {
+              setPage(1)
+              setSort(value as PublicListingSort)
+            }}
+            options={sortOptions}
+            resultLabel={`${totalCount} anuncio${totalCount === 1 ? '' : 's'} neste recorte${activeFiltersCount > 0 ? ` • ${activeFiltersCount} filtro${activeFiltersCount === 1 ? '' : 's'} ativo${activeFiltersCount === 1 ? '' : 's'}` : ''}`}
+            value={sort}
+          />
+
+          {listingsQuery.isLoading ? (
+            <Card className="rounded-[1.8rem] border-border/80">
+              <CardContent className="p-6 text-sm text-muted-foreground">
+                Carregando catalogo publico...
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {listingsQuery.isError ? (
+            <Card className="rounded-[1.8rem] border-destructive/20 bg-destructive/5">
+              <CardContent className="p-6 text-sm text-destructive">
+                Nao foi possivel carregar os anuncios publicos neste momento.
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {!listingsQuery.isLoading ? (
+            <ListingGrid
+              emptyDescription="Ajuste a busca ou limpe os filtros para encontrar outros lotes e materiais aprovados."
+              emptyTitle="Nenhum anuncio encontrado"
+              listings={listings}
+            />
+          ) : null}
+
+          {totalCount > PAGE_SIZE ? (
+            <div className="flex flex-col gap-3 rounded-[1.7rem] border border-border bg-card/88 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground">
+                Pagina {normalizedPage} de {totalPages}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  className="inline-flex h-11 items-center justify-center rounded-[1.1rem] border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={normalizedPage <= 1}
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  type="button"
+                >
+                  Anterior
+                </button>
+                <button
+                  className="inline-flex h-11 items-center justify-center rounded-[1.1rem] border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={normalizedPage >= totalPages}
+                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                  type="button"
+                >
+                  Proxima
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <aside className="sticky top-20 space-y-4 self-start">
+          <div className="rounded-[1.25rem] border border-[#c8d8c8] bg-white/95 p-3 shadow-[0_18px_45px_-36px_rgba(19,33,23,0.4)] backdrop-blur">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                className="h-12 rounded-[1rem] border-[#d5e1d5] bg-white pl-12 pr-4"
+                onChange={(event) => {
+                  setPage(1)
+                  setQuery(event.target.value)
+                }}
+                placeholder="Busque por material, sucata, maquina, lote, resumo ou cidade"
+                value={query}
+              />
+            </div>
+          </div>
+
           <ListingSidebarCard title="Categorias">
             <div className="flex flex-col gap-2">
               <Button
@@ -220,93 +307,6 @@ export function ListingsPage() {
             </div>
           </ListingSidebarCard>
         </aside>
-
-        <div className="space-y-6">
-          <div className="sticky top-20 z-20 rounded-[1.25rem] border border-[#c8d8c8] bg-white/95 p-3 shadow-[0_18px_45px_-36px_rgba(19,33,23,0.4)] backdrop-blur">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                className="h-12 rounded-[1rem] border-[#d5e1d5] bg-white pl-12 pr-4"
-                onChange={(event) => {
-                  setPage(1)
-                  setQuery(event.target.value)
-                }}
-                placeholder="Busque por material, sucata, maquina, lote, resumo ou cidade"
-                value={query}
-              />
-            </div>
-          </div>
-
-          {featuredListingsQuery.data?.length ? (
-            <div className="rounded-[2rem] border border-amber-200 bg-[linear-gradient(180deg,#fff9ec_0%,#fff3d6_100%)] p-5 shadow-[0_26px_55px_-42px_rgba(168,111,0,0.45)] md:p-6">
-              <FeaturedListingsSection
-                description="Anuncios com maior prioridade de exibicao no catalogo."
-                listings={featuredListingsQuery.data}
-                title="Anúncios em destaque"
-              />
-            </div>
-          ) : null}
-
-          <ListingSortBar
-            onChange={(value) => {
-              setPage(1)
-              setSort(value as PublicListingSort)
-            }}
-            options={sortOptions}
-            resultLabel={`${totalCount} anuncio${totalCount === 1 ? '' : 's'} neste recorte${activeFiltersCount > 0 ? ` • ${activeFiltersCount} filtro${activeFiltersCount === 1 ? '' : 's'} ativo${activeFiltersCount === 1 ? '' : 's'}` : ''}`}
-            value={sort}
-          />
-
-          {listingsQuery.isLoading ? (
-            <Card className="rounded-[1.8rem] border-border/80">
-              <CardContent className="p-6 text-sm text-muted-foreground">
-                Carregando catalogo publico...
-              </CardContent>
-            </Card>
-          ) : null}
-
-          {listingsQuery.isError ? (
-            <Card className="rounded-[1.8rem] border-destructive/20 bg-destructive/5">
-              <CardContent className="p-6 text-sm text-destructive">
-                Nao foi possivel carregar os anuncios publicos neste momento.
-              </CardContent>
-            </Card>
-          ) : null}
-
-          {!listingsQuery.isLoading ? (
-            <ListingGrid
-              emptyDescription="Ajuste a busca ou limpe os filtros para encontrar outros lotes e materiais aprovados."
-              emptyTitle="Nenhum anuncio encontrado"
-              listings={listings}
-            />
-          ) : null}
-
-          {totalCount > PAGE_SIZE ? (
-            <div className="flex flex-col gap-3 rounded-[1.7rem] border border-border bg-card/88 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted-foreground">
-                Pagina {normalizedPage} de {totalPages}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  className="inline-flex h-11 items-center justify-center rounded-[1.1rem] border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
-                  disabled={normalizedPage <= 1}
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
-                  type="button"
-                >
-                  Anterior
-                </button>
-                <button
-                  className="inline-flex h-11 items-center justify-center rounded-[1.1rem] border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
-                  disabled={normalizedPage >= totalPages}
-                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-                  type="button"
-                >
-                  Proxima
-                </button>
-              </div>
-            </div>
-          ) : null}
-        </div>
       </div>
     </section>
   )
