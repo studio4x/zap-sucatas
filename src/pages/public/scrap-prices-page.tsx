@@ -31,8 +31,9 @@ export function ScrapPricesPage() {
 
   return (
     <section className="mx-auto flex w-[80%] max-w-[1200px] flex-col items-center space-y-8">
-      <div className="w-full rounded-[2rem] border border-border bg-card p-6">
+      <div className="w-fit max-w-full rounded-[2rem] border border-border bg-card p-6">
         <PublicSectionHeading
+          className="md:flex-col md:items-start md:justify-start"
           description="Referência pública para acompanhar produtos, preços e quantidades no mercado de sucatas."
           eyebrow="Preço das Sucatas"
           title="Tabela de preço do ferro velho"
