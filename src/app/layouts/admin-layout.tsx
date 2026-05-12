@@ -96,7 +96,7 @@ const adminNavItems = [
   },
   {
     to: paths.admin.pricing,
-    label: 'Preços',
+    label: 'Preços LME',
     icon: SlidersHorizontal,
   },
   {

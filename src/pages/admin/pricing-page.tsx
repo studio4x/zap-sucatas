@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { RefreshCcw, Upload } from 'lucide-react'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
-import { AdminFilterCard } from '@/components/admin/admin-filter-card'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminPagination } from '@/components/admin/admin-pagination'
 import { AdminRowActions } from '@/components/admin/admin-row-actions'
@@ -16,8 +15,6 @@ import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
 import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select } from '@/components/ui/select'
 import {
   deleteScrapPriceEntry,
   fetchAdminPricingDashboard,
@@ -80,9 +77,6 @@ export function AdminPricingPage() {
   } = useOperationFeedback()
   const [editingEntry, setEditingEntry] = useState<ScrapPriceEntry | null>(null)
   const [entryPendingRemoval, setEntryPendingRemoval] = useState<ScrapPriceEntry | null>(null)
-  const [manualQuery, setManualQuery] = useState('')
-  const [manualStatusFilter, setManualStatusFilter] = useState<'active' | 'all' | 'inactive'>('all')
-  const [providerFilter, setProviderFilter] = useState('all')
   const [manualPage, setManualPage] = useState(1)
   const [snapshotPage, setSnapshotPage] = useState(1)
 
@@ -205,30 +199,11 @@ export function AdminPricingPage() {
   const isWestmetallUnavailable =
     syncStatus?.lastStatus === 'warning' &&
     (syncStatus.lastMessage ?? '').toLowerCase().includes('westmetall sem cotacoes numericas')
-  const providerOptions = ['all', ...new Set(data.recentSnapshots.map((snapshot) => snapshot.providerName))]
-  const filteredManualEntries = data.manualEntries.filter((entry) => {
-    const normalizedQuery = manualQuery.trim().toLowerCase()
-    const matchesQuery =
-      normalizedQuery.length === 0
-        ? true
-        : `${entry.materialName} ${entry.regionName ?? ''} ${entry.priceLabel}`.toLowerCase().includes(normalizedQuery)
-    const matchesStatus =
-      manualStatusFilter === 'all'
-        ? true
-        : manualStatusFilter === 'active'
-          ? entry.isActive
-          : !entry.isActive
-
-    return matchesQuery && matchesStatus
-  })
-  const filteredSnapshots = data.recentSnapshots.filter((snapshot) =>
-    providerFilter === 'all' ? true : snapshot.providerName === providerFilter,
-  )
-  const paginatedManualEntries = filteredManualEntries.slice(
+  const paginatedManualEntries = data.manualEntries.slice(
     (manualPage - 1) * MANUAL_PAGE_SIZE,
     manualPage * MANUAL_PAGE_SIZE,
   )
-  const paginatedSnapshots = filteredSnapshots.slice(
+  const paginatedSnapshots = data.recentSnapshots.slice(
     (snapshotPage - 1) * SNAPSHOT_PAGE_SIZE,
     snapshotPage * SNAPSHOT_PAGE_SIZE,
   )
@@ -362,61 +337,6 @@ export function AdminPricingPage() {
         latestValues={data.latestValues}
       />
 
-      <AdminFilterCard
-        actions={
-          <Button
-            onClick={() => {
-              setManualQuery('')
-              setManualStatusFilter('all')
-              setProviderFilter('all')
-              setManualPage(1)
-              setSnapshotPage(1)
-              clearFeedback()
-            }}
-            type="button"
-            variant="outline"
-          >
-            Limpar filtros
-          </Button>
-        }
-        description="Os filtros controlam tanto a tabela manual quanto a lista de snapshots recentes."
-      >
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_200px_220px]">
-          <Input
-            onChange={(event) => {
-              setManualPage(1)
-              setManualQuery(event.target.value)
-            }}
-            placeholder="Buscar entrada manual por material, região ou rótulo"
-            value={manualQuery}
-          />
-          <Select
-            onChange={(event) => {
-              setManualPage(1)
-              setManualStatusFilter(event.target.value as typeof manualStatusFilter)
-            }}
-            value={manualStatusFilter}
-          >
-            <option value="all">Todas as entradas</option>
-            <option value="active">Apenas ativas</option>
-            <option value="inactive">Apenas inativas</option>
-          </Select>
-          <Select
-            onChange={(event) => {
-              setSnapshotPage(1)
-              setProviderFilter(event.target.value)
-            }}
-            value={providerFilter}
-          >
-            {providerOptions.map((provider) => (
-              <option key={provider} value={provider}>
-                {provider === 'all' ? 'Todos os providers' : provider}
-              </option>
-            ))}
-          </Select>
-        </div>
-      </AdminFilterCard>
-
       <AdminDataTable
         columns={[
           {
@@ -486,7 +406,7 @@ export function AdminPricingPage() {
         ]}
         data={paginatedManualEntries}
         emptyDescription="Nenhuma entrada manual foi encontrada com os filtros atuais."
-        emptyTitle="Sem referências manuais"
+        emptyTitle="Sem entradas manuais"
         getRowKey={(entry) => entry.id}
       />
 
@@ -494,7 +414,7 @@ export function AdminPricingPage() {
         currentPage={manualPage}
         onPageChange={setManualPage}
         pageSize={MANUAL_PAGE_SIZE}
-        totalItems={filteredManualEntries.length}
+        totalItems={data.manualEntries.length}
       />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_360px]">
@@ -574,7 +494,7 @@ export function AdminPricingPage() {
         currentPage={snapshotPage}
         onPageChange={setSnapshotPage}
         pageSize={SNAPSHOT_PAGE_SIZE}
-        totalItems={filteredSnapshots.length}
+        totalItems={data.recentSnapshots.length}
       />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
