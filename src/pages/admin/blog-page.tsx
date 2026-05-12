@@ -15,7 +15,6 @@ import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
 import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import {
@@ -67,8 +66,11 @@ export function AdminBlogPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | BlogPostStatus>('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [page, setPage] = useState(1)
+  const [activeTab, setActiveTab] = useState<'categories' | 'posts'>('posts')
   const [editingPost, setEditingPost] = useState<AdminBlogPost | null>(null)
   const [editingCategory, setEditingCategory] = useState<AdminBlogCategory | null>(null)
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false)
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
   const [postPendingRemoval, setPostPendingRemoval] = useState<AdminBlogPost | null>(null)
   const [categoryPendingRemoval, setCategoryPendingRemoval] = useState<AdminBlogCategory | null>(null)
 
@@ -113,6 +115,7 @@ export function AdminBlogPage() {
           : 'Categoria editorial criada com sucesso.',
       )
       setEditingCategory(null)
+      setIsCategoryModalOpen(false)
       await invalidateBlog()
     },
   })
@@ -153,7 +156,8 @@ export function AdminBlogPage() {
           ? `Post "${savedPost.title}" atualizado com sucesso.`
           : `Post "${savedPost.title}" criado com sucesso.`,
       )
-      setEditingPost(savedPost)
+      setEditingPost(null)
+      setIsPostModalOpen(false)
       await invalidateBlog()
     },
   })
@@ -207,11 +211,24 @@ export function AdminBlogPage() {
               onClick={() => {
                 clearFeedback()
                 setEditingPost(null)
+                setIsPostModalOpen(true)
               }}
               type="button"
             >
               <Plus className="size-4" />
               Novo post
+            </Button>
+            <Button
+              onClick={() => {
+                clearFeedback()
+                setEditingCategory(null)
+                setIsCategoryModalOpen(true)
+              }}
+              type="button"
+              variant="outline"
+            >
+              <Plus className="size-4" />
+              Nova categoria
             </Button>
             <Button asChild type="button" variant="outline">
               <Link to={paths.public.blog}>Blog publico</Link>
@@ -238,144 +255,84 @@ export function AdminBlogPage() {
 
       {feedback ? <OperationFeedback feedback={feedback} /> : null}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_380px]">
-        <AdminBlogPostForm
-          key={editingPost?.id ?? 'new-blog-post'}
-          categories={categories}
-          defaultValues={postDefaultValues}
-          existingPost={editingPost}
-          isPending={savePostMutation.isPending}
-          onCancel={
-            editingPost
-              ? () => {
-                  setEditingPost(null)
-                }
-              : undefined
-          }
-          onSubmit={(values, coverFile) => savePostMutation.mutate({ coverFile, values })}
-          submitLabel={editingPost ? 'Atualizar post' : 'Criar post'}
-        />
-
-        <div className="space-y-6">
-          <AdminBlogCategoryForm
-            defaultValues={categoryDefaultValues}
-            isPending={saveCategoryMutation.isPending}
-            onCancel={
-              editingCategory
-                ? () => {
-                    setEditingCategory(null)
-                  }
-                : undefined
-            }
-            onSubmit={(values) => saveCategoryMutation.mutate(values)}
-            submitLabel={editingCategory ? 'Atualizar categoria' : 'Criar categoria'}
-          />
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Categorias editoriais</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {categoriesQuery.isLoading ? (
-                <p className="text-sm text-muted-foreground">Carregando categorias...</p>
-              ) : categories.length > 0 ? (
-                categories.map((category) => (
-                  <div key={category.id} className="rounded-2xl border border-border/70 px-4 py-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="space-y-1">
-                        <p className="font-medium text-foreground">{category.name}</p>
-                        <p className="text-xs text-muted-foreground">{category.slug}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {category.postCount} posts, {category.publishedPostCount} publicados
-                        </p>
-                      </div>
-                      <AdminRowActions
-                        actions={[
-                          {
-                            icon: Pencil,
-                            label: 'Editar',
-                            onClick: () => setEditingCategory(category),
-                            variant: 'outline',
-                          },
-                          {
-                            disabled: deleteCategoryMutation.isPending || category.postCount > 0,
-                            icon: Trash2,
-                            label: 'Excluir',
-                            onClick: () => setCategoryPendingRemoval(category),
-                            variant: 'destructive',
-                          },
-                        ]}
-                      />
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Nenhuma categoria editorial cadastrada ainda.
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+      <div className="inline-flex gap-2 rounded-2xl border border-border/70 bg-muted/20 p-1">
+        <Button
+          onClick={() => setActiveTab('posts')}
+          size="sm"
+          type="button"
+          variant={activeTab === 'posts' ? 'default' : 'ghost'}
+        >
+          Posts
+        </Button>
+        <Button
+          onClick={() => setActiveTab('categories')}
+          size="sm"
+          type="button"
+          variant={activeTab === 'categories' ? 'default' : 'ghost'}
+        >
+          Categorias
+        </Button>
       </div>
 
-      <AdminFilterCard
-        actions={
-          <Button
-            onClick={() => {
-              clearFeedback()
-              setCategoryFilter('all')
-              setPage(1)
-              setQuery('')
-              setStatusFilter('all')
-            }}
-            type="button"
-            variant="outline"
+      {activeTab === 'posts' ? (
+        <>
+          <AdminFilterCard
+            actions={
+              <Button
+                onClick={() => {
+                  clearFeedback()
+                  setCategoryFilter('all')
+                  setPage(1)
+                  setQuery('')
+                  setStatusFilter('all')
+                }}
+                type="button"
+                variant="outline"
+              >
+                Limpar filtros
+              </Button>
+            }
+            description="Filtre o dataset editorial por termo, status e categoria antes de agir sobre os posts."
           >
-            Limpar filtros
-          </Button>
-        }
-        description="Filtre o dataset editorial por termo, status e categoria antes de agir sobre os posts."
-      >
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_220px]">
-          <Input
-            onChange={(event) => {
-              setPage(1)
-              setQuery(event.target.value)
-            }}
-            placeholder="Buscar por titulo, slug ou resumo"
-            value={query}
-          />
-          <Select
-            onChange={(event) => {
-              setPage(1)
-              setStatusFilter(event.target.value as typeof statusFilter)
-            }}
-            value={statusFilter}
-          >
-            <option value="all">Todos os status</option>
-            <option value="draft">Rascunhos</option>
-            <option value="published">Publicados</option>
-            <option value="archived">Arquivados</option>
-          </Select>
-          <Select
-            onChange={(event) => {
-              setPage(1)
-              setCategoryFilter(event.target.value)
-            }}
-            value={categoryFilter}
-          >
-            <option value="all">Todas as categorias</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </Select>
-        </div>
-      </AdminFilterCard>
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_220px]">
+              <Input
+                onChange={(event) => {
+                  setPage(1)
+                  setQuery(event.target.value)
+                }}
+                placeholder="Buscar por titulo, slug ou resumo"
+                value={query}
+              />
+              <Select
+                onChange={(event) => {
+                  setPage(1)
+                  setStatusFilter(event.target.value as typeof statusFilter)
+                }}
+                value={statusFilter}
+              >
+                <option value="all">Todos os status</option>
+                <option value="draft">Rascunhos</option>
+                <option value="published">Publicados</option>
+                <option value="archived">Arquivados</option>
+              </Select>
+              <Select
+                onChange={(event) => {
+                  setPage(1)
+                  setCategoryFilter(event.target.value)
+                }}
+                value={categoryFilter}
+              >
+                <option value="all">Todas as categorias</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </AdminFilterCard>
 
-      <AdminDataTable
+          <AdminDataTable
         columns={[
           {
             header: 'Post',
@@ -440,7 +397,10 @@ export function AdminBlogPage() {
                   {
                     icon: Pencil,
                     label: 'Editar',
-                    onClick: () => setEditingPost(post),
+                    onClick: () => {
+                      setEditingPost(post)
+                      setIsPostModalOpen(true)
+                    },
                     variant: 'outline',
                   },
                   ...(post.status === 'published'
@@ -472,14 +432,125 @@ export function AdminBlogPage() {
         getRowKey={(post) => post.id}
         isError={blogQuery.isError || categoriesQuery.isError || statsQuery.isError}
         isLoading={blogQuery.isLoading || categoriesQuery.isLoading || statsQuery.isLoading}
-      />
+          />
 
-      <AdminPagination
-        currentPage={page}
-        onPageChange={setPage}
-        pageSize={PAGE_SIZE}
-        totalItems={totalCount}
-      />
+          <AdminPagination
+            currentPage={page}
+            onPageChange={setPage}
+            pageSize={PAGE_SIZE}
+            totalItems={totalCount}
+          />
+        </>
+      ) : (
+        <AdminDataTable
+          columns={[
+            {
+              header: 'Categoria',
+              cell: (category) => (
+                <div className="space-y-1">
+                  <p className="font-medium text-foreground">{category.name}</p>
+                  <p className="text-xs text-muted-foreground">{category.slug}</p>
+                </div>
+              ),
+            },
+            {
+              header: 'Uso',
+              cell: (category) => (
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  <p>{category.postCount} posts</p>
+                  <p>{category.publishedPostCount} publicados</p>
+                </div>
+              ),
+            },
+            {
+              header: 'Acoes',
+              className: 'w-[220px] text-right',
+              cell: (category) => (
+                <AdminRowActions
+                  actions={[
+                    {
+                      icon: Pencil,
+                      label: 'Editar',
+                      onClick: () => {
+                        setEditingCategory(category)
+                        setIsCategoryModalOpen(true)
+                      },
+                      variant: 'outline',
+                    },
+                    {
+                      disabled: deleteCategoryMutation.isPending || category.postCount > 0,
+                      icon: Trash2,
+                      label: 'Excluir',
+                      onClick: () => setCategoryPendingRemoval(category),
+                      variant: 'destructive',
+                    },
+                  ]}
+                />
+              ),
+            },
+          ]}
+          data={categories}
+          emptyDescription="Nenhuma categoria editorial cadastrada ainda."
+          emptyTitle="Sem categorias editoriais"
+          errorMessage="Nao foi possivel carregar as categorias."
+          getRowKey={(category) => category.id}
+          isError={categoriesQuery.isError}
+          isLoading={categoriesQuery.isLoading}
+        />
+      )}
+
+      {isPostModalOpen ? (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center px-4">
+          <button
+            aria-label="Fechar modal de post"
+            className="absolute inset-0 bg-slate-950/45"
+            onClick={() => {
+              if (!savePostMutation.isPending) setIsPostModalOpen(false)
+            }}
+            type="button"
+          />
+          <div className="relative max-h-[90vh] w-full max-w-5xl overflow-auto rounded-[1.75rem] border border-border bg-card p-6 shadow-2xl">
+            <AdminBlogPostForm
+              key={editingPost?.id ?? 'new-blog-post'}
+              categories={categories}
+              defaultValues={postDefaultValues}
+              existingPost={editingPost}
+              isPending={savePostMutation.isPending}
+              onCancel={() => {
+                setEditingPost(null)
+                setIsPostModalOpen(false)
+              }}
+              onSubmit={(values, coverFile) => savePostMutation.mutate({ coverFile, values })}
+              submitLabel={editingPost ? 'Atualizar post' : 'Criar post'}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {isCategoryModalOpen ? (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center px-4">
+          <button
+            aria-label="Fechar modal de categoria editorial"
+            className="absolute inset-0 bg-slate-950/45"
+            onClick={() => {
+              if (!saveCategoryMutation.isPending) setIsCategoryModalOpen(false)
+            }}
+            type="button"
+          />
+          <div className="relative w-full max-w-2xl rounded-[1.75rem] border border-border bg-card p-6 shadow-2xl">
+            <AdminBlogCategoryForm
+              defaultValues={categoryDefaultValues}
+              isPending={saveCategoryMutation.isPending}
+              onCancel={() => {
+                setEditingCategory(null)
+                setIsCategoryModalOpen(false)
+              }}
+              onSubmit={(values) => saveCategoryMutation.mutate(values)}
+              submitLabel={editingCategory ? 'Atualizar categoria' : 'Criar categoria'}
+            />
+          </div>
+        </div>
+      ) : null}
 
       <ConfirmActionDialog
         confirmLabel="Excluir categoria"
