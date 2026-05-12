@@ -195,3 +195,15 @@ verify_jwt = false
 [functions.list-location-listings]
 verify_jwt = false
 
+[functions.list-scrap-prices-public]
+verify_jwt = false
+
+[functions.list-scrap-prices-admin]
+verify_jwt = false
+
+[functions.upsert-scrap-price]
+verify_jwt = false
+
+[functions.delete-scrap-price]
+verify_jwt = false
+

@@ -35,6 +35,7 @@ const AdminLogsPage = lazy(() => import('@/pages/admin/logs-page').then((module)
 const AdminMaterialsPage = lazy(() => import('@/pages/admin/materials-page').then((module) => ({ default: module.AdminMaterialsPage })))
 const AdminOverviewPage = lazy(() => import('@/pages/admin/overview-page').then((module) => ({ default: module.AdminOverviewPage })))
 const AdminPricingPage = lazy(() => import('@/pages/admin/pricing-page').then((module) => ({ default: module.AdminPricingPage })))
+const AdminScrapPricesPage = lazy(() => import('@/pages/admin/scrap-prices-page').then((module) => ({ default: module.AdminScrapPricesPage })))
 const AdminFeaturedPaymentsPage = lazy(() => import('@/pages/admin/featured-payments-page').then((module) => ({ default: module.AdminFeaturedPaymentsPage })))
 const AdminQuestionsPage = lazy(() => import('@/pages/admin/questions-page').then((module) => ({ default: module.AdminQuestionsPage })))
 const AdminNotificationsPage = lazy(() => import('@/pages/admin/notifications-page').then((module) => ({ default: module.AdminNotificationsPage })))
@@ -51,6 +52,7 @@ const HomePage = lazy(() => import('@/pages/public/home-page').then((module) => 
 const ListingDetailsPage = lazy(() => import('@/pages/public/listing-details-page').then((module) => ({ default: module.ListingDetailsPage })))
 const ListingsPage = lazy(() => import('@/pages/public/listings-page').then((module) => ({ default: module.ListingsPage })))
 const PricingPage = lazy(() => import('@/pages/public/pricing-page').then((module) => ({ default: module.PricingPage })))
+const ScrapPricesPage = lazy(() => import('@/pages/public/scrap-prices-page').then((module) => ({ default: module.ScrapPricesPage })))
 const SupportPage = lazy(() => import('@/pages/public/support-page').then((module) => ({ default: module.SupportPage })))
 const NotFoundPage = lazy(() => import('@/pages/shared/not-found-page').then((module) => ({ default: module.NotFoundPage })))
 const SupportTicketDetailPage = lazy(() => import('@/pages/shared/support-ticket-detail-page').then((module) => ({ default: module.SupportTicketDetailPage })))
@@ -88,6 +90,10 @@ export const routes: RouteObject[] = [
       {
         path: 'tabela-de-precos',
         element: withSuspense(<PricingPage />),
+      },
+      {
+        path: 'tabela-de-preco-do-ferro-velho',
+        element: withSuspense(<ScrapPricesPage />),
       },
       {
         path: 'blog',
@@ -264,6 +270,10 @@ export const routes: RouteObject[] = [
       {
         path: 'precos',
         element: withSuspense(<AdminPricingPage />),
+      },
+      {
+        path: 'preco-das-sucatas',
+        element: withSuspense(<AdminScrapPricesPage />),
       },
       {
         path: 'configuracoes',

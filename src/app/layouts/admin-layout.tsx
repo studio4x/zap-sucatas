@@ -12,6 +12,7 @@ import {
   LifeBuoy,
   ShieldCheck,
   SlidersHorizontal,
+  Table2,
   WalletCards,
   SquareTerminal,
   Tags,
@@ -97,6 +98,11 @@ const adminNavItems = [
     to: paths.admin.pricing,
     label: 'Preços',
     icon: SlidersHorizontal,
+  },
+  {
+    to: paths.admin.scrapPrices,
+    label: 'Preço das Sucatas',
+    icon: Table2,
   },
   {
     to: paths.admin.settings,
