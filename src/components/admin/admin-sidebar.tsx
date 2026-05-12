@@ -57,16 +57,7 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
         ) : null}
       </div>
 
-      <div className="mt-4 rounded-[1rem] border border-sidebar-border bg-background/92 px-3 py-3 shadow-[0_12px_30px_-24px_rgba(19,33,23,0.18)]">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-          Painel admin
-        </p>
-        <p className="mt-2 text-sm leading-6 text-foreground">
-          Moderação, catálogo, operação de preços, conteúdo e trilha técnica do MVP.
-        </p>
-      </div>
-
-      <nav className="mt-4 flex-1 space-y-1 overflow-y-auto pr-1">
+      <nav className="mt-2 flex-1 space-y-1 overflow-y-auto pr-1">
         {items.map(({ end, icon: Icon, label, to }) => (
           <NavLink
             className={({ isActive }) =>
