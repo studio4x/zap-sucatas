@@ -5,7 +5,6 @@ import {
   Battery,
   CircleEllipsis,
   CircleHelp,
-  Clock3,
   Factory,
   Handshake,
   MapPin,
@@ -13,7 +12,6 @@ import {
   ScanSearch,
   Search,
   ShieldCheck,
-  TrendingUp,
   Wrench,
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -30,7 +28,7 @@ import { fetchFeaturedPublicListings } from '@/domains/listings/api'
 import type { Listing } from '@/domains/listings/types'
 import { formatListingDate } from '@/domains/listings/utils'
 import { fetchPublicPricingPageData } from '@/domains/pricing/api'
-import { formatPricingDate, formatPricingNumber } from '@/domains/pricing/utils'
+import { formatPricingDate } from '@/domains/pricing/utils'
 
 const faqItems = [
   {
@@ -77,19 +75,6 @@ const categoryIconMap: Record<string, typeof Factory> = {
   plastico: Recycle,
 }
 
-const marketCards = [
-  {
-    accentClassName: 'text-emerald-300',
-    code: 'CU',
-    label: 'Cobre LME',
-  },
-  {
-    accentClassName: 'text-emerald-200',
-    code: 'AL',
-    label: 'Alumínio',
-  },
-] as const
-
 function getCategoryIcon(category: PublicListingCategory) {
   const normalizedSlug = category.slug
     .normalize('NFD')
@@ -105,20 +90,6 @@ function getListingHref(listing: Listing) {
 
 function getListingImage(listing: Listing) {
   return listing.images[0]?.publicUrl ?? null
-}
-
-function renderMarketBars(barHeights: number[]) {
-  return (
-    <div className="mt-5 flex h-14 items-end gap-1.5">
-      {barHeights.map((height, index) => (
-        <span
-          key={`${height}-${index}`}
-          className="block flex-1 rounded-full bg-white/75"
-          style={{ height: `${height}px`, opacity: 0.42 + index * 0.08 }}
-        />
-      ))}
-    </div>
-  )
 }
 
 export function HomePage() {
@@ -151,7 +122,33 @@ export function HomePage() {
     .slice(0, 5)
 
   const featuredListings = featuredListingsQuery.data?.slice(0, 4) ?? []
-  const latestPricingEntries = pricingQuery.data?.manualEntries.slice(0, 2) ?? []
+  const copperDailyRows = (pricingQuery.data?.historyRows ?? [])
+    .filter((row) => row.rowType === 'daily' && typeof row.values.CU === 'number')
+    .slice(0, 2)
+  const latestCopperDaily = copperDailyRows[0]?.values.CU
+  const previousCopperDaily = copperDailyRows[1]?.values.CU
+
+  const copperWeeklyRows = (pricingQuery.data?.historyRows ?? [])
+    .filter((row) => row.rowType === 'weekly_average' && typeof row.values.CU === 'number')
+    .slice(0, 2)
+  const latestCopperWeekly = copperWeeklyRows[0]?.values.CU
+  const previousCopperWeekly = copperWeeklyRows[1]?.values.CU
+
+  const copperMonthlyRows = (pricingQuery.data?.historyRows ?? [])
+    .filter((row) => row.rowType === 'monthly_average' && typeof row.values.CU === 'number')
+    .slice(0, 2)
+  const latestCopperMonthly = copperMonthlyRows[0]?.values.CU
+  const previousCopperMonthly = copperMonthlyRows[1]?.values.CU
+
+  function formatVariation(current?: number, previous?: number) {
+    if (typeof current !== 'number' || typeof previous !== 'number' || previous === 0) {
+      return '--'
+    }
+
+    const percentage = ((current - previous) / previous) * 100
+    const sign = percentage > 0 ? '+' : ''
+    return `${sign}${percentage.toFixed(2)}%`
+  }
 
   return (
     <div className="space-y-20 pb-6 lg:space-y-24">
@@ -295,19 +292,16 @@ export function HomePage() {
               )
             })}
 
-            <Card className="rounded-[1.7rem] border-dashed border-border bg-secondary/30">
-              <CardContent className="flex h-full flex-col items-center justify-center gap-3 p-5 text-center">
-                <span className="inline-flex size-14 items-center justify-center rounded-full bg-white text-muted-foreground">
-                  <CircleEllipsis className="size-5" />
-                </span>
-                <div className="space-y-1">
-                  <h3 className="font-display text-lg tracking-tight text-foreground">Mais setores</h3>
-                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                    Carregando...
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <Button
+              asChild
+              className="h-full min-h-[170px] rounded-[1.7rem] border border-dashed border-border bg-secondary/30 text-foreground hover:bg-secondary/50"
+              variant="ghost"
+            >
+              <Link to={paths.public.categories}>
+                Ver todas as categorias
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
           </div>
         ) : (
           <PublicEmptyState
@@ -367,10 +361,10 @@ export function HomePage() {
 
             <div className="space-y-3">
               <h2 className="font-display text-3xl tracking-tight text-foreground sm:text-[2.3rem]">
-                Inteligência de mercado
+                Preços LME
               </h2>
               <p className="max-w-xl text-sm leading-7 text-muted-foreground sm:text-base">
-                Acompanhe as tendências de preço das principais commodities e referências públicas do mercado de sucata.
+                Resumo rápido das variações do cobre para orientar leitura de mercado e negociação.
               </p>
             </div>
 
@@ -378,36 +372,31 @@ export function HomePage() {
               <Button asChild className="bg-primary !text-white hover:bg-primary/90" style={{ color: '#ffffff' }}>
                 <Link to={paths.public.pricing}>Ver relatório completo</Link>
               </Button>
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-4 py-2 text-sm text-foreground">
-                <Clock3 className="size-4" />
-                {latestPricingEntries.length > 0 ? `${latestPricingEntries.length} referências manuais ativas` : 'Novas referências em breve'}
-              </div>
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {marketCards.map((card, index) => (
-              <div
-                key={card.code}
-                className="rounded-[1.9rem] border border-border bg-background p-5 shadow-sm"
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-foreground/80">{card.label}</p>
-                    <p className="mt-2 text-2xl font-semibold text-foreground">
-                      {typeof pricingQuery.data?.latestValues[card.code] === 'number'
-                        ? formatPricingNumber(pricingQuery.data.latestValues[card.code] ?? 0, 2)
-                        : '--'}
-                    </p>
-                  </div>
-                  <span className={`inline-flex items-center gap-1 text-sm font-semibold ${card.accentClassName}`}>
-                    <TrendingUp className="size-4" />
-                    Referência
-                  </span>
-                </div>
-                {renderMarketBars(index === 0 ? [10, 15, 20, 28, 34, 46] : [34, 28, 24, 18, 15, 12])}
-              </div>
-            ))}
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-[1.9rem] border border-border bg-background p-5 shadow-sm">
+              <p className="text-sm font-medium text-foreground/80">Variação diária do cobre</p>
+              <p className="mt-2 text-2xl font-semibold text-foreground">
+                {formatVariation(latestCopperDaily, previousCopperDaily)}
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">Comparativo do último dia útil</p>
+            </div>
+            <div className="rounded-[1.9rem] border border-border bg-background p-5 shadow-sm">
+              <p className="text-sm font-medium text-foreground/80">Variação semanal do cobre</p>
+              <p className="mt-2 text-2xl font-semibold text-foreground">
+                {formatVariation(latestCopperWeekly, previousCopperWeekly)}
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">Comparativo da média semanal</p>
+            </div>
+            <div className="rounded-[1.9rem] border border-border bg-background p-5 shadow-sm">
+              <p className="text-sm font-medium text-foreground/80">Variação mensal do cobre</p>
+              <p className="mt-2 text-2xl font-semibold text-foreground">
+                {formatVariation(latestCopperMonthly, previousCopperMonthly)}
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">Comparativo da média mensal</p>
+            </div>
           </div>
         </div>
       </section>
