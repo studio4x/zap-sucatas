@@ -183,3 +183,15 @@ verify_jwt = false
 [functions.update-asaas-environment]
 verify_jwt = false
 
+[functions.list-admin-locations]
+verify_jwt = false
+
+[functions.upsert-admin-location]
+verify_jwt = false
+
+[functions.delete-admin-location]
+verify_jwt = false
+
+[functions.list-location-listings]
+verify_jwt = false
+

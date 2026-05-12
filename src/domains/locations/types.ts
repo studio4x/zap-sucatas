@@ -9,3 +9,12 @@ export type AdminListingLocation = ListingLocation & {
   pendingListings: number
   totalListings: number
 }
+
+export type AdminLocationListingItem = {
+  city: string
+  id: string
+  state: string
+  status: string
+  title: string
+  updatedAt: string
+}

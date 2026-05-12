@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
@@ -10,7 +10,8 @@ import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { fetchAdminLocations } from '@/domains/locations/api'
+import { deleteAdminLocation, fetchAdminLocations, fetchLocationListings, upsertAdminLocation } from '@/domains/locations/api'
+import type { AdminListingLocation } from '@/domains/locations/types'
 
 const PAGE_SIZE = 12
 
@@ -25,13 +26,44 @@ function formatDate(value: string | null) {
 }
 
 export function AdminLocationsPage() {
+  const queryClient = useQueryClient()
   const [query, setQuery] = useState('')
   const [stateFilter, setStateFilter] = useState('all')
   const [page, setPage] = useState(1)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [newState, setNewState] = useState('')
+  const [newCity, setNewCity] = useState('')
+  const [selectedLocation, setSelectedLocation] = useState<AdminListingLocation | null>(null)
 
   const locationsQuery = useQuery({
     queryKey: ['locations', 'admin'],
     queryFn: fetchAdminLocations,
+  })
+  const locationListingsQuery = useQuery({
+    queryKey: ['locations', 'admin', 'listings', selectedLocation?.state, selectedLocation?.city],
+    queryFn: () => fetchLocationListings({ city: selectedLocation?.city ?? '', state: selectedLocation?.state ?? '' }),
+    enabled: Boolean(selectedLocation),
+  })
+
+  const createMutation = useMutation({
+    mutationFn: () => upsertAdminLocation({ city: newCity, state: newState }),
+    onSuccess: async () => {
+      setIsCreateModalOpen(false)
+      setNewCity('')
+      setNewState('')
+      await queryClient.invalidateQueries({ queryKey: ['locations', 'admin'] })
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (location: AdminListingLocation) =>
+      deleteAdminLocation({
+        city: location.city,
+        state: location.state,
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['locations', 'admin'] })
+    },
   })
 
   const locations = useMemo(() => locationsQuery.data ?? [], [locationsQuery.data])
@@ -70,6 +102,9 @@ export function AdminLocationsPage() {
       <AdminPageHeader
         actions={
           <>
+            <Button onClick={() => setIsCreateModalOpen(true)} type="button">
+              Adicionar localidade
+            </Button>
             <Button asChild type="button">
               <Link to={paths.admin.listings}>Anuncios</Link>
             </Button>
@@ -155,6 +190,31 @@ export function AdminLocationsPage() {
             header: 'Última movimentação',
             cell: (location) => <span className="text-sm text-muted-foreground">{formatDate(location.lastUpdatedAt)}</span>,
           },
+          {
+            header: 'Ações',
+            className: 'w-[280px]',
+            cell: (location) => (
+              <div className="flex items-center justify-end gap-2">
+                <Button
+                  onClick={() => setSelectedLocation(location)}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  Ver anúncios
+                </Button>
+                <Button
+                  disabled={deleteMutation.isPending}
+                  onClick={() => deleteMutation.mutate(location)}
+                  size="sm"
+                  type="button"
+                  variant="destructive"
+                >
+                  Remover
+                </Button>
+              </div>
+            ),
+          },
         ]}
         data={paginatedLocations}
         emptyDescription="Nenhuma localidade corresponde aos filtros atuais."
@@ -171,6 +231,103 @@ export function AdminLocationsPage() {
         pageSize={PAGE_SIZE}
         totalItems={filteredLocations.length}
       />
+
+      {isCreateModalOpen ? (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center px-4">
+          <button
+            aria-label="Fechar modal de localidade"
+            className="absolute inset-0 bg-slate-950/45"
+            onClick={() => {
+              if (!createMutation.isPending) {
+                setIsCreateModalOpen(false)
+              }
+            }}
+            type="button"
+          />
+          <div className="relative w-full max-w-md rounded-[1.75rem] border border-border bg-card p-6 shadow-2xl">
+            <p className="text-sm font-semibold text-foreground">Nova localidade</p>
+            <div className="mt-4 grid gap-3">
+              <Input
+                maxLength={2}
+                onChange={(event) => setNewState(event.target.value.toUpperCase())}
+                placeholder="UF"
+                value={newState}
+              />
+              <Input
+                onChange={(event) => setNewCity(event.target.value)}
+                placeholder="Cidade"
+                value={newCity}
+              />
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <Button
+                disabled={createMutation.isPending}
+                onClick={() => setIsCreateModalOpen(false)}
+                type="button"
+                variant="outline"
+              >
+                Cancelar
+              </Button>
+              <Button
+                disabled={createMutation.isPending}
+                onClick={() => createMutation.mutate()}
+                type="button"
+              >
+                {createMutation.isPending ? 'Salvando...' : 'Salvar localidade'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {selectedLocation ? (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center px-4">
+          <button
+            aria-label="Fechar modal de anuncios"
+            className="absolute inset-0 bg-slate-950/45"
+            onClick={() => setSelectedLocation(null)}
+            type="button"
+          />
+          <div className="relative w-full max-w-3xl rounded-[1.75rem] border border-border bg-card p-6 shadow-2xl">
+            <p className="text-sm font-semibold text-foreground">
+              Anúncios de {selectedLocation.city} - {selectedLocation.state}
+            </p>
+            <div className="mt-4 max-h-[60vh] overflow-y-auto rounded-xl border border-border">
+              {locationListingsQuery.isLoading ? (
+                <p className="p-4 text-sm text-muted-foreground">Carregando anúncios...</p>
+              ) : locationListingsQuery.isError ? (
+                <p className="p-4 text-sm text-destructive">Não foi possível carregar os anúncios desta localidade.</p>
+              ) : (locationListingsQuery.data ?? []).length === 0 ? (
+                <p className="p-4 text-sm text-muted-foreground">Nenhum anúncio encontrado para esta localidade.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/30 text-left">
+                      <th className="px-4 py-3 font-medium text-foreground">Título</th>
+                      <th className="px-4 py-3 font-medium text-foreground">Status</th>
+                      <th className="px-4 py-3 font-medium text-foreground">Atualizado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(locationListingsQuery.data ?? []).map((listing) => (
+                      <tr className="border-b border-border/60" key={listing.id}>
+                        <td className="px-4 py-3 text-foreground">{listing.title}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{listing.status}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{formatDate(listing.updatedAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+            <div className="mt-6 flex justify-end">
+              <Button onClick={() => setSelectedLocation(null)} type="button" variant="outline">
+                Fechar
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }

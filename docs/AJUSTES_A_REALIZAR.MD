@@ -12,3 +12,13 @@
 Moderacao antes da publicacao. Busca por categoria, material e localidade. Paginas de anuncio com contexto comercial. Mantenha o filtro de ordenação.
 
 [OK] T6 - Na pagina /admin/anuncios/, deve ter uma coluna para mostrar quais anúncios devem ser marcados como destaques. a marcação deverá ser automática quando o cliente pagar pelo destaque. Mostre dentro do anuncio também as informações sobre o pagamento do destaque.
+
+[OK] T7 - Na página "/admin/localidades", insira a possibilidade de remover e de adicionar novas localidades e também de clicar para ver todos os anuncios que utilizou cada localidade. A funcionalidade de adicionar nova localidade deverá abrir em um modal quando clicado no botão de adicionar, com o formulário para criar nova localidade.
+
+[ ] t8 - Na página "/admin/categorias", deverá ter um botão de adicionar categoria e ao clicar, deverá abrir um modal com o formulário para criar nova categoria. Remova da página os cards "Categoria operacional" e "Regras desta base". Os cards do filtro e da listagem das categorias deverão ocupar 100% da alrgura da página.
+
+[ ] t9 - Insira na aba de configurações asaas, a url do webhook a ser configurado no asaas.
+
+[ ] t10 - precisamos criar uma página no site público semelhante a esta do site atual: https://zapsucatas.com.br/tabela-de-preco-do-ferro-velho/. Os produtos, preços e quantidade deverão ser preenchidos em um CRUD no painel admin. Vamos chamá-lo de "Preço  das Sucatas". 
+
+[ ] t10 - No painel admin, altere o nome do menu "Preços" (página: https://zap-sucatas.vercel.app/admin/precos) para "Preços LME". Dentro da página, remova o card "Sem referências manuais" e o card "Filtros"

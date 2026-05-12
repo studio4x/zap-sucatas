@@ -1,13 +1,6 @@
 import { supabase } from '@/integrations/supabase/client'
-import type { AdminListingLocation } from '@/domains/locations/types'
-import { normalizeListingCity, normalizeListingState } from '@/domains/listings/utils'
-
-type ListingLocationRow = {
-  city: string
-  state: string
-  status: 'approved' | 'archived' | 'draft' | 'expired' | 'paused' | 'pending_review' | 'rejected'
-  updated_at: string
-}
+import { env } from '@/lib/env'
+import type { AdminListingLocation, AdminLocationListingItem } from '@/domains/locations/types'
 
 function ensureSupabase() {
   if (!supabase) {
@@ -17,53 +10,100 @@ function ensureSupabase() {
   return supabase
 }
 
-export async function fetchAdminLocations() {
-  const { data, error } = await ensureSupabase()
-    .from('listings')
-    .select('city, state, status, updated_at')
-    .order('state', { ascending: true })
-    .order('city', { ascending: true })
+async function getFreshAccessToken() {
+  const client = ensureSupabase()
+  const {
+    data: { session },
+  } = await client.auth.getSession()
+
+  if (!session?.refresh_token) {
+    if (!session?.access_token) {
+      throw new Error('Sessao invalida. Faça login novamente.')
+    }
+
+    return session.access_token
+  }
+
+  const { data, error } = await client.auth.refreshSession({
+    refresh_token: session.refresh_token,
+  })
 
   if (error) {
     throw error
   }
 
-  const grouped = new Map<string, AdminListingLocation>()
+  const accessToken = data.session?.access_token ?? session.access_token
 
-  ;((data ?? []) as ListingLocationRow[]).forEach((row) => {
-    const normalizedState = normalizeListingState(row.state)
-    const normalizedCity = normalizeListingCity(row.city)
-    const key = `${normalizedState}-${normalizedCity}`.toLowerCase()
-    const current = grouped.get(key) ?? {
-      approvedListings: 0,
-      city: normalizedCity,
-      lastUpdatedAt: row.updated_at,
-      pendingListings: 0,
-      state: normalizedState,
-      totalListings: 0,
-    }
+  if (!accessToken) {
+    throw new Error('Sessao invalida. Faça login novamente.')
+  }
 
-    current.totalListings += 1
-    current.lastUpdatedAt =
-      !current.lastUpdatedAt || current.lastUpdatedAt < row.updated_at
-        ? row.updated_at
-        : current.lastUpdatedAt
+  return accessToken
+}
 
-    if (row.status === 'approved') {
-      current.approvedListings += 1
-    }
+async function invokeLocationFunction<TBody extends object, TResponse>(name: string, body: TBody) {
+  ensureSupabase()
 
-    if (row.status === 'pending_review') {
-      current.pendingListings += 1
-    }
+  if (!env.supabaseUrl || !env.supabaseAnonKey) {
+    throw new Error('Supabase nao configurado no ambiente atual.')
+  }
 
-    grouped.set(key, current)
+  const accessToken = await getFreshAccessToken()
+  const response = await fetch(`${env.supabaseUrl}/functions/v1/${name}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      apikey: env.supabaseAnonKey,
+    },
+    body: JSON.stringify({
+      ...body,
+      access_token: accessToken,
+    }),
   })
 
-  return [...grouped.values()].sort((left, right) => {
-    if (left.state === right.state) {
-      return left.city.localeCompare(right.city, 'pt-BR')
+  const payload = (await response.json().catch(() => null)) as { error?: string } | null
+
+  if (!response.ok) {
+    if (payload?.error) {
+      throw new Error(payload.error)
     }
-    return left.state.localeCompare(right.state, 'pt-BR')
-  })
+
+    throw new Error('Edge Function returned a non-2xx status code')
+  }
+
+  return payload as TResponse
+}
+
+export async function fetchAdminLocations() {
+  const response = await invokeLocationFunction<
+    Record<string, never>,
+    { items: AdminListingLocation[]; success: boolean }
+  >('list-admin-locations', {})
+
+  return response.items
+}
+
+export async function upsertAdminLocation(input: { city: string; state: string }) {
+  return invokeLocationFunction<{ city: string; state: string }, { success: boolean }>('upsert-admin-location', input)
+}
+
+export async function deleteAdminLocation(input: { city: string; state: string }) {
+  return invokeLocationFunction<{ city: string; state: string }, { success: boolean }>('delete-admin-location', input)
+}
+
+export async function fetchLocationListings(input: { city: string; state: string }) {
+  const response = await invokeLocationFunction<
+    { city: string; state: string },
+    { items: Array<{ city: string; id: string; state: string; status: string; title: string; updated_at: string }>; success: boolean }
+  >('list-location-listings', input)
+
+  return response.items.map((item) => ({
+    city: item.city,
+    id: item.id,
+    state: item.state,
+    status: item.status,
+    title: item.title,
+    updatedAt: item.updated_at,
+  })) as AdminLocationListingItem[]
 }
