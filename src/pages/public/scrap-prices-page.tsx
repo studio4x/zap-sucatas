@@ -11,7 +11,7 @@ export function ScrapPricesPage() {
 
   if (pricesQuery.isLoading) {
     return (
-      <Card>
+      <Card className="mx-auto w-[80%] max-w-[1200px]">
         <CardContent className="p-6 text-sm text-muted-foreground">Carregando preço das sucatas...</CardContent>
       </Card>
     )
@@ -19,7 +19,7 @@ export function ScrapPricesPage() {
 
   if (pricesQuery.isError) {
     return (
-      <Card className="border-destructive/20 bg-destructive/5">
+      <Card className="mx-auto w-[80%] max-w-[1200px] border-destructive/20 bg-destructive/5">
         <CardContent className="p-6 text-sm text-destructive">
           Nao foi possivel carregar o preço das sucatas neste momento.
         </CardContent>
@@ -30,8 +30,8 @@ export function ScrapPricesPage() {
   const items = pricesQuery.data ?? []
 
   return (
-    <section className="space-y-8">
-      <div className="rounded-[2rem] border border-border bg-card p-6">
+    <section className="mx-auto flex w-[80%] max-w-[1200px] flex-col items-center space-y-8">
+      <div className="w-full rounded-[2rem] border border-border bg-card p-6">
         <PublicSectionHeading
           description="Referência pública para acompanhar produtos, preços e quantidades no mercado de sucatas."
           eyebrow="Preço das Sucatas"
@@ -39,7 +39,7 @@ export function ScrapPricesPage() {
         />
       </div>
 
-      <Card className="overflow-hidden rounded-[1.9rem] border-border/80">
+      <Card className="w-full overflow-hidden rounded-[1.9rem] border-border/80">
         <CardHeader className="border-b border-border/70">
           <CardTitle>Preço das Sucatas</CardTitle>
         </CardHeader>
@@ -48,7 +48,7 @@ export function ScrapPricesPage() {
             <div className="p-6 text-sm text-muted-foreground">Nenhum preço de sucata publicado ainda.</div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-[760px] border-collapse text-sm">
+              <table className="w-full min-w-[760px] border-collapse text-sm">
                 <thead>
                   <tr className="bg-[#27991f] text-left text-white">
                     <th className="px-4 py-3 font-semibold">Produto</th>
