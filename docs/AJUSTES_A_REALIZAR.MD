@@ -21,4 +21,4 @@ Moderacao antes da publicacao. Busca por categoria, material e localidade. Pagin
 
 [OK] t10 - precisamos criar uma página no site público semelhante a esta do site atual: https://zapsucatas.com.br/tabela-de-preco-do-ferro-velho/. Os produtos, preços e quantidade deverão ser preenchidos em um CRUD no painel admin. Vamos chamá-lo de "Preço  das Sucatas". 
 
-[ ] t10 - No painel admin, altere o nome do menu "Preços" (página: https://zap-sucatas.vercel.app/admin/precos) para "Preços LME". Dentro da página, remova o card "Sem referências manuais" e o card "Filtros"
+[ ] t11 - No painel admin, altere o nome do menu "Preços" (página: https://zap-sucatas.vercel.app/admin/precos) para "Preços LME". Dentro da página, remova o card "Sem referências manuais" e o card "Filtros"

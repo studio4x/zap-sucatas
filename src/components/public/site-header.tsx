@@ -8,7 +8,8 @@ import { cn } from '@/lib/utils'
 
 const navItems = [
   { label: 'Anúncios', to: paths.public.listings },
-  { label: 'Preços', to: paths.public.pricing },
+  { label: 'Preços dos Metais', to: paths.public.scrapPrices },
+  { label: 'Cotação LME', to: paths.public.pricing },
   { label: 'Blog', to: paths.public.blog },
   { label: 'Sobre', to: paths.public.about },
   { label: 'Suporte', to: paths.public.support },

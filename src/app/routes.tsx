@@ -88,7 +88,7 @@ export const routes: RouteObject[] = [
         element: withSuspense(<CategoryDetailsPage />),
       },
       {
-        path: 'tabela-de-precos',
+        path: 'preco-dos-metais-lme',
         element: withSuspense(<PricingPage />),
       },
       {

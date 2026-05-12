@@ -7,7 +7,7 @@ export const paths = {
     listingDetails: (slug: string) => `/anuncios/${slug}`,
     categories: '/categorias',
     categoryDetails: (slug: string) => `/categorias/${slug}`,
-    pricing: '/tabela-de-precos',
+    pricing: '/preco-dos-metais-lme',
     scrapPrices: '/tabela-de-preco-do-ferro-velho',
     blog: '/blog',
     blogPost: (slug: string) => `/blog/${slug}`,
