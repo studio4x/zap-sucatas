@@ -395,6 +395,12 @@ export function AdminFeaturedPaymentsPage() {
                         {validationMutation.data.config.webhookTokenConfigured ? 'Configurado' : 'Nao configurado'}
                       </p>
                     </div>
+                    <div className="rounded-lg border border-border bg-card p-4 text-sm md:col-span-2">
+                      <p className="font-medium text-foreground">URL do webhook Asaas</p>
+                      <p className="mt-1 break-all text-muted-foreground">
+                        {validationMutation.data.config.webhookUrl}
+                      </p>
+                    </div>
                     <div className="rounded-lg border border-border bg-card p-4 text-sm">
                       <p className="font-medium text-foreground">Due days</p>
                       <p className="mt-1 text-muted-foreground">{validationMutation.data.config.dueDays}</p>

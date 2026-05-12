@@ -28,6 +28,7 @@ export type AsaasIntegrationValidation = {
     billingType: string
     dueDays: number
     featuredPrice: number
+    webhookUrl: string
     webhookTokenConfigured: boolean
   }
   connectivity: {

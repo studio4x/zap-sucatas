@@ -17,7 +17,7 @@ Moderacao antes da publicacao. Busca por categoria, material e localidade. Pagin
 
 [OK] t8 - Na página "/admin/categorias", deverá ter um botão de adicionar categoria e ao clicar, deverá abrir um modal com o formulário para criar nova categoria. Remova da página os cards "Categoria operacional" e "Regras desta base". Os cards do filtro e da listagem das categorias deverão ocupar 100% da alrgura da página.
 
-[ ] t9 - Insira na aba de configurações asaas, a url do webhook a ser configurado no asaas.
+[OK] t9 - Insira na aba de configurações asaas, a url do webhook a ser configurado no asaas.
 
 [ ] t10 - precisamos criar uma página no site público semelhante a esta do site atual: https://zapsucatas.com.br/tabela-de-preco-do-ferro-velho/. Os produtos, preços e quantidade deverão ser preenchidos em um CRUD no painel admin. Vamos chamá-lo de "Preço  das Sucatas". 
 

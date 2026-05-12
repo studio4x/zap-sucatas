@@ -10,6 +10,15 @@ function hasEnv(name: string) {
   return Boolean(value && value.trim().length > 0)
 }
 
+function resolveWebhookUrl() {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')?.trim()
+  if (!supabaseUrl) {
+    return 'Nao disponivel'
+  }
+
+  return `${supabaseUrl}/functions/v1/asaas-payment-webhook`
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -41,6 +50,7 @@ Deno.serve(async (request) => {
       billingType: resolveFeaturedBillingType(),
       dueDays: resolveFeaturedDueDays(),
       featuredPrice: resolveFeaturedPriceValue(),
+      webhookUrl: resolveWebhookUrl(),
       webhookTokenConfigured: hasEnv('ASAAS_WEBHOOK_TOKEN'),
     }
 
@@ -77,6 +87,7 @@ Deno.serve(async (request) => {
           billingType: resolveFeaturedBillingType(),
           dueDays: resolveFeaturedDueDays(),
           featuredPrice: resolveFeaturedPriceValue(),
+          webhookUrl: resolveWebhookUrl(),
           webhookTokenConfigured: hasEnv('ASAAS_WEBHOOK_TOKEN'),
         },
         connectivity: {
