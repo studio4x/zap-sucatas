@@ -11,7 +11,7 @@ export function ScrapPricesPage() {
 
   if (pricesQuery.isLoading) {
     return (
-      <Card className="mx-auto w-[80%] max-w-[1200px]">
+      <Card className="w-full">
         <CardContent className="p-6 text-sm text-muted-foreground">Carregando preço das sucatas...</CardContent>
       </Card>
     )
@@ -19,7 +19,7 @@ export function ScrapPricesPage() {
 
   if (pricesQuery.isError) {
     return (
-      <Card className="mx-auto w-[80%] max-w-[1200px] border-destructive/20 bg-destructive/5">
+      <Card className="w-full border-destructive/20 bg-destructive/5">
         <CardContent className="p-6 text-sm text-destructive">
           Nao foi possivel carregar o preço das sucatas neste momento.
         </CardContent>
@@ -30,7 +30,7 @@ export function ScrapPricesPage() {
   const items = pricesQuery.data ?? []
 
   return (
-    <section className="mx-auto flex w-[80%] max-w-[1200px] flex-col items-center space-y-8">
+    <section className="flex w-full flex-col items-center space-y-8">
       <div className="w-full rounded-[2rem] border border-border bg-card p-6">
         <PublicSectionHeading
           description="Referência pública para acompanhar produtos, preços e quantidades no mercado de sucatas."
