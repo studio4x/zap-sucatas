@@ -15,7 +15,7 @@ Moderacao antes da publicacao. Busca por categoria, material e localidade. Pagin
 
 [OK] T7 - Na página "/admin/localidades", insira a possibilidade de remover e de adicionar novas localidades e também de clicar para ver todos os anuncios que utilizou cada localidade. A funcionalidade de adicionar nova localidade deverá abrir em um modal quando clicado no botão de adicionar, com o formulário para criar nova localidade.
 
-[ ] t8 - Na página "/admin/categorias", deverá ter um botão de adicionar categoria e ao clicar, deverá abrir um modal com o formulário para criar nova categoria. Remova da página os cards "Categoria operacional" e "Regras desta base". Os cards do filtro e da listagem das categorias deverão ocupar 100% da alrgura da página.
+[OK] t8 - Na página "/admin/categorias", deverá ter um botão de adicionar categoria e ao clicar, deverá abrir um modal com o formulário para criar nova categoria. Remova da página os cards "Categoria operacional" e "Regras desta base". Os cards do filtro e da listagem das categorias deverão ocupar 100% da alrgura da página.
 
 [ ] t9 - Insira na aba de configurações asaas, a url do webhook a ser configurado no asaas.
 

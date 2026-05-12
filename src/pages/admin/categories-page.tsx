@@ -12,7 +12,6 @@ import { AdminRowActions } from '@/components/admin/admin-row-actions'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import {
@@ -61,6 +60,7 @@ export function AdminCategoriesPage() {
   const [page, setPage] = useState(1)
   const [feedback, setFeedback] = useState<FeedbackState | null>(null)
   const [editingCategory, setEditingCategory] = useState<AdminListingCategory | null>(null)
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false)
 
   const categoriesQuery = useQuery({
     queryKey: ['categories', 'admin'],
@@ -98,6 +98,7 @@ export function AdminCategoriesPage() {
         tone: 'success',
       })
       setEditingCategory(null)
+      setIsFormModalOpen(false)
       await invalidateCategories()
     },
   })
@@ -230,6 +231,7 @@ export function AdminCategoriesPage() {
               onClick={() => {
                 setEditingCategory(null)
                 setFeedback(null)
+                setIsFormModalOpen(true)
               }}
               type="button"
             >
@@ -267,194 +269,200 @@ export function AdminCategoriesPage() {
         </div>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_380px]">
-        <div className="space-y-6">
-          <AdminFilterCard
-            actions={
-              <Button
-                onClick={() => {
-                  setPage(1)
-                  setQuery('')
-                  setStatusFilter('all')
-                }}
-                type="button"
-                variant="outline"
-              >
-                Limpar filtros
-              </Button>
-            }
-          >
-            <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
-              <Input
-                onChange={(event) => {
-                  setPage(1)
-                  setQuery(event.target.value)
-                }}
-                placeholder="Buscar por nome, slug ou descrição"
-                value={query}
-              />
-              <Select
-                onChange={(event) => {
-                  setPage(1)
-                  setStatusFilter(event.target.value as typeof statusFilter)
-                }}
-                value={statusFilter}
-              >
-                <option value="all">Todas</option>
-                <option value="active">Ativas</option>
-                <option value="inactive">Inativas</option>
-              </Select>
-            </div>
-          </AdminFilterCard>
+      <div className="space-y-6">
+        <AdminFilterCard
+          actions={
+            <Button
+              onClick={() => {
+                setPage(1)
+                setQuery('')
+                setStatusFilter('all')
+              }}
+              type="button"
+              variant="outline"
+            >
+              Limpar filtros
+            </Button>
+          }
+        >
+          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
+            <Input
+              onChange={(event) => {
+                setPage(1)
+                setQuery(event.target.value)
+              }}
+              placeholder="Buscar por nome, slug ou descrição"
+              value={query}
+            />
+            <Select
+              onChange={(event) => {
+                setPage(1)
+                setStatusFilter(event.target.value as typeof statusFilter)
+              }}
+              value={statusFilter}
+            >
+              <option value="all">Todas</option>
+              <option value="active">Ativas</option>
+              <option value="inactive">Inativas</option>
+            </Select>
+          </div>
+        </AdminFilterCard>
 
-          <AdminDataTable
-            columns={[
-              {
-                header: 'Ordem',
-                className: 'w-[120px]',
-                cell: (category) => (
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-foreground">{category.sortOrder}</span>
-                    <div className="flex gap-1">
-                      <Button
-                        disabled={isBusy || categories[0]?.id === category.id}
-                        onClick={() => handleMove(category.id, 'up')}
-                        size="icon"
-                        type="button"
-                        variant="outline"
-                      >
-                        <ArrowUp className="size-4" />
-                      </Button>
-                      <Button
-                        disabled={isBusy || categories[categories.length - 1]?.id === category.id}
-                        onClick={() => handleMove(category.id, 'down')}
-                        size="icon"
-                        type="button"
-                        variant="outline"
-                      >
-                        <ArrowDown className="size-4" />
-                      </Button>
-                    </div>
+        <AdminDataTable
+          columns={[
+            {
+              header: 'Ordem',
+              className: 'w-[120px]',
+              cell: (category) => (
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-foreground">{category.sortOrder}</span>
+                  <div className="flex gap-1">
+                    <Button
+                      disabled={isBusy || categories[0]?.id === category.id}
+                      onClick={() => handleMove(category.id, 'up')}
+                      size="icon"
+                      type="button"
+                      variant="outline"
+                    >
+                      <ArrowUp className="size-4" />
+                    </Button>
+                    <Button
+                      disabled={isBusy || categories[categories.length - 1]?.id === category.id}
+                      onClick={() => handleMove(category.id, 'down')}
+                      size="icon"
+                      type="button"
+                      variant="outline"
+                    >
+                      <ArrowDown className="size-4" />
+                    </Button>
                   </div>
-                ),
-              },
-              {
-                header: 'Categoria',
-                cell: (category) => (
-                  <div className="space-y-1">
-                    <p className="font-medium text-foreground">{category.name}</p>
-                    <p className="text-xs text-muted-foreground">{category.description ?? 'Sem descrição'}</p>
-                  </div>
-                ),
-              },
-              {
-                header: 'Slug',
-                cell: (category) => <span className="text-sm text-muted-foreground">{category.slug}</span>,
-              },
-              {
-                header: 'Status',
-                cell: (category) => (
-                  <AdminStatusBadge tone={category.isActive ? 'success' : 'neutral'}>
-                    {category.isActive ? 'Ativa' : 'Inativa'}
-                  </AdminStatusBadge>
-                ),
-              },
-              {
-                header: 'Uso',
-                cell: (category) => (
-                  <div className="space-y-1 text-xs text-muted-foreground">
-                    <p>{category.totalListings} anúncios</p>
-                    <p>{category.approvedListings} aprovados</p>
-                    <p>{category.pendingListings} pendentes</p>
-                  </div>
-                ),
-              },
-              {
-                header: 'Atualizado',
-                cell: (category) => <span className="text-sm text-muted-foreground">{formatDate(category.updatedAt)}</span>,
-              },
-              {
-                header: 'Ações',
-                className: 'w-[280px] text-right',
-                cell: (category) => (
-                  <AdminRowActions
-                    actions={[
-                      {
-                        icon: Pencil,
-                        label: 'Editar',
-                        onClick: () => {
-                          setEditingCategory(category)
-                          setFeedback(null)
-                        },
+                </div>
+              ),
+            },
+            {
+              header: 'Categoria',
+              cell: (category) => (
+                <div className="space-y-1">
+                  <p className="font-medium text-foreground">{category.name}</p>
+                  <p className="text-xs text-muted-foreground">{category.description ?? 'Sem descrição'}</p>
+                </div>
+              ),
+            },
+            {
+              header: 'Slug',
+              cell: (category) => <span className="text-sm text-muted-foreground">{category.slug}</span>,
+            },
+            {
+              header: 'Status',
+              cell: (category) => (
+                <AdminStatusBadge tone={category.isActive ? 'success' : 'neutral'}>
+                  {category.isActive ? 'Ativa' : 'Inativa'}
+                </AdminStatusBadge>
+              ),
+            },
+            {
+              header: 'Uso',
+              cell: (category) => (
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  <p>{category.totalListings} anúncios</p>
+                  <p>{category.approvedListings} aprovados</p>
+                  <p>{category.pendingListings} pendentes</p>
+                </div>
+              ),
+            },
+            {
+              header: 'Atualizado',
+              cell: (category) => (
+                <span className="text-sm text-muted-foreground">{formatDate(category.updatedAt)}</span>
+              ),
+            },
+            {
+              header: 'Ações',
+              className: 'w-[280px] text-right',
+              cell: (category) => (
+                <AdminRowActions
+                  actions={[
+                    {
+                      icon: Pencil,
+                      label: 'Editar',
+                      onClick: () => {
+                        setEditingCategory(category)
+                        setFeedback(null)
+                        setIsFormModalOpen(true)
                       },
-                      {
-                        label: category.isActive ? 'Inativar' : 'Reativar',
-                        onClick: () => toggleActiveMutation.mutate(category),
-                        variant: 'outline',
+                    },
+                    {
+                      label: category.isActive ? 'Inativar' : 'Reativar',
+                      onClick: () => toggleActiveMutation.mutate(category),
+                      variant: 'outline',
+                    },
+                    {
+                      icon: Trash2,
+                      label: 'Excluir',
+                      onClick: () => {
+                        if (
+                          window.confirm(
+                            'Excluir esta categoria só é permitido quando não houver anúncios vinculados. Deseja continuar?',
+                          )
+                        ) {
+                          deleteMutation.mutate(category.id)
+                        }
                       },
-                      {
-                        icon: Trash2,
-                        label: 'Excluir',
-                        onClick: () => {
-                          if (
-                            window.confirm(
-                              'Excluir esta categoria só é permitido quando não houver anúncios vinculados. Deseja continuar?',
-                            )
-                          ) {
-                            deleteMutation.mutate(category.id)
-                          }
-                        },
-                        variant: 'destructive',
-                      },
-                    ]}
-                  />
-                ),
-              },
-            ]}
-            data={paginatedCategories}
-            emptyDescription="Nenhuma categoria corresponde aos filtros atuais."
-            emptyTitle="Sem categorias neste recorte"
-            errorMessage="Não foi possível carregar as categorias."
-            getRowKey={(category) => category.id}
-            isError={categoriesQuery.isError}
-            isLoading={categoriesQuery.isLoading}
-          />
+                      variant: 'destructive',
+                    },
+                  ]}
+                />
+              ),
+            },
+          ]}
+          data={paginatedCategories}
+          emptyDescription="Nenhuma categoria corresponde aos filtros atuais."
+          emptyTitle="Sem categorias neste recorte"
+          errorMessage="Não foi possível carregar as categorias."
+          getRowKey={(category) => category.id}
+          isError={categoriesQuery.isError}
+          isLoading={categoriesQuery.isLoading}
+        />
 
-          <AdminPagination
-            currentPage={page}
-            onPageChange={setPage}
-            pageSize={PAGE_SIZE}
-            totalItems={filteredCategories.length}
-          />
-        </div>
-
-        <div className="space-y-6">
-          <AdminCategoryForm
-            defaultValues={editingCategory ? categoryToFormValues(editingCategory) : emptyCategoryValues}
-            isPending={saveMutation.isPending}
-            onCancel={
-              editingCategory
-                ? () => {
-                    setEditingCategory(null)
-                  }
-                : undefined
-            }
-            onSubmit={(values) => saveMutation.mutate(values)}
-            submitLabel={editingCategory ? 'Atualizar categoria' : 'Criar categoria'}
-          />
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Regras desta base</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-muted-foreground">
-              <p>Use a inativação como caminho seguro quando a categoria já estiver em uso.</p>
-              <p>Exclusão só é permitida quando não houver vínculo com anúncios.</p>
-              <p>A ordem definida aqui impacta filtros, destaques e a navegação pública.</p>
-            </CardContent>
-          </Card>
-        </div>
+        <AdminPagination
+          currentPage={page}
+          onPageChange={setPage}
+          pageSize={PAGE_SIZE}
+          totalItems={filteredCategories.length}
+        />
       </div>
+
+      {isFormModalOpen ? (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center px-4">
+          <button
+            aria-label="Fechar modal de categoria"
+            className="absolute inset-0 bg-slate-950/45"
+            onClick={() => {
+              if (!saveMutation.isPending) {
+                setIsFormModalOpen(false)
+              }
+            }}
+            type="button"
+          />
+          <div className="relative w-full max-w-2xl rounded-[1.75rem] border border-border bg-card p-6 shadow-2xl">
+            <p className="text-sm font-semibold text-foreground">
+              {editingCategory ? 'Editar categoria' : 'Nova categoria'}
+            </p>
+            <div className="mt-4">
+              <AdminCategoryForm
+                defaultValues={editingCategory ? categoryToFormValues(editingCategory) : emptyCategoryValues}
+                isPending={saveMutation.isPending}
+                onCancel={() => {
+                  setEditingCategory(null)
+                  setIsFormModalOpen(false)
+                }}
+                onSubmit={(values) => saveMutation.mutate(values)}
+                submitLabel={editingCategory ? 'Atualizar categoria' : 'Criar categoria'}
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }
