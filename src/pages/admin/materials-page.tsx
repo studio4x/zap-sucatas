@@ -12,7 +12,6 @@ import { AdminRowActions } from '@/components/admin/admin-row-actions'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import {
@@ -58,6 +57,7 @@ export function AdminMaterialsPage() {
   const [page, setPage] = useState(1)
   const [feedback, setFeedback] = useState<FeedbackState | null>(null)
   const [editingMaterial, setEditingMaterial] = useState<AdminListingMaterial | null>(null)
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false)
 
   const materialsQuery = useQuery({
     queryKey: ['materials', 'admin'],
@@ -95,6 +95,7 @@ export function AdminMaterialsPage() {
         tone: 'success',
       })
       setEditingMaterial(null)
+      setIsFormModalOpen(false)
       await invalidateMaterials()
     },
   })
@@ -184,6 +185,7 @@ export function AdminMaterialsPage() {
               onClick={() => {
                 setEditingMaterial(null)
                 setFeedback(null)
+                setIsFormModalOpen(true)
               }}
               type="button"
             >
@@ -221,47 +223,46 @@ export function AdminMaterialsPage() {
         </div>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_380px]">
-        <div className="space-y-6">
-          <AdminFilterCard
-            actions={
-              <Button
-                onClick={() => {
-                  setPage(1)
-                  setQuery('')
-                  setStatusFilter('all')
-                }}
-                type="button"
-                variant="outline"
-              >
-                Limpar filtros
-              </Button>
-            }
-          >
-            <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
-              <Input
-                onChange={(event) => {
-                  setPage(1)
-                  setQuery(event.target.value)
-                }}
-                placeholder="Buscar por nome ou slug"
-                value={query}
-              />
-              <Select
-                onChange={(event) => {
-                  setPage(1)
-                  setStatusFilter(event.target.value as typeof statusFilter)
-                }}
-                value={statusFilter}
-              >
-                <option value="all">Todos</option>
-                <option value="active">Ativos</option>
-                <option value="inactive">Inativos</option>
-              </Select>
-            </div>
-          </AdminFilterCard>
+      <div className="space-y-6">
+        <AdminFilterCard
+          actions={
+            <Button
+              onClick={() => {
+                setPage(1)
+                setQuery('')
+                setStatusFilter('all')
+              }}
+              type="button"
+              variant="outline"
+            >
+              Limpar filtros
+            </Button>
+          }
+        >
+          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
+            <Input
+              onChange={(event) => {
+                setPage(1)
+                setQuery(event.target.value)
+              }}
+              placeholder="Buscar por nome ou slug"
+              value={query}
+            />
+            <Select
+              onChange={(event) => {
+                setPage(1)
+                setStatusFilter(event.target.value as typeof statusFilter)
+              }}
+              value={statusFilter}
+            >
+              <option value="all">Todos</option>
+              <option value="active">Ativos</option>
+              <option value="inactive">Inativos</option>
+            </Select>
+          </div>
+        </AdminFilterCard>
 
-          <AdminDataTable
+        <AdminDataTable
             columns={[
               {
                 header: 'Material',
@@ -306,6 +307,7 @@ export function AdminMaterialsPage() {
                         onClick: () => {
                           setEditingMaterial(material)
                           setFeedback(null)
+                          setIsFormModalOpen(true)
                         },
                       },
                       {
@@ -341,41 +343,45 @@ export function AdminMaterialsPage() {
             isLoading={materialsQuery.isLoading}
           />
 
-          <AdminPagination
-            currentPage={page}
-            onPageChange={setPage}
-            pageSize={PAGE_SIZE}
-            totalItems={filteredMaterials.length}
-          />
-        </div>
-
-        <div className="space-y-6">
-          <AdminMaterialForm
-            defaultValues={editingMaterial ? materialToFormValues(editingMaterial) : emptyMaterialValues}
-            isPending={saveMutation.isPending}
-            onCancel={
-              editingMaterial
-                ? () => {
-                    setEditingMaterial(null)
-                  }
-                : undefined
-            }
-            onSubmit={(values) => saveMutation.mutate(values)}
-            submitLabel={editingMaterial ? 'Atualizar material' : 'Criar material'}
-          />
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Regras desta base</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-muted-foreground">
-              <p>Inative o material quando ele já estiver em uso operacional.</p>
-              <p>Exclusão é permitida apenas quando não houver vínculo com anúncios.</p>
-              <p>Materiais ativos alimentam os formulários e filtros do marketplace.</p>
-            </CardContent>
-          </Card>
-        </div>
+        <AdminPagination
+          currentPage={page}
+          onPageChange={setPage}
+          pageSize={PAGE_SIZE}
+          totalItems={filteredMaterials.length}
+        />
       </div>
+
+      {isFormModalOpen ? (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center px-4">
+          <button
+            aria-label="Fechar modal de material"
+            className="absolute inset-0 bg-slate-950/45"
+            onClick={() => {
+              if (!saveMutation.isPending) {
+                setIsFormModalOpen(false)
+              }
+            }}
+            type="button"
+          />
+          <div className="relative w-full max-w-2xl rounded-[1.75rem] border border-border bg-card p-6 shadow-2xl">
+            <p className="text-sm font-semibold text-foreground">
+              {editingMaterial ? 'Editar material' : 'Novo material'}
+            </p>
+            <div className="mt-4">
+              <AdminMaterialForm
+                defaultValues={editingMaterial ? materialToFormValues(editingMaterial) : emptyMaterialValues}
+                isPending={saveMutation.isPending}
+                onCancel={() => {
+                  setEditingMaterial(null)
+                  setIsFormModalOpen(false)
+                }}
+                onSubmit={(values) => saveMutation.mutate(values)}
+                submitLabel={editingMaterial ? 'Atualizar material' : 'Criar material'}
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }
