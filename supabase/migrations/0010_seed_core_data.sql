@@ -1,12 +1,12 @@
 insert into public.listing_categories (name, slug, description, sort_order)
 values
   ('Metais ferrosos', 'metais-ferrosos', 'Categorias para ferro, aco e derivados.', 10),
-  ('Metais nao ferrosos', 'metais-nao-ferrosos', 'Categorias para aluminio, cobre, latao e afins.', 20),
-  ('Papel e papelao', 'papel-e-papelao', 'Residuos e aparas de papel e papelao.', 30),
-  ('Plastico', 'plastico', 'Materiais plasticos industriais e reciclaveis.', 40),
+  ('Metais não ferrosos', 'metais-nao-ferrosos', 'Categorias para alumínio, cobre, latão e afins.', 20),
+  ('Papel e papelão', 'papel-e-papelao', 'Resíduos e aparas de papel e papelão.', 30),
+  ('Plástico', 'plastico', 'Materiais plásticos industriais e recicláveis.', 40),
   ('Eletronicos', 'eletronicos', 'Sucata eletronica e componentes.', 50),
   ('Baterias', 'baterias', 'Baterias automotivas e industriais.', 60),
-  ('Maquinarios', 'maquinarios', 'Maquinas e equipamentos reutilizaveis.', 70),
+  ('Maquinários', 'maquinarios', 'Máquinas e equipamentos reutilizáveis.', 70),
   ('Equipamentos industriais', 'equipamentos-industriais', 'Equipamentos industriais e linhas produtivas.', 80)
 on conflict (slug) do update
 set

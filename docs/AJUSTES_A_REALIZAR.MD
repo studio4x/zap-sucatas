@@ -32,3 +32,9 @@ Moderacao antes da publicacao. Busca por categoria, material e localidade. Pagin
 [OK] T15 - Na página de anuncios, nas sessão de destaque, tem um botão "Ver todo o catalogo". Ajuste ele para ao clicar, a página rolar para os anuncios que estão depois da sessão de destaque.
 
 [OK] T16 - Na página Visão GEral do admin (https://zap-sucatas.vercel.app/admin), remova a seção "fila prioritária" e "anúncio". Mantenha somente os cards de resumos..
+
+[OK] T17 - faça uma revisão geral no nome das categorias de anúncios. Muitas estão sem acentuação.
+
+[OK] T18 - Na seção Hero da Home, remova a borda e a sombra superior e inferior.
+
+[OK] T19 - NA página /suporte, remova a seção "sla de primeira resposta" e "casos sensiveis".

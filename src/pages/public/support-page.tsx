@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { fetchSupportConfig } from '@/domains/support/api'
 import { useAuth } from '@/hooks/use-auth'
-import { defaultSupportConfig, formatBusinessHours, getSupportCategoryMeta, supportFaqItems } from '@/lib/support-sla'
+import { defaultSupportConfig, getSupportCategoryMeta, supportFaqItems } from '@/lib/support-sla'
 
 export function SupportPage() {
   const { user } = useAuth()
@@ -50,44 +50,6 @@ export function SupportPage() {
           </div>
         </div>
       </section>
-
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_360px]">
-        <Card className="rounded-[1.9rem] border-border/80">
-          <CardContent className="space-y-5 p-6 md:p-8">
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">SLA de primeira resposta</p>
-              <h2 className="font-display text-3xl tracking-tight text-foreground">Prazos publicos por categoria</h2>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              {config.categories.map((category) => (
-                <div className="rounded-[1.35rem] border border-border bg-background p-4" key={category.key}>
-                  <div className="inline-flex rounded-full border border-primary/15 bg-primary/8 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-primary">
-                    ate {category.firstResponseHours}h uteis
-                  </div>
-                  <h3 className="mt-3 text-lg font-semibold text-foreground">{category.label}</h3>
-                  <p className="mt-2 text-sm leading-7 text-muted-foreground">{category.description}</p>
-                </div>
-              ))}
-            </div>
-            <div className="rounded-[1.35rem] border border-primary/10 bg-primary/5 p-4 text-sm leading-7 text-muted-foreground">
-              <p className="font-medium text-foreground">Horario de atendimento</p>
-              <p className="mt-1">{formatBusinessHours(config.businessHours)}</p>
-              <p className="mt-2">{config.publicNote}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-[1.9rem] border-border bg-[linear-gradient(180deg,#27991f_0%,#0f5038_100%)] text-white shadow-[0_30px_80px_-40px_rgba(9,27,20,0.9)]">
-          <CardContent className="space-y-4 p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-100/70">Casos sensiveis</p>
-            <h2 className="text-2xl font-semibold leading-tight tracking-[-0.03em] text-white">Use o chamado para registrar fraude, risco operacional ou bloqueios que exigem trilha.</h2>
-            <p className="text-sm leading-7 text-emerald-50/78">{config.crisisNote}</p>
-            <div className="pt-2">
-              <Button onClick={() => setIsModalOpen(true)} type="button">Abrir chamado</Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       <section className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
         <Card className="rounded-[1.8rem] border-border/80">

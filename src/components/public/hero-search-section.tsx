@@ -54,10 +54,9 @@ export function HeroSearchSection({
   }
 
   return (
-    <section className="-mx-4 overflow-hidden border-y border-border bg-white md:-mx-6 lg:-mx-8">
+    <section className="-mx-4 overflow-hidden bg-white md:-mx-6 lg:-mx-8">
       <div className="relative">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(31,99,69,0.1),transparent_32%),radial-gradient(circle_at_50%_100%,rgba(18,54,39,0.06),transparent_24%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-px bg-[linear-gradient(90deg,transparent,rgba(19,54,40,0.16),transparent)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(31,99,69,0.06),transparent_46%)]" />
 
         <div className="relative mx-auto max-w-[1440px] px-4 py-16 text-center md:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-4xl space-y-8">
