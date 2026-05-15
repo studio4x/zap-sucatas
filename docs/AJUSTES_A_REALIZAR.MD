@@ -38,3 +38,5 @@ Moderacao antes da publicacao. Busca por categoria, material e localidade. Pagin
 [OK] T18 - Na seção Hero da Home, remova a borda e a sombra superior e inferior.
 
 [OK] T19 - NA página /suporte, remova a seção "sla de primeira resposta" e "casos sensiveis".
+
+[OK] T20 - NO rodapé, o texto "Portal comercial especializado em sucatas" deverá ficar abaixo do logotipo e não ao lado.
