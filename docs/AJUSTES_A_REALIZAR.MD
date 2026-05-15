@@ -29,4 +29,6 @@ Moderacao antes da publicacao. Busca por categoria, material e localidade. Pagin
 
 [OK] T14 - Por enquanto não vamos ativar o Asaas e as funcionalidades de pagamento que dependem dele.. Portanto, insira na página https://zap-sucatas.vercel.app/admin/pagamentos um toogle para ativar e desativar tudo relacionado à pagamentos. Quando desativado, desative também a opção de pagar para destacar o anuncio.. 
 
-[ ] T15 - Na página de anuncios, nas sessão de destaque, tem um botão "Ver todo o catalogo". Ajuste ele para ao clicar, a página rolar para os anuncios que estão depois da sessão de destaque.
+[OK] T15 - Na página de anuncios, nas sessão de destaque, tem um botão "Ver todo o catalogo". Ajuste ele para ao clicar, a página rolar para os anuncios que estão depois da sessão de destaque.
+
+[OK] T16 - Na página Visão GEral do admin (https://zap-sucatas.vercel.app/admin), remova a seção "fila prioritária" e "anúncio". Mantenha somente os cards de resumos..

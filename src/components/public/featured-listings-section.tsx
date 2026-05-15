@@ -10,21 +10,29 @@ type FeaturedListingsSectionProps = {
   title: string
   description: string
   eyebrow?: string
+  onViewAllClick?: () => void
 }
 
 export function FeaturedListingsSection({
   description,
   eyebrow,
   listings,
+  onViewAllClick,
   title,
 }: FeaturedListingsSectionProps) {
   return (
     <section className="space-y-6">
       <PublicSectionHeading
         actions={
-          <Button asChild variant="outline">
-            <Link to={paths.public.listings}>Ver todo o catálogo</Link>
-          </Button>
+          onViewAllClick ? (
+            <Button onClick={onViewAllClick} type="button" variant="outline">
+              Ver todo o catálogo
+            </Button>
+          ) : (
+            <Button asChild variant="outline">
+              <Link to={paths.public.listings}>Ver todo o catálogo</Link>
+            </Button>
+          )
         }
         description={description}
         eyebrow={eyebrow}

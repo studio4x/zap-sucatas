@@ -1,48 +1,17 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { Eye, FileClock, LifeBuoy, MessageSquare, ShieldCheck, SlidersHorizontal } from 'lucide-react'
+import { FileClock, LifeBuoy, MessageSquare, ShieldCheck, SlidersHorizontal } from 'lucide-react'
 import { paths } from '@/app/paths'
-import { AdminDataTable } from '@/components/admin/admin-data-table'
-import { AdminFilterCard } from '@/components/admin/admin-filter-card'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
-import { AdminPagination } from '@/components/admin/admin-pagination'
-import { AdminRowActions } from '@/components/admin/admin-row-actions'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
-import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select } from '@/components/ui/select'
 import { fetchAdminListings } from '@/domains/listings/api'
-import { formatListingDate } from '@/domains/listings/utils'
 import { fetchAdminProfiles } from '@/domains/profiles/api'
 import { fetchAdminQuestions } from '@/domains/questions/api'
 import { fetchAdminSupportTickets } from '@/domains/support/api'
 
-const PAGE_SIZE = 8
-
-function getListingStatusMeta(status: string) {
-  switch (status) {
-    case 'approved':
-      return { label: 'Aprovado', tone: 'success' as const }
-    case 'pending_review':
-      return { label: 'Em revisão', tone: 'info' as const }
-    case 'rejected':
-      return { label: 'Rejeitado', tone: 'danger' as const }
-    case 'paused':
-      return { label: 'Pausado', tone: 'warning' as const }
-    case 'draft':
-      return { label: 'Rascunho', tone: 'neutral' as const }
-    default:
-      return { label: 'Arquivado', tone: 'neutral' as const }
-  }
-}
-
 export function AdminOverviewPage() {
-  const [focusFilter, setFocusFilter] = useState<'all' | 'approved' | 'pending_review' | 'rejected'>('pending_review')
-  const [query, setQuery] = useState('')
-  const [page, setPage] = useState(1)
-
   const listingsQuery = useQuery({
     queryKey: ['listings', 'admin'],
     queryFn: () => fetchAdminListings(),
@@ -64,22 +33,6 @@ export function AdminOverviewPage() {
   const questions = useMemo(() => questionsQuery.data ?? [], [questionsQuery.data])
   const profiles = useMemo(() => profilesQuery.data ?? [], [profilesQuery.data])
   const supportTickets = useMemo(() => supportTicketsQuery.data ?? [], [supportTicketsQuery.data])
-  const filteredListings = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase()
-
-    return listings.filter((listing) => {
-      const matchesFilter = focusFilter === 'all' ? true : listing.status === focusFilter
-      const haystack =
-        `${listing.title} ${listing.categoryName ?? ''} ${listing.city} ${listing.state}`.toLowerCase()
-      const matchesQuery = normalizedQuery.length === 0 ? true : haystack.includes(normalizedQuery)
-
-      return matchesFilter && matchesQuery
-    })
-  }, [focusFilter, listings, query])
-  const paginatedListings = useMemo(
-    () => filteredListings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filteredListings, page],
-  )
 
   const stats = useMemo(
     () => ({
@@ -188,129 +141,6 @@ export function AdminOverviewPage() {
           value={stats.totalUsers}
         />
       </div>
-
-      <AdminFilterCard
-        actions={
-          <Button
-            onClick={() => {
-              setFocusFilter('pending_review')
-              setQuery('')
-              setPage(1)
-            }}
-            type="button"
-            variant="outline"
-          >
-            Limpar filtros
-          </Button>
-        }
-        description="Use esta fila como entrada principal para moderação e triagem."
-        title="Fila prioritária"
-      >
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
-          <Input
-            onChange={(event) => {
-              setPage(1)
-              setQuery(event.target.value)
-            }}
-            placeholder="Buscar por título, categoria ou localidade"
-            value={query}
-          />
-          <Select
-            onChange={(event) => {
-              setFocusFilter(event.target.value as typeof focusFilter)
-              setPage(1)
-            }}
-            value={focusFilter}
-          >
-            <option value="pending_review">Pendentes</option>
-            <option value="approved">Aprovados</option>
-            <option value="rejected">Rejeitados</option>
-            <option value="all">Todos</option>
-          </Select>
-        </div>
-      </AdminFilterCard>
-
-      <AdminDataTable
-        columns={[
-          {
-            header: 'Anúncio',
-            cell: (listing) => (
-              <div className="space-y-1">
-                <p className="font-medium text-foreground">{listing.title}</p>
-                <p className="text-xs text-muted-foreground">{listing.summary || listing.description}</p>
-              </div>
-            ),
-          },
-          {
-            header: 'Categoria',
-            cell: (listing) => (
-              <div className="space-y-1 text-xs text-muted-foreground">
-                <p className="text-sm font-medium text-foreground">{listing.categoryName ?? 'Sem categoria'}</p>
-                <p>{listing.materialName ?? 'Material não informado'}</p>
-              </div>
-            ),
-          },
-          {
-            header: 'Localidade',
-            cell: (listing) => (
-              <span className="text-sm text-muted-foreground">
-                {listing.city} - {listing.state}
-              </span>
-            ),
-          },
-          {
-            header: 'Status',
-            cell: (listing) => {
-              const meta = getListingStatusMeta(listing.status)
-
-              return <AdminStatusBadge tone={meta.tone}>{meta.label}</AdminStatusBadge>
-            },
-          },
-          {
-            header: 'Atualizado',
-            cell: (listing) => <span className="text-sm text-muted-foreground">{formatListingDate(listing.updatedAt)}</span>,
-          },
-          {
-            header: 'Ações',
-            className: 'w-[210px] text-right',
-            cell: (listing) => (
-              <AdminRowActions
-                actions={[
-                  {
-                    icon: FileClock,
-                    label: 'Moderar',
-                    to: paths.admin.listingDetails(listing.id),
-                  },
-                  ...(listing.slug
-                    ? [
-                        {
-                          icon: Eye,
-                          label: 'Publico',
-                          to: paths.public.listingDetails(listing.slug),
-                          variant: 'ghost' as const,
-                        },
-                      ]
-                    : []),
-                ]}
-              />
-            ),
-          },
-        ]}
-        data={paginatedListings}
-        emptyDescription="Nenhum anúncio encontrado para os filtros atuais."
-        emptyTitle="Fila vazia"
-        errorMessage="Não foi possível carregar a fila administrativa."
-        getRowKey={(listing) => listing.id}
-        isError={listingsQuery.isError}
-        isLoading={listingsQuery.isLoading}
-      />
-
-      <AdminPagination
-        currentPage={page}
-        onPageChange={setPage}
-        pageSize={PAGE_SIZE}
-        totalItems={filteredListings.length}
-      />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard

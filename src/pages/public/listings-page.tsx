@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Search } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
@@ -31,6 +31,7 @@ export function ListingsPage() {
   const [city, setCity] = useState(searchParams.get('cidade') ?? '')
   const [sort, setSort] = useState<PublicListingSort>((searchParams.get('ordem') as PublicListingSort) ?? 'recent')
   const [page, setPage] = useState(Number(searchParams.get('pagina') ?? '1'))
+  const catalogSectionRef = useRef<HTMLDivElement | null>(null)
   const normalizedPage = Number.isFinite(page) && page > 0 ? page : 1
 
   const referencesQuery = useQuery({
@@ -243,20 +244,25 @@ export function ListingsPage() {
               <FeaturedListingsSection
                 description="Anuncios com maior prioridade de exibicao no catalogo."
                 listings={featuredListingsQuery.data}
+                onViewAllClick={() => {
+                  catalogSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }}
                 title="Anúncios em destaque"
               />
             </div>
           ) : null}
 
-          <ListingSortBar
-            onChange={(value) => {
-              setPage(1)
-              setSort(value as PublicListingSort)
-            }}
-            options={sortOptions}
-            resultLabel={`${totalCount} anuncio${totalCount === 1 ? '' : 's'} neste recorte${activeFiltersCount > 0 ? ` • ${activeFiltersCount} filtro${activeFiltersCount === 1 ? '' : 's'} ativo${activeFiltersCount === 1 ? '' : 's'}` : ''}`}
-            value={sort}
-          />
+          <div ref={catalogSectionRef}>
+            <ListingSortBar
+              onChange={(value) => {
+                setPage(1)
+                setSort(value as PublicListingSort)
+              }}
+              options={sortOptions}
+              resultLabel={`${totalCount} anuncio${totalCount === 1 ? '' : 's'} neste recorte${activeFiltersCount > 0 ? ` • ${activeFiltersCount} filtro${activeFiltersCount === 1 ? '' : 's'} ativo${activeFiltersCount === 1 ? '' : 's'}` : ''}`}
+              value={sort}
+            />
+          </div>
 
           {listingsQuery.isLoading ? (
             <Card className="rounded-[1.8rem] border-border/80">
