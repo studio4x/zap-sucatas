@@ -4,13 +4,13 @@ import { Link, NavLink } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { Brand } from '@/components/navigation/brand'
 import { Button } from '@/components/ui/button'
+import { useSystemSettings } from '@/hooks/use-system-settings'
 import { cn } from '@/lib/utils'
 
-const navItems = [
+const baseNavItems = [
   { label: 'Anúncios', to: paths.public.listings },
   { label: 'Preços dos Metais', to: paths.public.scrapPrices },
   { label: 'Cotação LME', to: paths.public.pricing },
-  { label: 'Blog', to: paths.public.blog },
   { label: 'Sobre', to: paths.public.about },
   { label: 'Suporte', to: paths.public.support },
   { label: 'Contato', to: paths.public.contact },
@@ -18,6 +18,10 @@ const navItems = [
 
 export function SiteHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { blogEnabled } = useSystemSettings()
+  const navItems = blogEnabled
+    ? [...baseNavItems.slice(0, 3), { label: 'Blog', to: paths.public.blog }, ...baseNavItems.slice(3)]
+    : baseNavItems
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-background/88 backdrop-blur-xl">

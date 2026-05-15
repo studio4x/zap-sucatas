@@ -1100,6 +1100,7 @@ export type Database = {
       system_settings: {
         Row: {
           allow_guest_questions: boolean
+          blog_enabled: boolean
           created_at: string
           crisis_protocol_config: Json | null
           id: string
@@ -1115,6 +1116,7 @@ export type Database = {
         }
         Insert: {
           allow_guest_questions?: boolean
+          blog_enabled?: boolean
           created_at?: string
           crisis_protocol_config?: Json | null
           id?: string
@@ -1130,6 +1132,7 @@ export type Database = {
         }
         Update: {
           allow_guest_questions?: boolean
+          blog_enabled?: boolean
           created_at?: string
           crisis_protocol_config?: Json | null
           id?: string

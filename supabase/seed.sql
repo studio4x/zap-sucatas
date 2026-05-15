@@ -39,6 +39,7 @@ insert into public.system_settings (
   seo_title_default,
   seo_description_default,
   allow_guest_questions,
+  blog_enabled,
   maintenance_mode
 )
 select
@@ -48,5 +49,6 @@ select
   'Zap Sucatas | Marketplace de sucatas e maquinarios',
   'Plataforma para anunciar, encontrar e moderar oportunidades em sucatas e maquinarios.',
   false,
+  true,
   false
 where not exists (select 1 from public.system_settings);

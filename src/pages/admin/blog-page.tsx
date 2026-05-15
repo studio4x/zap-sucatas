@@ -17,6 +17,7 @@ import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import {
   blogCategoryToFormValues,
   blogPostToFormValues,
@@ -32,6 +33,7 @@ import {
 } from '@/domains/blog/api'
 import type { BlogCategoryFormValues, BlogPostFormValues } from '@/domains/blog/schemas'
 import type { AdminBlogCategory, AdminBlogPost, BlogPostStatus } from '@/domains/blog/types'
+import { fetchSystemSettings, updateSystemSettings } from '@/domains/settings/api'
 import { useAuth } from '@/hooks/use-auth'
 import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 
@@ -94,9 +96,16 @@ export function AdminBlogPage() {
     queryKey: ['blog', 'admin', 'stats'],
     queryFn: fetchAdminBlogStats,
   })
+  const systemSettingsQuery = useQuery({
+    queryKey: ['system-settings'],
+    queryFn: fetchSystemSettings,
+  })
 
   const invalidateBlog = async () => {
     await Promise.all([queryClient.invalidateQueries({ queryKey: ['blog'] })])
+  }
+  const invalidateSystemSettings = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['system-settings'] })
   }
 
   const saveCategoryMutation = useMutation({
@@ -172,6 +181,34 @@ export function AdminBlogPage() {
       setEditingPost(null)
       setPostPendingRemoval(null)
       await invalidateBlog()
+    },
+  })
+
+  const toggleBlogMutation = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const current = systemSettingsQuery.data
+      if (!current) {
+        throw new Error('Configurações do sistema indisponíveis para atualizar o status do blog.')
+      }
+
+      return updateSystemSettings({
+        id: current.id,
+        allowGuestQuestions: current.allowGuestQuestions,
+        blogEnabled: enabled,
+        maintenanceMode: current.maintenanceMode,
+        seoDescriptionDefault: current.seoDescriptionDefault ?? '',
+        seoTitleDefault: current.seoTitleDefault ?? '',
+        siteName: current.siteName,
+        supportEmail: current.supportEmail ?? '',
+        supportPhone: current.supportPhone ?? '',
+      })
+    },
+    onError: (error) => {
+      setErrorFeedback(error, 'Nao foi possivel atualizar o status do blog.')
+    },
+    onSuccess: async (updated) => {
+      setSuccessFeedback(updated.blogEnabled ? 'Blog ativado com sucesso.' : 'Blog desativado com sucesso.')
+      await invalidateSystemSettings()
     },
   })
 
@@ -254,6 +291,25 @@ export function AdminBlogPage() {
       </div>
 
       {feedback ? <OperationFeedback feedback={feedback} /> : null}
+
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Visibilidade pública do blog</p>
+            <p className="text-sm text-muted-foreground">
+              Quando desativado, links de blog somem do site e as rotas públicas redirecionam para a home.
+            </p>
+          </div>
+          <Switch
+            checked={systemSettingsQuery.data?.blogEnabled ?? true}
+            disabled={toggleBlogMutation.isPending || systemSettingsQuery.isLoading}
+            onCheckedChange={(checked) => {
+              clearFeedback()
+              toggleBlogMutation.mutate(checked)
+            }}
+          />
+        </div>
+      </div>
 
       <div className="inline-flex gap-2 rounded-2xl border border-border/70 bg-muted/20 p-1">
         <Button

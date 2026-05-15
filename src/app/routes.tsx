@@ -1,5 +1,6 @@
 import { lazy, Suspense, type ReactNode } from 'react'
 import type { RouteObject } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { AuthGuard } from '@/app/guards/auth-guard'
 import { GuestGuard } from '@/app/guards/guest-guard'
 import { RoleGuard } from '@/app/guards/role-guard'
@@ -9,6 +10,7 @@ import { PublicLayout } from '@/app/layouts/public-layout'
 import { paths } from '@/app/paths'
 import { RouteErrorScreen } from '@/components/shared/route-error-screen'
 import { RouteLoadingScreen } from '@/components/shared/route-loading-screen'
+import { useSystemSettings } from '@/hooks/use-system-settings'
 
 const ForgotPasswordPage = lazy(() => import('@/pages/auth/forgot-password-page').then((module) => ({ default: module.ForgotPasswordPage })))
 const LoginPage = lazy(() => import('@/pages/auth/login-page').then((module) => ({ default: module.LoginPage })))
@@ -61,6 +63,13 @@ function withSuspense(element: ReactNode) {
   return <Suspense fallback={<RouteLoadingScreen />}>{element}</Suspense>
 }
 
+function BlogPublicGuard({ children }: { children: ReactNode }) {
+  const { blogEnabled, isLoading } = useSystemSettings()
+  if (isLoading) return <RouteLoadingScreen />
+  if (!blogEnabled) return <Navigate replace to={paths.public.home} />
+  return <>{children}</>
+}
+
 export const routes: RouteObject[] = [
   {
     path: paths.public.home,
@@ -97,11 +106,19 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'blog',
-        element: withSuspense(<BlogPage />),
+        element: (
+          <BlogPublicGuard>
+            {withSuspense(<BlogPage />)}
+          </BlogPublicGuard>
+        ),
       },
       {
         path: 'blog/:slug',
-        element: withSuspense(<BlogPostPage />),
+        element: (
+          <BlogPublicGuard>
+            {withSuspense(<BlogPostPage />)}
+          </BlogPublicGuard>
+        ),
       },
       {
         path: 'sobre',

@@ -1,5 +1,6 @@
 export type SystemSettings = {
   allowGuestQuestions: boolean
+  blogEnabled: boolean
   createdAt: string
   id: string
   maintenanceMode: boolean
@@ -34,6 +35,7 @@ export type IntegrationLog = {
 export type UpdateSystemSettingsInput = {
   id: string
   allowGuestQuestions: boolean
+  blogEnabled: boolean
   maintenanceMode: boolean
   seoDescriptionDefault: string
   seoTitleDefault: string

@@ -4,6 +4,7 @@ import { fetchSystemSettings } from '@/domains/settings/api'
 import type { SystemSettings } from '@/domains/settings/types'
 
 export type SystemSettingsContextValue = {
+  blogEnabled: boolean
   isError: boolean
   isLoading: boolean
   maintenanceMode: boolean
@@ -21,6 +22,7 @@ export function SystemSettingsProvider({ children }: PropsWithChildren) {
 
   const value = useMemo<SystemSettingsContextValue>(
     () => ({
+      blogEnabled: settingsQuery.data?.blogEnabled ?? true,
       isError: settingsQuery.isError,
       isLoading: settingsQuery.isLoading,
       maintenanceMode: settingsQuery.data?.maintenanceMode ?? false,

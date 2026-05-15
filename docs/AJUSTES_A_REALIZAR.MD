@@ -26,3 +26,5 @@ Moderacao antes da publicacao. Busca por categoria, material e localidade. Pagin
 [OK] T12 - Na página"admin/localidades", quando clico em "ver anuncios" em alguma linha de localidade, abre o modal e aparece o erro: Não foi possível carregar os anúncios desta localidade.
 
 [OK] T13 - Vamos alterar a paleta de cores do site. Utilize apenas essas cores: VERDE: #27991f, PRETO: #000000 e BRANCO: #FFFFFF. A VERDE deverá ser utilizada nos destaques e botões. A PRETA nos textos. A BRANCA nos fundos de seções.
+
+[ ] T14 - Por enquanto não vamos ativar o Asaas e as funcionalidades de pagamento que dependem dele.. Portanto, insira na página https://zap-sucatas.vercel.app/admin/pagamentos um toogle para ativar e desativar tudo relacionado à pagamentos. Quando desativado, desative também a opção de pagar para destacar o anuncio.. 

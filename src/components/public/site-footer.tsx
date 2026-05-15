@@ -3,8 +3,11 @@ import { paths } from '@/app/paths'
 import { Brand } from '@/components/navigation/brand'
 import { BuildVersionBadge } from '@/components/shared/build-version-badge'
 import { Button } from '@/components/ui/button'
+import { useSystemSettings } from '@/hooks/use-system-settings'
 
 export function SiteFooter() {
+  const { blogEnabled } = useSystemSettings()
+
   return (
     <footer className="border-t border-border/80 bg-[#163a2d] text-white">
       <div className="mx-auto grid w-full max-w-[1440px] gap-10 px-4 py-10 md:px-6 lg:grid-cols-[1.1fr_0.7fr_0.7fr_0.9fr] lg:px-8">
@@ -27,7 +30,7 @@ export function SiteFooter() {
             <Link to={paths.public.listings}>Anúncios</Link>
             <Link to={paths.public.categories}>Categorias</Link>
             <Link to={paths.public.pricing}>Tabela de preços</Link>
-            <Link to={paths.public.blog}>Blog</Link>
+            {blogEnabled ? <Link to={paths.public.blog}>Blog</Link> : null}
           </div>
         </div>
 

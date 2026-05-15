@@ -170,6 +170,7 @@ export function AdminSettingsPage() {
         ? {
             id: settingsQuery.data.id,
             allowGuestQuestions: settingsQuery.data.allowGuestQuestions,
+            blogEnabled: settingsQuery.data.blogEnabled,
             maintenanceMode: settingsQuery.data.maintenanceMode,
             seoDescriptionDefault: settingsQuery.data.seoDescriptionDefault ?? '',
             seoTitleDefault: settingsQuery.data.seoTitleDefault ?? '',
@@ -180,6 +181,7 @@ export function AdminSettingsPage() {
         : {
             id: '',
             allowGuestQuestions: false,
+            blogEnabled: true,
             maintenanceMode: false,
             seoDescriptionDefault: '',
             seoTitleDefault: '',
