@@ -2,6 +2,7 @@
 
 import nodemailer from 'npm:nodemailer@6.10.1'
 import { getBearerToken } from '../_shared/auth.ts'
+import { sendAdminNotificationEmail } from '../_shared/admin-notification-email.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertIntegrationLog } from '../_shared/logging.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
@@ -178,6 +179,10 @@ Deno.serve(async (request) => {
       email: input.email,
       fullName: input.fullName,
       subject: input.subject,
+    })
+    await sendAdminNotificationEmail({
+      subject: `Novo contato: ${input.subject}`,
+      body: `Contato de ${input.fullName} <${input.email}>.\n\nMensagem:\n${input.message}`,
     })
     const { data: admins } = await admin
       .from('profiles')

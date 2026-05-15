@@ -192,6 +192,7 @@ export function AdminBlogPage() {
       }
 
       return updateSystemSettings({
+        adminNotificationEmail: current.adminNotificationEmail ?? '',
         id: current.id,
         allowGuestQuestions: current.allowGuestQuestions,
         blogEnabled: enabled,

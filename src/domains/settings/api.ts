@@ -8,6 +8,7 @@ import type {
 } from '@/domains/settings/types'
 
 type SystemSettingsRow = {
+  admin_notification_email: string | null
   allow_guest_questions: boolean
   blog_enabled: boolean
   created_at: string
@@ -152,6 +153,7 @@ async function fetchVisualManifest(): Promise<VisualManifest | null> {
 
 function mapSystemSettings(row: SystemSettingsRow): SystemSettings {
   return {
+    adminNotificationEmail: row.admin_notification_email,
     allowGuestQuestions: row.allow_guest_questions,
     blogEnabled: row.blog_enabled,
     createdAt: row.created_at,
@@ -171,7 +173,7 @@ export async function fetchSystemSettings() {
   const { data, error } = await ensureSupabase()
     .from('system_settings')
     .select(
-      'id, site_name, support_email, support_phone, seo_title_default, seo_description_default, allow_guest_questions, blog_enabled, featured_payments_enabled, maintenance_mode, created_at, updated_at',
+      'id, site_name, support_email, support_phone, admin_notification_email, seo_title_default, seo_description_default, allow_guest_questions, blog_enabled, featured_payments_enabled, maintenance_mode, created_at, updated_at',
     )
     .limit(1)
     .single()
@@ -185,6 +187,7 @@ export async function fetchSystemSettings() {
 
 export async function updateSystemSettings(input: UpdateSystemSettingsInput) {
   const payload = {
+    admin_notification_email: input.adminNotificationEmail.trim() || null,
     allow_guest_questions: input.allowGuestQuestions,
     blog_enabled: input.blogEnabled,
     featured_payments_enabled: input.featuredPaymentsEnabled,

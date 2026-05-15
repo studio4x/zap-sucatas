@@ -169,6 +169,7 @@ export function AdminSettingsPage() {
       settingsQuery.data
         ? {
             id: settingsQuery.data.id,
+            adminNotificationEmail: settingsQuery.data.adminNotificationEmail ?? '',
             allowGuestQuestions: settingsQuery.data.allowGuestQuestions,
             blogEnabled: settingsQuery.data.blogEnabled,
             featuredPaymentsEnabled: settingsQuery.data.featuredPaymentsEnabled,
@@ -181,6 +182,7 @@ export function AdminSettingsPage() {
           }
         : {
             id: '',
+            adminNotificationEmail: '',
             allowGuestQuestions: false,
             blogEnabled: true,
             featuredPaymentsEnabled: true,
@@ -312,6 +314,7 @@ export function AdminSettingsPage() {
               value={settingsQuery.data.maintenanceMode ? 'Ativa' : 'Desativada'}
             />
             <AdminStatCard label="Suporte" value={settingsQuery.data.supportEmail ?? 'Sem e-mail'} />
+            <AdminStatCard label="E-mail admin" value={settingsQuery.data.adminNotificationEmail ?? 'Sem e-mail'} />
           </div>
 
           <AdminFilterCard
@@ -353,6 +356,17 @@ export function AdminSettingsPage() {
                     id="support-email"
                     onChange={(event) => updateDraftState({ supportEmail: event.target.value })}
                     value={formState.supportEmail}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground" htmlFor="admin-notification-email">
+                    E-mail administrativo para notificações
+                  </label>
+                  <Input
+                    id="admin-notification-email"
+                    onChange={(event) => updateDraftState({ adminNotificationEmail: event.target.value })}
+                    value={formState.adminNotificationEmail}
                   />
                 </div>
 

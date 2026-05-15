@@ -1099,6 +1099,7 @@ export type Database = {
       }
       system_settings: {
         Row: {
+          admin_notification_email: string | null
           allow_guest_questions: boolean
           blog_enabled: boolean
           created_at: string
@@ -1116,6 +1117,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_notification_email?: string | null
           allow_guest_questions?: boolean
           blog_enabled?: boolean
           created_at?: string
@@ -1133,6 +1135,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_notification_email?: string | null
           allow_guest_questions?: boolean
           blog_enabled?: boolean
           created_at?: string

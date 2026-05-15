@@ -1,4 +1,5 @@
 export type SystemSettings = {
+  adminNotificationEmail: string | null
   allowGuestQuestions: boolean
   blogEnabled: boolean
   createdAt: string
@@ -34,6 +35,7 @@ export type IntegrationLog = {
 }
 
 export type UpdateSystemSettingsInput = {
+  adminNotificationEmail: string
   id: string
   allowGuestQuestions: boolean
   blogEnabled: boolean

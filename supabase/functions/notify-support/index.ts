@@ -1,6 +1,7 @@
 /// <reference types="jsr:@supabase/functions-js/edge-runtime.d.ts" />
 
 import { getBearerToken } from '../_shared/auth.ts'
+import { sendAdminNotificationEmail } from '../_shared/admin-notification-email.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertIntegrationLog } from '../_shared/logging.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
@@ -253,6 +254,12 @@ Deno.serve(async (request) => {
     })
 
     const enqueueResult = await enqueueSupportNotifications(notificationInput)
+    if (payload.type === 'new_ticket' || payload.type === 'new_message') {
+      await sendAdminNotificationEmail({
+        subject: `Suporte: ${payload.type}`,
+        body: `Evento ${payload.type} no ticket ${payload.ticketId}.`,
+      })
+    }
 
     await insertIntegrationLog({
       integrationName: 'support_notifications',
