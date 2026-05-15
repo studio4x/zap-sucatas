@@ -4,6 +4,7 @@ import { requireActiveProfile, resolveHttpErrorStatus } from '../_shared/auth.ts
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertAdminAuditLog } from '../_shared/logging.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
+import { enqueueTransactionalNotification } from '../_shared/transactional-notifications.ts'
 
 type RequestBody = {
   answerText?: string
@@ -27,7 +28,7 @@ Deno.serve(async (request) => {
     const admin = createAdminClient()
     const { data: question, error: questionError } = await admin
       .from('listing_questions')
-      .select('id, listing_id, status')
+      .select('id, listing_id, status, author_user_id')
       .eq('id', questionId)
       .single()
 
@@ -37,7 +38,7 @@ Deno.serve(async (request) => {
 
     const { data: listing, error: listingError } = await admin
       .from('listings')
-      .select('id, user_id')
+      .select('id, user_id, title')
       .eq('id', question.listing_id)
       .single()
 
@@ -88,6 +89,22 @@ Deno.serve(async (request) => {
       entityId: questionId,
       entityType: 'listing_question',
     })
+
+    if (question.author_user_id && question.author_user_id !== actor.id) {
+      await enqueueTransactionalNotification({
+        actionUrl: '/app/perguntas',
+        body: `Sua pergunta no anuncio "${listing.title}" foi respondida.`,
+        category: 'listing_questions',
+        payload: {
+          entity_type: 'listing_question',
+          listing_id: listing.id,
+          question_id: question.id,
+        },
+        priority: 'normal',
+        title: 'Nova resposta na sua pergunta',
+        userId: question.author_user_id,
+      })
+    }
 
     return jsonResponse({
       questionId,

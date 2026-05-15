@@ -354,6 +354,25 @@ export async function createListingQuestion(input: CreateQuestionInput) {
     throw new Error(message)
   }
 
+  try {
+    if (!env.supabaseUrl || !env.supabaseAnonKey) {
+      return data.id as string
+    }
+
+    await fetch(`${env.supabaseUrl}/functions/v1/notify-listing-question`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: env.supabaseAnonKey,
+      },
+      body: JSON.stringify({
+        questionId: data.id,
+      }),
+    })
+  } catch {
+    // Notificacao de pergunta nao deve bloquear o envio da pergunta.
+  }
+
   return data.id as string
 }
 

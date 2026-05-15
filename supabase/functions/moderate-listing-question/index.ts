@@ -4,6 +4,7 @@ import { requireAdminProfile, resolveHttpErrorStatus } from '../_shared/auth.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertAdminAuditLog } from '../_shared/logging.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
+import { enqueueTransactionalNotification } from '../_shared/transactional-notifications.ts'
 
 type QuestionStatus = 'blocked' | 'hidden' | 'published'
 
@@ -34,7 +35,7 @@ Deno.serve(async (request) => {
     const admin = createAdminClient()
     const { data: question, error: questionError } = await admin
       .from('listing_questions')
-      .select('id, listing_id, status')
+      .select('id, listing_id, status, author_user_id')
       .eq('id', questionId)
       .single()
 
@@ -67,6 +68,28 @@ Deno.serve(async (request) => {
       entityId: questionId,
       entityType: 'listing_question',
     })
+
+    if (question.author_user_id) {
+      const statusCopy: Record<QuestionStatus, string> = {
+        blocked: 'foi bloqueada pela moderacao',
+        hidden: 'foi ocultada temporariamente',
+        published: 'foi publicada',
+      }
+
+      await enqueueTransactionalNotification({
+        actionUrl: '/app/perguntas',
+        body: `Sua pergunta ${statusCopy[questionStatus]}.`,
+        category: 'listing_questions',
+        payload: {
+          entity_type: 'listing_question',
+          question_id: question.id,
+          status: questionStatus,
+        },
+        priority: 'normal',
+        title: 'Atualizacao na moderacao da sua pergunta',
+        userId: question.author_user_id,
+      })
+    }
 
     return jsonResponse({
       questionId,

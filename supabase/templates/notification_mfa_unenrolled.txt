@@ -1,0 +1,10 @@
+Assunto: Segurança da conta - autenticação em duas etapas removida
+
+Olá,
+
+A autenticação em duas etapas (MFA) foi removida da sua conta do Zap Sucatas.
+
+Se você não reconhece essa ação, revise a segurança da conta imediatamente.
+
+Equipe Zap Sucatas
+https://zapsucatas.com.br

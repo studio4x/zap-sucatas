@@ -152,6 +152,9 @@ verify_jwt = false
 [functions.notify-support]
 verify_jwt = false
 
+[functions.notify-listing-question]
+verify_jwt = false
+
 
 [functions.send-notification]
 verify_jwt = false
