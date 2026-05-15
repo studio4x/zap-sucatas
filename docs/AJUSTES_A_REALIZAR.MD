@@ -27,4 +27,6 @@ Moderacao antes da publicacao. Busca por categoria, material e localidade. Pagin
 
 [OK] T13 - Vamos alterar a paleta de cores do site. Utilize apenas essas cores: VERDE: #27991f, PRETO: #000000 e BRANCO: #FFFFFF. A VERDE deverá ser utilizada nos destaques e botões. A PRETA nos textos. A BRANCA nos fundos de seções.
 
-[ ] T14 - Por enquanto não vamos ativar o Asaas e as funcionalidades de pagamento que dependem dele.. Portanto, insira na página https://zap-sucatas.vercel.app/admin/pagamentos um toogle para ativar e desativar tudo relacionado à pagamentos. Quando desativado, desative também a opção de pagar para destacar o anuncio.. 
+[OK] T14 - Por enquanto não vamos ativar o Asaas e as funcionalidades de pagamento que dependem dele.. Portanto, insira na página https://zap-sucatas.vercel.app/admin/pagamentos um toogle para ativar e desativar tudo relacionado à pagamentos. Quando desativado, desative também a opção de pagar para destacar o anuncio.. 
+
+[ ] T15 - Na página de anuncios, nas sessão de destaque, tem um botão "Ver todo o catalogo". Ajuste ele para ao clicar, a página rolar para os anuncios que estão depois da sessão de destaque.

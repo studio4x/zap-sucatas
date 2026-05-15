@@ -1103,6 +1103,7 @@ export type Database = {
           blog_enabled: boolean
           created_at: string
           crisis_protocol_config: Json | null
+          featured_payments_enabled: boolean
           id: string
           maintenance_mode: boolean
           seo_description_default: string | null
@@ -1119,6 +1120,7 @@ export type Database = {
           blog_enabled?: boolean
           created_at?: string
           crisis_protocol_config?: Json | null
+          featured_payments_enabled?: boolean
           id?: string
           maintenance_mode?: boolean
           seo_description_default?: string | null
@@ -1135,6 +1137,7 @@ export type Database = {
           blog_enabled?: boolean
           created_at?: string
           crisis_protocol_config?: Json | null
+          featured_payments_enabled?: boolean
           id?: string
           maintenance_mode?: boolean
           seo_description_default?: string | null

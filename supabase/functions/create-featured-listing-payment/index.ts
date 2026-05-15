@@ -87,6 +87,20 @@ Deno.serve(async (request) => {
     }
 
     const admin = createAdminClient()
+    const { data: systemSettings, error: settingsError } = await admin
+      .from('system_settings')
+      .select('featured_payments_enabled')
+      .limit(1)
+      .single()
+
+    if (settingsError || !systemSettings) {
+      throw settingsError ?? new Error('System settings not found.')
+    }
+
+    if (!systemSettings.featured_payments_enabled) {
+      return jsonResponse({ error: 'Featured payments are currently disabled.' }, 409)
+    }
+
     const { data: listing, error: listingError } = await admin
       .from('listings')
       .select('id, user_id, title, status, is_featured, contact_name, contact_phone')

@@ -26,6 +26,7 @@ import {
 import type { ListingFeaturedPaymentSummary } from '@/domains/listings/types'
 import { formatListingDate, listingStatusFilterOptions } from '@/domains/listings/utils'
 import { useAuth } from '@/hooks/use-auth'
+import { useSystemSettings } from '@/hooks/use-system-settings'
 
 type AppListingsStatusFilter = (typeof listingStatusFilterOptions)[number]['value']
 
@@ -37,6 +38,7 @@ type FeedbackState = {
 export function AppListingsPage() {
   const queryClient = useQueryClient()
   const { user } = useAuth()
+  const { featuredPaymentsEnabled } = useSystemSettings()
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<AppListingsStatusFilter>('all')
   const [feedback, setFeedback] = useState<FeedbackState | null>(null)
@@ -358,7 +360,8 @@ export function AppListingsPage() {
                 const canArchive = listing.status !== 'archived'
                 const latestFeaturedPayment = featuredPaymentByListingId.get(listing.id)
                 const hasPendingFeaturedPayment = latestFeaturedPayment?.status === 'pending'
-                const canRequestFeaturedPayment = listing.status === 'approved' && !listing.isFeatured
+                const canRequestFeaturedPayment =
+                  featuredPaymentsEnabled && listing.status === 'approved' && !listing.isFeatured
 
                 return (
                   <div className="flex justify-end gap-2">
@@ -452,6 +455,14 @@ export function AppListingsPage() {
           getRowKey={(listing) => listing.id}
           minWidth="min-w-[1020px]"
           title="Lista de anúncios"
+        />
+      ) : null}
+
+      {!featuredPaymentsEnabled ? (
+        <DashboardAlertCard
+          description="A operacao de pagamentos esta desativada no momento. O destaque pago de anuncios fica indisponivel."
+          title="Destaque pago temporariamente indisponivel"
+          tone="warning"
         />
       ) : null}
 

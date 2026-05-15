@@ -13,7 +13,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { fetchAdminFeaturedPayments, updateAsaasEnvironment, validateAsaasIntegration } from '@/domains/featured-payments/api'
+import { fetchSystemSettings, updateFeaturedPaymentsEnabled } from '@/domains/settings/api'
 import type { AdminFeaturedPaymentItem } from '@/domains/featured-payments/types'
 
 type TabKey = 'config' | 'payments'
@@ -74,6 +76,10 @@ export function AdminFeaturedPaymentsPage() {
     queryKey: ['featured-payments', 'admin'],
     queryFn: fetchAdminFeaturedPayments,
   })
+  const settingsQuery = useQuery({
+    queryKey: ['system-settings'],
+    queryFn: fetchSystemSettings,
+  })
 
   const validationMutation = useMutation({
     mutationFn: validateAsaasIntegration,
@@ -82,6 +88,18 @@ export function AdminFeaturedPaymentsPage() {
     mutationFn: updateAsaasEnvironment,
     onSuccess: () => {
       validationMutation.mutate()
+    },
+  })
+  const togglePaymentsMutation = useMutation({
+    mutationFn: (enabled: boolean) => {
+      const settingsId = settingsQuery.data?.id
+      if (!settingsId) {
+        throw new Error('Configuracoes do sistema indisponiveis.')
+      }
+      return updateFeaturedPaymentsEnabled({ enabled, id: settingsId })
+    },
+    onSuccess: () => {
+      settingsQuery.refetch()
     },
   })
 
@@ -145,6 +163,36 @@ export function AdminFeaturedPaymentsPage() {
         </button>
       </div>
 
+      <Card>
+        <CardContent className="flex items-center justify-between gap-4 p-4">
+          <div>
+            <p className="text-sm font-medium text-foreground">Pagamentos com Asaas</p>
+            <p className="text-sm text-muted-foreground">
+              Quando desativado, a geracao de cobranca e o destaque pago ficam bloqueados.
+            </p>
+          </div>
+          <Switch
+            checked={settingsQuery.data?.featuredPaymentsEnabled ?? true}
+            disabled={settingsQuery.isLoading || togglePaymentsMutation.isPending}
+            onCheckedChange={(checked) => togglePaymentsMutation.mutate(checked)}
+          />
+        </CardContent>
+      </Card>
+
+      {togglePaymentsMutation.isError ? (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {togglePaymentsMutation.error instanceof Error
+            ? togglePaymentsMutation.error.message
+            : 'Falha ao atualizar o status dos pagamentos.'}
+        </div>
+      ) : null}
+
+      {settingsQuery.data?.featuredPaymentsEnabled === false ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          Pagamentos desativados. A opcao de pagar para destacar anuncio esta bloqueada no dashboard.
+        </div>
+      ) : null}
+
       {activeTab === 'payments' ? (
         <>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -157,6 +205,7 @@ export function AdminFeaturedPaymentsPage() {
           <AdminFilterCard
             actions={
               <Button
+                disabled={settingsQuery.data?.featuredPaymentsEnabled === false}
                 onClick={() => {
                   setPage(1)
                   setQuery('')
@@ -172,6 +221,7 @@ export function AdminFeaturedPaymentsPage() {
           >
             <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
               <Input
+                disabled={settingsQuery.data?.featuredPaymentsEnabled === false}
                 onChange={(event) => {
                   setPage(1)
                   setQuery(event.target.value)
@@ -180,6 +230,7 @@ export function AdminFeaturedPaymentsPage() {
                 value={query}
               />
               <Select
+                disabled={settingsQuery.data?.featuredPaymentsEnabled === false}
                 onChange={(event) => {
                   setPage(1)
                   setStatusFilter(event.target.value as PaymentStatusFilter)
@@ -314,6 +365,7 @@ export function AdminFeaturedPaymentsPage() {
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Button
                     disabled={
+                      settingsQuery.data?.featuredPaymentsEnabled === false ||
                       updateEnvironmentMutation.isPending ||
                       validationMutation.isPending ||
                       validationMutation.data?.config.asaasEnvironment === 'sandbox'
@@ -326,6 +378,7 @@ export function AdminFeaturedPaymentsPage() {
                   </Button>
                   <Button
                     disabled={
+                      settingsQuery.data?.featuredPaymentsEnabled === false ||
                       updateEnvironmentMutation.isPending ||
                       validationMutation.isPending ||
                       validationMutation.data?.config.asaasEnvironment === 'production'
@@ -340,7 +393,11 @@ export function AdminFeaturedPaymentsPage() {
               </div>
 
               <Button
-                disabled={validationMutation.isPending || updateEnvironmentMutation.isPending}
+                disabled={
+                  settingsQuery.data?.featuredPaymentsEnabled === false ||
+                  validationMutation.isPending ||
+                  updateEnvironmentMutation.isPending
+                }
                 onClick={() => validationMutation.mutate()}
                 type="button"
               >

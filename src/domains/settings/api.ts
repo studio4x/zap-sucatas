@@ -11,6 +11,7 @@ type SystemSettingsRow = {
   allow_guest_questions: boolean
   blog_enabled: boolean
   created_at: string
+  featured_payments_enabled: boolean
   id: string
   maintenance_mode: boolean
   seo_description_default: string | null
@@ -154,6 +155,7 @@ function mapSystemSettings(row: SystemSettingsRow): SystemSettings {
     allowGuestQuestions: row.allow_guest_questions,
     blogEnabled: row.blog_enabled,
     createdAt: row.created_at,
+    featuredPaymentsEnabled: row.featured_payments_enabled,
     id: row.id,
     maintenanceMode: row.maintenance_mode,
     seoDescriptionDefault: row.seo_description_default,
@@ -169,7 +171,7 @@ export async function fetchSystemSettings() {
   const { data, error } = await ensureSupabase()
     .from('system_settings')
     .select(
-      'id, site_name, support_email, support_phone, seo_title_default, seo_description_default, allow_guest_questions, blog_enabled, maintenance_mode, created_at, updated_at',
+      'id, site_name, support_email, support_phone, seo_title_default, seo_description_default, allow_guest_questions, blog_enabled, featured_payments_enabled, maintenance_mode, created_at, updated_at',
     )
     .limit(1)
     .single()
@@ -185,6 +187,7 @@ export async function updateSystemSettings(input: UpdateSystemSettingsInput) {
   const payload = {
     allow_guest_questions: input.allowGuestQuestions,
     blog_enabled: input.blogEnabled,
+    featured_payments_enabled: input.featuredPaymentsEnabled,
     maintenance_mode: input.maintenanceMode,
     seo_description_default: input.seoDescriptionDefault.trim() || null,
     seo_title_default: input.seoTitleDefault.trim() || null,
@@ -196,6 +199,19 @@ export async function updateSystemSettings(input: UpdateSystemSettingsInput) {
   const { error } = await ensureSupabase()
     .from('system_settings')
     .update(payload)
+    .eq('id', input.id)
+
+  if (error) {
+    throw error
+  }
+
+  return fetchSystemSettings()
+}
+
+export async function updateFeaturedPaymentsEnabled(input: { enabled: boolean; id: string }) {
+  const { error } = await ensureSupabase()
+    .from('system_settings')
+    .update({ featured_payments_enabled: input.enabled })
     .eq('id', input.id)
 
   if (error) {

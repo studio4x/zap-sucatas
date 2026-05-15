@@ -195,6 +195,7 @@ export function AdminBlogPage() {
         id: current.id,
         allowGuestQuestions: current.allowGuestQuestions,
         blogEnabled: enabled,
+        featuredPaymentsEnabled: current.featuredPaymentsEnabled,
         maintenanceMode: current.maintenanceMode,
         seoDescriptionDefault: current.seoDescriptionDefault ?? '',
         seoTitleDefault: current.seoTitleDefault ?? '',

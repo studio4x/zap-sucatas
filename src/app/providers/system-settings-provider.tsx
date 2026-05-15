@@ -5,6 +5,7 @@ import type { SystemSettings } from '@/domains/settings/types'
 
 export type SystemSettingsContextValue = {
   blogEnabled: boolean
+  featuredPaymentsEnabled: boolean
   isError: boolean
   isLoading: boolean
   maintenanceMode: boolean
@@ -23,6 +24,7 @@ export function SystemSettingsProvider({ children }: PropsWithChildren) {
   const value = useMemo<SystemSettingsContextValue>(
     () => ({
       blogEnabled: settingsQuery.data?.blogEnabled ?? true,
+      featuredPaymentsEnabled: settingsQuery.data?.featuredPaymentsEnabled ?? true,
       isError: settingsQuery.isError,
       isLoading: settingsQuery.isLoading,
       maintenanceMode: settingsQuery.data?.maintenanceMode ?? false,

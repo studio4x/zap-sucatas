@@ -2,6 +2,7 @@ export type SystemSettings = {
   allowGuestQuestions: boolean
   blogEnabled: boolean
   createdAt: string
+  featuredPaymentsEnabled: boolean
   id: string
   maintenanceMode: boolean
   seoDescriptionDefault: string | null
@@ -36,6 +37,7 @@ export type UpdateSystemSettingsInput = {
   id: string
   allowGuestQuestions: boolean
   blogEnabled: boolean
+  featuredPaymentsEnabled: boolean
   maintenanceMode: boolean
   seoDescriptionDefault: string
   seoTitleDefault: string
