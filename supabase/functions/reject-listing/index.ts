@@ -5,6 +5,7 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertAdminAuditLog } from '../_shared/logging.ts'
 import { notifyListingStatus } from '../_shared/notify.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
+import { enqueueTransactionalNotification } from '../_shared/transactional-notifications.ts'
 
 type RequestBody = {
   listingId?: string
@@ -27,7 +28,7 @@ Deno.serve(async (request) => {
     const admin = createAdminClient()
     const { data: listing, error: listingError } = await admin
       .from('listings')
-      .select('id, status, rejection_reason')
+      .select('id, status, rejection_reason, user_id, title')
       .eq('id', listingId)
       .single()
 
@@ -60,6 +61,13 @@ Deno.serve(async (request) => {
       listingId,
       reason: reason.trim(),
       status: 'rejected',
+    })
+    await enqueueTransactionalNotification({
+      actionUrl: '/app/anuncios',
+      body: `Seu anuncio "${listing.title}" foi reprovado. Motivo: ${reason.trim()}`,
+      category: 'listing_status',
+      title: 'Anuncio reprovado',
+      userId: listing.user_id,
     })
 
     return jsonResponse({

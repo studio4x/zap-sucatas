@@ -5,6 +5,7 @@ import { requireActiveProfile, resolveHttpErrorStatus } from '../_shared/auth.ts
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertAdminAuditLog, insertIntegrationLog } from '../_shared/logging.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
+import { enqueueTransactionalNotification } from '../_shared/transactional-notifications.ts'
 
 type RequestBody = {
   listingId?: string
@@ -252,6 +253,13 @@ Deno.serve(async (request) => {
         listingId,
       },
       status: 'success',
+    })
+    await enqueueTransactionalNotification({
+      actionUrl: '/app/anuncios',
+      body: `A cobranca de destaque do anuncio "${listing.title}" foi criada no valor de R$ ${amount.toFixed(2)}.`,
+      category: 'featured_payment',
+      title: 'Cobranca de destaque criada',
+      userId: listing.user_id,
     })
 
     return jsonResponse({

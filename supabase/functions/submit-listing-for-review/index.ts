@@ -5,6 +5,7 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertAdminAuditLog } from '../_shared/logging.ts'
 import { notifyListingStatus } from '../_shared/notify.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
+import { enqueueTransactionalNotification } from '../_shared/transactional-notifications.ts'
 
 type RequestBody = {
   listingId?: string
@@ -89,6 +90,13 @@ Deno.serve(async (request) => {
     await notifyListingStatus({
       listingId,
       status: 'pending_review',
+    })
+    await enqueueTransactionalNotification({
+      actionUrl: '/app/anuncios',
+      body: `Seu anuncio "${listing.title}" foi enviado para revisao.`,
+      category: 'listing_status',
+      title: 'Anuncio enviado para revisao',
+      userId: listing.user_id,
     })
 
     return jsonResponse({

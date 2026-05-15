@@ -1,5 +1,6 @@
 /// <reference types="jsr:@supabase/functions-js/edge-runtime.d.ts" />
 
+import nodemailer from 'npm:nodemailer@6.10.1'
 import { requireAdminProfile } from '../_shared/auth.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertIntegrationLog } from '../_shared/logging.ts'
@@ -40,6 +41,29 @@ type ProfileRow = {
 }
 
 const MAX_BATCH = 150
+
+function getSmtpConfig() {
+  const host = Deno.env.get('SMTP_HOST')
+  const password = Deno.env.get('SMTP_PASSWORD')
+  const emailFrom = Deno.env.get('EMAIL_FROM')
+  if (!host || !password || !emailFrom) {
+    return null
+  }
+
+  return {
+    emailFrom,
+    emailFromName: Deno.env.get('EMAIL_FROM_NAME') ?? 'Zap Sucatas',
+    host,
+    password,
+    port: Number(Deno.env.get('SMTP_PORT') ?? '465'),
+    secure: (Deno.env.get('SMTP_SECURE') ?? 'true').toLowerCase() === 'true',
+    user: Deno.env.get('SMTP_USER') ?? emailFrom,
+  }
+}
+
+function renderEmailHtml(input: { body: string; title: string }) {
+  return `<!doctype html><html lang="pt-BR"><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#0f172a;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:24px 0;"><tr><td align="center"><table role="presentation" width="100%" style="max-width:620px;background:#ffffff;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden;"><tr><td style="background:#27991f;padding:18px 24px;text-align:center;color:#fff;font-size:20px;font-weight:700;">Zap Sucatas</td></tr><tr><td style="padding:24px;"><h1 style="margin:0 0 12px 0;font-size:22px;color:#0f172a;">${input.title}</h1><p style="margin:0 0 16px 0;font-size:15px;line-height:1.7;color:#334155;">${input.body}</p></td></tr><tr><td style="padding:16px 24px;border-top:1px solid #e5e7eb;font-size:12px;color:#64748b;">Este e-mail foi enviado automaticamente pela plataforma Zap Sucatas.</td></tr></table></td></tr></table></body></html>`
+}
 
 function channelEnabledForPreference(channel: QueueRow['channel'], preference: PreferenceRow | null) {
   if (!preference) {
@@ -181,9 +205,34 @@ Deno.serve(async (request) => {
         nextStatus = shouldRetry(attempt) ? 'retry' : 'failed'
         errorMessage = queueRow.channel === 'email' ? 'email_nao_configurado' : 'telefone_nao_configurado'
       } else {
-        providerMessageId = `${queueRow.channel}-${crypto.randomUUID()}`
-        deliveredAt = new Date().toISOString()
-        nextStatus = queueRow.channel === 'in-app' ? 'delivered' : 'sent'
+        if (queueRow.channel === 'email') {
+          const smtp = getSmtpConfig()
+          if (!smtp || !profile?.email) {
+            nextStatus = shouldRetry(attempt) ? 'retry' : 'failed'
+            errorMessage = 'smtp_nao_configurado_ou_destinatario_invalido'
+          } else {
+            const transporter = nodemailer.createTransport({
+              host: smtp.host,
+              port: smtp.port,
+              secure: smtp.secure,
+              auth: { user: smtp.user, pass: smtp.password },
+            })
+            const response = await transporter.sendMail({
+              from: `${smtp.emailFromName} <${smtp.emailFrom}>`,
+              to: profile.email,
+              subject: queueRow.title,
+              html: renderEmailHtml({ body: queueRow.body, title: queueRow.title }),
+              text: queueRow.body,
+            })
+            providerMessageId = response.messageId ?? `${queueRow.channel}-${crypto.randomUUID()}`
+            deliveredAt = new Date().toISOString()
+            nextStatus = 'sent'
+          }
+        } else {
+          providerMessageId = `${queueRow.channel}-${crypto.randomUUID()}`
+          deliveredAt = new Date().toISOString()
+          nextStatus = queueRow.channel === 'in-app' ? 'delivered' : 'sent'
+        }
       }
 
       if (nextStatus === 'retry' && !shouldRetry(attempt)) {

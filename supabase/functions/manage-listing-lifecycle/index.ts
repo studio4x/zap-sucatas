@@ -4,6 +4,7 @@ import { requireActiveProfile, resolveHttpErrorStatus } from '../_shared/auth.ts
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertAdminAuditLog } from '../_shared/logging.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
+import { enqueueTransactionalNotification } from '../_shared/transactional-notifications.ts'
 
 type LifecycleAction = 'archive' | 'pause'
 
@@ -63,7 +64,7 @@ Deno.serve(async (request) => {
     const admin = createAdminClient()
     const { data: listing, error: listingError } = await admin
       .from('listings')
-      .select('id, user_id, status, slug, rejection_reason')
+      .select('id, user_id, status, slug, rejection_reason, title')
       .eq('id', listingId)
       .single()
 
@@ -108,6 +109,13 @@ Deno.serve(async (request) => {
       },
       entityId: listingId,
       entityType: 'listing',
+    })
+    await enqueueTransactionalNotification({
+      actionUrl: '/app/anuncios',
+      body: `Seu anuncio "${listing.title}" foi ${transition.nextStatus === 'paused' ? 'pausado' : 'arquivado'}.`,
+      category: 'listing_status',
+      title: transition.nextStatus === 'paused' ? 'Anuncio pausado' : 'Anuncio arquivado',
+      userId: listing.user_id,
     })
 
     return jsonResponse({

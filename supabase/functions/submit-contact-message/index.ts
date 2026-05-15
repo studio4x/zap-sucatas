@@ -1,9 +1,11 @@
 /// <reference types="jsr:@supabase/functions-js/edge-runtime.d.ts" />
 
+import nodemailer from 'npm:nodemailer@6.10.1'
 import { getBearerToken } from '../_shared/auth.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertIntegrationLog } from '../_shared/logging.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
+import { enqueueTransactionalNotification } from '../_shared/transactional-notifications.ts'
 
 type RequestBody = {
   companyWebsite?: string
@@ -86,6 +88,27 @@ function validatePayload(payload: RequestBody) {
   }
 }
 
+async function sendContactConfirmationEmail(input: { email: string; fullName: string; subject: string }) {
+  const host = Deno.env.get('SMTP_HOST')
+  const password = Deno.env.get('SMTP_PASSWORD')
+  const emailFrom = Deno.env.get('EMAIL_FROM')
+  if (!host || !password || !emailFrom) {
+    return
+  }
+  const transporter = nodemailer.createTransport({
+    host,
+    port: Number(Deno.env.get('SMTP_PORT') ?? '465'),
+    secure: (Deno.env.get('SMTP_SECURE') ?? 'true').toLowerCase() === 'true',
+    auth: { user: Deno.env.get('SMTP_USER') ?? emailFrom, pass: password },
+  })
+  await transporter.sendMail({
+    from: `${Deno.env.get('EMAIL_FROM_NAME') ?? 'Zap Sucatas'} <${emailFrom}>`,
+    to: input.email,
+    subject: 'Recebemos sua mensagem - Zap Sucatas',
+    text: `Ola ${input.fullName}, recebemos sua mensagem sobre "${input.subject}". Nossa equipe retornara em breve.`,
+  })
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -150,6 +173,25 @@ Deno.serve(async (request) => {
 
     if (insertError) {
       throw insertError
+    }
+    await sendContactConfirmationEmail({
+      email: input.email,
+      fullName: input.fullName,
+      subject: input.subject,
+    })
+    const { data: admins } = await admin
+      .from('profiles')
+      .select('id')
+      .eq('is_admin', true)
+      .eq('status', 'active')
+    for (const adminProfile of admins ?? []) {
+      await enqueueTransactionalNotification({
+        actionUrl: '/admin/contato',
+        body: `Nova mensagem de contato recebida de ${input.fullName}: ${input.subject}`,
+        category: 'contact',
+        title: 'Novo contato recebido',
+        userId: adminProfile.id,
+      })
     }
 
     await insertIntegrationLog({

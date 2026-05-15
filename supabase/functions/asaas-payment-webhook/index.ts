@@ -3,6 +3,7 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertIntegrationLog } from '../_shared/logging.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
+import { enqueueTransactionalNotification } from '../_shared/transactional-notifications.ts'
 
 type AsaasWebhookPayload = {
   event?: string
@@ -84,7 +85,7 @@ Deno.serve(async (request) => {
     const admin = createAdminClient()
     const { data: featuredPayment, error: featuredPaymentError } = await admin
       .from('listing_featured_payments')
-      .select('id, listing_id, status')
+      .select('id, listing_id, status, user_id')
       .eq('asaas_payment_id', asaasPaymentId)
       .maybeSingle()
 
@@ -137,6 +138,20 @@ Deno.serve(async (request) => {
         throw listingUpdateError
       }
     }
+    const paymentStatusCopy: Record<FeaturedPaymentStatus, string> = {
+      canceled: 'foi cancelado',
+      expired: 'venceu',
+      failed: 'falhou',
+      paid: 'foi confirmado',
+      pending: 'esta pendente',
+    }
+    await enqueueTransactionalNotification({
+      actionUrl: '/app/anuncios',
+      body: `O pagamento de destaque ${paymentStatusCopy[nextStatus]}.`,
+      category: 'featured_payment',
+      title: `Pagamento de destaque: ${nextStatus}`,
+      userId: featuredPayment.user_id,
+    })
 
     await insertIntegrationLog({
       integrationName: 'asaas',

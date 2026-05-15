@@ -6,6 +6,7 @@ import { insertAdminAuditLog } from '../_shared/logging.ts'
 import { notifyListingStatus } from '../_shared/notify.ts'
 import { generateUniqueListingSlug } from '../_shared/slug.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
+import { enqueueTransactionalNotification } from '../_shared/transactional-notifications.ts'
 
 type RequestBody = {
   listingId?: string
@@ -27,7 +28,7 @@ Deno.serve(async (request) => {
     const admin = createAdminClient()
     const { data: listing, error: listingError } = await admin
       .from('listings')
-      .select('id, title, status, slug')
+      .select('id, title, status, slug, user_id')
       .eq('id', listingId)
       .single()
 
@@ -63,6 +64,13 @@ Deno.serve(async (request) => {
     await notifyListingStatus({
       listingId,
       status: 'approved',
+    })
+    await enqueueTransactionalNotification({
+      actionUrl: `/anuncios/${slug}`,
+      body: `Seu anuncio "${listing.title}" foi aprovado e ja esta publicado.`,
+      category: 'listing_status',
+      title: 'Anuncio aprovado',
+      userId: listing.user_id,
     })
 
     return jsonResponse({
