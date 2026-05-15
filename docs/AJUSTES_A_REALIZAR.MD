@@ -40,3 +40,5 @@ Moderacao antes da publicacao. Busca por categoria, material e localidade. Pagin
 [OK] T19 - NA página /suporte, remova a seção "sla de primeira resposta" e "casos sensiveis".
 
 [OK] T20 - NO rodapé, o texto "Portal comercial especializado em sucatas" deverá ficar abaixo do logotipo e não ao lado.
+
+[OK] T21 - Faça uma revisão geral nas notificações da plataforma, tanto aquelas que devem ser enviadas pelo SUpabase como as que devem ser enviadas diretamente pela plataforma. ALém disso, na página de admin/notificações, insira o conteúdo atual na aba "Notificações Manuais" e crie uma nova aba "Notificações Transacionais" e insira nessa aba um sistema completo para gerenciar e acompanhar todas as notificações transacionais da plataforma.
