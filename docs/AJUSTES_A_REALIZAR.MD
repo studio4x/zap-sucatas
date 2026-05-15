@@ -23,5 +23,6 @@ Moderacao antes da publicacao. Busca por categoria, material e localidade. Pagin
 
 [OK] t11 - No painel admin, altere o nome do menu "Preços" (página: https://zap-sucatas.vercel.app/admin/precos) para "Preços LME". Dentro da página, remova o card "Sem referências manuais" e o card "Filtros"
 
-[ ] T12 - Na página"admin/localidades", quando clico em "ver anuncios" em alguma linha de localidade, abre o modal e aparece o erro: Não foi possível carregar os anúncios desta localidade.
+[OK] T12 - Na página"admin/localidades", quando clico em "ver anuncios" em alguma linha de localidade, abre o modal e aparece o erro: Não foi possível carregar os anúncios desta localidade.
 
+[OK] T13 - Vamos alterar a paleta de cores do site. Utilize apenas essas cores: VERDE: #27991f, PRETO: #000000 e BRANCO: #FFFFFF. A VERDE deverá ser utilizada nos destaques e botões. A PRETA nos textos. A BRANCA nos fundos de seções.
