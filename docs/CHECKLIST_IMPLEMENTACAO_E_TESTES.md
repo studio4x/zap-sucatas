@@ -126,10 +126,10 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ### Testes sugeridos
 
-1. [ ] Enviar pergunta em anuncio publicado.
-2. [ ] Responder pergunta no dashboard do anunciante.
-3. [ ] Moderar pergunta no admin (publicar/ocultar/bloquear conforme regra).
-4. [ ] Validar exibicao da resposta no anuncio publico.
+1. [OK] Enviar pergunta em anuncio publicado.
+2. [OK] Responder pergunta no dashboard do anunciante.
+3. [OK] Moderar pergunta no admin (publicar/ocultar/bloquear conforme regra).
+4. [OK] Validar exibicao da resposta no anuncio publico.
 
 ## 4.4 Blog
 
