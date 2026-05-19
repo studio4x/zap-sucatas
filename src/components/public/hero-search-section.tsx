@@ -67,7 +67,7 @@ export function HeroSearchSection({
         <div className="relative w-full px-4 py-16 text-center md:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-4xl space-y-8">
             <div className="space-y-5">
-              <Badge className="rounded-full border-emerald-800/12 bg-emerald-800/8 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-950" variant="outline">
+              <Badge className="rounded-full border-white/40 bg-white/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white" variant="outline">
                   Marketplace especializado em sucatas
               </Badge>
 

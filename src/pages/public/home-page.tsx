@@ -319,10 +319,10 @@ export function HomePage() {
       >
         <div className="relative mx-auto max-w-5xl space-y-10">
           <div className="space-y-3 text-center">
-            <h2 className="font-display text-3xl tracking-tight text-foreground sm:text-[2.2rem]">
+            <h2 className="font-display text-3xl tracking-tight text-white sm:text-[2.2rem]">
               Como o Zap Sucatas funciona
             </h2>
-            <p className="mx-auto max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+            <p className="mx-auto max-w-2xl text-sm leading-7 text-white/90 sm:text-base">
               Um processo simples e transparente para transformar resíduos em receita ou matéria-prima.
             </p>
           </div>
@@ -340,7 +340,7 @@ export function HomePage() {
                     {index + 1}
                   </span>
                   <CardContent className="flex flex-col items-center gap-5 p-8">
-                    <span className="inline-flex size-16 items-center justify-center rounded-[1.35rem] bg-accent/75 text-primary">
+                    <span className="inline-flex size-16 items-center justify-center rounded-[1.35rem] bg-primary text-white">
                       <Icon className="size-7" />
                     </span>
                     <div className="space-y-2">
