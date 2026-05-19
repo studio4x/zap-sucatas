@@ -16,6 +16,8 @@ import {
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { paths } from '@/app/paths'
+import ctaHandshakeBg from '@/assets/home-bg/cta-handshake-bg.png'
+import howItWorksBg from '@/assets/home-bg/how-it-works-bg.png'
 import { FaqSection } from '@/components/public/faq-section'
 import { HeroSearchSection } from '@/components/public/hero-search-section'
 import { PublicEmptyState } from '@/components/public/public-empty-state'
@@ -311,8 +313,12 @@ export function HomePage() {
         )}
       </section>
 
-      <section className="rounded-[2.5rem] border border-border/70 bg-white px-5 py-14 shadow-[0_24px_60px_-40px_rgba(12,60,44,0.12)] sm:px-8 lg:px-12">
-        <div className="mx-auto max-w-5xl space-y-10">
+      <section
+        className="relative overflow-hidden rounded-[2.5rem] border border-border/70 bg-white px-5 py-14 shadow-[0_24px_60px_-40px_rgba(12,60,44,0.12)] sm:px-8 lg:px-12"
+        style={{ backgroundImage: `url(${howItWorksBg})`, backgroundPosition: 'center', backgroundSize: 'cover' }}
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.93)_20%,rgba(246,251,248,0.89)_100%)]" />
+        <div className="relative mx-auto max-w-5xl space-y-10">
           <div className="space-y-3 text-center">
             <h2 className="font-display text-3xl tracking-tight text-foreground sm:text-[2.2rem]">
               Como o Zap Sucatas funciona
@@ -407,13 +413,17 @@ export function HomePage() {
         title="Perguntas frequentes"
       />
 
-      <section className="rounded-[2.6rem] border border-primary/10 bg-accent/55 px-6 py-14 text-center shadow-[0_24px_60px_-42px_rgba(12,60,44,0.18)] md:px-10">
-        <div className="mx-auto max-w-3xl space-y-6">
+      <section
+        className="relative overflow-hidden rounded-[2.6rem] border border-primary/10 bg-accent/55 px-6 py-14 text-center shadow-[0_24px_60px_-42px_rgba(12,60,44,0.18)] md:px-10"
+        style={{ backgroundImage: `url(${ctaHandshakeBg})`, backgroundPosition: 'center', backgroundSize: 'cover' }}
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(15,40,31,0.74)_5%,rgba(16,44,34,0.56)_45%,rgba(16,44,34,0.45)_100%)]" />
+        <div className="relative mx-auto max-w-3xl space-y-6">
           <div className="space-y-3">
-            <h2 className="font-display text-3xl tracking-tight text-foreground sm:text-[2.15rem]">
+            <h2 className="font-display text-3xl tracking-tight text-white sm:text-[2.15rem]">
               Pronto para digitalizar suas negociações?
             </h2>
-            <p className="text-sm leading-7 text-muted-foreground sm:text-base">
+            <p className="text-sm leading-7 text-emerald-50 sm:text-base">
               Junte-se a empresas que já compram e vendem sucata com mais clareza comercial e operação estruturada.
             </p>
           </div>
@@ -422,7 +432,7 @@ export function HomePage() {
             <Button asChild className="rounded-xl px-6">
               <Link to={paths.auth.register}>Criar conta e anunciar</Link>
             </Button>
-            <Button asChild className="rounded-xl px-6" variant="outline">
+            <Button asChild className="rounded-xl border-white/70 bg-white/10 px-6 text-white hover:bg-white/20" variant="outline">
               <Link to={paths.public.support}>
                 <CircleHelp className="size-4" />
                 Falar com suporte

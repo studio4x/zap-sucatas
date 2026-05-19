@@ -2,6 +2,7 @@ import { Search, ShieldCheck, TrendingUp, Wrench } from 'lucide-react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
+import heroIndustrialBg from '@/assets/home-bg/hero-industrial-bg.png'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -56,7 +57,12 @@ export function HeroSearchSection({
   return (
     <section className="-mx-4 overflow-hidden bg-white md:-mx-6 lg:-mx-8">
       <div className="relative">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(31,99,69,0.06),transparent_46%)]" />
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${heroIndustrialBg})` }}
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(8,26,20,0.72)_10%,rgba(10,35,26,0.58)_45%,rgba(10,35,26,0.45)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.14),transparent_46%)]" />
 
         <div className="relative mx-auto max-w-[1440px] px-4 py-16 text-center md:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-4xl space-y-8">
@@ -66,10 +72,10 @@ export function HeroSearchSection({
               </Badge>
 
               <div className="space-y-4">
-                <h1 className="mx-auto max-w-3xl font-display text-4xl leading-[0.98] tracking-[-0.05em] text-slate-950 sm:text-[3.2rem] lg:text-[4.25rem]">
+                <h1 className="mx-auto max-w-3xl font-display text-4xl leading-[0.98] tracking-[-0.05em] text-white sm:text-[3.2rem] lg:text-[4.25rem]">
                   Compre e venda sucatas com inteligência.
                 </h1>
-                <p className="mx-auto max-w-2xl text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
+                <p className="mx-auto max-w-2xl text-sm leading-7 text-emerald-50 sm:text-base sm:leading-8">
                   Conectamos geradores de resíduos industriais a compradores qualificados em um marketplace transparente e eficiente para o mercado de sucatas.
                 </p>
               </div>
@@ -101,13 +107,13 @@ export function HeroSearchSection({
               </div>
 
               <div className="flex flex-wrap items-center justify-center gap-2.5">
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-100/80">
                   Buscas rápidas
                 </span>
                 {quickSearches.map((term) => (
                   <button
                     key={term}
-                    className="rounded-full bg-white/85 px-4 py-2 text-sm font-medium text-slate-700 ring-1 ring-[#dce5dc] transition hover:bg-emerald-800/8 hover:text-emerald-950"
+                    className="rounded-full bg-white/88 px-4 py-2 text-sm font-medium text-slate-700 ring-1 ring-white/60 transition hover:bg-white hover:text-emerald-950"
                     onClick={() => handleQuickSearch(term)}
                     type="button"
                   >
@@ -117,7 +123,7 @@ export function HeroSearchSection({
               </div>
             </form>
 
-            <div className="flex flex-wrap items-center justify-center gap-6 pt-2 text-sm text-slate-600">
+            <div className="flex flex-wrap items-center justify-center gap-6 pt-2 text-sm text-emerald-50">
               {marketSignals.map(({ icon: Icon, title }) => (
                 <div key={title} className="inline-flex items-center gap-2">
                   <Icon className="size-4 text-primary" />
