@@ -314,10 +314,9 @@ export function HomePage() {
       </section>
 
       <section
-        className="relative overflow-hidden rounded-[2.5rem] border border-border/70 bg-white px-5 py-14 shadow-[0_24px_60px_-40px_rgba(12,60,44,0.12)] sm:px-8 lg:px-12"
+        className="-mx-4 relative overflow-hidden bg-white px-5 py-14 sm:-mx-6 sm:px-8 lg:-mx-8 lg:px-12"
         style={{ backgroundImage: `url(${howItWorksBg})`, backgroundPosition: 'center', backgroundSize: 'cover' }}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.93)_20%,rgba(246,251,248,0.89)_100%)]" />
         <div className="relative mx-auto max-w-5xl space-y-10">
           <div className="space-y-3 text-center">
             <h2 className="font-display text-3xl tracking-tight text-foreground sm:text-[2.2rem]">

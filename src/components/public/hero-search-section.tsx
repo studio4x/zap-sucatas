@@ -64,7 +64,7 @@ export function HeroSearchSection({
         <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(8,26,20,0.72)_10%,rgba(10,35,26,0.58)_45%,rgba(10,35,26,0.45)_100%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.14),transparent_46%)]" />
 
-        <div className="relative mx-auto max-w-[1440px] px-4 py-16 text-center md:px-6 lg:px-8 lg:py-24">
+        <div className="relative w-full px-4 py-16 text-center md:px-6 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-4xl space-y-8">
             <div className="space-y-5">
               <Badge className="rounded-full border-emerald-800/12 bg-emerald-800/8 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-950" variant="outline">
