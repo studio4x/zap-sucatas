@@ -48,7 +48,7 @@ export function DashboardSidebar({
         <Brand layout="stacked" subtitle="Área do anunciante" />
       </div>
 
-      <div className="mt-5 rounded-2xl border border-border bg-background px-4 py-4 shadow-sm">
+      <div className="mt-5 rounded-2xl bg-background px-4 py-4">
         <p className="text-sm font-semibold text-foreground">
           {user?.fullName?.trim() || 'Conta autenticada'}
         </p>
@@ -87,8 +87,8 @@ export function DashboardSidebar({
         ))}
       </nav>
 
-      <div className="mt-5 rounded-2xl border border-border bg-background px-4 py-4 shadow-sm">
-        <Button className="w-full" onClick={() => void onSignOut()} type="button" variant="outline">
+      <div className="mt-5 px-0 py-0">
+        <Button className="w-full" onClick={() => void onSignOut()} type="button" variant="secondary">
           <LogOut className="size-4" />
           Sair
         </Button>
