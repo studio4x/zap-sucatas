@@ -187,7 +187,7 @@ export function AppListingsPage() {
     createFeaturedPaymentMutation.isPending
 
   return (
-    <section className="space-y-6 rounded-3xl bg-gradient-to-b from-emerald-50/70 via-white to-slate-50/60 p-4 md:p-6">
+    <section className="space-y-6">
       <DashboardSectionHeader
         action={
           <Button asChild type="button">
@@ -237,36 +237,15 @@ export function AppListingsPage() {
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <DashboardStatCard className="bg-white/90" label="Total" value={stats.total} />
-        <DashboardStatCard className="bg-white/90" label="Rascunhos" value={stats.drafts} />
-        <DashboardStatCard
-          className="bg-amber-50/80"
-          label="Em revisão"
-          tone={stats.pending > 0 ? 'warning' : 'default'}
-          value={stats.pending}
-        />
-        <DashboardStatCard
-          className="bg-emerald-50/80"
-          label="Aprovados"
-          tone={stats.approved > 0 ? 'success' : 'default'}
-          value={stats.approved}
-        />
-        <DashboardStatCard
-          className="bg-slate-100/80"
-          label="Arquivados"
-          tone={stats.archived > 0 ? 'warning' : 'default'}
-          value={stats.archived}
-        />
+        <DashboardStatCard label="Total" value={stats.total} />
+        <DashboardStatCard label="Rascunhos" value={stats.drafts} />
+        <DashboardStatCard label="Em revisão" tone={stats.pending > 0 ? 'warning' : 'default'} value={stats.pending} />
+        <DashboardStatCard label="Aprovados" tone={stats.approved > 0 ? 'success' : 'default'} value={stats.approved} />
+        <DashboardStatCard label="Arquivados" tone={stats.archived > 0 ? 'warning' : 'default'} value={stats.archived} />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
+        <DashboardStatCard label="Em destaque" tone={stats.featured > 0 ? 'success' : 'default'} value={stats.featured} />
         <DashboardStatCard
-          className="bg-emerald-100/80"
-          label="Em destaque"
-          tone={stats.featured > 0 ? 'success' : 'default'}
-          value={stats.featured}
-        />
-        <DashboardStatCard
-          className="bg-amber-50/80"
           label="Destaque pendente"
           tone={stats.featuredPending > 0 ? 'warning' : 'default'}
           value={stats.featuredPending}
@@ -274,7 +253,6 @@ export function AppListingsPage() {
       </div>
 
       <DashboardFilterCard
-        className="bg-white/90"
         actions={
           <Button
             onClick={() => {
@@ -335,8 +313,7 @@ export function AppListingsPage() {
       ) : null}
 
       {!listingsQuery.isLoading && !listingsQuery.isError && filteredListings.length > 0 ? (
-        <div className="rounded-2xl bg-white/90 shadow-sm ring-1 ring-emerald-100/80">
-          <DashboardTableCard
+        <DashboardTableCard
           columns={[
             {
               header: 'Anúncio',
@@ -478,8 +455,7 @@ export function AppListingsPage() {
           getRowKey={(listing) => listing.id}
           minWidth="min-w-[1020px]"
           title="Lista de anúncios"
-          />
-        </div>
+        />
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-2">
