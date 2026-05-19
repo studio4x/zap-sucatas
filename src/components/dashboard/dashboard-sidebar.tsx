@@ -1,4 +1,4 @@
-import { CircleHelp, LogOut } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { NavLink } from 'react-router-dom'
 import { paths } from '@/app/paths'
@@ -88,19 +88,7 @@ export function DashboardSidebar({
       </nav>
 
       <div className="mt-5 rounded-2xl border border-border bg-background px-4 py-4 shadow-sm">
-        <div className="flex items-start gap-3">
-          <div className="mt-0.5 flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <CircleHelp className="size-4" />
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-foreground">Precisa de ajuda?</p>
-            <p className="text-sm leading-6 text-muted-foreground">
-              Atualize seus anúncios, acompanhe perguntas e use a configuração da conta quando precisar.
-            </p>
-          </div>
-        </div>
-
-        <Button className="mt-4 w-full" onClick={() => void onSignOut()} type="button" variant="outline">
+        <Button className="w-full" onClick={() => void onSignOut()} type="button" variant="outline">
           <LogOut className="size-4" />
           Sair
         </Button>
