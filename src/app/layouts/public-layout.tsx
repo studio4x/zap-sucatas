@@ -10,6 +10,7 @@ import { useVisualFavicon } from '@/hooks/use-visual-favicon'
 export function PublicLayout() {
   const location = useLocation()
   const { isLoading, maintenanceMode } = useSystemSettings()
+  const isHome = location.pathname === paths.public.home
   useVisualFavicon('layout-public')
   useAnalyticsTracker('public')
   const allowDuringMaintenance = [paths.auth.login, paths.auth.forgotPassword] as string[]
@@ -29,7 +30,11 @@ export function PublicLayout() {
         <SiteHeader />
 
         <main className="relative z-10 pb-20">
-          <div className="mx-auto w-full max-w-[1440px] px-4 pb-10 pt-0 md:px-6 lg:px-8 lg:pt-0">
+          <div
+            className={`mx-auto w-full max-w-[1440px] px-4 pb-10 md:px-6 lg:px-8 ${
+              isHome ? 'pt-0 lg:pt-0' : 'pt-6 lg:pt-8'
+            }`}
+          >
             <Outlet />
           </div>
         </main>
