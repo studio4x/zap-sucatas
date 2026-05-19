@@ -29,7 +29,7 @@ export function PublicLayout() {
         <SiteHeader />
 
         <main className="relative z-10 pb-20">
-          <div className="mx-auto w-full max-w-[1440px] px-4 pb-10 pt-6 md:px-6 lg:px-8 lg:pt-8">
+          <div className="mx-auto w-full max-w-[1440px] px-4 pb-10 pt-0 md:px-6 lg:px-8 lg:pt-0">
             <Outlet />
           </div>
         </main>
