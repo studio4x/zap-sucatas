@@ -17,9 +17,6 @@ export function SiteFooter() {
             Catálogo moderado, páginas de anúncio robustas, referência de preços e estrutura comercial
             pensada para o mercado de sucatas.
           </p>
-          <Button asChild className="bg-white !text-[#163a2d] hover:bg-white/90" style={{ color: '#163a2d' }}>
-            <Link to={paths.auth.register}>Publicar anúncio</Link>
-          </Button>
         </div>
 
         <div className="space-y-4">
@@ -29,7 +26,8 @@ export function SiteFooter() {
           <div className="grid gap-3 text-sm text-white/78">
             <Link to={paths.public.listings}>Anúncios</Link>
             <Link to={paths.public.categories}>Categorias</Link>
-            <Link to={paths.public.pricing}>Tabela de preços</Link>
+            <Link to={paths.public.pricing}>Cotação LME</Link>
+            <Link to={paths.public.scrapPrices}>Preços dos Metais</Link>
             {blogEnabled ? <Link to={paths.public.blog}>Blog</Link> : null}
           </div>
         </div>
@@ -51,10 +49,15 @@ export function SiteFooter() {
           <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-white/72">
             Mercado
           </h3>
+          <h4 className="text-lg font-semibold text-white">
+            Publique seu estoque
+          </h4>
           <p className="text-sm leading-7 text-white/72">
-            Plataforma preparada para descoberta rápida, leitura comercial e navegação previsível
-            em desktop e mobile.
+            Crie anúncios com visibilidade para compradores do setor e acelere suas negociações.
           </p>
+          <Button asChild className="bg-white !text-[#163a2d] hover:bg-white/90" style={{ color: '#163a2d' }}>
+            <Link to={paths.auth.register}>Publicar anúncio</Link>
+          </Button>
         </div>
       </div>
 
