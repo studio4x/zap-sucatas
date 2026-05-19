@@ -13,7 +13,8 @@ import { useAuth } from '@/hooks/use-auth'
 export function RegisterPage() {
   const navigate = useNavigate()
   const { isSupabaseConfigured } = useAuth()
-  const [message, setMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false)
 
   const form = useForm<RegisterFormValues>({
     defaultValues: {
@@ -26,7 +27,7 @@ export function RegisterPage() {
   })
 
   async function handleSubmit(values: RegisterFormValues) {
-    setMessage(null)
+    setErrorMessage(null)
 
     try {
       const sessionUser = await signUp({
@@ -40,10 +41,10 @@ export function RegisterPage() {
         return
       }
 
-      setMessage('Cadastro enviado. Verifique seu e-mail para confirmar a conta.')
+      setIsConfirmationModalOpen(true)
       form.reset()
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Falha ao criar conta.')
+      setErrorMessage(error instanceof Error ? error.message : 'Falha ao criar conta.')
     }
   }
 
@@ -112,7 +113,7 @@ export function RegisterPage() {
             </div>
           </div>
 
-          {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+          {errorMessage ? <p className="text-sm text-rose-700">{errorMessage}</p> : null}
 
           <div className="flex flex-wrap gap-3">
             <Button disabled={!isSupabaseConfigured || form.formState.isSubmitting} type="submit">
@@ -124,6 +125,29 @@ export function RegisterPage() {
           </div>
         </form>
       </div>
+
+      {isConfirmationModalOpen ? (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-slate-950/55" />
+          <div className="relative w-full max-w-lg rounded-2xl border border-emerald-200 bg-white p-6 shadow-2xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+              Cadastro criado
+            </p>
+            <h3 className="mt-2 text-2xl font-semibold text-foreground">
+              Confirme seu e-mail para ativar a conta
+            </h3>
+            <p className="mt-3 text-sm leading-7 text-muted-foreground">
+              Enviamos um e-mail de confirmação para você. Acesse sua caixa de entrada e valide o
+              endereço para concluir o cadastro e entrar na plataforma.
+            </p>
+            <div className="mt-6 flex justify-end">
+              <Button onClick={() => setIsConfirmationModalOpen(false)} type="button">
+                Fechar
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </PublicAuthShell>
   )
 }
