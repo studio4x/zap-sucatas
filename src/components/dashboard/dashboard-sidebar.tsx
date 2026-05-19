@@ -45,7 +45,7 @@ export function DashboardSidebar({
   return (
     <aside className="flex h-full flex-col bg-card px-4 py-5">
       <div className="border-b border-border pb-4">
-        <Brand subtitle="Área do anunciante" />
+        <Brand layout="stacked" subtitle="Área do anunciante" />
       </div>
 
       <div className="mt-5 rounded-2xl border border-border bg-background px-4 py-4 shadow-sm">
