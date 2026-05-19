@@ -4,7 +4,6 @@ import {
   ArrowRight,
   Battery,
   CircleEllipsis,
-  CircleHelp,
   Factory,
   Handshake,
   MapPin,
@@ -411,6 +410,11 @@ export function HomePage() {
         items={faqItems}
         title="Perguntas frequentes"
       />
+      <div className="-mt-14 flex justify-center">
+        <Button asChild className="rounded-xl px-6" variant="outline">
+          <Link to={paths.public.support}>Ir para suporte</Link>
+        </Button>
+      </div>
 
       <section
         className="relative overflow-hidden rounded-[2.6rem] border border-primary/10 bg-accent/55 px-6 py-14 text-center shadow-[0_24px_60px_-42px_rgba(12,60,44,0.18)] md:px-10"
@@ -430,12 +434,6 @@ export function HomePage() {
           <div className="flex flex-wrap justify-center gap-3">
             <Button asChild className="rounded-xl px-6">
               <Link to={paths.auth.register}>Criar conta e anunciar</Link>
-            </Button>
-            <Button asChild className="rounded-xl border-white/70 bg-white/10 px-6 text-white hover:bg-white/20" variant="outline">
-              <Link to={paths.public.support}>
-                <CircleHelp className="size-4" />
-                Falar com suporte
-              </Link>
             </Button>
           </div>
         </div>
