@@ -458,14 +458,6 @@ export function AppListingsPage() {
         />
       ) : null}
 
-      {!featuredPaymentsEnabled ? (
-        <DashboardAlertCard
-          description="A operacao de pagamentos esta desativada no momento. O destaque pago de anuncios fica indisponivel."
-          title="Destaque pago temporariamente indisponivel"
-          tone="warning"
-        />
-      ) : null}
-
       <div className="grid gap-4 lg:grid-cols-2">
         <DashboardActionCard
           action={

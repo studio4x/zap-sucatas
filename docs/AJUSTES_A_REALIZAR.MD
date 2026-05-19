@@ -48,3 +48,7 @@ Moderacao antes da publicacao. Busca por categoria, material e localidade. Pagin
 [OK] T23 - Ao criar uma conta na página de cadastro, atualmente aparece a mensagem "Cadastro enviado. Verifique seu e-mail para confirmar a conta.". Vamos alterar essa mensagem para um modal que se abre com um aviso bem evidente sobre a criação da conta e sobre a necessidade de validar o e-mail.. insira também um botão de fechar modal apenas..
 
 [OK] t24 - No dashboard do usuário, o favicon que está aparecendo não é o que foi configurado no admin. Ajuste.
+
+[OK] T25 - Quando um anuncio é criado e enviado para revisão, aparece a mensagem "Destaque pago temporariamente indisponivel. A operacao de pagamentos esta desativada no momento. O destaque pago de anuncios fica indisponivel.". Essa mensagem não precisa aparecer, podemos removê-la.
+
+[ ] t26 - A página https://zap-sucatas.vercel.app/app/anuncios está muito branca.. com cards todos brancos.. Precisamos melhorar isso.. inserir fundos nos cards.. deixar mais moderna, sem tanto branco...
