@@ -55,7 +55,7 @@ export function HeroSearchSection({
   }
 
   return (
-    <section className="-mx-4 overflow-hidden bg-white md:-mx-6 lg:-mx-8">
+    <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 overflow-hidden bg-white">
       <div className="relative">
         <div
           className="absolute inset-0 bg-cover bg-center"

@@ -314,7 +314,7 @@ export function HomePage() {
       </section>
 
       <section
-        className="-mx-4 relative overflow-hidden bg-white px-5 py-14 sm:-mx-6 sm:px-8 lg:-mx-8 lg:px-12"
+        className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 overflow-hidden bg-white px-5 py-14 sm:px-8 lg:px-12"
         style={{ backgroundImage: `url(${howItWorksBg})`, backgroundPosition: 'center', backgroundSize: 'cover' }}
       >
         <div className="relative mx-auto max-w-5xl space-y-10">
