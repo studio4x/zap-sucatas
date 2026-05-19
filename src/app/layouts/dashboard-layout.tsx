@@ -15,6 +15,7 @@ import { MaintenanceScreen } from '@/components/shared/maintenance-screen'
 import { useAnalyticsTracker } from '@/hooks/use-analytics-tracker'
 import { useAuth } from '@/hooks/use-auth'
 import { useSystemSettings } from '@/hooks/use-system-settings'
+import { useVisualFavicon } from '@/hooks/use-visual-favicon'
 
 const dashboardNavItems = [
   {
@@ -63,6 +64,7 @@ const dashboardNavItems = [
 export function DashboardLayout() {
   const { user } = useAuth()
   const { isLoading, maintenanceMode } = useSystemSettings()
+  useVisualFavicon('layout-dashboard')
   useAnalyticsTracker('dashboard')
   const hasRestrictedAccess = user?.status === 'under_review' || user?.status === 'suspended'
   const visibleNavItems = hasRestrictedAccess
