@@ -44,3 +44,7 @@ Moderacao antes da publicacao. Busca por categoria, material e localidade. Pagin
 [OK] T21 - Faça uma revisão geral nas notificações da plataforma, tanto aquelas que devem ser enviadas pelo SUpabase como as que devem ser enviadas diretamente pela plataforma. ALém disso, na página de admin/notificações, insira o conteúdo atual na aba "Notificações Manuais" e crie uma nova aba "Notificações Transacionais" e insira nessa aba um sistema completo para gerenciar e acompanhar todas as notificações transacionais da plataforma.
 
 [OK] T22 - Faça uma revisão geral nas notificações da plataforma, tanto aquelas que devem ser enviadas pelo SUpabase como as que devem ser enviadas diretamente pela plataforma. Veja se faltam notificações e e-mails a serem criados com base nas funcionaldiades existentes na plataforma..
+
+[OK] T23 - Ao criar uma conta na página de cadastro, atualmente aparece a mensagem "Cadastro enviado. Verifique seu e-mail para confirmar a conta.". Vamos alterar essa mensagem para um modal que se abre com um aviso bem evidente sobre a criação da conta e sobre a necessidade de validar o e-mail.. insira também um botão de fechar modal apenas..
+
+[OK] t24 - No dashboard do usuário, o favicon que está aparecendo não é o que foi configurado no admin. Ajuste.
