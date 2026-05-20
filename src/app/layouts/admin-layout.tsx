@@ -123,7 +123,7 @@ export function AdminLayout() {
   useAnalyticsTracker('admin')
 
   return (
-    <div className="admin-theme min-h-screen bg-background text-foreground">
+    <div className="admin-theme min-h-screen overflow-x-hidden bg-background text-foreground">
       <ScrollToTopOnRouteChange />
       <div className="lg:grid lg:min-h-screen lg:grid-cols-[256px_minmax(0,1fr)]">
         <div className="hidden border-r border-sidebar-border lg:block lg:h-screen lg:overflow-hidden">
@@ -138,7 +138,7 @@ export function AdminLayout() {
               onClick={() => setMobileOpen(false)}
               type="button"
             />
-            <div className="relative h-full w-64 border-r border-sidebar-border bg-sidebar shadow-lg">
+            <div className="relative h-full w-[min(20rem,88vw)] border-r border-sidebar-border bg-sidebar shadow-lg">
               <AdminSidebar items={adminNavItems} onClose={() => setMobileOpen(false)} />
             </div>
           </div>
@@ -160,8 +160,8 @@ export function AdminLayout() {
             </Button>
           </header>
 
-          <main className="min-h-screen overflow-x-auto p-4 md:p-6 lg:p-8">
-            <div className="mx-auto flex w-full max-w-none flex-col gap-6">
+          <main className="min-h-screen overflow-x-hidden p-4 md:p-6 lg:p-8">
+            <div className="mx-auto flex w-full max-w-none min-w-0 flex-col gap-6">
               <Outlet />
               <div className="border-t border-border/70 pt-4">
                 <BuildVersionBadge />

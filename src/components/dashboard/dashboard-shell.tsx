@@ -41,7 +41,7 @@ export function DashboardShell({
   )
 
   return (
-    <div className="dashboard-theme min-h-screen bg-background text-foreground">
+    <div className="dashboard-theme min-h-screen overflow-x-hidden bg-background text-foreground">
       <div className="flex min-h-screen flex-col bg-background">
         <div className="flex flex-1 bg-secondary/10">
           <div className="hidden w-64 shrink-0 lg:block">
@@ -58,7 +58,7 @@ export function DashboardShell({
                 onClick={() => setMobileOpen(false)}
                 type="button"
               />
-              <div className="relative h-full w-72 border-r border-border bg-card shadow-lg">
+              <div className="relative h-full w-[min(20rem,88vw)] border-r border-border bg-card shadow-lg">
                 <DashboardSidebar
                   items={navItems}
                   onNavigate={() => setMobileOpen(false)}
@@ -75,7 +75,7 @@ export function DashboardShell({
               onMenuOpen={() => setMobileOpen(true)}
               user={user}
             />
-            <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col p-3 pb-28 pt-4 md:p-6 md:pb-28 lg:p-8 lg:pb-8">
+            <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-1 flex-col p-3 pb-28 pt-4 md:p-6 md:pb-28 lg:p-8 lg:pb-8">
               {children}
               <div className="mt-8 border-t border-border/70 pt-4">
                 <BuildVersionBadge />

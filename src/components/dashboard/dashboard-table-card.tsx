@@ -40,13 +40,13 @@ export function DashboardTableCard<T>({
   return (
     <section className="rounded-2xl bg-card shadow-[0_20px_38px_-30px_rgba(0,0,0,0.38),0_12px_20px_-20px_rgba(39,153,31,0.22)]">
       <div className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
+        <div className="min-w-0 space-y-1">
           <h2 className="text-lg font-semibold text-foreground">{title}</h2>
           {description ? (
             <p className="text-sm leading-6 text-muted-foreground">{description}</p>
           ) : null}
         </div>
-        {action ? <div className="flex items-center gap-3">{action}</div> : null}
+        {action ? <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:justify-end [&>*]:w-full sm:[&>*]:w-auto">{action}</div> : null}
       </div>
 
       {isLoading ? (

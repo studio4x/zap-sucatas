@@ -23,14 +23,14 @@ export function AdminPageHeader({
           {eyebrow}
         </p>
         <div className="space-y-1">
-          <h1 className="text-[30px] font-semibold leading-none tracking-[-0.02em] text-foreground">
+          <h1 className="text-2xl font-semibold leading-tight tracking-[-0.02em] text-foreground md:text-[30px] md:leading-none">
             {title}
           </h1>
           <p className="max-w-3xl text-sm leading-6 text-muted-foreground">{description}</p>
         </div>
       </div>
 
-      {actions ? <div className="flex flex-wrap items-center gap-3">{actions}</div> : null}
+      {actions ? <div className="flex w-full flex-wrap items-center gap-3 lg:w-auto lg:justify-end [&>*]:w-full sm:[&>*]:w-auto">{actions}</div> : null}
     </header>
   )
 }
