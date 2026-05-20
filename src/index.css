@@ -276,6 +276,12 @@ a {
   font-weight: 600;
 }
 
+.admin-theme [class*='bg-card'][class*='border'],
+.admin-theme [class*='bg-muted'][class*='border'] {
+  border-color: transparent !important;
+  border-width: 0 !important;
+}
+
 .dashboard-theme {
   --background: #f8fdf7;
   --foreground: #000000;
