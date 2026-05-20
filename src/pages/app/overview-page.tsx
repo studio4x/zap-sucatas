@@ -81,7 +81,7 @@ export function AppOverviewPage() {
   })()
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 [&>*]:min-w-0">
       <DashboardSectionHeader
         action={
           <Button asChild type="button">
@@ -132,7 +132,7 @@ export function AppOverviewPage() {
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
         <DashboardTableCard
           columns={[
             {

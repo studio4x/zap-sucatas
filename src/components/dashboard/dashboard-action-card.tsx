@@ -30,20 +30,20 @@ export function DashboardActionCard({
   return (
     <section
       className={cn(
-        'rounded-2xl p-6 shadow-[0_18px_36px_-28px_rgba(0,0,0,0.38),0_10px_20px_-20px_rgba(39,153,31,0.24)]',
+        'min-w-0 rounded-2xl p-6 shadow-[0_18px_36px_-28px_rgba(0,0,0,0.38),0_10px_20px_-20px_rgba(39,153,31,0.24)]',
         toneClassMap[tone],
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2">
+      <div className="flex min-w-0 items-start justify-between gap-4">
+        <div className="min-w-0 space-y-2">
           {eyebrow ? (
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {eyebrow}
             </p>
           ) : null}
-          <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-          <p className="text-sm leading-6 text-muted-foreground">{description}</p>
+          <h2 className="break-words text-lg font-semibold text-foreground [overflow-wrap:anywhere]">{title}</h2>
+          <p className="break-words text-sm leading-6 text-muted-foreground [overflow-wrap:anywhere]">{description}</p>
         </div>
         {icon ? (
           <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-background text-primary shadow-[0_10px_18px_-14px_rgba(0,0,0,0.3)]">

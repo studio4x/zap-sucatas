@@ -47,7 +47,7 @@ export function AdminOverviewPage() {
   )
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 [&>*]:min-w-0">
       <AdminPageHeader
         actions={
           <>
@@ -67,7 +67,7 @@ export function AdminOverviewPage() {
         title="Operação administrativa"
       />
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
         <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Suporte no topo da fila</p>
           <div className="mt-3 flex flex-wrap items-center gap-3">

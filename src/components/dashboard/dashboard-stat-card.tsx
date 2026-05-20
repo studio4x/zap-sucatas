@@ -27,15 +27,15 @@ export function DashboardStatCard({
   return (
     <section
       className={cn(
-        'rounded-2xl p-5 shadow-[0_18px_34px_-28px_rgba(0,0,0,0.36),0_10px_18px_-18px_rgba(39,153,31,0.24)]',
+        'min-w-0 rounded-2xl p-5 shadow-[0_18px_34px_-28px_rgba(0,0,0,0.36),0_10px_18px_-18px_rgba(39,153,31,0.24)]',
         toneClassMap[tone],
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-white/90">{label}</p>
-          <div className="text-3xl font-bold leading-none text-white">{value}</div>
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0 space-y-2">
+          <p className="break-words text-sm font-medium text-white/90 [overflow-wrap:anywhere]">{label}</p>
+          <div className="break-words text-3xl font-bold leading-none text-white [overflow-wrap:anywhere]">{value}</div>
         </div>
         {icon ? (
           <div className="flex size-10 items-center justify-center rounded-xl bg-white/15 text-white">
