@@ -3,6 +3,7 @@ import { paths } from '@/app/paths'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Link } from 'react-router-dom'
+import quemSomosImage from '@/assets/about/quem-somos.png'
 
 const principles = [
   {
@@ -64,7 +65,7 @@ export function AboutPage() {
           <img
             alt="Equipe operacional em patio de reciclagem e classificacao de metais"
             className="h-[420px] w-full object-cover"
-            src="https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&w=1600&q=80"
+            src={quemSomosImage}
           />
         </div>
         <div className="space-y-4">
