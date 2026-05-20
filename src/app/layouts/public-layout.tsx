@@ -11,6 +11,7 @@ export function PublicLayout() {
   const location = useLocation()
   const { isLoading, maintenanceMode } = useSystemSettings()
   const isHome = location.pathname === paths.public.home
+  const isAbout = location.pathname === paths.public.about
   useVisualFavicon('layout-public')
   useAnalyticsTracker('public')
   const allowDuringMaintenance = [paths.auth.login, paths.auth.forgotPassword] as string[]
@@ -32,7 +33,7 @@ export function PublicLayout() {
         <main className="relative z-10 pb-20">
           <div
             className={`mx-auto w-full max-w-[1440px] px-4 pb-10 md:px-6 lg:px-8 ${
-              isHome ? 'pt-0 lg:pt-0' : 'pt-6 lg:pt-8'
+              isHome || isAbout ? 'pt-0 lg:pt-0' : 'pt-6 lg:pt-8'
             }`}
           >
             <Outlet />

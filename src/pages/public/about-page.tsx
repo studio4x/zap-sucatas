@@ -40,10 +40,10 @@ export function AboutPage() {
 
   return (
     <div className="space-y-10 lg:space-y-12">
-      <section className="relative overflow-hidden rounded-[2.2rem]">
+      <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 overflow-hidden">
         <img
           alt="Patio industrial com separacao de sucatas e operacao de reciclagem"
-          className="h-[420px] w-full object-cover md:h-[520px]"
+          className="h-[420px] w-full object-cover md:h-[560px]"
           src="https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=1800&q=80"
         />
         <div className="absolute inset-0 bg-[#05220f]/62" />
