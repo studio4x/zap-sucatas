@@ -24,7 +24,13 @@ export function DashboardAlertCard({
   tone = 'info',
 }: DashboardAlertCardProps) {
   return (
-    <section className={cn('rounded-2xl px-5 py-4 shadow-sm', toneClassMap[tone], className)}>
+    <section
+      className={cn(
+        'rounded-2xl px-5 py-4 shadow-[0_16px_30px_-26px_rgba(0,0,0,0.36),0_8px_16px_-16px_rgba(39,153,31,0.22)]',
+        toneClassMap[tone],
+        className,
+      )}
+    >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <p className="text-sm font-semibold">{title}</p>

@@ -287,7 +287,7 @@ export function AppListingsPage() {
       </DashboardFilterCard>
 
       {listingsQuery.isLoading ? (
-        <div className="rounded-2xl border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
+        <div className="rounded-2xl border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
           Carregando anúncios do dashboard...
         </div>
       ) : null}

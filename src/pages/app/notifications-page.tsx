@@ -188,7 +188,10 @@ export function AppNotificationsPage() {
               const priorityMeta = getNotificationPriorityMeta(notification.priority)
 
               return (
-                <article className="rounded-xl border border-border bg-card p-4 shadow-sm" key={notification.id}>
+                <article
+                  className="rounded-xl border border-border bg-card p-4 shadow-[0_16px_30px_-24px_rgba(0,0,0,0.32),0_8px_16px_-16px_rgba(39,153,31,0.2)]"
+                  key={notification.id}
+                >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0 space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
@@ -234,7 +237,7 @@ export function AppNotificationsPage() {
         </div>
       ) : null}
 
-      <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+      <section className="rounded-xl border border-border bg-card p-5 shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
         <h2 className="text-base font-semibold text-foreground">Preferencias de notificacao</h2>
         <p className="mt-1 text-sm text-muted-foreground">Controle os canais, horario silencioso e frequencia de e-mails para sua conta.</p>
 

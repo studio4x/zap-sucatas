@@ -16,7 +16,12 @@ export function DashboardFormSection({
   title,
 }: DashboardFormSectionProps) {
   return (
-    <section className={cn('rounded-2xl bg-card p-6 shadow-sm', className)}>
+    <section
+      className={cn(
+        'rounded-2xl bg-card p-6 shadow-[0_18px_34px_-28px_rgba(0,0,0,0.36),0_10px_18px_-18px_rgba(39,153,31,0.22)]',
+        className,
+      )}
+    >
       <div className="flex flex-col gap-4 pb-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <h2 className="text-lg font-semibold text-foreground">{title}</h2>

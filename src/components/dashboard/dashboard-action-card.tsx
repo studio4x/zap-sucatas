@@ -30,7 +30,7 @@ export function DashboardActionCard({
   return (
     <section
       className={cn(
-        'rounded-2xl p-6 shadow-sm',
+        'rounded-2xl p-6 shadow-[0_18px_36px_-28px_rgba(0,0,0,0.38),0_10px_20px_-20px_rgba(39,153,31,0.24)]',
         toneClassMap[tone],
         className,
       )}
@@ -46,7 +46,7 @@ export function DashboardActionCard({
           <p className="text-sm leading-6 text-muted-foreground">{description}</p>
         </div>
         {icon ? (
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-background text-primary shadow-sm">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-background text-primary shadow-[0_10px_18px_-14px_rgba(0,0,0,0.3)]">
             {icon}
           </div>
         ) : null}

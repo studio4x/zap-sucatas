@@ -27,7 +27,7 @@ export function DashboardStatCard({
   return (
     <section
       className={cn(
-        'rounded-2xl p-5 shadow-sm',
+        'rounded-2xl p-5 shadow-[0_18px_34px_-28px_rgba(0,0,0,0.36),0_10px_18px_-18px_rgba(39,153,31,0.24)]',
         toneClassMap[tone],
         className,
       )}

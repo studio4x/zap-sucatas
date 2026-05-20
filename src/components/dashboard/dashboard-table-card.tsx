@@ -38,7 +38,7 @@ export function DashboardTableCard<T>({
   title,
 }: DashboardTableCardProps<T>) {
   return (
-    <section className="rounded-2xl bg-card shadow-sm">
+    <section className="rounded-2xl bg-card shadow-[0_20px_38px_-30px_rgba(0,0,0,0.38),0_12px_20px_-20px_rgba(39,153,31,0.22)]">
       <div className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <h2 className="text-lg font-semibold text-foreground">{title}</h2>
