@@ -16,8 +16,8 @@ export function DashboardFormSection({
   title,
 }: DashboardFormSectionProps) {
   return (
-    <section className={cn('rounded-2xl border border-border bg-card p-6 shadow-sm', className)}>
-      <div className="flex flex-col gap-4 border-b border-border pb-4 sm:flex-row sm:items-start sm:justify-between">
+    <section className={cn('rounded-2xl bg-card p-6 shadow-sm', className)}>
+      <div className="flex flex-col gap-4 pb-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <h2 className="text-lg font-semibold text-foreground">{title}</h2>
           {description ? (

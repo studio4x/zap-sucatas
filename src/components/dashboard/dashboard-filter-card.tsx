@@ -16,8 +16,8 @@ export function DashboardFilterCard({
   title = 'Filtros',
 }: DashboardFilterCardProps) {
   return (
-    <section className={cn('rounded-2xl border border-border bg-card p-5 shadow-sm', className)}>
-      <div className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
+    <section className={cn('rounded-2xl bg-card p-5 shadow-sm', className)}>
+      <div className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <h2 className="text-sm font-semibold text-foreground">{title}</h2>
           {description ? (

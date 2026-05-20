@@ -11,9 +11,9 @@ type DashboardStatCardProps = {
 }
 
 const toneClassMap = {
-  default: 'border-primary/70 bg-primary',
-  success: 'border-primary/70 bg-primary',
-  warning: 'border-primary/70 bg-primary',
+  default: 'bg-primary',
+  success: 'bg-primary',
+  warning: 'bg-primary',
 }
 
 export function DashboardStatCard({
@@ -27,7 +27,7 @@ export function DashboardStatCard({
   return (
     <section
       className={cn(
-        'rounded-2xl border border-border p-5 shadow-sm',
+        'rounded-2xl p-5 shadow-sm',
         toneClassMap[tone],
         className,
       )}

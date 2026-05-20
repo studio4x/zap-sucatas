@@ -38,8 +38,8 @@ export function DashboardTableCard<T>({
   title,
 }: DashboardTableCardProps<T>) {
   return (
-    <section className="rounded-2xl border border-border bg-card shadow-sm">
-      <div className="flex flex-col gap-4 border-b border-border px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
+    <section className="rounded-2xl bg-card shadow-sm">
+      <div className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <h2 className="text-lg font-semibold text-foreground">{title}</h2>
           {description ? (
@@ -83,10 +83,7 @@ export function DashboardTableCard<T>({
             </thead>
             <tbody>
               {data.map((row) => (
-                <tr
-                  className="border-t border-border transition-colors hover:bg-muted/20"
-                  key={getRowKey(row)}
-                >
+                <tr className="transition-colors hover:bg-muted/20" key={getRowKey(row)}>
                   {columns.map((column) => (
                     <td className={cn('px-5 py-4 align-top', column.className)} key={column.header}>
                       {column.cell(row)}

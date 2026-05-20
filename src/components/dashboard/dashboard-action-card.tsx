@@ -13,9 +13,9 @@ type DashboardActionCardProps = {
 
 const toneClassMap = {
   default: 'bg-card',
-  primary: 'border-primary/15 bg-primary/5',
-  success: 'border-emerald-200 bg-emerald-50/80',
-  warning: 'border-amber-200 bg-amber-50/80',
+  primary: 'bg-primary/5',
+  success: 'bg-emerald-50/80',
+  warning: 'bg-amber-50/80',
 }
 
 export function DashboardActionCard({
@@ -30,7 +30,7 @@ export function DashboardActionCard({
   return (
     <section
       className={cn(
-        'rounded-2xl border p-6 shadow-sm',
+        'rounded-2xl p-6 shadow-sm',
         toneClassMap[tone],
         className,
       )}
