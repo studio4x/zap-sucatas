@@ -12,6 +12,7 @@ import { Outlet } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { DashboardShell } from '@/components/dashboard/dashboard-shell'
 import { MaintenanceScreen } from '@/components/shared/maintenance-screen'
+import { ScrollToTopOnRouteChange } from '@/components/shared/scroll-to-top-on-route-change'
 import { useAnalyticsTracker } from '@/hooks/use-analytics-tracker'
 import { useAuth } from '@/hooks/use-auth'
 import { useSystemSettings } from '@/hooks/use-system-settings'
@@ -92,8 +93,11 @@ export function DashboardLayout() {
   }
 
   return (
-    <DashboardShell navItems={visibleNavItems} quickNavItems={quickNavItems}>
-      <Outlet />
-    </DashboardShell>
+    <>
+      <ScrollToTopOnRouteChange />
+      <DashboardShell navItems={visibleNavItems} quickNavItems={quickNavItems}>
+        <Outlet />
+      </DashboardShell>
+    </>
   )
 }

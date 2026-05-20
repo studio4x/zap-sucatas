@@ -3,6 +3,7 @@ import { paths } from '@/app/paths'
 import { SiteFooter } from '@/components/public/site-footer'
 import { SiteHeader } from '@/components/public/site-header'
 import { MaintenanceScreen } from '@/components/shared/maintenance-screen'
+import { ScrollToTopOnRouteChange } from '@/components/shared/scroll-to-top-on-route-change'
 import { useAnalyticsTracker } from '@/hooks/use-analytics-tracker'
 import { useSystemSettings } from '@/hooks/use-system-settings'
 import { useVisualFavicon } from '@/hooks/use-visual-favicon'
@@ -27,6 +28,7 @@ export function PublicLayout() {
 
   return (
     <div className="public-theme min-h-screen">
+      <ScrollToTopOnRouteChange />
       <div className="relative min-h-screen">
         <SiteHeader />
 

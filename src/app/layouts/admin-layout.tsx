@@ -23,6 +23,7 @@ import { Outlet } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { BuildVersionBadge } from '@/components/shared/build-version-badge'
+import { ScrollToTopOnRouteChange } from '@/components/shared/scroll-to-top-on-route-change'
 import { Button } from '@/components/ui/button'
 import { useAnalyticsTracker } from '@/hooks/use-analytics-tracker'
 import { useVisualFavicon } from '@/hooks/use-visual-favicon'
@@ -123,6 +124,7 @@ export function AdminLayout() {
 
   return (
     <div className="admin-theme min-h-screen bg-background text-foreground">
+      <ScrollToTopOnRouteChange />
       <div className="lg:grid lg:min-h-screen lg:grid-cols-[256px_minmax(0,1fr)]">
         <div className="hidden border-r border-sidebar-border lg:block lg:h-screen lg:overflow-hidden">
           <AdminSidebar items={adminNavItems} />
