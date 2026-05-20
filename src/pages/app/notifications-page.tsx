@@ -168,7 +168,7 @@ export function AppNotificationsPage() {
       </DashboardFilterCard>
 
       {notificationsQuery.isLoading ? (
-        <div className="rounded-xl border border-border bg-card px-5 py-6 text-sm text-muted-foreground">Carregando notificacoes...</div>
+        <div className="rounded-xl bg-card px-5 py-6 text-sm text-muted-foreground shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">Carregando notificacoes...</div>
       ) : null}
 
       {notificationsQuery.isError ? (
@@ -182,14 +182,14 @@ export function AppNotificationsPage() {
       {!notificationsQuery.isLoading && !notificationsQuery.isError ? (
         <div className="space-y-3">
           {notifications.length === 0 ? (
-            <div className="rounded-xl border border-border bg-card px-5 py-7 text-sm text-muted-foreground">Nenhuma notificacao encontrada para os filtros atuais.</div>
+            <div className="rounded-xl bg-card px-5 py-7 text-sm text-muted-foreground shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">Nenhuma notificacao encontrada para os filtros atuais.</div>
           ) : (
             notifications.map((notification) => {
               const priorityMeta = getNotificationPriorityMeta(notification.priority)
 
               return (
                 <article
-                  className="rounded-xl border border-border bg-card p-4 shadow-[0_16px_30px_-24px_rgba(0,0,0,0.32),0_8px_16px_-16px_rgba(39,153,31,0.2)]"
+                  className="rounded-xl bg-card p-4 shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]"
                   key={notification.id}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
@@ -237,7 +237,7 @@ export function AppNotificationsPage() {
         </div>
       ) : null}
 
-      <section className="rounded-xl border border-border bg-card p-5 shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
+      <section className="rounded-xl bg-card p-5 shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
         <h2 className="text-base font-semibold text-foreground">Preferencias de notificacao</h2>
         <p className="mt-1 text-sm text-muted-foreground">Controle os canais, horario silencioso e frequencia de e-mails para sua conta.</p>
 
