@@ -11,9 +11,9 @@ type DashboardStatCardProps = {
 }
 
 const toneClassMap = {
-  default: 'bg-card',
-  success: 'bg-emerald-50/80',
-  warning: 'bg-amber-50/80',
+  default: 'border-primary/70 bg-primary',
+  success: 'border-primary/70 bg-primary',
+  warning: 'border-primary/70 bg-primary',
 }
 
 export function DashboardStatCard({
@@ -34,17 +34,17 @@ export function DashboardStatCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-2">
-          <p className="text-sm font-medium text-muted-foreground">{label}</p>
-          <div className="text-3xl font-bold leading-none text-foreground">{value}</div>
+          <p className="text-sm font-medium text-white/90">{label}</p>
+          <div className="text-3xl font-bold leading-none text-white">{value}</div>
         </div>
         {icon ? (
-          <div className="flex size-10 items-center justify-center rounded-xl bg-background text-primary">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-white/15 text-white">
             {icon}
           </div>
         ) : null}
       </div>
       {description ? (
-        <p className="mt-3 text-sm leading-6 text-muted-foreground">{description}</p>
+        <p className="mt-3 text-sm leading-6 text-white/90">{description}</p>
       ) : null}
     </section>
   )

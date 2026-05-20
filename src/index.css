@@ -277,17 +277,17 @@ a {
 }
 
 .dashboard-theme {
-  --background: #f2f7f2;
+  --background: #ffffff;
   --foreground: #000000;
-  --card: #fbfdf9;
+  --card: #ffffff;
   --card-foreground: #000000;
-  --popover: #fbfdf9;
+  --popover: #ffffff;
   --popover-foreground: #000000;
   --primary: #27991f;
   --primary-foreground: #ffffff;
-  --secondary: #ecf4ea;
+  --secondary: #ffffff;
   --secondary-foreground: #000000;
-  --muted: #eef4ed;
+  --muted: #ffffff;
   --muted-foreground: #000000;
   --accent: #27991f;
   --accent-foreground: #ffffff;
@@ -307,10 +307,7 @@ a {
   --sidebar-ring: #27991f;
   --font-sans: "Inter", system-ui, sans-serif;
   --font-display: "Inter", system-ui, sans-serif;
-  background:
-    radial-gradient(circle at top right, rgba(39, 153, 31, 0.1), transparent 44%),
-    radial-gradient(circle at bottom left, rgba(39, 153, 31, 0.08), transparent 40%),
-    var(--background);
+  background: var(--background);
   color: var(--foreground);
   font-family: 'Inter', system-ui, sans-serif;
 }
@@ -323,8 +320,8 @@ a {
 .dashboard-theme [data-slot='card'] {
   border-radius: 16px;
   border-color: var(--border);
-  background: color-mix(in srgb, var(--card) 94%, #ffffff 6%);
-  box-shadow: 0 12px 30px -24px rgba(19, 33, 23, 0.32), 0 6px 18px -18px rgba(39, 153, 31, 0.22);
+  background: var(--card);
+  box-shadow: 0 2px 8px -2px rgba(29, 37, 48, 0.1), 0 1px 2px -1px rgba(29, 37, 48, 0.05);
 }
 
 .dashboard-theme [data-slot='button'],
