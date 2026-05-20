@@ -12,12 +12,12 @@ export const pricingSeriesCatalog: Array<{
   currencyCode: 'BRL' | 'USD'
   label: string
 }> = [
-  { code: 'CU', color: '#218c4f', currencyCode: 'USD', label: 'Cobre' },
-  { code: 'ZN', color: '#3fa34d', currencyCode: 'USD', label: 'Zinco' },
+  { code: 'CU', color: '#dc2626', currencyCode: 'USD', label: 'Cobre' },
+  { code: 'ZN', color: '#94a3b8', currencyCode: 'USD', label: 'Zinco' },
   { code: 'AL', color: '#0e7490', currencyCode: 'USD', label: 'Alumínio' },
   { code: 'PB', color: '#8b5cf6', currencyCode: 'USD', label: 'Chumbo' },
   { code: 'SN', color: '#ca8a04', currencyCode: 'USD', label: 'Estanho' },
-  { code: 'NI', color: '#ef4444', currencyCode: 'USD', label: 'Níquel' },
+  { code: 'NI', color: '#218c4f', currencyCode: 'USD', label: 'Níquel' },
   { code: 'USD', color: '#2563eb', currencyCode: 'BRL', label: 'Dólar' },
 ]
 
