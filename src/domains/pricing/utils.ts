@@ -13,7 +13,7 @@ export const pricingSeriesCatalog: Array<{
   label: string
 }> = [
   { code: 'CU', color: '#dc2626', currencyCode: 'USD', label: 'Cobre' },
-  { code: 'ZN', color: '#94a3b8', currencyCode: 'USD', label: 'Zinco' },
+  { code: 'ZN', color: '#C0C0C0', currencyCode: 'USD', label: 'Zinco' },
   { code: 'AL', color: '#0e7490', currencyCode: 'USD', label: 'Alumínio' },
   { code: 'PB', color: '#8b5cf6', currencyCode: 'USD', label: 'Chumbo' },
   { code: 'SN', color: '#ca8a04', currencyCode: 'USD', label: 'Estanho' },
