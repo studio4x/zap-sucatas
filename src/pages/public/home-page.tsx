@@ -16,7 +16,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import ctaHandshakeBg from '@/assets/home-bg/cta-handshake-bg.png'
-import howItWorksBg from '@/assets/home-bg/how-it-works-bg.png'
+import howItWorksBg from '@/assets/home-bg/how-it-works-bg.jpg'
 import { FaqSection } from '@/components/public/faq-section'
 import { HeroSearchSection } from '@/components/public/hero-search-section'
 import { PublicEmptyState } from '@/components/public/public-empty-state'
