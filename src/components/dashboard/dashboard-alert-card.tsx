@@ -32,11 +32,11 @@ export function DashboardAlertCard({
       )}
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
+        <div className="min-w-0 space-y-1">
           <p className="text-sm font-semibold">{title}</p>
           <p className="text-sm leading-6 opacity-90">{description}</p>
         </div>
-        {action ? <div className="flex shrink-0 items-center gap-2">{action}</div> : null}
+        {action ? <div className="flex w-full items-center gap-2 sm:w-auto sm:shrink-0 [&>*]:w-full sm:[&>*]:w-auto">{action}</div> : null}
       </div>
     </section>
   )
