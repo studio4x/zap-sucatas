@@ -1,11 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
 import { CheckCircle2, Eye, Gem, Target } from 'lucide-react'
 import { paths } from '@/app/paths'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Link } from 'react-router-dom'
-import whoWeAreImage from '@/assets/hero.png'
-import { fetchSystemSettings } from '@/domains/settings/api'
 
 const principles = [
   {
@@ -35,11 +32,6 @@ const highlights = [
 ]
 
 export function AboutPage() {
-  const settingsQuery = useQuery({
-    queryKey: ['system-settings', 'public-about'],
-    queryFn: fetchSystemSettings,
-  })
-
   return (
     <div className="space-y-10 lg:space-y-12">
       <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 overflow-hidden">
@@ -58,7 +50,7 @@ export function AboutPage() {
               <h1 className="text-4xl font-semibold leading-tight tracking-[-0.03em] text-white md:text-6xl">
                 Transformando o futuro da reciclacao com comercio digital inteligente
               </h1>
-              <p className="max-w-2xl text-base leading-7 text-white/88 md:text-lg">
+              <p className="mx-auto max-w-2xl text-base leading-7 text-white/88 md:text-lg">
                 A Zap Sucatas une experiencia setorial, tecnologia e leitura de mercado para tornar a negociacao de
                 sucatas mais clara, rapida e confiavel.
               </p>
@@ -72,7 +64,7 @@ export function AboutPage() {
           <img
             alt="Equipe operacional em patio de reciclagem e classificacao de metais"
             className="h-[420px] w-full object-cover"
-            src={whoWeAreImage}
+            src="https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&w=1600&q=80"
           />
         </div>
         <div className="space-y-4">
@@ -88,15 +80,6 @@ export function AboutPage() {
           <p className="text-base font-semibold leading-8 text-primary">
             Nossa paixao e transformar residuos em oportunidade com transparencia e eficiencia operacional.
           </p>
-          {settingsQuery.data ? (
-            <div className="rounded-[1.4rem] bg-secondary/40 px-5 py-4 text-sm leading-7 text-muted-foreground shadow-[0_16px_36px_-28px_rgba(19,33,23,0.35)]">
-              <p className="font-semibold text-foreground">Contato operacional atual</p>
-              <p className="mt-1">
-                {settingsQuery.data.supportEmail ?? 'E-mail em atualizacao'} ·{' '}
-                {settingsQuery.data.supportPhone ?? 'Telefone em atualizacao'}
-              </p>
-            </div>
-          ) : null}
         </div>
       </section>
 
@@ -148,8 +131,12 @@ export function AboutPage() {
               Plataforma especializada, moderada e orientada a resultado
             </div>
           </div>
-          <div className="flex justify-start lg:justify-end">
-            <Button asChild className="bg-white !text-[#0f3a29] hover:bg-white/90" style={{ color: '#0f3a29' }}>
+          <div className="flex justify-center">
+            <Button
+              asChild
+              className="h-14 min-w-[220px] rounded-2xl bg-white px-10 text-base font-semibold !text-[#0f3a29] shadow-[0_18px_40px_-20px_rgba(0,0,0,0.45)] hover:bg-white/92"
+              style={{ color: '#0f3a29' }}
+            >
               <Link to={paths.auth.register}>Criar conta</Link>
             </Button>
           </div>
