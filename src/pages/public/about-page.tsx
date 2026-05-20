@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { CheckCircle2, Eye, Gem, Target } from 'lucide-react'
 import { paths } from '@/app/paths'
-import { CtaBanner } from '@/components/public/cta-banner'
 import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Link } from 'react-router-dom'
+import whoWeAreImage from '@/assets/hero.png'
 import { fetchSystemSettings } from '@/domains/settings/api'
 
 const principles = [
@@ -47,9 +49,9 @@ export function AboutPage() {
           src="https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=1800&q=80"
         />
         <div className="absolute inset-0 bg-[#05220f]/62" />
-        <div className="absolute inset-0 flex items-center">
+        <div className="absolute inset-0 flex items-center justify-center text-center">
           <div className="px-6 md:px-10">
-            <div className="max-w-3xl space-y-5">
+            <div className="mx-auto max-w-3xl space-y-5">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-100/85">
                 Sobre a plataforma
               </p>
@@ -70,7 +72,7 @@ export function AboutPage() {
           <img
             alt="Equipe operacional em patio de reciclagem e classificacao de metais"
             className="h-[420px] w-full object-cover"
-            src="https://images.unsplash.com/photo-1581091870622-2fda63b2be6f?auto=format&fit=crop&w=1400&q=80"
+            src={whoWeAreImage}
           />
         </div>
         <div className="space-y-4">
@@ -128,18 +130,31 @@ export function AboutPage() {
         </div>
       </section>
 
-      <CtaBanner
-        actionLabel="Criar conta"
-        actionTo={paths.auth.register}
-        description="Se voce movimenta sucatas e metais, publique anuncios em um ambiente com descoberta comercial e leitura de mercado."
-        secondaryAction={
-          <div className="inline-flex items-center gap-2 text-sm text-white/80">
-            <CheckCircle2 className="size-4" />
-            Plataforma especializada, moderada e orientada a resultado
+      <section className="overflow-hidden rounded-[2rem] border border-border bg-[linear-gradient(135deg,rgba(22,98,70,0.98),rgba(12,60,44,0.96))] text-primary-foreground shadow-[0_24px_60px_-28px_rgba(12,60,44,0.75)]">
+        <div className="grid gap-8 px-6 py-8 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:px-10">
+          <div className="space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary-foreground/75">
+              Anunciar na plataforma
+            </p>
+            <h3 className="font-display text-3xl tracking-tight md:text-4xl">
+              Faca parte da mudanca no mercado de sucatas
+            </h3>
+            <p className="max-w-2xl text-sm leading-7 text-primary-foreground/86">
+              Se voce movimenta sucatas e metais, publique anuncios em um ambiente com descoberta comercial e leitura
+              de mercado.
+            </p>
+            <div className="inline-flex items-center gap-2 text-sm text-white/80">
+              <CheckCircle2 className="size-4" />
+              Plataforma especializada, moderada e orientada a resultado
+            </div>
           </div>
-        }
-        title="Faca parte da mudanca no mercado de sucatas"
-      />
+          <div className="flex justify-start lg:justify-end">
+            <Button asChild className="bg-white !text-[#0f3a29] hover:bg-white/90" style={{ color: '#0f3a29' }}>
+              <Link to={paths.auth.register}>Criar conta</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
