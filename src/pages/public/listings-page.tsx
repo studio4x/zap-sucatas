@@ -124,7 +124,7 @@ export function ListingsPage() {
 
   return (
     <section className="space-y-6 lg:space-y-8">
-      <div className="overflow-hidden rounded-[2.25rem] border border-[#d7e2d7] bg-[linear-gradient(180deg,#f6faf5_0%,#eef4ef_100%)] px-5 py-6 md:px-6 lg:px-8 lg:py-8">
+      <div className="overflow-hidden rounded-[2.25rem] bg-[linear-gradient(180deg,#f6faf5_0%,#eef4ef_100%)] px-5 py-6 shadow-[0_20px_48px_-36px_rgba(19,33,23,0.3)] md:px-6 lg:px-8 lg:py-8">
         <PublicSectionHeading
           description="Encontre anuncios por categoria, localidade e material."
           eyebrow="Catalogo publico"
@@ -134,7 +134,7 @@ export function ListingsPage() {
 
       <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
         <aside className="sticky top-20 space-y-4 self-start">
-          <div className="rounded-[1.25rem] border border-[#c8d8c8] bg-white/95 p-3 shadow-[0_18px_45px_-36px_rgba(19,33,23,0.4)] backdrop-blur">
+          <div className="rounded-[1.25rem] bg-white/95 p-3 shadow-[0_18px_45px_-36px_rgba(19,33,23,0.4)] backdrop-blur">
             <div className="relative">
               <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -240,7 +240,7 @@ export function ListingsPage() {
 
         <div className="space-y-6">
           {!hasSearchQuery && featuredListingsQuery.data?.length ? (
-            <div className="rounded-[2rem] border border-amber-200 bg-[linear-gradient(180deg,#fff9ec_0%,#fff3d6_100%)] p-5 shadow-[0_26px_55px_-42px_rgba(168,111,0,0.45)] md:p-6">
+            <div className="rounded-[2rem] bg-[linear-gradient(180deg,#fff9ec_0%,#fff3d6_100%)] p-5 shadow-[0_26px_55px_-42px_rgba(168,111,0,0.45)] md:p-6">
               <FeaturedListingsSection
                 description="Anuncios com maior prioridade de exibicao no catalogo."
                 listings={featuredListingsQuery.data}
@@ -265,7 +265,7 @@ export function ListingsPage() {
           </div>
 
           {listingsQuery.isLoading ? (
-            <Card className="rounded-[1.8rem] border-border/80">
+            <Card className="rounded-[1.8rem] border-0">
               <CardContent className="p-6 text-sm text-muted-foreground">
                 Carregando catalogo publico...
               </CardContent>
@@ -289,7 +289,7 @@ export function ListingsPage() {
           ) : null}
 
           {totalCount > PAGE_SIZE ? (
-            <div className="flex flex-col gap-3 rounded-[1.7rem] border border-border bg-card/88 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 rounded-[1.7rem] bg-card/88 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
                 Pagina {normalizedPage} de {totalPages}
               </p>
