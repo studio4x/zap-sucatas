@@ -67,7 +67,7 @@ export function DashboardSidebar({
               cn(
                 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-primary text-white shadow-sm'
+                  ? 'bg-primary !text-white shadow-sm'
                   : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
               )
             }
@@ -76,7 +76,7 @@ export function DashboardSidebar({
             onClick={onNavigate}
             to={to}
           >
-            <Icon className="size-4" />
+            <Icon className="size-4 text-current" />
             <span className="truncate">{label}</span>
             {to === paths.app.notifications && unreadCount > 0 ? (
               <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">

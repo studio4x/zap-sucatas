@@ -24,7 +24,7 @@ export function DashboardQuickNav({ items }: DashboardQuickNavProps) {
               cn(
                 'flex min-w-0 flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-medium transition-colors',
                 isActive
-                  ? 'bg-primary text-white'
+                  ? 'bg-primary !text-white'
                   : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
               )
             }
@@ -32,7 +32,7 @@ export function DashboardQuickNav({ items }: DashboardQuickNavProps) {
             key={to}
             to={to}
           >
-            <Icon className="size-4" />
+            <Icon className="size-4 text-current" />
             <span className="truncate">{shortLabel ?? label}</span>
           </NavLink>
         ))}

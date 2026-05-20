@@ -47,7 +47,7 @@ export function AppSupportTicketsPage() {
         title="Meus chamados"
       />
 
-      <Card className="rounded-[1.8rem] bg-primary/5 shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
+      <Card className="rounded-[1.8rem] !border-none bg-primary/5 shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
         <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm font-semibold text-foreground">SLA publico de primeira resposta</p>
@@ -58,12 +58,19 @@ export function AppSupportTicketsPage() {
         </CardContent>
       </Card>
 
-      <Card className="rounded-[1.8rem] shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
+      <Card className="rounded-[1.8rem] !border-none shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
         <CardContent className="p-0">
           {ticketsQuery.isLoading ? <div className="px-6 py-8 text-sm text-muted-foreground">Carregando chamados...</div> : null}
           {ticketsQuery.isError ? <div className="px-6 py-8 text-sm text-destructive">Nao foi possivel carregar os chamados.</div> : null}
           {!ticketsQuery.isLoading && !ticketsQuery.isError && tickets.length === 0 ? (
-            <div className="p-6"><DashboardEmptyState description="Voce ainda nao abriu nenhum chamado." icon={MessageSquare} title="Nenhum chamado encontrado" /></div>
+            <div className="p-6">
+              <DashboardEmptyState
+                className="border-none border-transparent bg-transparent shadow-none"
+                description="Voce ainda nao abriu nenhum chamado."
+                icon={MessageSquare}
+                title="Nenhum chamado encontrado"
+              />
+            </div>
           ) : null}
           {!ticketsQuery.isLoading && !ticketsQuery.isError && tickets.length > 0 ? (
             <div className="overflow-x-auto">
