@@ -5,7 +5,6 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { DashboardFormSection } from '@/components/dashboard/dashboard-form-section'
 import { DashboardSectionHeader } from '@/components/dashboard/dashboard-section-header'
-import { DashboardStatCard } from '@/components/dashboard/dashboard-stat-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { fetchCurrentProfile, updateCurrentProfile } from '@/domains/profiles/api'
@@ -102,15 +101,6 @@ export function AppProfilePage() {
         title="Mantenha estas informações sempre atualizadas"
         tone="info"
       />
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <DashboardStatCard label="Status" value={getStatusLabel(profileQuery.data.status)} />
-        <DashboardStatCard
-          label="Papel"
-          value={profileQuery.data.role === 'admin' ? 'Administrador' : 'Anunciante'}
-        />
-        <DashboardStatCard label="E-mail" value={user?.email ?? 'Sem e-mail'} />
-      </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
         <DashboardFormSection
