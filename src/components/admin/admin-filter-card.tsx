@@ -16,8 +16,13 @@ export function AdminFilterCard({
   title = 'Filtros',
 }: AdminFilterCardProps) {
   return (
-    <section className={cn('rounded-xl border border-border bg-card p-4 shadow-sm', className)}>
-      <div className="flex flex-col gap-3 border-b border-border pb-4 lg:flex-row lg:items-center lg:justify-between">
+    <section
+      className={cn(
+        'rounded-xl bg-card p-4 shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]',
+        className,
+      )}
+    >
+      <div className="flex flex-col gap-3 pb-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2 className="text-sm font-semibold text-foreground">{title}</h2>
           {description ? (

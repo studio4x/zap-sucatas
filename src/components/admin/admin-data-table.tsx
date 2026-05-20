@@ -35,7 +35,7 @@ export function AdminDataTable<T>({
 }: AdminDataTableProps<T>) {
   if (isLoading) {
     return (
-      <div className="rounded-lg border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
+      <div className="rounded-lg bg-card px-6 py-8 text-sm text-muted-foreground shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
         Carregando dados operacionais...
       </div>
     )
@@ -54,7 +54,7 @@ export function AdminDataTable<T>({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+    <div className="overflow-hidden rounded-lg bg-card shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
       <div className="overflow-x-auto">
         <table className={cn('w-full border-collapse text-sm', minWidth)}>
           <thead className="bg-muted/65 text-left">

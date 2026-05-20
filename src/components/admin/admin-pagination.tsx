@@ -23,7 +23,7 @@ export function AdminPagination({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded-lg bg-card px-4 py-3 shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)] sm:flex-row sm:items-center sm:justify-between">
       <p className="text-sm text-muted-foreground">
         Exibindo {startItem}-{endItem} de {totalItems} registros
       </p>
