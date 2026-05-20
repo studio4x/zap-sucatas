@@ -1,27 +1,35 @@
 import { useQuery } from '@tanstack/react-query'
-import { CheckCircle2, Factory, ShieldCheck, Waypoints } from 'lucide-react'
+import { CheckCircle2, Eye, Gem, Target } from 'lucide-react'
 import { paths } from '@/app/paths'
 import { CtaBanner } from '@/components/public/cta-banner'
-import { PublicSectionHeading } from '@/components/public/public-section-heading'
 import { Card, CardContent } from '@/components/ui/card'
 import { fetchSystemSettings } from '@/domains/settings/api'
 
-const pillars = [
+const principles = [
   {
-    description: 'Portal focado em sucatas, metais e recicláveis, sem dispersar o produto para segmentos genéricos.',
-    icon: Factory,
-    title: 'Especializacao setorial',
+    description:
+      'Comercializar sucatas com excelencia operacional, elevando transparencia, previsibilidade e confianca na negociacao.',
+    icon: Target,
+    title: 'Missao',
   },
   {
-    description: 'A plataforma combina catalogo publico, paginas de anuncio detalhadas, blog e leitura de precos para apoiar a negociacao.',
-    icon: Waypoints,
-    title: 'Produto orientado a mercado',
+    description:
+      'Ser referencia nacional em marketplace de sucatas, conectando vendedores e compradores com inteligencia de mercado.',
+    icon: Eye,
+    title: 'Visao',
   },
   {
-    description: 'A moderacao dos anuncios ajuda a elevar confianca, reduzir ruido e organizar melhor a experiencia do portal.',
-    icon: ShieldCheck,
-    title: 'Confianca operacional',
+    description:
+      'Etica, transparencia, comprometimento, sustentabilidade e foco no cliente em cada interacao da plataforma.',
+    icon: Gem,
+    title: 'Valores',
   },
+]
+
+const highlights = [
+  { label: 'Metais reciclados (ton)', value: '500.000+' },
+  { label: 'Anos de atuacao no setor', value: '20+' },
+  { label: 'Parceiros satisfeitos', value: '2.500+' },
 ]
 
 export function AboutPage() {
@@ -31,78 +39,106 @@ export function AboutPage() {
   })
 
   return (
-    <div className="space-y-8 lg:space-y-10">
-      <section className="overflow-hidden rounded-[2.2rem] border border-border bg-white">
-        <div className="grid gap-6 px-5 py-6 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)] lg:px-8 lg:py-8">
-          <div className="space-y-4">
-            <PublicSectionHeading
-              description="A Zap Sucatas nasce para elevar a experiência digital do mercado de sucatas, unindo descoberta, confiança comercial e leitura operacional."
-              eyebrow="Sobre a plataforma"
-              title="Um portal comercial construido para o mercado industrial"
-            />
+    <div className="space-y-10 lg:space-y-12">
+      <section className="relative overflow-hidden rounded-[2.2rem]">
+        <img
+          alt="Patio industrial com separacao de sucatas e operacao de reciclagem"
+          className="h-[420px] w-full object-cover md:h-[520px]"
+          src="https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=1800&q=80"
+        />
+        <div className="absolute inset-0 bg-[#05220f]/62" />
+        <div className="absolute inset-0 flex items-center">
+          <div className="px-6 md:px-10">
+            <div className="max-w-3xl space-y-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-100/85">
+                Sobre a plataforma
+              </p>
+              <h1 className="text-4xl font-semibold leading-tight tracking-[-0.03em] text-white md:text-6xl">
+                Transformando o futuro da reciclacao com comercio digital inteligente
+              </h1>
+              <p className="max-w-2xl text-base leading-7 text-white/88 md:text-lg">
+                A Zap Sucatas une experiencia setorial, tecnologia e leitura de mercado para tornar a negociacao de
+                sucatas mais clara, rapida e confiavel.
+              </p>
+            </div>
           </div>
-
-          <Card className="rounded-[1.8rem] border-border bg-[linear-gradient(180deg,#27991f_0%,#0f5038_100%)] text-white shadow-[0_30px_70px_-40px_rgba(12,34,25,0.9)]">
-            <CardContent className="space-y-4 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100/72">
-                Direcao do produto
-              </p>
-              <p className="text-2xl font-semibold leading-tight tracking-[-0.03em] text-white">
-                Menos site institucional. Mais estrutura de marketplace real para o setor.
-              </p>
-              <p className="text-sm leading-7 text-emerald-50/78">
-                Busca, catalogo, detalhe de anuncio, conteudo e precos convivem no mesmo ecossistema comercial.
-              </p>
-            </CardContent>
-          </Card>
         </div>
       </section>
 
-      <div className="grid gap-5 lg:grid-cols-3">
-        {pillars.map(({ description, icon: Icon, title }) => (
-          <Card key={title} className="rounded-[1.85rem] border-border/80">
-            <CardContent className="space-y-4 p-6">
-              <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <Icon className="size-5" />
-              </div>
-              <h2 className="text-xl font-semibold text-foreground">{title}</h2>
-              <p className="text-sm leading-7 text-muted-foreground">{description}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <Card className="rounded-[1.95rem] border-border/80">
-        <CardContent className="space-y-5 p-6 md:p-8">
+      <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center">
+        <div className="overflow-hidden rounded-[2rem] shadow-[0_26px_60px_-42px_rgba(19,33,23,0.35)]">
+          <img
+            alt="Equipe operacional em patio de reciclagem e classificacao de metais"
+            className="h-[420px] w-full object-cover"
+            src="https://images.unsplash.com/photo-1581091870622-2fda63b2be6f?auto=format&fit=crop&w=1400&q=80"
+          />
+        </div>
+        <div className="space-y-4">
+          <h2 className="text-3xl font-semibold tracking-[-0.02em] text-foreground md:text-4xl">Quem somos</h2>
           <p className="text-base leading-8 text-foreground/90">
-            Mais do que uma pagina institucional, a Zap Sucatas foi desenhada como um produto comercial: busca publica, categorias, paginas de anuncio robustas, perguntas, conteudo editorial e leitura de precos convivem no mesmo ecossistema.
+            A Zap Sucatas nasce para elevar a experiencia digital do mercado de sucatas, metais e reciclaveis. O foco
+            e claro: menos portal generico, mais estrutura comercial real para o setor.
           </p>
           <p className="text-base leading-8 text-foreground/90">
-            O objetivo e tornar a negociacao mais clara, previsivel e confiavel para quem compra e para quem vende. A interface publica prioriza catalogo vivo, navegacao rapida e CTA constante para anunciar.
+            A plataforma combina catalogo publico, paginas de anuncio detalhadas, conteudo editorial e leitura de
+            precos para apoiar decisao de compra e venda em um unico ecossistema.
+          </p>
+          <p className="text-base font-semibold leading-8 text-primary">
+            Nossa paixao e transformar residuos em oportunidade com transparencia e eficiencia operacional.
           </p>
           {settingsQuery.data ? (
-            <div className="rounded-[1.5rem] border border-border bg-secondary/40 p-5 text-sm leading-7 text-muted-foreground">
+            <div className="rounded-[1.4rem] bg-secondary/40 px-5 py-4 text-sm leading-7 text-muted-foreground shadow-[0_16px_36px_-28px_rgba(19,33,23,0.35)]">
               <p className="font-semibold text-foreground">Contato operacional atual</p>
-              <p className="mt-2">
+              <p className="mt-1">
                 {settingsQuery.data.supportEmail ?? 'E-mail em atualizacao'} ·{' '}
                 {settingsQuery.data.supportPhone ?? 'Telefone em atualizacao'}
               </p>
             </div>
           ) : null}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
+
+      <section className="space-y-6">
+        <h2 className="text-center text-3xl font-semibold tracking-[-0.02em] text-foreground md:text-4xl">
+          Missao, visao e valores
+        </h2>
+        <div className="grid gap-5 lg:grid-cols-3">
+          {principles.map(({ description, icon: Icon, title }) => (
+            <Card key={title} className="rounded-[1.7rem] border-0 bg-card shadow-[0_22px_50px_-38px_rgba(19,33,23,0.34)]">
+              <CardContent className="space-y-4 p-6">
+                <div className="flex size-12 items-center justify-center rounded-full bg-primary/12 text-primary">
+                  <Icon className="size-5" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground">{title}</h3>
+                <p className="text-sm leading-7 text-muted-foreground">{description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-[2rem] bg-[#0b2a18] px-6 py-10 text-white shadow-[0_34px_70px_-44px_rgba(6,20,12,0.75)] md:px-10">
+        <div className="grid gap-8 md:grid-cols-3">
+          {highlights.map((item) => (
+            <div className="text-center" key={item.label}>
+              <p className="text-4xl font-semibold tracking-[-0.03em] text-[#a0f790] md:text-5xl">{item.value}</p>
+              <p className="mt-2 text-sm text-white/80 md:text-base">{item.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <CtaBanner
         actionLabel="Criar conta"
         actionTo={paths.auth.register}
-        description="Se você movimenta sucatas e metais, publique seus anúncios em uma plataforma desenhada para descoberta comercial."
+        description="Se voce movimenta sucatas e metais, publique anuncios em um ambiente com descoberta comercial e leitura de mercado."
         secondaryAction={
           <div className="inline-flex items-center gap-2 text-sm text-white/80">
             <CheckCircle2 className="size-4" />
-            Catalogo moderado e navegacao orientada a mercado
+            Plataforma especializada, moderada e orientada a resultado
           </div>
         }
-        title="Quer anunciar em um ambiente mais organizado e confiavel?"
+        title="Faca parte da mudanca no mercado de sucatas"
       />
     </div>
   )
