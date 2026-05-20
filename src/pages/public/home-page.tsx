@@ -316,6 +316,7 @@ export function HomePage() {
         className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 overflow-hidden bg-white px-5 py-14 sm:px-8 lg:px-12"
         style={{ backgroundImage: `url(${howItWorksBg})`, backgroundPosition: 'center', backgroundSize: 'cover' }}
       >
+        <div className="pointer-events-none absolute inset-0 bg-black/45" />
         <div className="relative mx-auto max-w-5xl space-y-10">
           <div className="space-y-3 text-center">
             <h2 className="font-display text-3xl tracking-tight text-white sm:text-[2.2rem]">
