@@ -66,7 +66,7 @@ export function Brand({ subtitle, layout = 'inline', tone = 'default' }: BrandPr
             Zap Sucatas
           </p>
         ) : null}
-        <p className={cn('text-sm leading-tight', isInverse ? 'text-white/72' : 'text-muted-foreground')}>
+        <p className={cn('hidden text-sm leading-tight lg:block', isInverse ? 'text-white/72' : 'text-muted-foreground')}>
           {subtitle}
         </p>
       </div>
