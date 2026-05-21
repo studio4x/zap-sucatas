@@ -2,23 +2,19 @@ import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { RefreshCw, RotateCcw, Send, StopCircle } from 'lucide-react'
+import { RefreshCw, Send } from 'lucide-react'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
 import { AdminFilterCard } from '@/components/admin/admin-filter-card'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminPagination } from '@/components/admin/admin-pagination'
-import { AdminRowActions } from '@/components/admin/admin-row-actions'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import {
-  cancelQueueItem,
   fetchAdminNotificationHistoryPage,
-  fetchAdminNotificationQueuePage,
   fetchAdminNotificationQueueStats,
   processNotificationQueue,
-  reprocessQueueItem,
   sendNotificationBroadcast,
 } from '@/domains/notifications/api'
 import {
@@ -33,7 +29,6 @@ import {
   getNotificationQueueStatusMeta,
 } from '@/lib/notifications'
 
-const PAGE_SIZE = 14
 const HISTORY_PAGE_SIZE = 12
 
 type NotificationsTab = 'manual' | 'transactional'
@@ -62,13 +57,6 @@ export function AdminNotificationsPage() {
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<NotificationsTab>('manual')
 
-  const [query, setQuery] = useState('')
-  const [channelFilter, setChannelFilter] = useState<'all' | NotificationQueueItem['channel']>('all')
-  const [statusFilter, setStatusFilter] = useState<'all' | NotificationQueueItem['status']>('all')
-  const [priorityFilter, setPriorityFilter] = useState<'all' | NotificationQueueItem['priority']>('all')
-  const [categoryFilter, setCategoryFilter] = useState('all')
-  const [page, setPage] = useState(1)
-
   const [historyQuery, setHistoryQuery] = useState('')
   const [historyChannelFilter, setHistoryChannelFilter] = useState<'all' | NotificationQueueItem['channel']>('all')
   const [historyStatusFilter, setHistoryStatusFilter] = useState<'all' | NotificationQueueItem['status']>('all')
@@ -77,21 +65,6 @@ export function AdminNotificationsPage() {
   const [historyPage, setHistoryPage] = useState(1)
 
   const effectiveHistoryOriginFilter: 'all' | NotificationHistoryItem['origin'] = activeTab === 'manual' ? 'manual' : historyOriginFilter
-
-  const queueQuery = useQuery({
-    queryKey: ['notifications', 'admin', 'queue', { categoryFilter, channelFilter, page, priorityFilter, query, statusFilter }],
-    queryFn: () =>
-      fetchAdminNotificationQueuePage({
-        category: categoryFilter,
-        channel: channelFilter,
-        page,
-        pageSize: PAGE_SIZE,
-        priority: priorityFilter,
-        query,
-        status: statusFilter,
-      }),
-    placeholderData: (previousData) => previousData,
-  })
 
   const historyListQuery = useQuery({
     queryKey: ['notifications', 'admin', 'history', { activeTab, effectiveHistoryOriginFilter, historyCategoryFilter, historyChannelFilter, historyPage, historyQuery, historyStatusFilter }],
@@ -117,7 +90,6 @@ export function AdminNotificationsPage() {
 
   const invalidateAll = async () =>
     Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['notifications', 'admin', 'queue'] }),
       queryClient.invalidateQueries({ queryKey: ['notifications', 'admin', 'stats'] }),
       queryClient.invalidateQueries({ queryKey: ['notifications', 'admin', 'history'] }),
     ])
@@ -140,15 +112,10 @@ export function AdminNotificationsPage() {
     },
   })
   const processMutation = useMutation({ mutationFn: processNotificationQueue, onSuccess: invalidateAll })
-  const retryMutation = useMutation({ mutationFn: reprocessQueueItem, onSuccess: invalidateAll })
-  const cancelMutation = useMutation({ mutationFn: cancelQueueItem, onSuccess: invalidateAll })
 
-  const queueRows = queueQuery.data?.items ?? []
-  const totalCount = queueQuery.data?.totalCount ?? 0
   const historyRows = historyListQuery.data?.items ?? []
   const historyTotalCount = historyListQuery.data?.totalCount ?? 0
   const stats = statsQuery.data ?? { deliveryRate: 0, failed: 0, pending: 0, retrying: 0, sent: 0, total: 0 }
-  const categories = useMemo(() => ['all', ...Array.from(new Set(queueRows.map((row) => row.category)))], [queueRows])
   const historyCategories = useMemo(() => ['all', ...Array.from(new Set(historyRows.map((row) => row.category)))], [historyRows])
   const selectedChannels = form.watch('channels')
 
@@ -286,51 +253,6 @@ export function AdminNotificationsPage() {
             <AdminStatCard label="Enviadas" value={stats.sent} />
             <AdminStatCard label="Taxa de entrega" value={`${stats.deliveryRate.toFixed(2)}%`} />
           </div>
-
-          <AdminFilterCard
-            actions={<Button onClick={() => { setQuery(''); setChannelFilter('all'); setStatusFilter('all'); setPriorityFilter('all'); setCategoryFilter('all'); setPage(1) }} type="button" variant="outline">Limpar filtros</Button>}
-            description="Monitore a fila pendente/retry, filtre por canal e execute acoes operacionais por item."
-            title="Queue monitor"
-          >
-            <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_160px_160px_160px_180px]">
-              <Input onChange={(event) => { setPage(1); setQuery(event.target.value) }} placeholder="Buscar por titulo ou mensagem" value={query} />
-              <Select onChange={(event) => { setPage(1); setChannelFilter(event.target.value as typeof channelFilter) }} value={channelFilter}><option value="all">Todos canais</option><option value="in-app">In-app</option><option value="push">Push</option><option value="email">Email</option><option value="whatsapp">WhatsApp</option></Select>
-              <Select onChange={(event) => { setPage(1); setStatusFilter(event.target.value as typeof statusFilter) }} value={statusFilter}><option value="all">Todos status</option><option value="pending">Pending</option><option value="retry">Retry</option><option value="sent">Sent</option><option value="delivered">Delivered</option><option value="failed">Failed</option><option value="bounced">Bounced</option></Select>
-              <Select onChange={(event) => { setPage(1); setPriorityFilter(event.target.value as typeof priorityFilter) }} value={priorityFilter}><option value="all">Toda prioridade</option><option value="low">Baixa</option><option value="normal">Normal</option><option value="high">Alta</option><option value="urgent">Urgente</option></Select>
-              <Select onChange={(event) => { setPage(1); setCategoryFilter(event.target.value) }} value={categoryFilter}><option value="all">Todas categorias</option>{categories.filter((value) => value !== 'all').map((value) => <option key={value} value={value}>{value}</option>)}</Select>
-            </div>
-          </AdminFilterCard>
-
-          <AdminDataTable
-            columns={[
-              { header: 'Criado em', cell: (row) => <span className="text-xs text-muted-foreground">{formatNotificationDateTime(row.createdAt)}</span> },
-              { header: 'Canal', cell: (row) => <span className="inline-flex rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold">{getNotificationChannelMeta(row.channel).label}</span> },
-              { header: 'Conteudo', cell: (row) => <div className="space-y-1"><p className="font-medium text-foreground line-clamp-1">{row.title}</p><p className="text-xs text-muted-foreground line-clamp-2">{row.body}</p><p className="text-xs text-muted-foreground">Categoria: {row.category}</p></div> },
-              { header: 'Prioridade', cell: (row) => { const meta = getNotificationPriorityMeta(row.priority); return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${meta.tone}`}>{meta.label}</span> } },
-              { header: 'Status', cell: (row) => { const meta = getNotificationQueueStatusMeta(row.status); return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${meta.tone}`}>{meta.label}</span> } },
-              { header: 'Tentativas', cell: (row) => <div className="space-y-1 text-xs text-muted-foreground"><p>{row.attemptCount}</p><p>{row.nextRetryAt ? `Proxima: ${formatNotificationDateTime(row.nextRetryAt)}` : 'Sem retry'}</p></div> },
-              {
-                header: 'Acoes',
-                className: 'text-right w-[180px]',
-                cell: (row) => (
-                  <AdminRowActions
-                    actions={[
-                      { icon: RotateCcw, label: 'Reprocessar', onClick: () => retryMutation.mutate(row.id), variant: 'outline' },
-                      { icon: StopCircle, label: 'Cancelar', onClick: () => cancelMutation.mutate(row.id), variant: 'ghost' },
-                    ]}
-                  />
-                ),
-              },
-            ]}
-            data={queueRows}
-            emptyDescription="Nenhum item de fila encontrado para os filtros atuais."
-            emptyTitle="Fila vazia"
-            errorMessage="Nao foi possivel carregar a fila de notificacoes."
-            getRowKey={(row) => row.id}
-            isError={queueQuery.isError || statsQuery.isError}
-            isLoading={queueQuery.isLoading || statsQuery.isLoading}
-          />
-          <AdminPagination currentPage={page} onPageChange={setPage} pageSize={PAGE_SIZE} totalItems={totalCount} />
 
           <AdminFilterCard
             actions={<Button onClick={() => { setHistoryQuery(''); setHistoryChannelFilter('all'); setHistoryStatusFilter('all'); setHistoryOriginFilter('automatic'); setHistoryCategoryFilter('all'); setHistoryPage(1) }} type="button" variant="outline">Limpar filtros</Button>}
