@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -29,10 +29,49 @@ export function AdminBlogPostForm({
   submitLabel,
 }: AdminBlogPostFormProps) {
   const [coverFile, setCoverFile] = useState<File | null>(null)
+  const editorRef = useRef<HTMLDivElement | null>(null)
   const form = useForm<BlogPostFormValues>({
     defaultValues,
     resolver: zodResolver(blogPostSchema),
   })
+  const contentValue = form.watch('contentText')
+
+  const toEditorHtml = (value: string) => {
+    const trimmed = value.trim()
+    if (!trimmed) return ''
+    return trimmed
+      .split(/\n{2,}/)
+      .map((paragraph) => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
+      .join('')
+  }
+
+  const fromEditorHtmlToPlainText = (html: string) => {
+    const container = document.createElement('div')
+    container.innerHTML = html
+    const blocks = Array.from(container.querySelectorAll('p, div, li, h1, h2, h3, h4, h5, h6'))
+      .map((block) => block.textContent?.trim() ?? '')
+      .filter(Boolean)
+
+    if (blocks.length > 0) {
+      return blocks.join('\n\n').trim()
+    }
+
+    return (container.textContent ?? '').trim()
+  }
+
+  const applyEditorCommand = (command: string) => {
+    editorRef.current?.focus()
+    document.execCommand(command)
+    if (editorRef.current) {
+      form.setValue('contentText', fromEditorHtmlToPlainText(editorRef.current.innerHTML), { shouldValidate: true })
+    }
+  }
+
+  useEffect(() => {
+    if (editorRef.current && editorRef.current.innerHTML.trim().length === 0 && contentValue) {
+      editorRef.current.innerHTML = toEditorHtml(contentValue)
+    }
+  }, [contentValue])
 
   return (
     <Card>
@@ -130,12 +169,32 @@ export function AdminBlogPostForm({
               <label className="text-sm font-medium text-foreground" htmlFor="blog-post-content">
                 Conteudo
               </label>
-              <Textarea
-                className="min-h-72"
-                id="blog-post-content"
-                placeholder="Escreva o artigo em texto corrido. Cada paragrafo vazio gera uma nova secao."
-                {...form.register('contentText')}
-              />
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2 rounded-xl border border-border bg-background p-2">
+                  <Button onClick={() => applyEditorCommand('bold')} size="sm" type="button" variant="outline">Negrito</Button>
+                  <Button onClick={() => applyEditorCommand('italic')} size="sm" type="button" variant="outline">Italico</Button>
+                  <Button onClick={() => applyEditorCommand('underline')} size="sm" type="button" variant="outline">Sublinhado</Button>
+                  <Button onClick={() => applyEditorCommand('insertUnorderedList')} size="sm" type="button" variant="outline">Lista</Button>
+                </div>
+                <div
+                  ref={editorRef}
+                  className="min-h-72 rounded-xl border border-input bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  contentEditable
+                  id="blog-post-content"
+                  onBlur={() => {
+                    if (editorRef.current) {
+                      form.setValue('contentText', fromEditorHtmlToPlainText(editorRef.current.innerHTML), { shouldValidate: true })
+                    }
+                  }}
+                  onInput={() => {
+                    if (editorRef.current) {
+                      form.setValue('contentText', fromEditorHtmlToPlainText(editorRef.current.innerHTML), { shouldValidate: true })
+                    }
+                  }}
+                  suppressContentEditableWarning
+                />
+                <input type="hidden" {...form.register('contentText')} />
+              </div>
               {form.formState.errors.contentText ? (
                 <p className="text-sm text-destructive">{form.formState.errors.contentText.message}</p>
               ) : null}
