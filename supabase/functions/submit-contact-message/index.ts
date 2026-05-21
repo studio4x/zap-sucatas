@@ -189,13 +189,18 @@ Deno.serve(async (request) => {
       .select('id')
       .eq('is_admin', true)
       .eq('status', 'active')
-    for (const adminProfile of admins ?? []) {
+      .order('created_at', { ascending: true })
+      .limit(1)
+
+    const primaryAdminId = admins?.[0]?.id
+    if (primaryAdminId) {
       await enqueueTransactionalNotification({
         actionUrl: '/admin/contato',
         body: `Nova mensagem de contato recebida de ${input.fullName}: ${input.subject}`,
         category: 'contact',
+        channels: ['in-app'],
         title: 'Novo contato recebido',
-        userId: adminProfile.id,
+        userId: primaryAdminId,
       })
     }
 
