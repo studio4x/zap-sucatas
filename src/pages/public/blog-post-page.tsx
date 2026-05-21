@@ -127,7 +127,7 @@ export function BlogPostPage() {
       </div>
 
       <Card className="mx-auto w-full max-w-4xl border-none bg-transparent shadow-none">
-        <CardContent className="space-y-6 px-2 py-0 md:px-4">
+        <CardContent className="space-y-6 px-4 py-6 md:px-10 md:py-10">
           {post.excerpt ? <p className="text-xl leading-9 text-foreground/90">{post.excerpt}</p> : null}
           {contentIsHtml ? (
             <article className="prose prose-zinc max-w-none text-foreground/90 prose-p:leading-8 prose-li:leading-8">
