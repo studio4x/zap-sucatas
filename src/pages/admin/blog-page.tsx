@@ -10,7 +10,6 @@ import { AdminFilterCard } from '@/components/admin/admin-filter-card'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminPagination } from '@/components/admin/admin-pagination'
 import { AdminRowActions } from '@/components/admin/admin-row-actions'
-import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
 import { OperationFeedback } from '@/components/shared/operation-feedback'
@@ -27,7 +26,6 @@ import {
   deleteBlogPost,
   fetchAdminBlogCategories,
   fetchAdminBlogPostsPage,
-  fetchAdminBlogStats,
   saveAdminBlogPost,
   upsertBlogCategory,
 } from '@/domains/blog/api'
@@ -91,10 +89,6 @@ export function AdminBlogPage() {
   const categoriesQuery = useQuery({
     queryKey: ['blog', 'admin', 'categories'],
     queryFn: fetchAdminBlogCategories,
-  })
-  const statsQuery = useQuery({
-    queryKey: ['blog', 'admin', 'stats'],
-    queryFn: fetchAdminBlogStats,
   })
   const systemSettingsQuery = useQuery({
     queryKey: ['system-settings'],
@@ -217,16 +211,6 @@ export function AdminBlogPage() {
   const posts = useMemo(() => blogQuery.data?.items ?? [], [blogQuery.data])
   const totalCount = blogQuery.data?.totalCount ?? 0
   const categories = useMemo(() => categoriesQuery.data ?? [], [categoriesQuery.data])
-  const stats = useMemo(
-    () =>
-      statsQuery.data ?? {
-        archived: 0,
-        drafts: 0,
-        published: 0,
-        total: 0,
-      },
-    [statsQuery.data],
-  )
 
   const categoryDefaultValues = useMemo(
     () => (editingCategory ? blogCategoryToFormValues(editingCategory) : createEmptyBlogCategoryFormValues()),
@@ -236,11 +220,6 @@ export function AdminBlogPage() {
     () => (editingPost ? blogPostToFormValues(editingPost) : createEmptyBlogPostFormValues()),
     [editingPost],
   )
-  const uniqueTagsCount = useMemo(
-    () => new Set(posts.flatMap((post) => post.tags)).size,
-    [posts],
-  )
-
   return (
     <section className="space-y-6">
       <AdminPageHeader
@@ -278,19 +257,6 @@ export function AdminBlogPage() {
         eyebrow="Admin / blog"
         title="Gestao do blog"
       />
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-        <AdminStatCard label="Total" value={stats.total} />
-        <AdminStatCard label="Rascunhos" value={stats.drafts} />
-        <AdminStatCard label="Publicados" value={stats.published} />
-        <AdminStatCard label="Arquivados" value={stats.archived} />
-        <AdminStatCard label="Categorias" value={categories.length} />
-        <AdminStatCard
-          description="Tags visiveis na pagina atual."
-          label="Tags"
-          value={uniqueTagsCount}
-        />
-      </div>
 
       {feedback ? <OperationFeedback feedback={feedback} /> : null}
 
@@ -488,8 +454,8 @@ export function AdminBlogPage() {
         emptyTitle="Sem posts neste filtro"
         errorMessage="Nao foi possivel carregar os posts do blog."
         getRowKey={(post) => post.id}
-        isError={blogQuery.isError || categoriesQuery.isError || statsQuery.isError}
-        isLoading={blogQuery.isLoading || categoriesQuery.isLoading || statsQuery.isLoading}
+        isError={blogQuery.isError || categoriesQuery.isError}
+        isLoading={blogQuery.isLoading || categoriesQuery.isLoading}
           />
 
           <AdminPagination
