@@ -33,7 +33,7 @@ export function Brand({ subtitle, layout = 'inline', tone = 'default' }: BrandPr
 
   return (
     <Link
-      className={cn('inline-flex min-w-0 gap-3', isStacked ? 'flex-col items-start' : 'items-center')}
+      className={cn('inline-flex min-w-0 gap-3', isStacked ? 'flex-col items-start gap-1' : 'items-center')}
       to={paths.public.home}
     >
       {!logo || logoLoadError ? (
@@ -46,10 +46,10 @@ export function Brand({ subtitle, layout = 'inline', tone = 'default' }: BrandPr
           <MessageCircleMore className="size-5" />
         </div>
       ) : (
-        <div className="flex min-h-11 min-w-20 items-center">
+        <div className={cn('flex min-w-20 items-center', isStacked ? 'min-h-14' : 'min-h-11')}>
           <img
             alt="Zap Sucatas"
-            className="h-10 w-auto max-w-[180px] object-contain"
+            className={cn('w-auto object-contain', isStacked ? 'h-12 max-w-[230px]' : 'h-10 max-w-[180px]')}
             onError={() => setLogoLoadError(true)}
             src={logo.publicUrl}
           />
@@ -66,7 +66,7 @@ export function Brand({ subtitle, layout = 'inline', tone = 'default' }: BrandPr
             Zap Sucatas
           </p>
         ) : null}
-        <p className={cn('hidden text-sm leading-tight lg:block', isInverse ? 'text-white/72' : 'text-muted-foreground')}>
+        <p className={cn('hidden leading-tight lg:block', isStacked ? 'text-xs' : 'text-sm', isInverse ? 'text-white/72' : 'text-muted-foreground')}>
           {subtitle}
         </p>
       </div>
