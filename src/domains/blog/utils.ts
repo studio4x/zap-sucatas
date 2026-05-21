@@ -7,6 +7,15 @@ export type BlogContentDocument = {
   version: 1
 }
 
+function stripHtml(value: string) {
+  return value
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 export function parseBlogTagsInput(value: string) {
   return Array.from(
     new Set(
@@ -66,18 +75,19 @@ export function slugifyBlogValue(value: string) {
 
 export function createBlogContentDocument(rawText: string): BlogContentDocument {
   const normalized = rawText.trim()
+  const plain = /<[a-z][\s\S]*>/i.test(normalized) ? stripHtml(normalized) : normalized
   const blocks = normalized
-    .split(/\n{2,}/)
+    .split(/\n{2,}|<\/p>/i)
     .map((block) => block.trim())
     .filter(Boolean)
     .map((block) => ({
-      text: block,
+      text: stripHtml(block),
       type: 'paragraph' as const,
     }))
 
   return {
     blocks,
-    raw: normalized,
+    raw: normalized || plain,
     version: 1,
   }
 }
@@ -93,6 +103,14 @@ export function blogContentToPlainText(content: unknown) {
 
   const paragraphs = extractBlogParagraphs(content)
   return paragraphs.join('\n\n')
+}
+
+export function blogContentHasHtml(content: unknown) {
+  if (content && typeof content === 'object' && 'raw' in content) {
+    const raw = (content as { raw?: unknown }).raw
+    return typeof raw === 'string' ? /<[a-z][\s\S]*>/i.test(raw) : false
+  }
+  return false
 }
 
 export function extractBlogParagraphs(content: unknown) {

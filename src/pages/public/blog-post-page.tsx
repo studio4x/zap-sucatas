@@ -8,7 +8,7 @@ import { PublicSectionHeading } from '@/components/public/public-section-heading
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { fetchPublicBlogPostBySlug, fetchPublicBlogPosts } from '@/domains/blog/api'
-import { extractBlogParagraphs } from '@/domains/blog/utils'
+import { blogContentHasHtml, blogContentToPlainText, extractBlogParagraphs } from '@/domains/blog/utils'
 
 function formatBlogDate(value: string | null) {
   if (!value) {
@@ -83,6 +83,8 @@ export function BlogPostPage() {
 
   const post = postQuery.data
   const paragraphs = extractBlogParagraphs(post.content)
+  const rawContent = blogContentToPlainText(post.content)
+  const contentIsHtml = blogContentHasHtml(post.content)
   const articleCategory = post.categoryName ?? 'Notícias'
 
   return (
@@ -127,11 +129,17 @@ export function BlogPostPage() {
       <Card className="mx-auto w-full max-w-4xl border-none bg-transparent shadow-none">
         <CardContent className="space-y-6 px-2 py-0 md:px-4">
           {post.excerpt ? <p className="text-xl leading-9 text-foreground/90">{post.excerpt}</p> : null}
-          {(paragraphs.length > 0 ? paragraphs : [post.excerpt ?? 'Conteudo em atualizacao.']).map((paragraph, index) => (
-            <p key={`${paragraph.slice(0, 32)}-${index}`} className="text-base leading-8 text-foreground/90">
-              {paragraph}
-            </p>
-          ))}
+          {contentIsHtml ? (
+            <article className="prose prose-zinc max-w-none text-foreground/90 prose-p:leading-8 prose-li:leading-8">
+              <div dangerouslySetInnerHTML={{ __html: rawContent }} />
+            </article>
+          ) : (
+            (paragraphs.length > 0 ? paragraphs : [post.excerpt ?? 'Conteudo em atualizacao.']).map((paragraph, index) => (
+              <p key={`${paragraph.slice(0, 32)}-${index}`} className="text-base leading-8 text-foreground/90">
+                {paragraph}
+              </p>
+            ))
+          )}
         </CardContent>
       </Card>
 
