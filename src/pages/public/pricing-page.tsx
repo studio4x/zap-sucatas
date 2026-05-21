@@ -1,17 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { PricingMonthlyIndicators } from '@/components/pricing/pricing-monthly-indicators'
 import { PricingHistoryTable } from '@/components/pricing/pricing-history-table'
 import { CtaBanner } from '@/components/public/cta-banner'
-import { PublicSectionHeading } from '@/components/public/public-section-heading'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { fetchPublicPricingPageData } from '@/domains/pricing/api'
 import {
   formatPricingDate,
-  formatPricingDateTime,
   formatPricingNumber,
 } from '@/domains/pricing/utils'
 
@@ -45,54 +40,6 @@ export function PricingPage() {
 
   return (
     <div className="space-y-8 lg:space-y-10">
-      <section className="overflow-hidden rounded-[2.2rem] border border-border bg-white">
-        <div className="grid gap-6 px-5 py-6 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)] lg:px-8 lg:py-8">
-          <div className="space-y-4">
-            <PublicSectionHeading
-              actions={
-                <Button asChild variant="outline">
-                  <Link to={paths.public.listings}>Explorar anuncios</Link>
-                </Button>
-              }
-              description="Ferramenta publica para acompanhar precos manuais de sucata, historico dos metais e referencia de atualizacao do mercado."
-              eyebrow="Tabela de precos"
-              title="Leitura publica de metais e referencias comerciais"
-            />
-            <div className="flex flex-wrap gap-2">
-              <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
-                Historico consolidado
-              </Badge>
-              <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
-                Atualizacao operacional
-              </Badge>
-              <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
-                Apoio a negociacao
-              </Badge>
-            </div>
-          </div>
-
-          <Card className="rounded-[1.8rem] border-border bg-[linear-gradient(180deg,#27991f_0%,#0f5038_100%)] text-white shadow-[0_30px_70px_-40px_rgba(12,34,25,0.9)]">
-            <CardContent className="space-y-4 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100/72">
-                Janela operacional
-              </p>
-              <div className="space-y-2">
-                <p className="text-3xl font-semibold tracking-[-0.04em] text-white">
-                  {formatPricingDate(data.latestQuotedDate)}
-                </p>
-                <p className="text-sm leading-7 text-emerald-50/78">
-                  Ultima consolidacao disponivel do historico publico de precos.
-                </p>
-              </div>
-              <div className="space-y-2 border-t border-white/12 pt-4 text-sm text-emerald-50/82">
-                <p>Historico: {data.historyWindowLabel}</p>
-                <p>Atualizacao manual: {formatPricingDateTime(data.lastManualUpdate)}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
       <PricingMonthlyIndicators rows={data.historyRows} />
 
       <PricingHistoryTable rows={data.historyRows} title="Historico consolidado dos ultimos 6 meses" />
