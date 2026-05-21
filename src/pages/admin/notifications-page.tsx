@@ -44,6 +44,9 @@ function getHistoryOriginMeta(origin: NotificationHistoryItem['origin']) {
 }
 
 function getHistoryStatusMeta(status: NotificationHistoryItem['status']) {
+  if (status === 'partial') {
+    return { label: 'Parcial', tone: 'border-[#ead4a4] bg-[#fff7e8] text-[#8f6512]' }
+  }
   if (status === 'mixed') {
     return { label: 'Misto', tone: 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300' }
   }

@@ -103,11 +103,22 @@ function deriveHistoryStatus(rows: NotificationQueueRow[]): NotificationHistoryI
     return 'widget_only'
   }
 
-  const normalized = new Set(rows.map((row) => row.status))
-  const values = Array.from(normalized)
+  const values = Array.from(new Set(rows.map((row) => row.status)))
 
   if (values.length === 1) {
     return values[0] as NotificationHistoryItem['status']
+  }
+
+  const hasSuccess = values.some((value) => value === 'delivered' || value === 'sent')
+  const hasPendingOrFailure = values.some((value) =>
+    value === 'pending' ||
+    value === 'retry' ||
+    value === 'failed' ||
+    value === 'bounced',
+  )
+
+  if (hasSuccess && hasPendingOrFailure) {
+    return 'partial'
   }
 
   return 'mixed'

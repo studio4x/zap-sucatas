@@ -78,7 +78,7 @@ export type NotificationHistoryItem = {
   origin: NotificationDispatchOrigin
   priority: NotificationPriority
   queueItems: number
-  status: NotificationQueueStatus | 'mixed' | 'widget_only'
+  status: NotificationQueueStatus | 'mixed' | 'partial' | 'widget_only'
   title: string
   updatedAt: string
 }
