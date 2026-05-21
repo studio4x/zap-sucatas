@@ -1,12 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { Mail, Phone } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { PublicSectionHeading } from '@/components/public/public-section-heading'
+import heroIndustrialBg from '@/assets/home-bg/hero-industrial-bg.png'
 import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { submitContactMessage } from '@/domains/contact/api'
@@ -30,7 +29,7 @@ export function ContactPage() {
       fullName: user?.fullName ?? '',
       message: '',
       phone: '',
-      subject: '',
+      subject: 'Contato via site',
     },
     resolver: zodResolver(contactMessageSchema),
   })
@@ -42,7 +41,7 @@ export function ContactPage() {
       fullName: user?.fullName ?? '',
       message: '',
       phone: '',
-      subject: '',
+      subject: 'Contato via site',
     })
   }, [form, user?.email, user?.fullName])
 
@@ -59,177 +58,83 @@ export function ContactPage() {
         fullName: user?.fullName ?? '',
         message: '',
         phone: '',
-        subject: '',
+        subject: 'Contato via site',
       })
     },
   })
 
-  const supportEmail = settingsQuery.data?.supportEmail ?? 'faleconosco@zapsucatas.com.br'
-  const supportPhone = settingsQuery.data?.supportPhone ?? '(em atualizacao)'
+  const supportPhone = settingsQuery.data?.supportPhone ?? '(11) 97618-6992'
 
   return (
     <div className="space-y-8 lg:space-y-10">
-      <section className="overflow-hidden rounded-[2.2rem] border border-border bg-white">
-        <div className="grid gap-6 px-5 py-6 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(300px,0.95fr)] lg:px-8 lg:py-8">
-          <div className="space-y-4">
-            <PublicSectionHeading
-              description="Fale com a equipe da Zap Sucatas para duvidas comerciais, suporte de plataforma e orientacao sobre publicacao de anuncios."
-              eyebrow="Contato"
-              title="Canal direto com a operacao"
-            />
-          </div>
-
-          <Card className="rounded-[1.8rem] border-border bg-[linear-gradient(180deg,#27991f_0%,#0f5038_100%)] text-white shadow-[0_30px_70px_-40px_rgba(12,34,25,0.9)]">
-            <CardContent className="space-y-4 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100/72">
-                Operacao comercial
-              </p>
-              <p className="text-2xl font-semibold leading-tight tracking-[-0.03em] text-white">
-                Use este canal para anunciar melhor, resolver duvidas de operacao e falar com a equipe.
-              </p>
-              <p className="text-sm leading-7 text-emerald-50/78">
-                O formulario envia sua mensagem para o backoffice com persistencia real e trilha operacional.
-              </p>
-            </CardContent>
-          </Card>
+      <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 overflow-hidden">
+        <img alt="Contato Zap Sucatas" className="h-[170px] w-full object-cover md:h-[190px]" src={heroIndustrialBg} />
+        <div className="absolute inset-0 bg-black/58" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <h1 className="text-5xl font-semibold tracking-tight text-white">Contato</h1>
         </div>
       </section>
 
       {feedback ? <OperationFeedback feedback={feedback} /> : null}
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        <Card className="rounded-[1.85rem] border-border/80">
-          <CardContent className="space-y-4 p-6">
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <Mail className="size-5" />
-            </div>
-            <h2 className="text-xl font-semibold text-foreground">E-mail comercial</h2>
-            <p className="text-sm leading-7 text-muted-foreground">
-              Use este canal para duvidas sobre anuncios, operacao do portal e oportunidades comerciais.
+      <section className="grid gap-8 lg:grid-cols-2">
+        <div className="space-y-6">
+          <div>
+            <p className="text-4xl font-black leading-none tracking-tight">
+              <span className="text-primary">ZAP</span>
+              <span className="text-foreground">SUCATAS</span>
             </p>
-            <a className="text-base font-semibold text-primary" href={`mailto:${supportEmail}`}>
-              {supportEmail}
-            </a>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-[1.85rem] border-border/80">
-          <CardContent className="space-y-4 p-6">
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <Phone className="size-5" />
-            </div>
-            <h2 className="text-xl font-semibold text-foreground">Telefone de suporte</h2>
-            <p className="text-sm leading-7 text-muted-foreground">
-              Contato rapido para encaminhamento comercial e orientacao sobre o uso da plataforma.
-            </p>
-            <a className="text-base font-semibold text-primary" href={`tel:${supportPhone}`}>
-              {supportPhone}
-            </a>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="rounded-[1.95rem] border-border/80">
-        <CardContent className="space-y-6 p-6 md:p-8">
-          <div className="space-y-2">
-            <h2 className="text-2xl font-semibold text-foreground">Enviar mensagem</h2>
-            <p className="text-sm leading-7 text-muted-foreground">
-              Use o formulario para falar com a operacao comercial, tirar duvidas sobre anuncios ou solicitar apoio no uso da plataforma.
-            </p>
+            <h2 className="mt-2 text-4xl font-bold leading-tight tracking-tight text-foreground">Entre em contato conosco!</h2>
           </div>
 
+          <p className="max-w-xl text-2xl leading-8 text-muted-foreground">
+            Se desejar fazer alguma sugestao, reclamacao, elogio ou denuncia utilize nosso formulario ou entre em contato em nosso WhatsApp.
+          </p>
+
+          <div className="inline-flex items-center gap-3 text-primary">
+            <MessageCircle className="size-8" />
+            <a className="text-4xl font-semibold hover:underline" href={`tel:${supportPhone}`}>
+              {supportPhone}
+            </a>
+          </div>
+
+          <p className="max-w-xl text-xl leading-8 text-muted-foreground">
+            Sua opiniao e muito importante para nos. Estamos a disposicao para sanar todas as suas duvidas ou solicitacoes.
+          </p>
+
+          <p className="text-3xl font-semibold text-foreground">Vamos conversar!</p>
+        </div>
+
+        <div>
+          <h3 className="text-4xl font-semibold text-primary">Envie sua mensagem</h3>
+
           <form
-            className="grid gap-4 md:grid-cols-2"
+            className="mt-6 space-y-3"
             onSubmit={form.handleSubmit((values) => {
               clearFeedback()
               submitMutation.mutate(values)
             })}
           >
-            <input
-              autoComplete="off"
-              className="hidden"
-              tabIndex={-1}
-              type="text"
-              {...form.register('companyWebsite')}
-            />
+            <input autoComplete="off" className="hidden" tabIndex={-1} type="text" {...form.register('companyWebsite')} />
+            <input className="hidden" type="text" {...form.register('subject')} />
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground" htmlFor="contact-full-name">
-                Nome completo
-              </label>
-              <Input id="contact-full-name" {...form.register('fullName')} />
-              {form.formState.errors.fullName ? (
-                <p className="text-sm text-destructive">{form.formState.errors.fullName.message}</p>
-              ) : null}
-            </div>
+            <Input className="h-12 rounded-md" placeholder="Digite seu nome" {...form.register('fullName')} />
+            {form.formState.errors.fullName ? <p className="text-sm text-destructive">{form.formState.errors.fullName.message}</p> : null}
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground" htmlFor="contact-email">
-                E-mail
-              </label>
-              <Input id="contact-email" type="email" {...form.register('email')} />
-              {form.formState.errors.email ? (
-                <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
-              ) : null}
-            </div>
+            <Input className="h-12 rounded-md" placeholder="Digite seu email" type="email" {...form.register('email')} />
+            {form.formState.errors.email ? <p className="text-sm text-destructive">{form.formState.errors.email.message}</p> : null}
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground" htmlFor="contact-phone">
-                Telefone
-              </label>
-              <Input id="contact-phone" placeholder="(11) 99999-9999" {...form.register('phone')} />
-            </div>
+            <Input className="h-12 rounded-md" placeholder="Seu telefone" {...form.register('phone')} />
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground" htmlFor="contact-subject">
-                Assunto
-              </label>
-              <Input id="contact-subject" {...form.register('subject')} />
-              {form.formState.errors.subject ? (
-                <p className="text-sm text-destructive">{form.formState.errors.subject.message}</p>
-              ) : null}
-            </div>
+            <Textarea className="min-h-36 rounded-md" placeholder="Sua mensagem" {...form.register('message')} />
+            {form.formState.errors.message ? <p className="text-sm text-destructive">{form.formState.errors.message.message}</p> : null}
 
-            <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-medium text-foreground" htmlFor="contact-message">
-                Mensagem
-              </label>
-              <Textarea
-                id="contact-message"
-                placeholder="Descreva sua necessidade comercial ou operacional."
-                {...form.register('message')}
-              />
-              {form.formState.errors.message ? (
-                <p className="text-sm text-destructive">{form.formState.errors.message.message}</p>
-              ) : null}
-            </div>
-
-            <div className="flex flex-wrap gap-3 md:col-span-2">
-              <Button disabled={submitMutation.isPending} type="submit">
-                {submitMutation.isPending ? 'Enviando...' : 'Enviar mensagem'}
-              </Button>
-              <Button
-                disabled={submitMutation.isPending}
-                onClick={() => {
-                  clearFeedback()
-                  form.reset({
-                    companyWebsite: '',
-                    email: user?.email ?? '',
-                    fullName: user?.fullName ?? '',
-                    message: '',
-                    phone: '',
-                    subject: '',
-                  })
-                }}
-                type="button"
-                variant="outline"
-              >
-                Limpar formulario
-              </Button>
-            </div>
+            <Button className="mt-2 h-12 w-full max-w-[420px] rounded-md bg-primary text-lg font-semibold text-white hover:bg-primary/90" disabled={submitMutation.isPending} type="submit">
+              {submitMutation.isPending ? 'Enviando...' : 'Enviar'}
+            </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   )
 }
