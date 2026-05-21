@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { MessageCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -10,18 +10,12 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { submitContactMessage } from '@/domains/contact/api'
 import { contactMessageSchema, type ContactMessageValues } from '@/domains/contact/schemas'
-import { fetchSystemSettings } from '@/domains/settings/api'
 import { useAuth } from '@/hooks/use-auth'
 import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 
 export function ContactPage() {
   const { user } = useAuth()
   const { clearFeedback, feedback, setErrorFeedback, setSuccessFeedback } = useOperationFeedback()
-  const settingsQuery = useQuery({
-    queryKey: ['system-settings', 'public-contact'],
-    queryFn: fetchSystemSettings,
-  })
-
   const form = useForm<ContactMessageValues>({
     defaultValues: {
       companyWebsite: '',
@@ -63,7 +57,8 @@ export function ContactPage() {
     },
   })
 
-  const supportPhone = settingsQuery.data?.supportPhone ?? '(11) 97618-6992'
+  const supportPhone = '(11) 97618-6992'
+  const supportWhatsappUrl = 'https://wa.me/5511976186992'
 
   return (
     <div className="space-y-8 lg:space-y-10">
@@ -93,7 +88,12 @@ export function ContactPage() {
 
           <div className="inline-flex items-center gap-3 text-primary">
             <MessageCircle className="size-8" />
-            <a className="text-4xl font-semibold hover:underline" href={`tel:${supportPhone}`}>
+            <a
+              className="text-4xl font-semibold hover:underline"
+              href={supportWhatsappUrl}
+              rel="noreferrer"
+              target="_blank"
+            >
               {supportPhone}
             </a>
           </div>
