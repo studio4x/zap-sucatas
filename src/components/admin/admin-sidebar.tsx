@@ -1,14 +1,12 @@
 import type { LucideIcon } from 'lucide-react'
-import { ChevronRight, LogOut, PanelLeftClose } from 'lucide-react'
+import { ChevronRight, PanelLeftClose } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { Brand } from '@/components/navigation/brand'
-import { Button } from '@/components/ui/button'
 import { fetchAdminNotificationQueueStats } from '@/domains/notifications/api'
 import { fetchAdminSupportTickets } from '@/domains/support/api'
-import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 
 export type AdminNavItem = {
@@ -77,12 +75,7 @@ const adminNavGroups: AdminNavGroup[] = [
   },
 ]
 
-function getRoleLabel(role: 'admin' | 'user') {
-  return role === 'admin' ? 'Administrador' : 'Usuário'
-}
-
 export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
-  const { signOut, user } = useAuth()
   const supportQueueQuery = useQuery({
     queryKey: ['support', 'admin', 'sidebar-summary'],
     queryFn: fetchAdminSupportTickets,
@@ -112,7 +105,7 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
   )
 
   return (
-    <aside className="flex h-full flex-col bg-sidebar px-4 py-4 text-sidebar-foreground">
+    <aside className="flex h-full flex-col bg-sidebar px-5 py-4 text-sidebar-foreground">
       <div className="flex items-start justify-between gap-3 border-b border-sidebar-border pb-4">
         <Brand layout="stacked" subtitle="Backoffice operacional" />
         {onClose ? (
@@ -133,7 +126,7 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
           }
 
           return (
-            <section className="rounded-2xl border border-sidebar-border bg-background/92 p-3 shadow-[0_12px_28px_-24px_rgba(19,33,23,0.2)]" key={group.key}>
+            <section className="rounded-2xl border border-sidebar-border bg-background/92 p-4 shadow-[0_12px_28px_-24px_rgba(19,33,23,0.2)]" key={group.key}>
               <button
                 className="mb-1 flex w-full items-center justify-between gap-3 rounded-xl px-1 py-1 text-left transition hover:bg-sidebar-accent/40"
                 onClick={() =>
@@ -203,19 +196,6 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
         </div>
       ) : null}
 
-      <div className="mt-4 rounded-[1rem] border border-sidebar-border bg-background/92 px-3 py-3 shadow-[0_12px_30px_-24px_rgba(19,33,23,0.18)]">
-        <p className="text-sm font-semibold text-foreground">
-          {user?.fullName?.trim() || 'Sessão administrativa'}
-        </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {getRoleLabel(user?.role ?? 'user')} {user?.status === 'active' ? 'ativo' : user?.status}
-        </p>
-        <p className="mt-1 truncate text-xs text-muted-foreground">{user?.email ?? 'Sem e-mail'}</p>
-        <Button className="mt-4 w-full justify-center" onClick={signOut} type="button" variant="outline">
-          <LogOut className="size-4" />
-          Sair
-        </Button>
-      </div>
     </aside>
   )
 }

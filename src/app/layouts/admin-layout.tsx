@@ -1,4 +1,5 @@
 import {
+  CircleUserRound,
   ChartNoAxesColumn,
   Bell,
   Boxes,
@@ -14,6 +15,7 @@ import {
   SlidersHorizontal,
   Table2,
   WalletCards,
+  LogOut,
   SquareTerminal,
   Tags,
   UsersRound,
@@ -26,6 +28,7 @@ import { BuildVersionBadge } from '@/components/shared/build-version-badge'
 import { ScrollToTopOnRouteChange } from '@/components/shared/scroll-to-top-on-route-change'
 import { Button } from '@/components/ui/button'
 import { useAnalyticsTracker } from '@/hooks/use-analytics-tracker'
+import { useAuth } from '@/hooks/use-auth'
 import { useVisualFavicon } from '@/hooks/use-visual-favicon'
 
 const adminNavItems = [
@@ -119,13 +122,14 @@ const adminNavItems = [
 
 export function AdminLayout() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { signOut, user } = useAuth()
   useVisualFavicon('layout-admin')
   useAnalyticsTracker('admin')
 
   return (
     <div className="admin-theme min-h-screen overflow-x-hidden bg-background text-foreground">
       <ScrollToTopOnRouteChange />
-      <div className="lg:grid lg:min-h-screen lg:grid-cols-[256px_minmax(0,1fr)]">
+      <div className="lg:grid lg:min-h-screen lg:grid-cols-[320px_minmax(0,1fr)]">
         <div className="hidden border-r border-sidebar-border lg:block lg:h-screen lg:overflow-hidden">
           <AdminSidebar items={adminNavItems} />
         </div>
@@ -145,6 +149,20 @@ export function AdminLayout() {
         ) : null}
 
         <div className="min-w-0">
+          <header className="sticky top-0 z-30 hidden h-16 items-center justify-end border-b border-border bg-card/95 px-6 shadow-sm backdrop-blur lg:flex">
+            <div className="flex items-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm text-foreground">
+                <CircleUserRound className="size-4 text-primary" />
+                <span className="font-medium uppercase tracking-[0.12em] text-muted-foreground">Conta</span>
+                <span className="max-w-[240px] truncate font-semibold text-foreground">{user?.email ?? 'Sem e-mail'}</span>
+              </div>
+              <Button className="h-9 px-4" onClick={signOut} type="button" variant="outline">
+                <LogOut className="size-4" />
+                Sair
+              </Button>
+            </div>
+          </header>
+
           <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card/95 px-4 shadow-sm backdrop-blur lg:hidden">
             <div className="flex items-center gap-3">
               <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
