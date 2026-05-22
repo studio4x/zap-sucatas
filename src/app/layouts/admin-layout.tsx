@@ -130,7 +130,7 @@ export function AdminLayout() {
     <div className="admin-theme min-h-screen overflow-x-hidden bg-background text-foreground">
       <ScrollToTopOnRouteChange />
       <div className="lg:grid lg:min-h-screen lg:grid-cols-[320px_minmax(0,1fr)]">
-        <div className="hidden border-r border-sidebar-border lg:block lg:h-screen lg:overflow-hidden">
+        <div className="hidden border-r border-sidebar-border lg:block">
           <AdminSidebar items={adminNavItems} />
         </div>
 
