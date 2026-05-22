@@ -73,11 +73,7 @@ export function LoginPage() {
     <PublicAuthShell
       badge="Entrar"
       description="Acesse sua conta para publicar anuncios, responder perguntas e acompanhar o status da sua operacao no portal."
-      highlights={[
-        'Painel do anunciante com anuncios, perguntas e perfil.',
-        'Fluxo de moderacao para dar mais confianca ao catalogo publico.',
-        'Acesso administrativo separado e protegido por role.',
-      ]}
+      highlights={[]}
       title="Login do anunciante"
     >
       <div className="space-y-6">

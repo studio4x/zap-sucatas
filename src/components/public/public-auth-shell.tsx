@@ -34,16 +34,18 @@ export function PublicAuthShell({
             </p>
           </div>
 
-          <div className="grid gap-3">
-            {highlights.map((item) => (
-              <div
-                key={item}
-                className="rounded-[1.4rem] border border-white/85 bg-white/88 px-4 py-4 text-sm leading-7 text-foreground shadow-sm"
-              >
-                {item}
-              </div>
-            ))}
-          </div>
+          {highlights.length > 0 ? (
+            <div className="grid gap-3">
+              {highlights.map((item) => (
+                <div
+                  key={item}
+                  className="rounded-[1.4rem] border border-white/85 bg-white/88 px-4 py-4 text-sm leading-7 text-foreground shadow-sm"
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
       </div>
 
