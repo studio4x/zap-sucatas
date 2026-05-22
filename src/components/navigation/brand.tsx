@@ -46,10 +46,10 @@ export function Brand({ subtitle, layout = 'inline', tone = 'default' }: BrandPr
           <MessageCircleMore className="size-5" />
         </div>
       ) : (
-        <div className={cn('flex min-w-20 items-center', isStacked ? 'min-h-14' : 'min-h-11')}>
+        <div className={cn('flex min-w-20 items-center', isStacked ? 'min-h-16' : 'min-h-11')}>
           <img
             alt="Zap Sucatas"
-            className={cn('w-auto object-contain', isStacked ? 'h-12 max-w-[230px]' : 'h-10 max-w-[180px]')}
+            className={cn('w-auto object-contain', isStacked ? 'h-14 max-w-[270px]' : 'h-10 max-w-[180px]')}
             onError={() => setLogoLoadError(true)}
             src={logo.publicUrl}
           />
