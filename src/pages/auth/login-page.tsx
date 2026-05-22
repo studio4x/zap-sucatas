@@ -136,7 +136,7 @@ export function LoginPage() {
         <div className="border-t border-border/70 pt-6">
           <div className="space-y-4">
             <div className="space-y-1">
-              <h2 className="text-xl font-semibold text-foreground">Entrar com magic link</h2>
+              <h2 className="text-xl font-semibold text-foreground">Entrar com login sem senha</h2>
               <p className="text-sm leading-7 text-muted-foreground">
                 Acesse sem senha usando um link seguro enviado por e-mail.
               </p>
@@ -163,7 +163,7 @@ export function LoginPage() {
                   type="submit"
                   variant="secondary"
                 >
-                  {magicLinkForm.formState.isSubmitting ? 'Enviando...' : 'Enviar magic link'}
+                  {magicLinkForm.formState.isSubmitting ? 'Enviando...' : 'Enviar Link de acesso'}
                 </Button>
                 <Button asChild type="button" variant="outline">
                   <Link to={paths.auth.register}>Criar conta</Link>
