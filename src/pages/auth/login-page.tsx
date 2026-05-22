@@ -62,7 +62,7 @@ export function LoginPage() {
 
     try {
       await sendMagicLink(values.email)
-      setMagicMessage('Magic link enviado. Verifique seu e-mail para concluir o login.')
+      setMagicMessage('Link de acesso enviado. Verifique seu e-mail para concluir o login.')
       magicLinkForm.reset({ email: values.email })
     } catch (error) {
       setMagicMessage(error instanceof Error ? error.message : 'Falha ao enviar magic link.')
