@@ -4,6 +4,7 @@ import nodemailer from 'npm:nodemailer@6.10.1'
 import { getBearerToken } from '../_shared/auth.ts'
 import { sendAdminNotificationEmail } from '../_shared/admin-notification-email.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
+import { renderBrandedEmail } from '../_shared/email-template.ts'
 import { insertIntegrationLog } from '../_shared/logging.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
 import { enqueueTransactionalNotification } from '../_shared/transactional-notifications.ts'
@@ -106,6 +107,12 @@ async function sendContactConfirmationEmail(input: { email: string; fullName: st
     from: `${Deno.env.get('EMAIL_FROM_NAME') ?? 'Zap Sucatas'} <${emailFrom}>`,
     to: input.email,
     subject: 'Recebemos sua mensagem - Zap Sucatas',
+    html: (
+      await renderBrandedEmail({
+        title: 'Recebemos sua mensagem',
+        bodyHtml: `<p style="margin:0 0 14px 0;font-size:15px;line-height:1.7;color:#334155;">Olá ${input.fullName},</p><p style="margin:0 0 16px 0;font-size:15px;line-height:1.7;color:#334155;">Recebemos sua mensagem sobre "<strong>${input.subject}</strong>". Nossa equipe retornará em breve.</p>`,
+      })
+    ).html,
     text: `Ola ${input.fullName}, recebemos sua mensagem sobre "${input.subject}". Nossa equipe retornara em breve.`,
   })
 }

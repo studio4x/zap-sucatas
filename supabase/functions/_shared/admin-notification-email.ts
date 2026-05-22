@@ -1,4 +1,5 @@
 import nodemailer from 'npm:nodemailer@6.10.1'
+import { renderBrandedEmail } from './email-template.ts'
 import { createAdminClient } from './supabase.ts'
 
 async function resolveAdminDestinationEmail() {
@@ -36,6 +37,12 @@ export async function sendAdminNotificationEmail(input: { body: string; subject:
     from: `${Deno.env.get('EMAIL_FROM_NAME') ?? 'Zap Sucatas'} <${emailFrom}>`,
     to: destination,
     subject: input.subject,
+    html: (
+      await renderBrandedEmail({
+        title: input.subject,
+        bodyHtml: `<p style="margin:0 0 16px 0;font-size:15px;line-height:1.7;color:#334155;white-space:pre-wrap;">${input.body}</p>`,
+      })
+    ).html,
     text: input.body,
   })
 

@@ -1,4 +1,5 @@
 import nodemailer from 'npm:nodemailer@6.10.1'
+import { renderBrandedEmail } from './email-template.ts'
 import { createAdminClient } from './supabase.ts'
 import { insertIntegrationLog } from './logging.ts'
 
@@ -72,7 +73,7 @@ async function resolveListingOwnerEmail(listingId: string) {
   }
 }
 
-function renderListingStatusEmail(input: {
+async function renderListingStatusEmail(input: {
   listingTitle: string
   reason?: string | null
   recipientName: string
@@ -95,7 +96,12 @@ function renderListingStatusEmail(input: {
 
   const selected = statusCopy[input.status]
   const text = `Ola ${input.recipientName},\n\n${selected.body}\n\nZap Sucatas`
-  const html = `<p>Ola ${input.recipientName},</p><p>${selected.body}</p><p>Zap Sucatas</p>`
+  const html = (
+    await renderBrandedEmail({
+      title: selected.subject,
+      bodyHtml: `<p style="margin:0 0 14px 0;font-size:15px;line-height:1.7;color:#334155;">Olá ${input.recipientName},</p><p style="margin:0 0 16px 0;font-size:15px;line-height:1.7;color:#334155;">${selected.body}</p>`,
+    })
+  ).html
 
   return {
     subject: selected.subject,
@@ -137,7 +143,7 @@ export async function notifyListingStatus(input: {
 }) {
   const smtpConfig = getSmtpConfig()
   const recipient = await resolveListingOwnerEmail(input.listingId)
-  const email = renderListingStatusEmail({
+  const email = await renderListingStatusEmail({
     listingTitle: recipient.listingTitle,
     reason: input.reason ?? null,
     recipientName: recipient.recipientName,

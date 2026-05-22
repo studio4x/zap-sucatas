@@ -3,6 +3,7 @@
 import nodemailer from 'npm:nodemailer@6.10.1'
 import { requireAdminProfile } from '../_shared/auth.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
+import { renderBrandedEmail } from '../_shared/email-template.ts'
 import { insertIntegrationLog } from '../_shared/logging.ts'
 import { computeNextRetryAt, isQuietHoursActive, shouldRetry } from '../_shared/notifications.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
@@ -59,10 +60,6 @@ function getSmtpConfig() {
     secure: (Deno.env.get('SMTP_SECURE') ?? 'true').toLowerCase() === 'true',
     user: Deno.env.get('SMTP_USER') ?? emailFrom,
   }
-}
-
-function renderEmailHtml(input: { body: string; title: string }) {
-  return `<!doctype html><html lang="pt-BR"><body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#0f172a;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:24px 0;"><tr><td align="center"><table role="presentation" width="100%" style="max-width:620px;background:#ffffff;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden;"><tr><td style="background:#27991f;padding:18px 24px;text-align:center;color:#fff;font-size:20px;font-weight:700;">Zap Sucatas</td></tr><tr><td style="padding:24px;"><h1 style="margin:0 0 12px 0;font-size:22px;color:#0f172a;">${input.title}</h1><p style="margin:0 0 16px 0;font-size:15px;line-height:1.7;color:#334155;">${input.body}</p></td></tr><tr><td style="padding:16px 24px;border-top:1px solid #e5e7eb;font-size:12px;color:#64748b;">Este e-mail foi enviado automaticamente pela plataforma Zap Sucatas.</td></tr></table></td></tr></table></body></html>`
 }
 
 function channelEnabledForPreference(channel: QueueRow['channel'], preference: PreferenceRow | null) {
@@ -221,7 +218,13 @@ Deno.serve(async (request) => {
               from: `${smtp.emailFromName} <${smtp.emailFrom}>`,
               to: profile.email,
               subject: queueRow.title,
-              html: renderEmailHtml({ body: queueRow.body, title: queueRow.title }),
+              html: (
+                await renderBrandedEmail({
+                  bodyHtml: `<p style="margin:0 0 16px 0;font-size:15px;line-height:1.7;color:#334155;">${queueRow.body}</p>`,
+                  footerText: 'Zap Sucatas · Este e-mail foi enviado automaticamente pela plataforma.',
+                  title: queueRow.title,
+                })
+              ).html,
               text: queueRow.body,
             })
             providerMessageId = response.messageId ?? `${queueRow.channel}-${crypto.randomUUID()}`

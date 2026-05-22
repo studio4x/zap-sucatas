@@ -35,6 +35,7 @@ function ensureSupabase() {
 
 const SITE_ASSETS_BUCKET = 'site-assets'
 const VISUAL_MANIFEST_PATH = 'site/branding/manifest.json'
+const EMAIL_LOGO_LIGHT_STABLE_PATH = 'site/branding/email/logo-light-current'
 
 const visualAssetFolders: Record<VisualAssetKind, string> = {
   favicon: 'site/branding/favicon',
@@ -299,6 +300,20 @@ export async function uploadAdminVisualAsset(input: {
 
   if (uploadError) {
     throw uploadError
+  }
+
+  if (input.kind === 'logoLight') {
+    const { error: emailLogoAliasUploadError } = await client.storage
+      .from(SITE_ASSETS_BUCKET)
+      .upload(EMAIL_LOGO_LIGHT_STABLE_PATH, input.file, {
+        cacheControl: '300',
+        contentType: input.file.type || undefined,
+        upsert: true,
+      })
+
+    if (emailLogoAliasUploadError) {
+      throw emailLogoAliasUploadError
+    }
   }
 
   const { data: folderFiles, error: listError } = await client.storage
