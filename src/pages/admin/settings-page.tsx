@@ -174,6 +174,7 @@ export function AdminSettingsPage() {
             allowGuestQuestions: settingsQuery.data.allowGuestQuestions,
             blogEnabled: settingsQuery.data.blogEnabled,
             featuredPaymentsEnabled: settingsQuery.data.featuredPaymentsEnabled,
+            footerLogoScalePercent: settingsQuery.data.footerLogoScalePercent,
             headerLogoScalePercent: settingsQuery.data.headerLogoScalePercent,
             maintenanceMode: settingsQuery.data.maintenanceMode,
             seoDescriptionDefault: settingsQuery.data.seoDescriptionDefault ?? '',
@@ -188,6 +189,7 @@ export function AdminSettingsPage() {
             allowGuestQuestions: false,
             blogEnabled: true,
             featuredPaymentsEnabled: true,
+            footerLogoScalePercent: 200,
             headerLogoScalePercent: 100,
             maintenanceMode: false,
             seoDescriptionDefault: '',
@@ -546,6 +548,45 @@ export function AdminSettingsPage() {
                   layout="stacked"
                   logoScalePercent={formState.headerLogoScalePercent}
                   subtitle="Marketplace especializado em sucatas"
+                />
+              </div>
+            </div>
+          </article>
+
+          <article className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Preview do rodapé
+            </p>
+            <h3 className="mt-2 text-xl font-semibold tracking-tight text-foreground">Ajuste manual do logotipo</h3>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Controle o tamanho do logotipo no rodapé público e valide a proporção visual com o texto institucional.
+            </p>
+
+            <div className="mt-4 space-y-2">
+              <label className="text-sm font-medium text-foreground" htmlFor="footer-logo-scale-visual">
+                Escala do logotipo: {formState.footerLogoScalePercent}%
+              </label>
+              <Input
+                id="footer-logo-scale-visual"
+                max={260}
+                min={100}
+                onChange={(event) =>
+                  updateDraftState({
+                    footerLogoScalePercent: Number(event.target.value) || 200,
+                  })
+                }
+                type="range"
+                value={formState.footerLogoScalePercent}
+              />
+            </div>
+
+            <div className="mt-5 overflow-hidden rounded-2xl border border-border bg-[#163a2d] p-4">
+              <div className="flex min-h-28 items-start">
+                <Brand
+                  layout="stacked"
+                  logoScalePercent={formState.footerLogoScalePercent}
+                  subtitle="Portal comercial especializado em sucatas"
+                  tone="inverse"
                 />
               </div>
             </div>

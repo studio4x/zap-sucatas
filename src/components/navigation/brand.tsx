@@ -34,11 +34,11 @@ export function Brand({ subtitle, layout = 'inline', logoScalePercent = 100, ton
   const clampedLogoScale = Math.max(60, Math.min(220, logoScalePercent))
   const stackedLogoHeight = 56 * (clampedLogoScale / 100)
   const stackedLogoMaxWidth = 270 * (clampedLogoScale / 100)
-  const stackedLogoMinHeight = 64 * (clampedLogoScale / 100)
+  const stackedLogoMinHeight = 58 * (clampedLogoScale / 100)
 
   return (
     <Link
-      className={cn('inline-flex min-w-0 gap-3', isStacked ? 'flex-col items-start gap-1' : 'items-center')}
+      className={cn('inline-flex min-w-0 gap-3', isStacked ? 'flex-col items-start gap-0.5' : 'items-center')}
       to={paths.public.home}
     >
       {!logo || logoLoadError ? (
@@ -62,7 +62,7 @@ export function Brand({ subtitle, layout = 'inline', logoScalePercent = 100, ton
             src={logo.publicUrl}
             style={
               isStacked
-                ? { height: `${stackedLogoHeight}px`, marginLeft: '-10px', maxWidth: `${stackedLogoMaxWidth}px` }
+                ? { height: `${stackedLogoHeight}px`, maxWidth: `${stackedLogoMaxWidth}px` }
                 : undefined
             }
           />

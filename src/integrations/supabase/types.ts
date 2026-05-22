@@ -1105,6 +1105,7 @@ export type Database = {
           created_at: string
           crisis_protocol_config: Json | null
           featured_payments_enabled: boolean
+          footer_logo_scale_percent: number
           header_logo_scale_percent: number
           id: string
           maintenance_mode: boolean
@@ -1124,6 +1125,7 @@ export type Database = {
           created_at?: string
           crisis_protocol_config?: Json | null
           featured_payments_enabled?: boolean
+          footer_logo_scale_percent?: number
           header_logo_scale_percent?: number
           id?: string
           maintenance_mode?: boolean
@@ -1143,6 +1145,7 @@ export type Database = {
           created_at?: string
           crisis_protocol_config?: Json | null
           featured_payments_enabled?: boolean
+          footer_logo_scale_percent?: number
           header_logo_scale_percent?: number
           id?: string
           maintenance_mode?: boolean

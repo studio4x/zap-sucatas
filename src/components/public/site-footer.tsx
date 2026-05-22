@@ -6,13 +6,18 @@ import { Button } from '@/components/ui/button'
 import { useSystemSettings } from '@/hooks/use-system-settings'
 
 export function SiteFooter() {
-  const { blogEnabled } = useSystemSettings()
+  const { blogEnabled, settings } = useSystemSettings()
 
   return (
     <footer className="border-t border-border/80 bg-[#163a2d] text-white">
       <div className="mx-auto grid w-full max-w-[1440px] gap-10 px-4 py-10 md:px-6 lg:grid-cols-[1.1fr_0.7fr_0.7fr_0.9fr] lg:px-8">
         <div className="space-y-5">
-          <Brand layout="stacked" logoScalePercent={200} subtitle="Portal comercial especializado em sucatas" tone="inverse" />
+          <Brand
+            layout="stacked"
+            logoScalePercent={settings?.footerLogoScalePercent ?? 200}
+            subtitle="Portal comercial especializado em sucatas"
+            tone="inverse"
+          />
           <p className="max-w-md text-sm leading-7 text-white/72">
             Catálogo moderado, páginas de anúncio robustas, referência de preços e estrutura comercial
             pensada para o mercado de sucatas.

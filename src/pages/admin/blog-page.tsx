@@ -191,6 +191,7 @@ export function AdminBlogPage() {
         allowGuestQuestions: current.allowGuestQuestions,
         blogEnabled: enabled,
         featuredPaymentsEnabled: current.featuredPaymentsEnabled,
+        footerLogoScalePercent: current.footerLogoScalePercent,
         headerLogoScalePercent: current.headerLogoScalePercent,
         maintenanceMode: current.maintenanceMode,
         seoDescriptionDefault: current.seoDescriptionDefault ?? '',
