@@ -24,6 +24,7 @@ type AdminSidebarProps = {
 }
 
 type AdminNavGroup = {
+  description: string
   key: string
   title: string
   values: string[]
@@ -33,11 +34,13 @@ const adminNavGroups: AdminNavGroup[] = [
   {
     key: 'visao-geral',
     title: 'Visão geral',
+    description: 'Painel executivo e acompanhamento operacional.',
     values: [paths.admin.root, paths.admin.analytics],
   },
   {
     key: 'conteudo',
     title: 'Conteúdo',
+    description: 'Catálogo, experiência pública e edição da plataforma.',
     values: [
       paths.admin.listings,
       paths.admin.categories,
@@ -51,6 +54,7 @@ const adminNavGroups: AdminNavGroup[] = [
   {
     key: 'relacionamento',
     title: 'Relacionamento',
+    description: 'Pessoas, mensagens, reputação e atendimento.',
     values: [
       paths.admin.users,
       paths.admin.questions,
@@ -62,11 +66,13 @@ const adminNavGroups: AdminNavGroup[] = [
   {
     key: 'financeiro',
     title: 'Financeiro',
+    description: 'Recebimentos, repasses e parâmetros de monetização.',
     values: [paths.admin.featuredPayments],
   },
   {
     key: 'plataforma',
     title: 'Plataforma',
+    description: 'Configurações de apoio e administração da conta.',
     values: [paths.admin.settings, paths.admin.logs],
   },
 ]
@@ -143,6 +149,7 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
                   <ChevronRight className={cn('size-4 transition-transform', collapsedGroups[group.key] ? '' : 'rotate-90')} />
                 </span>
               </button>
+              <p className="mb-2 px-1 text-xs leading-5 text-muted-foreground">{group.description}</p>
 
               {!collapsedGroups[group.key] ? (
                 <div className="space-y-1">
