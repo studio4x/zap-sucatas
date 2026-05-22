@@ -62,7 +62,7 @@ export function Brand({ subtitle, layout = 'inline', logoScalePercent = 100, ton
             src={logo.publicUrl}
             style={
               isStacked
-                ? { height: `${stackedLogoHeight}px`, maxWidth: `${stackedLogoMaxWidth}px` }
+                ? { height: `${stackedLogoHeight}px`, marginLeft: '-10px', maxWidth: `${stackedLogoMaxWidth}px` }
                 : undefined
             }
           />
