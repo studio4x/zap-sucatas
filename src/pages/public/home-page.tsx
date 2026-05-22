@@ -152,7 +152,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="space-y-20 pb-6 lg:space-y-24">
+    <div className="space-y-[3em] pb-6 lg:space-y-[3em]">
       <HeroSearchSection onSearchSubmit={handleHeroSearch} query={query} setQuery={setQuery} />
 
       <section className="-mx-4 rounded-[2.6rem] border border-border/70 bg-white px-4 py-16 shadow-[0_28px_70px_-42px_rgba(12,60,44,0.14)] md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
