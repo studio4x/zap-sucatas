@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Menu, Search, X } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
-import { paths } from '@/app/paths'
+import { getDefaultPathByRole, paths } from '@/app/paths'
 import { Brand } from '@/components/navigation/brand'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/hooks/use-auth'
 import { useSystemSettings } from '@/hooks/use-system-settings'
 import { cn } from '@/lib/utils'
 
@@ -20,6 +21,7 @@ export function SiteHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isCompact, setIsCompact] = useState(false)
   const { blogEnabled, settings } = useSystemSettings()
+  const { isAuthenticated, user } = useAuth()
   const baseLogoScale = settings?.headerLogoScalePercent ?? 100
   const compactLogoScale = useMemo(
     () => Math.max(60, Math.round(baseLogoScale * 0.72)),
@@ -28,6 +30,7 @@ export function SiteHeader() {
   const navItems = blogEnabled
     ? [...baseNavItems.slice(0, 3), { label: 'Blog', to: paths.public.blog }, ...baseNavItems.slice(3)]
     : baseNavItems
+  const dashboardPath = user ? getDefaultPathByRole(user.role) : paths.auth.login
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,15 +70,26 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <Button asChild size="sm" variant="ghost">
-            <Link to={paths.auth.login}>Entrar</Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link to={paths.auth.register}>Anunciar agora</Link>
+          {!isAuthenticated ? (
+            <Button asChild size="sm" variant="ghost">
+              <Link to={paths.auth.login}>Entrar</Link>
+            </Button>
+          ) : (
+            <Button asChild size="sm" variant="ghost">
+              <Link to={dashboardPath}>Acessar Painel</Link>
+            </Button>
+          )}
+          <Button asChild className="h-12 px-8 text-base font-semibold uppercase tracking-wide">
+            <Link to={paths.auth.register}>ANUNCIAR AGORA</Link>
           </Button>
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
+          {isAuthenticated ? (
+            <Button asChild size="sm" variant="outline">
+              <Link to={dashboardPath}>Painel</Link>
+            </Button>
+          ) : null}
           <Button asChild size="icon" variant="outline">
             <Link aria-label="Buscar anúncios" to={paths.public.listings}>
               <Search className="size-5" />
@@ -112,14 +126,22 @@ export function SiteHeader() {
               </NavLink>
             ))}
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
-              <Button asChild variant="outline">
-                <Link onClick={() => setIsMobileMenuOpen(false)} to={paths.auth.login}>
-                  Entrar
-                </Link>
-              </Button>
+              {!isAuthenticated ? (
+                <Button asChild variant="outline">
+                  <Link onClick={() => setIsMobileMenuOpen(false)} to={paths.auth.login}>
+                    Entrar
+                  </Link>
+                </Button>
+              ) : (
+                <Button asChild variant="outline">
+                  <Link onClick={() => setIsMobileMenuOpen(false)} to={dashboardPath}>
+                    Acessar Painel
+                  </Link>
+                </Button>
+              )}
               <Button asChild>
                 <Link onClick={() => setIsMobileMenuOpen(false)} to={paths.auth.register}>
-                  Quero anunciar
+                  ANUNCIAR AGORA
                 </Link>
               </Button>
             </div>
