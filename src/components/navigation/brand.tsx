@@ -7,13 +7,14 @@ import { fetchVisualSettings } from '@/domains/settings/api'
 import { cn } from '@/lib/utils'
 
 type BrandProps = {
+  hideSubtitle?: boolean
   layout?: 'inline' | 'stacked'
   logoScalePercent?: number
   subtitle: string
   tone?: 'default' | 'inverse'
 }
 
-export function Brand({ subtitle, layout = 'inline', logoScalePercent = 100, tone = 'default' }: BrandProps) {
+export function Brand({ hideSubtitle = false, subtitle, layout = 'inline', logoScalePercent = 100, tone = 'default' }: BrandProps) {
   const isInverse = tone === 'inverse'
   const [logoLoadError, setLogoLoadError] = useState(false)
   const visualSettingsQuery = useQuery({
@@ -79,7 +80,7 @@ export function Brand({ subtitle, layout = 'inline', logoScalePercent = 100, ton
             Zap Sucatas
           </p>
         ) : null}
-        <p className={cn('hidden leading-tight lg:block', isStacked ? 'text-xs' : 'text-sm', isInverse ? 'text-white/72' : 'text-muted-foreground')}>
+        <p className={cn('hidden leading-tight lg:block', isStacked ? 'text-xs' : 'text-sm', isInverse ? 'text-white/72' : 'text-muted-foreground', hideSubtitle && 'lg:hidden')}>
           {subtitle}
         </p>
       </div>

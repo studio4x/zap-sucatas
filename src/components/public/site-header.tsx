@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Menu, Search, X } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 import { paths } from '@/app/paths'
@@ -18,17 +18,34 @@ const baseNavItems = [
 
 export function SiteHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isCompact, setIsCompact] = useState(false)
   const { blogEnabled, settings } = useSystemSettings()
+  const baseLogoScale = settings?.headerLogoScalePercent ?? 100
+  const compactLogoScale = useMemo(
+    () => Math.max(60, Math.round(baseLogoScale * 0.72)),
+    [baseLogoScale],
+  )
   const navItems = blogEnabled
     ? [...baseNavItems.slice(0, 3), { label: 'Blog', to: paths.public.blog }, ...baseNavItems.slice(3)]
     : baseNavItems
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsCompact(window.scrollY > 24)
+    }
+
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-background/88 backdrop-blur-xl">
-      <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-4 px-4 py-4 md:px-6 lg:px-8">
+      <div className={cn('mx-auto flex w-full max-w-[1440px] items-center justify-between gap-4 px-4 transition-all duration-200 md:px-6 lg:px-8', isCompact ? 'py-2' : 'py-4')}>
         <Brand
+          hideSubtitle={isCompact}
           layout="stacked"
-          logoScalePercent={settings?.headerLogoScalePercent ?? 100}
+          logoScalePercent={isCompact ? compactLogoScale : baseLogoScale}
           subtitle="Marketplace especializado em sucatas"
         />
 
