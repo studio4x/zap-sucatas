@@ -7,12 +7,13 @@ import { fetchVisualSettings } from '@/domains/settings/api'
 import { cn } from '@/lib/utils'
 
 type BrandProps = {
-  subtitle: string
   layout?: 'inline' | 'stacked'
+  logoScalePercent?: number
+  subtitle: string
   tone?: 'default' | 'inverse'
 }
 
-export function Brand({ subtitle, layout = 'inline', tone = 'default' }: BrandProps) {
+export function Brand({ subtitle, layout = 'inline', logoScalePercent = 100, tone = 'default' }: BrandProps) {
   const isInverse = tone === 'inverse'
   const [logoLoadError, setLogoLoadError] = useState(false)
   const visualSettingsQuery = useQuery({
@@ -30,6 +31,10 @@ export function Brand({ subtitle, layout = 'inline', tone = 'default' }: BrandPr
   }, [logo?.publicUrl])
 
   const isStacked = layout === 'stacked'
+  const clampedLogoScale = Math.max(60, Math.min(220, logoScalePercent))
+  const stackedLogoHeight = 56 * (clampedLogoScale / 100)
+  const stackedLogoMaxWidth = 270 * (clampedLogoScale / 100)
+  const stackedLogoMinHeight = 64 * (clampedLogoScale / 100)
 
   return (
     <Link
@@ -46,12 +51,20 @@ export function Brand({ subtitle, layout = 'inline', tone = 'default' }: BrandPr
           <MessageCircleMore className="size-5" />
         </div>
       ) : (
-        <div className={cn('flex min-w-20 items-center', isStacked ? 'min-h-16' : 'min-h-11')}>
+        <div
+          className={cn('flex min-w-20 items-center', isStacked ? 'min-h-16' : 'min-h-11')}
+          style={isStacked ? { minHeight: `${stackedLogoMinHeight}px` } : undefined}
+        >
           <img
             alt="Zap Sucatas"
-            className={cn('w-auto object-contain', isStacked ? 'h-14 max-w-[270px]' : 'h-10 max-w-[180px]')}
+            className={cn('w-auto object-contain', isStacked ? '' : 'h-10 max-w-[180px]')}
             onError={() => setLogoLoadError(true)}
             src={logo.publicUrl}
+            style={
+              isStacked
+                ? { height: `${stackedLogoHeight}px`, maxWidth: `${stackedLogoMaxWidth}px` }
+                : undefined
+            }
           />
         </div>
       )}

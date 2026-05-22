@@ -13,6 +13,7 @@ type SystemSettingsRow = {
   blog_enabled: boolean
   created_at: string
   featured_payments_enabled: boolean
+  header_logo_scale_percent: number
   id: string
   maintenance_mode: boolean
   seo_description_default: string | null
@@ -158,6 +159,7 @@ function mapSystemSettings(row: SystemSettingsRow): SystemSettings {
     blogEnabled: row.blog_enabled,
     createdAt: row.created_at,
     featuredPaymentsEnabled: row.featured_payments_enabled,
+    headerLogoScalePercent: row.header_logo_scale_percent,
     id: row.id,
     maintenanceMode: row.maintenance_mode,
     seoDescriptionDefault: row.seo_description_default,
@@ -173,7 +175,7 @@ export async function fetchSystemSettings() {
   const { data, error } = await ensureSupabase()
     .from('system_settings')
     .select(
-      'id, site_name, support_email, support_phone, admin_notification_email, seo_title_default, seo_description_default, allow_guest_questions, blog_enabled, featured_payments_enabled, maintenance_mode, created_at, updated_at',
+      'id, site_name, support_email, support_phone, admin_notification_email, seo_title_default, seo_description_default, allow_guest_questions, blog_enabled, featured_payments_enabled, header_logo_scale_percent, maintenance_mode, created_at, updated_at',
     )
     .limit(1)
     .single()
@@ -191,6 +193,7 @@ export async function updateSystemSettings(input: UpdateSystemSettingsInput) {
     allow_guest_questions: input.allowGuestQuestions,
     blog_enabled: input.blogEnabled,
     featured_payments_enabled: input.featuredPaymentsEnabled,
+    header_logo_scale_percent: Math.max(60, Math.min(220, Math.round(input.headerLogoScalePercent))),
     maintenance_mode: input.maintenanceMode,
     seo_description_default: input.seoDescriptionDefault.trim() || null,
     seo_title_default: input.seoTitleDefault.trim() || null,

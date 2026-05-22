@@ -4,6 +4,7 @@ export type SystemSettings = {
   blogEnabled: boolean
   createdAt: string
   featuredPaymentsEnabled: boolean
+  headerLogoScalePercent: number
   id: string
   maintenanceMode: boolean
   seoDescriptionDefault: string | null
@@ -40,6 +41,7 @@ export type UpdateSystemSettingsInput = {
   allowGuestQuestions: boolean
   blogEnabled: boolean
   featuredPaymentsEnabled: boolean
+  headerLogoScalePercent: number
   maintenanceMode: boolean
   seoDescriptionDefault: string
   seoTitleDefault: string

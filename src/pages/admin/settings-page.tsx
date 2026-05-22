@@ -6,6 +6,7 @@ import { paths } from '@/app/paths'
 import { AdminFilterCard } from '@/components/admin/admin-filter-card'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
+import { Brand } from '@/components/navigation/brand'
 import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -173,6 +174,7 @@ export function AdminSettingsPage() {
             allowGuestQuestions: settingsQuery.data.allowGuestQuestions,
             blogEnabled: settingsQuery.data.blogEnabled,
             featuredPaymentsEnabled: settingsQuery.data.featuredPaymentsEnabled,
+            headerLogoScalePercent: settingsQuery.data.headerLogoScalePercent,
             maintenanceMode: settingsQuery.data.maintenanceMode,
             seoDescriptionDefault: settingsQuery.data.seoDescriptionDefault ?? '',
             seoTitleDefault: settingsQuery.data.seoTitleDefault ?? '',
@@ -186,6 +188,7 @@ export function AdminSettingsPage() {
             allowGuestQuestions: false,
             blogEnabled: true,
             featuredPaymentsEnabled: true,
+            headerLogoScalePercent: 100,
             maintenanceMode: false,
             seoDescriptionDefault: '',
             seoTitleDefault: '',
@@ -263,7 +266,7 @@ export function AdminSettingsPage() {
         actions={
           <>
             <Button
-              disabled={activeTab !== 'operational' || updateMutation.isPending}
+              disabled={updateMutation.isPending}
               onClick={() => {
                 clearFeedback()
                 updateMutation.mutate(latestFormStateRef.current)
@@ -412,6 +415,24 @@ export function AdminSettingsPage() {
                     />
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground" htmlFor="header-logo-scale-operational">
+                    Tamanho do logotipo no header ({formState.headerLogoScalePercent}%)
+                  </label>
+                  <Input
+                    id="header-logo-scale-operational"
+                    max={220}
+                    min={60}
+                    onChange={(event) =>
+                      updateDraftState({
+                        headerLogoScalePercent: Number(event.target.value) || 100,
+                      })
+                    }
+                    type="range"
+                    value={formState.headerLogoScalePercent}
+                  />
+                </div>
               </CardContent>
             </Card>
 
@@ -491,6 +512,44 @@ export function AdminSettingsPage() {
               </div>
             </div>
           </AdminFilterCard>
+
+          <article className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Preview do header
+            </p>
+            <h3 className="mt-2 text-xl font-semibold tracking-tight text-foreground">Ajuste manual do logotipo</h3>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Controle o tamanho do logotipo no cabeçalho público e valide a leitura com o subtítulo.
+            </p>
+
+            <div className="mt-4 space-y-2">
+              <label className="text-sm font-medium text-foreground" htmlFor="header-logo-scale-visual">
+                Escala do logotipo: {formState.headerLogoScalePercent}%
+              </label>
+              <Input
+                id="header-logo-scale-visual"
+                max={220}
+                min={60}
+                onChange={(event) =>
+                  updateDraftState({
+                    headerLogoScalePercent: Number(event.target.value) || 100,
+                  })
+                }
+                type="range"
+                value={formState.headerLogoScalePercent}
+              />
+            </div>
+
+            <div className="mt-5 overflow-hidden rounded-2xl border border-border bg-background p-4">
+              <div className="flex min-h-24 items-center">
+                <Brand
+                  layout="stacked"
+                  logoScalePercent={formState.headerLogoScalePercent}
+                  subtitle="Marketplace especializado em sucatas"
+                />
+              </div>
+            </div>
+          </article>
 
           {visualAssetsQuery.isError ? (
             <div className="rounded-lg border border-rose-200 bg-rose-50 px-6 py-4 text-sm text-rose-700 shadow-sm">
