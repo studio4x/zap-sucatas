@@ -126,7 +126,7 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
           }
 
           return (
-            <section className="rounded-2xl border border-sidebar-border bg-background/92 p-4 shadow-[0_12px_28px_-24px_rgba(19,33,23,0.2)]" key={group.key}>
+            <section className="rounded-2xl bg-white p-4 shadow-[0_14px_30px_-26px_rgba(19,33,23,0.22)]" key={group.key}>
               <button
                 className="mb-1 flex w-full items-center justify-between gap-3 rounded-xl px-1 py-1 text-left transition hover:bg-sidebar-accent/40"
                 onClick={() =>
@@ -138,7 +138,7 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
                 type="button"
               >
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">{group.title}</p>
-                <span className="inline-flex size-7 items-center justify-center rounded-full border border-sidebar-border bg-white/70 text-muted-foreground">
+                <span className="inline-flex size-7 items-center justify-center rounded-full border border-border/70 bg-white text-muted-foreground">
                   <ChevronRight className={cn('size-4 transition-transform', collapsedGroups[group.key] ? '' : 'rotate-90')} />
                 </span>
               </button>
