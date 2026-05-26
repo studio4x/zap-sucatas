@@ -1,6 +1,7 @@
 /// <reference types="jsr:@supabase/functions-js/edge-runtime.d.ts" />
 
 import { requireActiveProfile, resolveHttpErrorStatus } from '../_shared/auth.ts'
+import { sendAdminNotificationEmail } from '../_shared/admin-notification-email.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertAdminAuditLog } from '../_shared/logging.ts'
 import { notifyListingStatus } from '../_shared/notify.ts'
@@ -91,6 +92,18 @@ Deno.serve(async (request) => {
       listingId,
       status: 'pending_review',
     })
+
+    await sendAdminNotificationEmail({
+      subject: 'Novo anúncio enviado para revisão',
+      body: `Um novo anúncio foi enviado para revisão.
+
+Título: ${listing.title}
+ID do anúncio: ${listing.id}
+Localidade: ${listing.city} - ${listing.state}
+
+Acesse o painel para moderar: /admin/anuncios/${listing.id}`,
+    })
+
     await enqueueTransactionalNotification({
       actionUrl: '/app/anuncios',
       body: `Seu anuncio "${listing.title}" foi enviado para revisao.`,

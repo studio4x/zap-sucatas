@@ -14,6 +14,7 @@ import type {
 type NotificationRow = Database['public']['Tables']['notifications']['Row']
 type NotificationPreferenceRow = Database['public']['Tables']['notification_preferences']['Row']
 type NotificationQueueRow = Database['public']['Tables']['notification_queue']['Row']
+type ProfileRecipientRow = Pick<Database['public']['Tables']['profiles']['Row'], 'email' | 'full_name' | 'id'>
 
 function ensureSupabase() {
   if (!supabase) {
@@ -122,6 +123,33 @@ function deriveHistoryStatus(rows: NotificationQueueRow[]): NotificationHistoryI
   }
 
   return 'mixed'
+}
+
+function buildRecipientSummary(rows: NotificationQueueRow[], profilesMap: Map<string, ProfileRecipientRow>) {
+  const uniqueUserIds = Array.from(new Set(rows.map((row) => row.user_id).filter(Boolean)))
+  if (uniqueUserIds.length === 0) {
+    return 'Destinatário não identificado'
+  }
+
+  const labels = uniqueUserIds
+    .map((userId) => {
+      const profile = profilesMap.get(userId)
+      if (!profile) {
+        return userId
+      }
+
+      const name = profile.full_name?.trim()
+      const email = profile.email?.trim()
+      if (name && email) return `${name} (${email})`
+      return name || email || userId
+    })
+    .filter((value) => value.length > 0)
+
+  if (labels.length <= 2) {
+    return labels.join(' · ')
+  }
+
+  return `${labels[0]} · ${labels[1]} +${labels.length - 2} destinatário(s)`
 }
 
 async function getFreshAccessToken() {
@@ -473,6 +501,23 @@ export async function fetchAdminNotificationHistoryPage(input: {
   }
 
   const notificationIds = Array.from(grouped.keys())
+  const uniqueUserIds = Array.from(new Set(queueRows.map((row) => row.user_id).filter(Boolean)))
+  const profilesMap = new Map<string, ProfileRecipientRow>()
+  if (uniqueUserIds.length > 0) {
+    const { data: profilesData, error: profilesError } = await client
+      .from('profiles')
+      .select('id, full_name, email')
+      .in('id', uniqueUserIds)
+
+    if (profilesError) {
+      throw profilesError
+    }
+
+    ;(profilesData ?? []).forEach((profile) => {
+      profilesMap.set(profile.id, profile as ProfileRecipientRow)
+    })
+  }
+
   const { data: notificationsData, error: notificationsError } = await client
     .from('notifications')
     .select('id, title, body, category, priority, created_at')
@@ -506,6 +551,7 @@ export async function fetchAdminNotificationHistoryPage(input: {
         origin: deriveDispatchOrigin(rows),
         priority: notification.priority as NotificationHistoryItem['priority'],
         queueItems: rows.length,
+        recipientSummary: buildRecipientSummary(rows, profilesMap),
         status: deriveHistoryStatus(rows),
         title: notification.title,
         updatedAt: latestUpdatedAt,
