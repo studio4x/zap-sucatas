@@ -310,98 +310,80 @@ Deno.serve(async (request) => {
         return jsonResponse({ error: 'You cannot delete your own admin account.' }, 409)
       }
 
-      const [
-        { count: listingCount, error: listingsError },
-        { count: questionCount, error: questionsError },
-        { count: answerCount, error: answersError },
-        { count: blogCount, error: blogError },
-        { count: auditCount, error: auditError },
-      ] = await Promise.all([
-        admin
-          .from('listings')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', existingProfile.id),
-        admin
-          .from('listing_questions')
-          .select('id', { count: 'exact', head: true })
-          .eq('author_user_id', existingProfile.id),
-        admin
-          .from('listing_answers')
-          .select('id', { count: 'exact', head: true })
-          .eq('responder_user_id', existingProfile.id),
-        admin
-          .from('blog_posts')
-          .select('id', { count: 'exact', head: true })
-          .eq('author_user_id', existingProfile.id),
-        admin
-          .from('admin_audit_logs')
-          .select('id', { count: 'exact', head: true })
-          .eq('actor_user_id', existingProfile.id),
-      ])
+      const { data: ownedListings, error: ownedListingsError } = await admin
+        .from('listings')
+        .select('id')
+        .eq('user_id', existingProfile.id)
 
-      if (listingsError || questionsError || answersError || blogError || auditError) {
-        throw (
-          listingsError ??
-          questionsError ??
-          answersError ??
-          blogError ??
-          auditError ??
-          new Error('Unable to inspect user dependencies.')
-        )
+      if (ownedListingsError) {
+        throw ownedListingsError
       }
 
-      const dependencies = [
-        listingCount ? `${listingCount} anuncios` : null,
-        questionCount ? `${questionCount} perguntas` : null,
-        answerCount ? `${answerCount} respostas` : null,
-        blogCount ? `${blogCount} posts de blog` : null,
-        auditCount ? `${auditCount} logs administrativos` : null,
-      ].filter(Boolean)
+      const ownedListingIds = (ownedListings ?? []).map((row) => row.id as string)
 
-      if (dependencies.length > 0) {
-        const archivedName = 'Usuario removido'
-        const archivedEmail = `removido+${existingProfile.id}@zapsucatas.local`
-        const { error: archiveError } = await admin
-          .from('profiles')
-          .update({
-            email: archivedEmail,
-            full_name: archivedName,
-            phone: null,
-            role: 'user',
-            status: 'suspended',
-          })
-          .eq('id', existingProfile.id)
+      if (ownedListingIds.length > 0) {
+        const { error: deleteOwnedListingsError } = await admin
+          .from('listings')
+          .delete()
+          .in('id', ownedListingIds)
 
-        if (archiveError) {
-          throw archiveError
+        if (deleteOwnedListingsError) {
+          throw deleteOwnedListingsError
         }
+      }
 
-        await insertAdminAuditLog({
-          action: 'deactivate_user_with_dependencies',
-          actorUserId: actor.id,
-          afterData: {
-            dependencies,
-            email: archivedEmail,
-            fullName: archivedName,
-            status: 'suspended',
-          },
-          beforeData: {
-            email: existingProfile.email,
-            fullName: existingProfile.full_name,
-            phone: existingProfile.phone,
-            role: existingProfile.role,
-            status: existingProfile.status,
-          },
-          entityId: existingProfile.id,
-          entityType: 'profile',
-        })
+      const { error: deleteUserAnswersError } = await admin
+        .from('listing_answers')
+        .delete()
+        .eq('responder_user_id', existingProfile.id)
 
-        return jsonResponse({
-          mode: 'deactivated',
-          profileId: existingProfile.id,
-          reason: `Usuario desativado porque possui dados vinculados: ${dependencies.join(', ')}.`,
-          success: true,
-        })
+      if (deleteUserAnswersError) {
+        throw deleteUserAnswersError
+      }
+
+      const { error: deleteUserQuestionsError } = await admin
+        .from('listing_questions')
+        .delete()
+        .eq('author_user_id', existingProfile.id)
+
+      if (deleteUserQuestionsError) {
+        throw deleteUserQuestionsError
+      }
+
+      const { error: deleteUserBlogPostsError } = await admin
+        .from('blog_posts')
+        .delete()
+        .eq('author_user_id', existingProfile.id)
+
+      if (deleteUserBlogPostsError) {
+        throw deleteUserBlogPostsError
+      }
+
+      const { error: deleteUserContactMessagesError } = await admin
+        .from('contact_messages')
+        .delete()
+        .eq('profile_id', existingProfile.id)
+
+      if (deleteUserContactMessagesError) {
+        throw deleteUserContactMessagesError
+      }
+
+      const { error: deleteUserAnalyticsEventsError } = await admin
+        .from('analytics_events')
+        .delete()
+        .eq('profile_id', existingProfile.id)
+
+      if (deleteUserAnalyticsEventsError) {
+        throw deleteUserAnalyticsEventsError
+      }
+
+      const { error: deleteUserAuditLogsError } = await admin
+        .from('admin_audit_logs')
+        .delete()
+        .eq('actor_user_id', existingProfile.id)
+
+      if (deleteUserAuditLogsError) {
+        throw deleteUserAuditLogsError
       }
 
       await insertAdminAuditLog({
