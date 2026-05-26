@@ -40,6 +40,14 @@ Deno.serve(async (request) => {
       return jsonResponse({ error: 'You do not own this listing.' }, 403)
     }
 
+    if (listing.status === 'pending_review') {
+      return jsonResponse({
+        listingId,
+        status: 'pending_review',
+        success: true,
+      })
+    }
+
     if (!['draft', 'rejected', 'paused'].includes(listing.status)) {
       return jsonResponse({ error: 'Listing cannot be submitted from the current status.' }, 409)
     }
