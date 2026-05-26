@@ -47,6 +47,8 @@ Deno.serve(async (request) => {
       })
 
       await sendAdminNotificationEmail({
+        actionLabel: 'Abrir anúncio no painel admin',
+        actionUrl: `/admin/anuncios/${listing.id}`,
         subject: 'Novo anúncio enviado para revisão',
         body: `Um novo anúncio foi enviado para revisão.
 
@@ -125,9 +127,11 @@ Acesse o painel para moderar: /admin/anuncios/${listing.id}`,
       status: 'pending_review',
     })
 
-    await sendAdminNotificationEmail({
-      subject: 'Novo anúncio enviado para revisão',
-      body: `Um novo anúncio foi enviado para revisão.
+      await sendAdminNotificationEmail({
+        actionLabel: 'Abrir anúncio no painel admin',
+        actionUrl: `/admin/anuncios/${listing.id}`,
+        subject: 'Novo anúncio enviado para revisão',
+        body: `Um novo anúncio foi enviado para revisão.
 
 Título: ${listing.title}
 ID do anúncio: ${listing.id}
