@@ -1,7 +1,6 @@
 import {
   Bell,
   CircleUserRound,
-  FilePlus2,
   House,
   LifeBuoy,
   MessageSquareMore,
@@ -29,11 +28,6 @@ const dashboardNavItems = [
     to: paths.app.listings,
     label: 'Anúncios',
     icon: Rows4,
-  },
-  {
-    to: paths.app.newListing,
-    label: 'Novo anúncio',
-    icon: FilePlus2,
   },
   {
     to: paths.app.questions,
@@ -77,9 +71,9 @@ export function DashboardLayout() {
     : [
         dashboardNavItems[0],
         dashboardNavItems[1],
+        dashboardNavItems[2],
         dashboardNavItems[3],
         dashboardNavItems[4],
-        dashboardNavItems[5],
       ]
 
   if (!isLoading && maintenanceMode && user?.role !== 'admin') {
