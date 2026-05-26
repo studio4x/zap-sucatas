@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
@@ -15,6 +16,8 @@ export function RegisterPage() {
   const { isSupabaseConfigured } = useAuth()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const form = useForm<RegisterFormValues>({
     defaultValues: {
@@ -92,24 +95,46 @@ export function RegisterPage() {
               <label className="text-sm font-medium text-foreground" htmlFor="register-password">
                 Senha
               </label>
-              <Input
-                autoComplete="new-password"
-                id="register-password"
-                type="password"
-                {...form.register('password')}
-              />
+              <div className="relative">
+                <Input
+                  autoComplete="new-password"
+                  className="pr-11"
+                  id="register-password"
+                  type={showPassword ? 'text' : 'password'}
+                  {...form.register('password')}
+                />
+                <button
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center text-muted-foreground transition hover:text-foreground"
+                  onClick={() => setShowPassword((current) => !current)}
+                  type="button"
+                >
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground" htmlFor="register-confirm-password">
                 Confirmar senha
               </label>
-              <Input
-                autoComplete="new-password"
-                id="register-confirm-password"
-                type="password"
-                {...form.register('confirmPassword')}
-              />
+              <div className="relative">
+                <Input
+                  autoComplete="new-password"
+                  className="pr-11"
+                  id="register-confirm-password"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  {...form.register('confirmPassword')}
+                />
+                <button
+                  aria-label={showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center text-muted-foreground transition hover:text-foreground"
+                  onClick={() => setShowConfirmPassword((current) => !current)}
+                  type="button"
+                >
+                  {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
             </div>
           </div>
 

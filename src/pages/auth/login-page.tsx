@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -28,6 +29,7 @@ export function LoginPage() {
   const state = location.state as LocationState | null
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null)
   const [magicMessage, setMagicMessage] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
 
   const passwordForm = useForm<LoginFormValues>({
     defaultValues: {
@@ -108,12 +110,23 @@ export function LoginPage() {
               <label className="text-sm font-medium text-foreground" htmlFor="login-password">
                 Senha
               </label>
-              <Input
-                autoComplete="current-password"
-                id="login-password"
-                type="password"
-                {...passwordForm.register('password')}
-              />
+              <div className="relative">
+                <Input
+                  autoComplete="current-password"
+                  className="pr-11"
+                  id="login-password"
+                  type={showPassword ? 'text' : 'password'}
+                  {...passwordForm.register('password')}
+                />
+                <button
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  className="absolute inset-y-0 right-0 inline-flex w-11 items-center justify-center text-muted-foreground transition hover:text-foreground"
+                  onClick={() => setShowPassword((current) => !current)}
+                  type="button"
+                >
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
             </div>
 
             {passwordMessage ? <p className="text-sm text-muted-foreground">{passwordMessage}</p> : null}
