@@ -174,7 +174,7 @@ async function requireVerifiedAdminProfile(request: Request) {
   let token = ''
 
   try {
-    token = getBearerToken(request)
+    token = await getBearerToken(request)
   } catch {
     return {
       error: jsonResponse({ error: 'Missing bearer token.' }, 401),
