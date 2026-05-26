@@ -129,6 +129,7 @@ export function AdminNewListingPage() {
         key={`admin-new-listing:${settingsQuery.data?.siteName ?? 'site'}:${settingsQuery.data?.supportPhone ?? 'phone'}`}
         cancelTo={paths.admin.listings}
         categories={referencesQuery.data.categories}
+        cityOptionsByState={referencesQuery.data.stateCityMap}
         defaultValues={defaultValues}
         finalActionDescription="Salve o anúncio como rascunho ou publique diretamente no catálogo da Zap Sucatas quando os dados estiverem prontos."
         finalActionLabel="Salvar e publicar agora"
@@ -136,6 +137,7 @@ export function AdminNewListingPage() {
         materials={referencesQuery.data.materials}
         mode="create"
         onSubmit={createMutation.mutateAsync}
+        stateOptions={referencesQuery.data.states}
         status="draft"
       />
     </section>

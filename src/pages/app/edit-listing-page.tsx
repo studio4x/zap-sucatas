@@ -137,6 +137,7 @@ export function AppEditListingPage() {
       key={`${id}:${listingQuery.data.updatedAt}:${listingQuery.data.images.length}`}
       cancelTo={paths.app.listings}
       categories={referencesQuery.data.categories}
+      cityOptionsByState={referencesQuery.data.stateCityMap}
       defaultValues={listingToFormValues(listingQuery.data)}
       existingImages={listingQuery.data.images}
       isSubmitting={updateMutation.isPending}
@@ -144,6 +145,7 @@ export function AppEditListingPage() {
       mode="edit"
       onSubmit={updateMutation.mutateAsync}
       rejectionReason={listingQuery.data.rejectionReason}
+      stateOptions={referencesQuery.data.states}
       status={listingQuery.data.status}
     />
   )

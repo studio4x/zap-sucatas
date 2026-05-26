@@ -313,11 +313,34 @@ export async function fetchListingReferences() {
         .filter((value): value is string => Boolean(value)),
     ),
   ]
+  const stateCityMap = (locations ?? []).reduce<Record<string, string[]>>((accumulator, item) => {
+    const uf = item.state?.trim().toUpperCase()
+    const city = item.city?.trim()
+
+    if (!uf || !city) {
+      return accumulator
+    }
+
+    if (!accumulator[uf]) {
+      accumulator[uf] = []
+    }
+
+    if (!accumulator[uf].includes(city)) {
+      accumulator[uf].push(city)
+    }
+
+    return accumulator
+  }, {})
+
+  Object.keys(stateCityMap).forEach((uf) => {
+    stateCityMap[uf] = stateCityMap[uf].slice().sort((left, right) => left.localeCompare(right, 'pt-BR'))
+  })
 
   return {
     categories: (categories ?? []) as ListingCategory[],
     cities,
     materials: (materials ?? []) as ListingMaterial[],
+    stateCityMap,
     states,
   }
 }

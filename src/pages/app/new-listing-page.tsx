@@ -102,11 +102,13 @@ export function AppNewListingPage() {
       key="app-new-listing"
       cancelTo={paths.app.listings}
       categories={referencesQuery.data.categories}
+      cityOptionsByState={referencesQuery.data.stateCityMap}
       defaultValues={createEmptyListingFormValues()}
       isSubmitting={createMutation.isPending}
       materials={referencesQuery.data.materials}
       mode="create"
       onSubmit={createMutation.mutateAsync}
+      stateOptions={referencesQuery.data.states}
       status="draft"
     />
   )

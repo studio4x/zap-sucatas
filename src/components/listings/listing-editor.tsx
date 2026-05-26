@@ -40,6 +40,7 @@ export type ListingEditorSubmitPayload = {
 type ListingEditorProps = {
   cancelTo: string
   categories: ListingCategory[]
+  cityOptionsByState: Record<string, string[]>
   defaultValues: ListingFormValues
   existingImages?: ListingImage[]
   finalActionDescription?: string
@@ -49,6 +50,7 @@ type ListingEditorProps = {
   mode: 'create' | 'edit'
   onSubmit: (payload: ListingEditorSubmitPayload) => Promise<void>
   rejectionReason?: string | null
+  stateOptions: string[]
   status?: ListingStatus | null
 }
 
@@ -114,6 +116,7 @@ function FormField({
 export function ListingEditor({
   cancelTo,
   categories,
+  cityOptionsByState,
   defaultValues,
   existingImages,
   finalActionDescription,
@@ -123,6 +126,7 @@ export function ListingEditor({
   mode,
   onSubmit,
   rejectionReason,
+  stateOptions,
   status,
 }: ListingEditorProps) {
   const resolvedExistingImages = existingImages ?? EMPTY_EXISTING_IMAGES
@@ -145,6 +149,11 @@ export function ListingEditor({
     control: form.control,
     name: 'attributes',
   })
+  const selectedState = form.watch('state')
+  const availableCities = useMemo(
+    () => cityOptionsByState[selectedState?.trim().toUpperCase()] ?? [],
+    [cityOptionsByState, selectedState],
+  )
 
   const activeExistingImages = useMemo(
     () => resolvedExistingImages.filter((image) => !removedImageIds.includes(image.id)),
@@ -222,6 +231,18 @@ export function ListingEditor({
       pendingFiles.forEach((item) => URL.revokeObjectURL(item.previewUrl))
     }
   }, [pendingFiles])
+
+  useEffect(() => {
+    const currentCity = form.getValues('city')?.trim()
+
+    if (!currentCity) {
+      return
+    }
+
+    if (!availableCities.includes(currentCity)) {
+      form.setValue('city', '', { shouldDirty: true, shouldValidate: true })
+    }
+  }, [availableCities, form])
 
   async function handleSubmit(values: ListingFormSchemaValues, shouldSubmitAfterSave: boolean) {
     try {
@@ -411,17 +432,41 @@ export function ListingEditor({
             title="Localizacao e contato"
           >
             <div className="grid gap-4 md:grid-cols-2">
-              <FormField fieldId="listing-city" label="Cidade">
-                <Input id="listing-city" {...form.register('city')} />
-                {form.formState.errors.city ? (
-                  <p className="text-sm text-destructive">{form.formState.errors.city.message}</p>
+              <FormField fieldId="listing-state" label="Estado">
+                <Select id="listing-state" {...form.register('state')}>
+                  <option value="">Selecione o estado</option>
+                  {stateOptions.map((state) => (
+                    <option key={state} value={state}>
+                      {state}
+                    </option>
+                  ))}
+                </Select>
+                {form.formState.errors.state ? (
+                  <p className="text-sm text-destructive">{form.formState.errors.state.message}</p>
                 ) : null}
               </FormField>
 
-              <FormField fieldId="listing-state" label="Estado">
-                <Input id="listing-state" {...form.register('state')} maxLength={2} placeholder="SP" />
-                {form.formState.errors.state ? (
-                  <p className="text-sm text-destructive">{form.formState.errors.state.message}</p>
+              <FormField fieldId="listing-city" label="Cidade">
+                <Select
+                  disabled={!selectedState || availableCities.length === 0}
+                  id="listing-city"
+                  {...form.register('city')}
+                >
+                  <option value="">
+                    {!selectedState
+                      ? 'Selecione o estado primeiro'
+                      : availableCities.length === 0
+                        ? 'Sem cidades disponíveis'
+                        : 'Selecione a cidade'}
+                  </option>
+                  {availableCities.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </Select>
+                {form.formState.errors.city ? (
+                  <p className="text-sm text-destructive">{form.formState.errors.city.message}</p>
                 ) : null}
               </FormField>
 

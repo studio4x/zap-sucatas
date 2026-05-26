@@ -174,6 +174,7 @@ export function AdminEditListingPage() {
         key={`${id}:${listingQuery.data.updatedAt}:${listingQuery.data.images.length}`}
         cancelTo={paths.admin.listingDetails(id)}
         categories={referencesQuery.data.categories}
+        cityOptionsByState={referencesQuery.data.stateCityMap}
         defaultValues={listingToFormValues(listingQuery.data)}
         existingImages={listingQuery.data.images}
         finalActionDescription="Salve alterações em rascunho ou publique imediatamente o anúncio no catálogo quando o conteúdo estiver validado pela operação."
@@ -183,6 +184,7 @@ export function AdminEditListingPage() {
         mode="edit"
         onSubmit={updateMutation.mutateAsync}
         rejectionReason={listingQuery.data.rejectionReason}
+        stateOptions={referencesQuery.data.states}
         status={listingQuery.data.status}
       />
 
