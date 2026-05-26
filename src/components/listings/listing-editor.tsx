@@ -128,9 +128,6 @@ export function ListingEditor({
   const resolvedExistingImages = existingImages ?? EMPTY_EXISTING_IMAGES
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
   const [removedImageIds, setRemovedImageIds] = useState<string[]>([])
-  const [imageOrderKeys, setImageOrderKeys] = useState<string[]>(
-    resolvedExistingImages.map((image) => buildExistingImageKey(image.id)),
-  )
   const [coverImageKey, setCoverImageKey] = useState<string | null>(
     resolveInitialCoverImageKey(resolvedExistingImages),
   )
@@ -169,18 +166,7 @@ export function ListingEditor({
     ],
     [activeExistingImages, pendingFiles],
   )
-  const normalizedImageOrderKeys = useMemo(() => {
-    const availableSet = new Set(availableImageKeys)
-    const next = imageOrderKeys.filter((key) => availableSet.has(key))
-
-    availableImageKeys.forEach((key) => {
-      if (!next.includes(key)) {
-        next.push(key)
-      }
-    })
-
-    return next
-  }, [availableImageKeys, imageOrderKeys])
+  const normalizedImageOrderKeys = useMemo(() => availableImageKeys, [availableImageKeys])
   const resolvedCoverImageKey = useMemo(() => {
     if (coverImageKey && availableImageKeys.includes(coverImageKey)) {
       return coverImageKey
