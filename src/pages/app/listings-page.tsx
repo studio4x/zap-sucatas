@@ -3,12 +3,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Archive, Eye, FilePlus2, PauseCircle, SendHorizontal, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
-import { DashboardActionCard } from '@/components/dashboard/dashboard-action-card'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { DashboardEmptyState } from '@/components/dashboard/dashboard-empty-state'
 import { DashboardFilterCard } from '@/components/dashboard/dashboard-filter-card'
 import { DashboardSectionHeader } from '@/components/dashboard/dashboard-section-header'
-import { DashboardStatCard } from '@/components/dashboard/dashboard-stat-card'
 import { DashboardTableCard } from '@/components/dashboard/dashboard-table-card'
 import { ListingStatusBadge } from '@/components/listings/listing-status-badge'
 import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
@@ -163,20 +161,6 @@ export function AppListingsPage() {
     })
   }, [listings, query, statusFilter])
 
-  const stats = useMemo(
-    () => ({
-      approved: listings.filter((listing) => listing.status === 'approved').length,
-      archived: listings.filter((listing) => listing.status === 'archived').length,
-      drafts: listings.filter((listing) => listing.status === 'draft').length,
-      featured: listings.filter((listing) => listing.isFeatured).length,
-      featuredPending: listings.filter((listing) => featuredPaymentByListingId.get(listing.id)?.status === 'pending')
-        .length,
-      pending: listings.filter((listing) => listing.status === 'pending_review').length,
-      total: listings.length,
-    }),
-    [featuredPaymentByListingId, listings],
-  )
-
   const requiresAttention = listings.find(
     (listing) => listing.status === 'rejected' || listing.status === 'draft',
   )
@@ -235,22 +219,6 @@ export function AppListingsPage() {
           tone={feedback.tone}
         />
       ) : null}
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <DashboardStatCard label="Total" value={stats.total} />
-        <DashboardStatCard label="Rascunhos" value={stats.drafts} />
-        <DashboardStatCard label="Em revisão" tone={stats.pending > 0 ? 'warning' : 'default'} value={stats.pending} />
-        <DashboardStatCard label="Aprovados" tone={stats.approved > 0 ? 'success' : 'default'} value={stats.approved} />
-        <DashboardStatCard label="Arquivados" tone={stats.archived > 0 ? 'warning' : 'default'} value={stats.archived} />
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <DashboardStatCard label="Em destaque" tone={stats.featured > 0 ? 'success' : 'default'} value={stats.featured} />
-        <DashboardStatCard
-          label="Destaque pendente"
-          tone={stats.featuredPending > 0 ? 'warning' : 'default'}
-          value={stats.featuredPending}
-        />
-      </div>
 
       <DashboardFilterCard
         actions={
@@ -457,28 +425,6 @@ export function AppListingsPage() {
           title="Lista de anúncios"
         />
       ) : null}
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <DashboardActionCard
-          action={
-            <Button asChild className="w-full sm:w-auto" type="button" variant="outline">
-              <Link to={paths.app.profile}>Atualizar dados de contato</Link>
-            </Button>
-          }
-          description="Mantenha nome, telefone e dados da conta sempre atualizados para facilitar a negociação."
-          title="Perfil e dados comerciais"
-        />
-
-        <DashboardActionCard
-          action={
-            <Button asChild className="w-full sm:w-auto" type="button" variant="outline">
-              <Link to={paths.app.questions}>Abrir perguntas</Link>
-            </Button>
-          }
-          description="As perguntas recebidas ficam centralizadas e podem virar novas oportunidades."
-          title="Inbox de perguntas"
-        />
-      </div>
 
       <ConfirmActionDialog
         confirmLabel="Arquivar anúncio"
