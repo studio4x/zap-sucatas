@@ -471,8 +471,10 @@ export function ListingEditor({
                   {...form.register('summary')}
                   className="min-h-24"
                   maxLength={240}
-                  placeholder="Descreva o lote em poucas linhas: tipo de sucata, volume, diferencial e objetivo da negociação."
                 />
+                <p className="text-xs text-muted-foreground">
+                  Descreva o lote em poucas linhas: tipo de sucata, volume, diferencial e objetivo da negociacao.
+                </p>
                 {form.formState.errors.summary ? (
                   <p className="text-sm text-red-600">{form.formState.errors.summary.message}</p>
                 ) : null}
@@ -495,12 +497,14 @@ export function ListingEditor({
                         ],
                       }}
                       onChange={field.onChange}
-                      placeholder="Detalhe composição, estado do material, quantidade, forma de retirada/entrega e condições comerciais."
                       theme="snow"
                       value={field.value ?? ''}
                     />
                   )}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Detalhe composicao, estado do material, quantidade, forma de retirada/entrega e condicoes comerciais.
+                </p>
                 {form.formState.errors.description ? (
                   <p className="text-sm text-red-600">
                     {form.formState.errors.description.message}
