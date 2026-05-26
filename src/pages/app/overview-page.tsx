@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom'
 import { FileClock, FilePlus2, MessageSquareMore, Rows4 } from 'lucide-react'
 import { paths } from '@/app/paths'
 import { DashboardActionCard } from '@/components/dashboard/dashboard-action-card'
-import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { DashboardSectionHeader } from '@/components/dashboard/dashboard-section-header'
 import { DashboardStatCard } from '@/components/dashboard/dashboard-stat-card'
 import { DashboardTableCard } from '@/components/dashboard/dashboard-table-card'
@@ -44,42 +43,6 @@ export function AppOverviewPage() {
   )
   const recentListings = listings.slice(0, 5)
 
-  const nextStepAlert = (() => {
-    if (stats.rejected > 0) {
-      return {
-        description:
-          'Você tem anúncios rejeitados. Revise o motivo, ajuste os dados e envie novamente para análise.',
-        title: 'Existem anúncios que precisam de correção',
-        tone: 'warning' as const,
-      }
-    }
-
-    if (stats.pending > 0) {
-      return {
-        description:
-          'Seus anúncios em revisão aguardam liberação do time administrativo. Você pode acompanhar os status na lista completa.',
-        title: 'Seus anúncios estão em análise',
-        tone: 'info' as const,
-      }
-    }
-
-    if (listings.length === 0) {
-      return {
-        description:
-          'Seu dashboard está pronto. O primeiro passo é criar um anúncio com fotos, localidade e descrição completa.',
-        title: 'Comece publicando o primeiro anúncio',
-        tone: 'success' as const,
-      }
-    }
-
-    return {
-      description:
-        'Sua área está operando normalmente. Continue acompanhando perguntas e mantendo os anúncios atualizados.',
-      title: 'Tudo certo por aqui',
-      tone: 'success' as const,
-    }
-  })()
-
   return (
     <section className="space-y-6 [&>*]:min-w-0">
       <DashboardSectionHeader
@@ -93,17 +56,6 @@ export function AppOverviewPage() {
         }
         description="Acompanhe seus anúncios, veja o que exige atenção agora e entre rápido nas ações principais da conta."
         title="Visão geral"
-      />
-
-      <DashboardAlertCard
-        action={
-          <Button asChild size="sm" type="button" variant="outline">
-            <Link to={paths.app.listings}>Abrir meus anúncios</Link>
-          </Button>
-        }
-        description={nextStepAlert.description}
-        title={nextStepAlert.title}
-        tone={nextStepAlert.tone}
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
