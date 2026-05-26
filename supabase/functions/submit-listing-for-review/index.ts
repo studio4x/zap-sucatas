@@ -12,6 +12,33 @@ type RequestBody = {
   listingId?: string
 }
 
+async function resolveAdminRecipientProfileId() {
+  const admin = createAdminClient()
+  const { data: settings } = await admin
+    .from('system_settings')
+    .select('admin_notification_email, support_email')
+    .limit(1)
+    .maybeSingle()
+
+  const destinationEmail =
+    settings?.admin_notification_email?.trim().toLowerCase() ||
+    settings?.support_email?.trim().toLowerCase() ||
+    null
+
+  if (!destinationEmail) {
+    return null
+  }
+
+  const { data: recipient } = await admin
+    .from('profiles')
+    .select('id')
+    .ilike('email', destinationEmail)
+    .limit(1)
+    .maybeSingle()
+
+  return recipient?.id ?? null
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -40,6 +67,8 @@ Deno.serve(async (request) => {
       return jsonResponse({ error: 'You do not own this listing.' }, 403)
     }
 
+    const adminRecipientProfileId = await resolveAdminRecipientProfileId()
+
     if (listing.status === 'pending_review') {
       await notifyListingStatus({
         listingId,
@@ -66,6 +95,15 @@ Acesse o painel para moderar: /admin/anuncios/${listing.id}`,
         title: 'Anuncio enviado para revisao',
         userId: listing.user_id,
       })
+      if (adminRecipientProfileId && adminRecipientProfileId !== listing.user_id) {
+        await enqueueTransactionalNotification({
+          actionUrl: `/admin/anuncios/${listing.id}`,
+          body: `O anuncio "${listing.title}" foi reenviado para revisao e aguarda moderacao.`,
+          category: 'listing_status',
+          title: 'Anuncio pendente de revisao no admin',
+          userId: adminRecipientProfileId,
+        })
+      }
 
       return jsonResponse({
         listingId,
@@ -147,6 +185,15 @@ Acesse o painel para moderar: /admin/anuncios/${listing.id}`,
       title: 'Anuncio enviado para revisao',
       userId: listing.user_id,
     })
+    if (adminRecipientProfileId && adminRecipientProfileId !== listing.user_id) {
+      await enqueueTransactionalNotification({
+        actionUrl: `/admin/anuncios/${listing.id}`,
+        body: `Novo anuncio "${listing.title}" enviado para revisao e aguardando moderacao.`,
+        category: 'listing_status',
+        title: 'Anuncio pendente de revisao no admin',
+        userId: adminRecipientProfileId,
+      })
+    }
 
     return jsonResponse({
       listingId,
