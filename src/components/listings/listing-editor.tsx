@@ -117,6 +117,36 @@ function formatContactPhone(value: string) {
   return `(${ddd}) ${rest.slice(0, 5)}-${rest.slice(5)}`
 }
 
+const CONDITION_OPTIONS = [
+  'Novo',
+  'Seminovo',
+  'Usado',
+  'Sucata prensada',
+  'Sucata em lote',
+  'Reciclavel',
+] as const
+
+const PRICE_OPTIONS = [
+  'Sob consulta',
+  'A combinar',
+  'Preco por kg',
+  'Preco por tonelada',
+  'Faixa negociavel',
+] as const
+
+const OTHER_CONDITION_VALUE = '__other_condition__'
+const CUSTOM_PRICE_VALUE = '__custom_price__'
+
+function formatBRLInput(value: string) {
+  const digits = value.replace(/\D/g, '')
+  if (!digits) return ''
+  const numericValue = Number(digits) / 100
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(numericValue)
+}
+
 function FormField({
   children,
   fieldId,
@@ -173,10 +203,18 @@ export function ListingEditor({
     name: 'attributes',
   })
   const selectedState = form.watch('state')
+  const conditionValue = form.watch('conditionType') ?? ''
+  const priceValue = form.watch('priceLabel') ?? ''
   const availableCities = useMemo(
     () => cityOptionsByState[selectedState?.trim().toUpperCase()] ?? [],
     [cityOptionsByState, selectedState],
   )
+  const selectedConditionOption = CONDITION_OPTIONS.includes(conditionValue as (typeof CONDITION_OPTIONS)[number])
+    ? conditionValue
+    : OTHER_CONDITION_VALUE
+  const selectedPriceOption = PRICE_OPTIONS.includes(priceValue as (typeof PRICE_OPTIONS)[number])
+    ? priceValue
+    : CUSTOM_PRICE_VALUE
 
   const activeExistingImages = useMemo(
     () => resolvedExistingImages.filter((image) => !removedImageIds.includes(image.id)),
@@ -433,6 +471,7 @@ export function ListingEditor({
                   {...form.register('summary')}
                   className="min-h-24"
                   maxLength={240}
+                  placeholder="Descreva o lote em poucas linhas: tipo de sucata, volume, diferencial e objetivo da negociação."
                 />
                 {form.formState.errors.summary ? (
                   <p className="text-sm text-red-600">{form.formState.errors.summary.message}</p>
@@ -456,6 +495,7 @@ export function ListingEditor({
                         ],
                       }}
                       onChange={field.onChange}
+                      placeholder="Detalhe composição, estado do material, quantidade, forma de retirada/entrega e condições comerciais."
                       theme="snow"
                       value={field.value ?? ''}
                     />
@@ -530,19 +570,72 @@ export function ListingEditor({
               </FormField>
 
               <FormField fieldId="listing-condition" label="Condicao">
-                <Input
+                <Select
                   id="listing-condition"
-                  {...form.register('conditionType')}
-                  placeholder="Ex.: usado, em lote, sucata prensada"
-                />
+                  onChange={(event) => {
+                    const value = event.target.value
+                    if (value !== OTHER_CONDITION_VALUE) {
+                      form.setValue('conditionType', value, { shouldDirty: true, shouldValidate: true })
+                    } else if (CONDITION_OPTIONS.includes(conditionValue as (typeof CONDITION_OPTIONS)[number])) {
+                      form.setValue('conditionType', '', { shouldDirty: true, shouldValidate: true })
+                    }
+                  }}
+                  value={selectedConditionOption}
+                >
+                  {CONDITION_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                  <option value={OTHER_CONDITION_VALUE}>Outra condição</option>
+                </Select>
+                {selectedConditionOption === OTHER_CONDITION_VALUE ? (
+                  <Input
+                    className="mt-2"
+                    id="listing-condition-custom"
+                    onChange={(event) =>
+                      form.setValue('conditionType', event.target.value, { shouldDirty: true, shouldValidate: true })
+                    }
+                    placeholder="Digite a condição específica"
+                    value={conditionValue}
+                  />
+                ) : null}
               </FormField>
 
               <FormField fieldId="listing-price" label="Faixa de preço">
-                <Input
+                <Select
                   id="listing-price"
-                  {...form.register('priceLabel')}
-                  placeholder="Ex.: sob consulta, a combinar"
-                />
+                  onChange={(event) => {
+                    const value = event.target.value
+                    if (value !== CUSTOM_PRICE_VALUE) {
+                      form.setValue('priceLabel', value, { shouldDirty: true, shouldValidate: true })
+                    } else if (PRICE_OPTIONS.includes(priceValue as (typeof PRICE_OPTIONS)[number])) {
+                      form.setValue('priceLabel', '', { shouldDirty: true, shouldValidate: true })
+                    }
+                  }}
+                  value={selectedPriceOption}
+                >
+                  {PRICE_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                  <option value={CUSTOM_PRICE_VALUE}>Inserir valor</option>
+                </Select>
+                {selectedPriceOption === CUSTOM_PRICE_VALUE ? (
+                  <Input
+                    className="mt-2"
+                    id="listing-price-custom"
+                    onChange={(event) =>
+                      form.setValue('priceLabel', formatBRLInput(event.target.value), {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      })
+                    }
+                    placeholder="R$ 0,00"
+                    value={priceValue}
+                  />
+                ) : null}
               </FormField>
             </div>
           </DashboardFormSection>
