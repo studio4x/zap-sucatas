@@ -53,4 +53,4 @@ Moderacao antes da publicacao. Busca por categoria, material e localidade. Pagin
 
 [OK] t26 - A página https://zap-sucatas.vercel.app/app/anuncios está muito branca.. com cards todos brancos.. Precisamos melhorar isso.. inserir fundos nos cards.. deixar mais moderna, sem tanto branco...
 
-[ ] t27 - Insira nos campos "resumo comercial" e "descrição", da página de criar novo anuncio, um editor rico reactquill.
+[ok] t27 - Insira nos campos "resumo comercial" e "descrição", da página de criar novo anuncio, um editor rico reactquill.
