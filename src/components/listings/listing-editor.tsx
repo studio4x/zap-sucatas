@@ -135,7 +135,25 @@ const PRICE_OPTIONS = [
 ] as const
 
 const OTHER_CONDITION_VALUE = '__other_condition__'
-const CUSTOM_PRICE_VALUE = '__custom_price__'
+const PRICE_OPTIONS_WITH_VALUE = ['Preco por kg', 'Preco por tonelada'] as const
+
+function parsePriceLabel(value: string) {
+  const normalized = value.trim()
+  const withValueOption = PRICE_OPTIONS_WITH_VALUE.find((option) => normalized.startsWith(`${option}:`))
+
+  if (withValueOption) {
+    return {
+      option: withValueOption,
+      amount: normalized.slice(withValueOption.length + 1).trim(),
+    }
+  }
+
+  if (PRICE_OPTIONS.includes(normalized as (typeof PRICE_OPTIONS)[number])) {
+    return { option: normalized, amount: '' }
+  }
+
+  return { option: 'Sob consulta', amount: '' }
+}
 
 function formatBRLInput(value: string) {
   const digits = value.replace(/\D/g, '')
@@ -205,6 +223,7 @@ export function ListingEditor({
   const selectedState = form.watch('state')
   const conditionValue = form.watch('conditionType') ?? ''
   const priceValue = form.watch('priceLabel') ?? ''
+  const parsedPrice = useMemo(() => parsePriceLabel(priceValue), [priceValue])
   const availableCities = useMemo(
     () => cityOptionsByState[selectedState?.trim().toUpperCase()] ?? [],
     [cityOptionsByState, selectedState],
@@ -212,9 +231,7 @@ export function ListingEditor({
   const selectedConditionOption = CONDITION_OPTIONS.includes(conditionValue as (typeof CONDITION_OPTIONS)[number])
     ? conditionValue
     : OTHER_CONDITION_VALUE
-  const selectedPriceOption = PRICE_OPTIONS.includes(priceValue as (typeof PRICE_OPTIONS)[number])
-    ? priceValue
-    : CUSTOM_PRICE_VALUE
+  const selectedPriceOption = parsedPrice.option
 
   const activeExistingImages = useMemo(
     () => resolvedExistingImages.filter((image) => !removedImageIds.includes(image.id)),
@@ -611,10 +628,10 @@ export function ListingEditor({
                   id="listing-price"
                   onChange={(event) => {
                     const value = event.target.value
-                    if (value !== CUSTOM_PRICE_VALUE) {
+                    if (PRICE_OPTIONS_WITH_VALUE.includes(value as (typeof PRICE_OPTIONS_WITH_VALUE)[number])) {
+                      form.setValue('priceLabel', `${value}:`, { shouldDirty: true, shouldValidate: true })
+                    } else {
                       form.setValue('priceLabel', value, { shouldDirty: true, shouldValidate: true })
-                    } else if (PRICE_OPTIONS.includes(priceValue as (typeof PRICE_OPTIONS)[number])) {
-                      form.setValue('priceLabel', '', { shouldDirty: true, shouldValidate: true })
                     }
                   }}
                   value={selectedPriceOption}
@@ -624,21 +641,33 @@ export function ListingEditor({
                       {option}
                     </option>
                   ))}
-                  <option value={CUSTOM_PRICE_VALUE}>Inserir valor</option>
                 </Select>
-                {selectedPriceOption === CUSTOM_PRICE_VALUE ? (
+                {PRICE_OPTIONS_WITH_VALUE.includes(
+                  selectedPriceOption as (typeof PRICE_OPTIONS_WITH_VALUE)[number],
+                ) ? (
                   <Input
                     className="mt-2"
                     id="listing-price-custom"
                     onChange={(event) =>
-                      form.setValue('priceLabel', formatBRLInput(event.target.value), {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      })
+                      form.setValue(
+                        'priceLabel',
+                        `${selectedPriceOption}: ${formatBRLInput(event.target.value)}`.trim(),
+                        {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        },
+                      )
                     }
                     placeholder="R$ 0,00"
-                    value={priceValue}
+                    value={parsedPrice.amount}
                   />
+                ) : null}
+                {PRICE_OPTIONS_WITH_VALUE.includes(
+                  selectedPriceOption as (typeof PRICE_OPTIONS_WITH_VALUE)[number],
+                ) ? (
+                  <p className="text-xs text-muted-foreground">
+                    Informe o valor em reais para {selectedPriceOption.toLowerCase()}.
+                  </p>
                 ) : null}
               </FormField>
             </div>

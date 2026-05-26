@@ -25,6 +25,22 @@ import {
 } from '@/domains/questions/api'
 import { useAuth } from '@/hooks/use-auth'
 
+function parseCommercialPrice(priceLabel: string | null) {
+  const label = (priceLabel ?? '').trim()
+  if (!label) {
+    return { type: 'Sob consulta', value: null as string | null }
+  }
+
+  const separatorIndex = label.indexOf(':')
+  if (separatorIndex === -1) {
+    return { type: label, value: null as string | null }
+  }
+
+  const type = label.slice(0, separatorIndex).trim() || 'Sob consulta'
+  const value = label.slice(separatorIndex + 1).trim() || null
+  return { type, value }
+}
+
 export function ListingDetailsPage() {
   const { slug = '' } = useParams()
   const { isAuthenticated, user } = useAuth()
@@ -129,6 +145,7 @@ export function ListingDetailsPage() {
   }
 
   const listing = listingQuery.data
+  const commercialPrice = parseCommercialPrice(listing.priceLabel)
 
   return (
     <div className="space-y-8 lg:space-y-10">
@@ -186,11 +203,14 @@ export function ListingDetailsPage() {
               </div>
               <div className="rounded-[1.35rem] border border-white/80 bg-white/85 px-4 py-4 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Faixa comercial
+                  Tipo de preco
                 </p>
                 <p className="mt-2 text-base font-semibold text-foreground">
-                  {listing.priceLabel ?? 'Sob consulta'}
+                  {commercialPrice.type}
                 </p>
+                {commercialPrice.value ? (
+                  <p className="mt-1 text-sm text-muted-foreground">{commercialPrice.value}</p>
+                ) : null}
               </div>
             </div>
           </div>
@@ -202,8 +222,9 @@ export function ListingDetailsPage() {
                   Janela comercial
                 </p>
                 <p className="text-4xl font-semibold tracking-[-0.04em] text-white">
-                  {listing.priceLabel ?? 'Sob consulta'}
+                  {commercialPrice.type}
                 </p>
+                {commercialPrice.value ? <p className="text-lg font-medium text-emerald-100">{commercialPrice.value}</p> : null}
                 <p className="text-sm leading-7 text-emerald-50/78">
                   Use os dados tecnicos e as perguntas publicas para validar o lote antes do contato.
                 </p>
