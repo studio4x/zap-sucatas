@@ -359,12 +359,49 @@ Deno.serve(async (request) => {
       ].filter(Boolean)
 
       if (dependencies.length > 0) {
-        return jsonResponse(
-          {
-            error: `Nao e possivel excluir este usuario porque ele possui dados vinculados: ${dependencies.join(', ')}.`,
+        const archivedName = 'Usuario removido'
+        const archivedEmail = `removido+${existingProfile.id}@zapsucatas.local`
+        const { error: archiveError } = await admin
+          .from('profiles')
+          .update({
+            email: archivedEmail,
+            full_name: archivedName,
+            phone: null,
+            role: 'user',
+            status: 'suspended',
+          })
+          .eq('id', existingProfile.id)
+
+        if (archiveError) {
+          throw archiveError
+        }
+
+        await insertAdminAuditLog({
+          action: 'deactivate_user_with_dependencies',
+          actorUserId: actor.id,
+          afterData: {
+            dependencies,
+            email: archivedEmail,
+            fullName: archivedName,
+            status: 'suspended',
           },
-          409,
-        )
+          beforeData: {
+            email: existingProfile.email,
+            fullName: existingProfile.full_name,
+            phone: existingProfile.phone,
+            role: existingProfile.role,
+            status: existingProfile.status,
+          },
+          entityId: existingProfile.id,
+          entityType: 'profile',
+        })
+
+        return jsonResponse({
+          mode: 'deactivated',
+          profileId: existingProfile.id,
+          reason: `Usuario desativado porque possui dados vinculados: ${dependencies.join(', ')}.`,
+          success: true,
+        })
       }
 
       await insertAdminAuditLog({
