@@ -113,14 +113,25 @@ export function ListingsPage() {
   const hasSearchQuery = query.trim().length > 0
 
   const visibleCities = useMemo(() => {
-    const allCities = referencesQuery.data?.cities ?? []
-
     if (!state) {
-      return allCities
+      return []
     }
 
-    return allCities.filter((item) => item.toLowerCase().includes(city.trim().toLowerCase()) || !city.trim())
-  }, [city, referencesQuery.data?.cities, state])
+    return referencesQuery.data?.stateCityMap?.[state] ?? []
+  }, [referencesQuery.data?.stateCityMap, state])
+
+  useEffect(() => {
+    if (!state) {
+      if (city) {
+        setCity('')
+      }
+      return
+    }
+
+    if (city && !visibleCities.some((item) => item.toLowerCase() === city.toLowerCase())) {
+      setCity('')
+    }
+  }, [city, state, visibleCities])
 
   return (
     <section className="space-y-6 lg:space-y-8">
@@ -185,6 +196,7 @@ export function ListingsPage() {
                 onClick={() => {
                   setPage(1)
                   setState('')
+                  setCity('')
                 }}
                 type="button"
                 variant={state ? 'outline' : 'default'}
@@ -197,6 +209,7 @@ export function ListingsPage() {
                   onClick={() => {
                     setPage(1)
                     setState(uf)
+                    setCity('')
                   }}
                   type="button"
                   variant={state === uf ? 'default' : 'outline'}
@@ -211,6 +224,7 @@ export function ListingsPage() {
             <div className="flex flex-col gap-2">
               <Button
                 className="justify-start"
+                disabled={!state}
                 onClick={() => {
                   setPage(1)
                   setCity('')
@@ -218,7 +232,7 @@ export function ListingsPage() {
                 type="button"
                 variant={city ? 'outline' : 'default'}
               >
-                Todas as cidades
+                {!state ? 'Selecione um estado' : 'Todas as cidades'}
               </Button>
               {visibleCities.slice(0, 20).map((cityItem) => (
                 <Button

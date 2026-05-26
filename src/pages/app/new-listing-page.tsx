@@ -5,6 +5,7 @@ import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { ListingEditor, type ListingEditorSubmitPayload } from '@/components/listings/listing-editor'
 import {
   createListingDraft,
+  fetchBrazilLocalities,
   fetchListingReferences,
   reorderListingImages,
   submitListingForReview,
@@ -21,6 +22,11 @@ export function AppNewListingPage() {
   const referencesQuery = useQuery({
     queryKey: ['listing-references'],
     queryFn: fetchListingReferences,
+  })
+  const brazilLocalitiesQuery = useQuery({
+    queryKey: ['listing-localities', 'brazil'],
+    queryFn: fetchBrazilLocalities,
+    staleTime: 1000 * 60 * 60 * 24,
   })
 
   const createMutation = useMutation({
@@ -79,7 +85,7 @@ export function AppNewListingPage() {
     },
   })
 
-  if (referencesQuery.isLoading) {
+  if (referencesQuery.isLoading || brazilLocalitiesQuery.isLoading) {
     return (
       <div className="rounded-2xl border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
         Carregando categorias e materiais...
@@ -87,7 +93,7 @@ export function AppNewListingPage() {
     )
   }
 
-  if (referencesQuery.isError || !referencesQuery.data) {
+  if (referencesQuery.isError || brazilLocalitiesQuery.isError || !referencesQuery.data || !brazilLocalitiesQuery.data) {
     return (
       <DashboardAlertCard
         description="Não foi possível carregar categorias e materiais para o formulário."
@@ -102,13 +108,13 @@ export function AppNewListingPage() {
       key="app-new-listing"
       cancelTo={paths.app.listings}
       categories={referencesQuery.data.categories}
-      cityOptionsByState={referencesQuery.data.stateCityMap}
+      cityOptionsByState={brazilLocalitiesQuery.data.stateCityMap}
       defaultValues={createEmptyListingFormValues()}
       isSubmitting={createMutation.isPending}
       materials={referencesQuery.data.materials}
       mode="create"
       onSubmit={createMutation.mutateAsync}
-      stateOptions={referencesQuery.data.states}
+      stateOptions={brazilLocalitiesQuery.data.states}
       status="draft"
     />
   )

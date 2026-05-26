@@ -7,7 +7,6 @@ import {
   Logs,
   Mailbox,
   Menu,
-  MapPinned,
   MessagesSquare,
   Newspaper,
   LifeBuoy,
@@ -82,11 +81,6 @@ const adminNavItems = [
     to: paths.admin.materials,
     label: 'Materiais',
     icon: Boxes,
-  },
-  {
-    to: paths.admin.locations,
-    label: 'Localidades',
-    icon: MapPinned,
   },
   {
     to: paths.admin.blog,

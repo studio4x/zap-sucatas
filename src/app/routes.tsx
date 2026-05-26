@@ -32,7 +32,6 @@ const AdminEditListingPage = lazy(() => import('@/pages/admin/edit-listing-page'
 const AdminListingDetailsPage = lazy(() => import('@/pages/admin/listing-details-page').then((module) => ({ default: module.AdminListingDetailsPage })))
 const AdminListingsPage = lazy(() => import('@/pages/admin/listings-page').then((module) => ({ default: module.AdminListingsPage })))
 const AdminNewListingPage = lazy(() => import('@/pages/admin/new-listing-page').then((module) => ({ default: module.AdminNewListingPage })))
-const AdminLocationsPage = lazy(() => import('@/pages/admin/locations-page').then((module) => ({ default: module.AdminLocationsPage })))
 const AdminLogsPage = lazy(() => import('@/pages/admin/logs-page').then((module) => ({ default: module.AdminLogsPage })))
 const AdminMaterialsPage = lazy(() => import('@/pages/admin/materials-page').then((module) => ({ default: module.AdminMaterialsPage })))
 const AdminOverviewPage = lazy(() => import('@/pages/admin/overview-page').then((module) => ({ default: module.AdminOverviewPage })))
@@ -271,10 +270,6 @@ export const routes: RouteObject[] = [
       {
         path: 'materiais',
         element: withSuspense(<AdminMaterialsPage />),
-      },
-      {
-        path: 'localidades',
-        element: withSuspense(<AdminLocationsPage />),
       },
       {
         path: 'blog',

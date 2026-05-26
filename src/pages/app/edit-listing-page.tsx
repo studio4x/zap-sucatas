@@ -4,6 +4,7 @@ import { paths } from '@/app/paths'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { ListingEditor, type ListingEditorSubmitPayload } from '@/components/listings/listing-editor'
 import {
+  fetchBrazilLocalities,
   fetchListingDetailsForOwner,
   fetchListingReferences,
   removeListingImage,
@@ -24,6 +25,11 @@ export function AppEditListingPage() {
   const referencesQuery = useQuery({
     queryKey: ['listing-references'],
     queryFn: fetchListingReferences,
+  })
+  const brazilLocalitiesQuery = useQuery({
+    queryKey: ['listing-localities', 'brazil'],
+    queryFn: fetchBrazilLocalities,
+    staleTime: 1000 * 60 * 60 * 24,
   })
 
   const listingQuery = useQuery({
@@ -99,7 +105,7 @@ export function AppEditListingPage() {
     },
   })
 
-  if (referencesQuery.isLoading || listingQuery.isLoading) {
+  if (referencesQuery.isLoading || listingQuery.isLoading || brazilLocalitiesQuery.isLoading) {
     return (
       <div className="rounded-2xl border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
         Carregando dados do anúncio...
@@ -109,8 +115,10 @@ export function AppEditListingPage() {
 
   if (
     referencesQuery.isError ||
+    brazilLocalitiesQuery.isError ||
     listingQuery.isError ||
     !referencesQuery.data ||
+    !brazilLocalitiesQuery.data ||
     !listingQuery.data
   ) {
     return (
@@ -137,7 +145,7 @@ export function AppEditListingPage() {
       key={`${id}:${listingQuery.data.updatedAt}:${listingQuery.data.images.length}`}
       cancelTo={paths.app.listings}
       categories={referencesQuery.data.categories}
-      cityOptionsByState={referencesQuery.data.stateCityMap}
+      cityOptionsByState={brazilLocalitiesQuery.data.stateCityMap}
       defaultValues={listingToFormValues(listingQuery.data)}
       existingImages={listingQuery.data.images}
       isSubmitting={updateMutation.isPending}
@@ -145,7 +153,7 @@ export function AppEditListingPage() {
       mode="edit"
       onSubmit={updateMutation.mutateAsync}
       rejectionReason={listingQuery.data.rejectionReason}
-      stateOptions={referencesQuery.data.states}
+      stateOptions={brazilLocalitiesQuery.data.states}
       status={listingQuery.data.status}
     />
   )

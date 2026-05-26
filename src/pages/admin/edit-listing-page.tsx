@@ -10,6 +10,7 @@ import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
 import {
   approveListing,
   archiveListing,
+  fetchBrazilLocalities,
   fetchListingDetailsForAdmin,
   fetchListingReferences,
   removeListingImage,
@@ -31,6 +32,11 @@ export function AdminEditListingPage() {
   const referencesQuery = useQuery({
     queryKey: ['listing-references'],
     queryFn: fetchListingReferences,
+  })
+  const brazilLocalitiesQuery = useQuery({
+    queryKey: ['listing-localities', 'brazil'],
+    queryFn: fetchBrazilLocalities,
+    staleTime: 1000 * 60 * 60 * 24,
   })
   const listingQuery = useQuery({
     queryKey: ['listing', 'admin', id],
@@ -119,7 +125,7 @@ export function AdminEditListingPage() {
     },
   })
 
-  if (referencesQuery.isLoading || listingQuery.isLoading) {
+  if (referencesQuery.isLoading || listingQuery.isLoading || brazilLocalitiesQuery.isLoading) {
     return (
       <div className="rounded-lg border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
         Carregando anúncio administrativo...
@@ -127,7 +133,14 @@ export function AdminEditListingPage() {
     )
   }
 
-  if (referencesQuery.isError || listingQuery.isError || !referencesQuery.data || !listingQuery.data) {
+  if (
+    referencesQuery.isError ||
+    listingQuery.isError ||
+    brazilLocalitiesQuery.isError ||
+    !referencesQuery.data ||
+    !listingQuery.data ||
+    !brazilLocalitiesQuery.data
+  ) {
     return (
       <DashboardAlertCard
         description="Não foi possível carregar este anúncio para edição administrativa."
@@ -174,7 +187,7 @@ export function AdminEditListingPage() {
         key={`${id}:${listingQuery.data.updatedAt}:${listingQuery.data.images.length}`}
         cancelTo={paths.admin.listingDetails(id)}
         categories={referencesQuery.data.categories}
-        cityOptionsByState={referencesQuery.data.stateCityMap}
+        cityOptionsByState={brazilLocalitiesQuery.data.stateCityMap}
         defaultValues={listingToFormValues(listingQuery.data)}
         existingImages={listingQuery.data.images}
         finalActionDescription="Salve alterações em rascunho ou publique imediatamente o anúncio no catálogo quando o conteúdo estiver validado pela operação."
@@ -184,7 +197,7 @@ export function AdminEditListingPage() {
         mode="edit"
         onSubmit={updateMutation.mutateAsync}
         rejectionReason={listingQuery.data.rejectionReason}
-        stateOptions={referencesQuery.data.states}
+        stateOptions={brazilLocalitiesQuery.data.states}
         status={listingQuery.data.status}
       />
 

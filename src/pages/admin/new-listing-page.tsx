@@ -8,6 +8,7 @@ import { ListingEditor, type ListingEditorSubmitPayload } from '@/components/lis
 import {
   approveListing,
   createListingDraft,
+  fetchBrazilLocalities,
   fetchListingReferences,
   reorderListingImages,
   uploadListingImages,
@@ -24,6 +25,11 @@ export function AdminNewListingPage() {
   const referencesQuery = useQuery({
     queryKey: ['listing-references'],
     queryFn: fetchListingReferences,
+  })
+  const brazilLocalitiesQuery = useQuery({
+    queryKey: ['listing-localities', 'brazil'],
+    queryFn: fetchBrazilLocalities,
+    staleTime: 1000 * 60 * 60 * 24,
   })
   const settingsQuery = useQuery({
     queryKey: ['system-settings'],
@@ -99,7 +105,7 @@ export function AdminNewListingPage() {
     },
   })
 
-  if (referencesQuery.isLoading || settingsQuery.isLoading) {
+  if (referencesQuery.isLoading || settingsQuery.isLoading || brazilLocalitiesQuery.isLoading) {
     return (
       <div className="rounded-lg border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-sm">
         Carregando referências para o anúncio administrativo...
@@ -107,7 +113,13 @@ export function AdminNewListingPage() {
     )
   }
 
-  if (referencesQuery.isError || settingsQuery.isError || !referencesQuery.data) {
+  if (
+    referencesQuery.isError ||
+    settingsQuery.isError ||
+    brazilLocalitiesQuery.isError ||
+    !referencesQuery.data ||
+    !brazilLocalitiesQuery.data
+  ) {
     return (
       <DashboardAlertCard
         description="Não foi possível carregar categorias, materiais e dados básicos da Zap Sucatas."
@@ -129,7 +141,7 @@ export function AdminNewListingPage() {
         key={`admin-new-listing:${settingsQuery.data?.siteName ?? 'site'}:${settingsQuery.data?.supportPhone ?? 'phone'}`}
         cancelTo={paths.admin.listings}
         categories={referencesQuery.data.categories}
-        cityOptionsByState={referencesQuery.data.stateCityMap}
+        cityOptionsByState={brazilLocalitiesQuery.data.stateCityMap}
         defaultValues={defaultValues}
         finalActionDescription="Salve o anúncio como rascunho ou publique diretamente no catálogo da Zap Sucatas quando os dados estiverem prontos."
         finalActionLabel="Salvar e publicar agora"
@@ -137,7 +149,7 @@ export function AdminNewListingPage() {
         materials={referencesQuery.data.materials}
         mode="create"
         onSubmit={createMutation.mutateAsync}
-        stateOptions={referencesQuery.data.states}
+        stateOptions={brazilLocalitiesQuery.data.states}
         status="draft"
       />
     </section>

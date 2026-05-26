@@ -43,7 +43,6 @@ const adminNavGroups: AdminNavGroup[] = [
       paths.admin.listings,
       paths.admin.categories,
       paths.admin.materials,
-      paths.admin.locations,
       paths.admin.blog,
       paths.admin.pricing,
       paths.admin.scrapPrices,

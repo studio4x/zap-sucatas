@@ -20,6 +20,7 @@ import type {
 import { normalizeListingCity, normalizeListingState } from '@/domains/listings/utils'
 
 const LISTING_MEDIA_BUCKET = 'listing-media'
+let brazilLocalitiesPromise: Promise<{ stateCityMap: Record<string, string[]>; states: string[] }> | null = null
 
 type ListingRow = {
   category_id: string
@@ -343,6 +344,53 @@ export async function fetchListingReferences() {
     stateCityMap,
     states,
   }
+}
+
+export async function fetchBrazilLocalities() {
+  if (brazilLocalitiesPromise) {
+    return brazilLocalitiesPromise
+  }
+
+  brazilLocalitiesPromise = (async () => {
+    const statesResponse = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
+
+    if (!statesResponse.ok) {
+      throw new Error('Não foi possível carregar estados do Brasil.')
+    }
+
+    const statesPayload = (await statesResponse.json()) as Array<{ nome: string; sigla: string }>
+    const states = statesPayload
+      .map((item) => item.sigla?.trim().toUpperCase())
+      .filter((value): value is string => Boolean(value))
+      .sort((left, right) => left.localeCompare(right, 'pt-BR'))
+
+    const stateCityEntries = await Promise.all(
+      states.map(async (uf) => {
+        const response = await fetch(
+          `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`,
+        )
+
+        if (!response.ok) {
+          throw new Error(`Não foi possível carregar cidades do estado ${uf}.`)
+        }
+
+        const payload = (await response.json()) as Array<{ nome: string }>
+        const cities = payload
+          .map((city) => city.nome?.trim())
+          .filter((value): value is string => Boolean(value))
+          .sort((left, right) => left.localeCompare(right, 'pt-BR'))
+
+        return [uf, cities] as const
+      }),
+    )
+
+    return {
+      states,
+      stateCityMap: Object.fromEntries(stateCityEntries),
+    }
+  })()
+
+  return brazilLocalitiesPromise
 }
 
 export async function fetchUserListings(profileId: string, filters: ListingListFilters = {}) {
