@@ -882,10 +882,10 @@ export function ListingEditor({
                 {isSubmitting && submitAfterSave ? 'Processando...' : resolvedFinalActionLabel}
               </Button>
               {!canSubmitForReview ? (
-                <DashboardEmptyState
-                  className="px-4 py-8"
+                <DashboardAlertCard
                   description="Adicione fotos do lote antes de enviar para revisão."
                   title="Ainda faltam imagens"
+                  tone="warning"
                 />
               ) : null}
             </div>
