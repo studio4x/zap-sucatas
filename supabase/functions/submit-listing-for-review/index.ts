@@ -41,6 +41,30 @@ Deno.serve(async (request) => {
     }
 
     if (listing.status === 'pending_review') {
+      await notifyListingStatus({
+        listingId,
+        status: 'pending_review',
+      })
+
+      await sendAdminNotificationEmail({
+        subject: 'Novo anúncio enviado para revisão',
+        body: `Um novo anúncio foi enviado para revisão.
+
+Título: ${listing.title}
+ID do anúncio: ${listing.id}
+Localidade: ${listing.city} - ${listing.state}
+
+Acesse o painel para moderar: /admin/anuncios/${listing.id}`,
+      })
+
+      await enqueueTransactionalNotification({
+        actionUrl: '/app/anuncios',
+        body: `Seu anuncio "${listing.title}" foi enviado para revisao.`,
+        category: 'listing_status',
+        title: 'Anuncio enviado para revisao',
+        userId: listing.user_id,
+      })
+
       return jsonResponse({
         listingId,
         status: 'pending_review',
