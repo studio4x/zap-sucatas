@@ -357,7 +357,8 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[2.6rem] border border-border/70 bg-white px-6 py-8 text-foreground shadow-[0_28px_70px_-42px_rgba(12,60,44,0.14)] md:px-10 md:py-10">
+      <section className="relative overflow-hidden rounded-[2.6rem] border border-primary/20 bg-[linear-gradient(135deg,#f8fcf7_0%,#f1f8ee_52%,#f8fcf6_100%)] px-6 py-8 text-foreground shadow-[0_30px_80px_-44px_rgba(12,60,44,0.24)] md:px-10 md:py-10">
+        <div className="pointer-events-none absolute inset-x-8 bottom-0 h-px bg-primary/20" />
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="space-y-6">
             <Badge className="w-fit border-primary/15 bg-primary/5 text-primary" variant="outline">
@@ -381,21 +382,21 @@ export function HomePage() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-[1.9rem] border border-border bg-background p-5 shadow-sm">
+            <div className="rounded-[1.9rem] border border-primary/10 bg-white p-5 shadow-[0_16px_34px_-28px_rgba(12,60,44,0.26)]">
               <p className="text-sm font-medium text-foreground/80">Variação diária do cobre</p>
               <p className="mt-2 text-2xl font-semibold text-foreground">
                 {formatVariation(latestCopperDaily, previousCopperDaily)}
               </p>
               <p className="mt-2 text-xs text-muted-foreground">Comparativo do último dia útil</p>
             </div>
-            <div className="rounded-[1.9rem] border border-border bg-background p-5 shadow-sm">
+            <div className="rounded-[1.9rem] border border-primary/10 bg-white p-5 shadow-[0_16px_34px_-28px_rgba(12,60,44,0.26)]">
               <p className="text-sm font-medium text-foreground/80">Variação semanal do cobre</p>
               <p className="mt-2 text-2xl font-semibold text-foreground">
                 {formatVariation(latestCopperWeekly, previousCopperWeekly)}
               </p>
               <p className="mt-2 text-xs text-muted-foreground">Comparativo da média semanal</p>
             </div>
-            <div className="rounded-[1.9rem] border border-border bg-background p-5 shadow-sm">
+            <div className="rounded-[1.9rem] border border-primary/10 bg-white p-5 shadow-[0_16px_34px_-28px_rgba(12,60,44,0.26)]">
               <p className="text-sm font-medium text-foreground/80">Variação mensal do cobre</p>
               <p className="mt-2 text-2xl font-semibold text-foreground">
                 {formatVariation(latestCopperMonthly, previousCopperMonthly)}
