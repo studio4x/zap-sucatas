@@ -392,7 +392,7 @@ export function ListingEditor({
               <FormField fieldId="listing-title" label="Titulo">
                 <Input id="listing-title" {...form.register('title')} />
                 {form.formState.errors.title ? (
-                  <p className="text-sm text-destructive">{form.formState.errors.title.message}</p>
+                  <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
                 ) : null}
               </FormField>
 
@@ -407,7 +407,7 @@ export function ListingEditor({
                     ))}
                   </Select>
                   {form.formState.errors.categoryId ? (
-                    <p className="text-sm text-destructive">
+                    <p className="text-sm text-red-600">
                       {form.formState.errors.categoryId.message}
                     </p>
                   ) : null}
@@ -433,14 +433,14 @@ export function ListingEditor({
                   maxLength={240}
                 />
                 {form.formState.errors.summary ? (
-                  <p className="text-sm text-destructive">{form.formState.errors.summary.message}</p>
+                  <p className="text-sm text-red-600">{form.formState.errors.summary.message}</p>
                 ) : null}
               </FormField>
 
               <FormField fieldId="listing-description" label="Descricao">
                 <Textarea id="listing-description" {...form.register('description')} className="min-h-40" />
                 {form.formState.errors.description ? (
-                  <p className="text-sm text-destructive">
+                  <p className="text-sm text-red-600">
                     {form.formState.errors.description.message}
                   </p>
                 ) : null}
@@ -463,7 +463,7 @@ export function ListingEditor({
                   ))}
                 </Select>
                 {form.formState.errors.state ? (
-                  <p className="text-sm text-destructive">{form.formState.errors.state.message}</p>
+                  <p className="text-sm text-red-600">{form.formState.errors.state.message}</p>
                 ) : null}
               </FormField>
 
@@ -487,7 +487,7 @@ export function ListingEditor({
                   ))}
                 </Select>
                 {form.formState.errors.city ? (
-                  <p className="text-sm text-destructive">{form.formState.errors.city.message}</p>
+                  <p className="text-sm text-red-600">{form.formState.errors.city.message}</p>
                 ) : null}
               </FormField>
 
@@ -554,7 +554,7 @@ export function ListingEditor({
                     <label className="text-sm font-medium text-foreground">Rotulo</label>
                     <Input {...form.register(`attributes.${index}.attributeLabel`)} />
                     {form.formState.errors.attributes?.[index]?.attributeLabel ? (
-                      <p className="text-sm text-destructive">
+                      <p className="text-sm text-red-600">
                         {form.formState.errors.attributes[index]?.attributeLabel?.message}
                       </p>
                     ) : null}
@@ -564,7 +564,7 @@ export function ListingEditor({
                     <label className="text-sm font-medium text-foreground">Valor</label>
                     <Input {...form.register(`attributes.${index}.attributeValue`)} />
                     {form.formState.errors.attributes?.[index]?.attributeValue ? (
-                      <p className="text-sm text-destructive">
+                      <p className="text-sm text-red-600">
                         {form.formState.errors.attributes[index]?.attributeValue?.message}
                       </p>
                     ) : null}
