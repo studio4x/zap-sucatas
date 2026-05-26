@@ -621,6 +621,9 @@ export function ListingEditor({
                   <p className="text-xs text-muted-foreground">
                     JPG, PNG ou WEBP. Você pode escolher várias imagens de uma vez.
                   </p>
+                  <p className="text-xs text-muted-foreground">
+                    Recomendado: proporção 16:10 (ex.: 1600x1000) para melhor encaixe no catálogo.
+                  </p>
                 </div>
                 <input accept="image/*" className="hidden" multiple onChange={handleFileSelection} type="file" />
               </label>
@@ -669,7 +672,7 @@ export function ListingEditor({
                             </p>
                             <div className="grid gap-2">
                               <Button
-                                className="w-full"
+                                className="h-8 w-full px-2 text-xs font-medium"
                                 onClick={() => setCoverImageKey(item.key)}
                                 size="sm"
                                 type="button"
@@ -678,7 +681,7 @@ export function ListingEditor({
                                 {isCover ? 'Capa selecionada' : 'Definir capa'}
                               </Button>
                               <Button
-                                className="w-full"
+                                className="h-8 w-full px-2 text-xs font-medium"
                                 onClick={() =>
                                   item.kind === 'existing'
                                     ? removeExistingImage(item.image.id)
