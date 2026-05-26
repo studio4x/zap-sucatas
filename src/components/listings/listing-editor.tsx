@@ -7,7 +7,6 @@ import ReactQuill from 'react-quill-new'
 import 'react-quill-new/dist/quill.snow.css'
 import { Link } from 'react-router-dom'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
-import { DashboardEmptyState } from '@/components/dashboard/dashboard-empty-state'
 import { DashboardFormSection } from '@/components/dashboard/dashboard-form-section'
 import { DashboardSectionHeader } from '@/components/dashboard/dashboard-section-header'
 import { ListingStatusBadge } from '@/components/listings/listing-status-badge'
@@ -755,11 +754,12 @@ export function ListingEditor({
               </label>
 
               {orderedImageItems.length === 0 ? (
-                <DashboardEmptyState
-                  className="px-4 py-8"
-                  description="Adicione imagens e organize a ordem antes de enviar para revisão."
-                  title="Nenhuma imagem pronta"
-                />
+                <div className="rounded-2xl border border-amber-300/70 bg-amber-50 px-4 py-4">
+                  <p className="text-sm font-semibold text-amber-900">Nenhuma imagem pronta</p>
+                  <p className="mt-1 text-sm text-amber-800">
+                    Adicione imagens no bloco acima e organize a ordem antes de enviar para revisão.
+                  </p>
+                </div>
               ) : (
                 <div className="grid grid-cols-2 gap-3">
                   {orderedImageItems.map((item, index) => {
