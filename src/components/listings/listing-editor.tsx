@@ -2,7 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ImagePlus, Star, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { ChangeEvent, ReactNode } from 'react'
-import { useFieldArray, useForm } from 'react-hook-form'
+import { Controller, useFieldArray, useForm } from 'react-hook-form'
+import ReactQuill from 'react-quill-new'
+import 'react-quill-new/dist/quill.snow.css'
 import { Link } from 'react-router-dom'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { DashboardEmptyState } from '@/components/dashboard/dashboard-empty-state'
@@ -438,7 +440,27 @@ export function ListingEditor({
               </FormField>
 
               <FormField fieldId="listing-description" label="Descricao">
-                <Textarea id="listing-description" {...form.register('description')} className="min-h-40" />
+                <Controller
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <ReactQuill
+                      id="listing-description"
+                      modules={{
+                        toolbar: [
+                          [{ header: [2, 3, false] }],
+                          ['bold', 'italic', 'underline', 'strike'],
+                          [{ list: 'ordered' }, { list: 'bullet' }],
+                          ['link', 'blockquote'],
+                          ['clean'],
+                        ],
+                      }}
+                      onChange={field.onChange}
+                      theme="snow"
+                      value={field.value ?? ''}
+                    />
+                  )}
+                />
                 {form.formState.errors.description ? (
                   <p className="text-sm text-red-600">
                     {form.formState.errors.description.message}
