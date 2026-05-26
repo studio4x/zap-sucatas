@@ -94,6 +94,27 @@ function resolveInitialCoverImageKey(images: ListingImage[]) {
   return images[0] ? buildExistingImageKey(images[0].id) : null
 }
 
+function formatContactPhone(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 11)
+
+  if (digits.length <= 2) {
+    return digits.length === 0 ? '' : `(${digits}`
+  }
+
+  const ddd = digits.slice(0, 2)
+  const rest = digits.slice(2)
+
+  if (rest.length <= 4) {
+    return `(${ddd}) ${rest}`
+  }
+
+  if (rest.length <= 8) {
+    return `(${ddd}) ${rest.slice(0, 4)}-${rest.slice(4)}`
+  }
+
+  return `(${ddd}) ${rest.slice(0, 5)}-${rest.slice(5)}`
+}
+
 function FormField({
   children,
   fieldId,
@@ -475,7 +496,15 @@ export function ListingEditor({
               </FormField>
 
               <FormField fieldId="listing-contact-phone" label="Telefone de contato">
-                <Input id="listing-contact-phone" {...form.register('contactPhone')} />
+                <Input
+                  id="listing-contact-phone"
+                  placeholder="(11) 99999-9999"
+                  {...form.register('contactPhone', {
+                    onChange: (event) => {
+                      event.target.value = formatContactPhone(event.target.value)
+                    },
+                  })}
+                />
               </FormField>
 
               <FormField fieldId="listing-condition" label="Condicao">
