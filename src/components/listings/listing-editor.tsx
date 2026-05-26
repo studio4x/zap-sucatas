@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowDown, ArrowUp, ImagePlus, Star, Trash2 } from 'lucide-react'
+import { ImagePlus, Star, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { ChangeEvent, ReactNode } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
@@ -109,14 +109,6 @@ function FormField({
       {children}
     </div>
   )
-}
-
-function arraysAreEqual(left: string[], right: string[]) {
-  if (left.length !== right.length) {
-    return false
-  }
-
-  return left.every((value, index) => value === right[index])
 }
 
 export function ListingEditor({
@@ -323,29 +315,6 @@ export function ListingEditor({
 
   function restoreExistingImage(imageId: string) {
     setRemovedImageIds((current) => current.filter((id) => id !== imageId))
-  }
-
-  function moveImage(key: string, direction: 'down' | 'up') {
-    setImageOrderKeys(() => {
-      const current = normalizedImageOrderKeys
-      const index = current.findIndex((item) => item === key)
-
-      if (index === -1) {
-        return current
-      }
-
-      const nextIndex = direction === 'up' ? index - 1 : index + 1
-
-      if (nextIndex < 0 || nextIndex >= current.length) {
-        return current
-      }
-
-      const next = [...current]
-      const currentValue = next[index]
-      next[index] = next[nextIndex]
-      next[nextIndex] = currentValue
-      return arraysAreEqual(current, next) ? current : next
-    })
   }
 
   const canSubmitForReview = orderedImageItems.length > 0
@@ -581,22 +550,20 @@ export function ListingEditor({
                   title="Nenhuma imagem pronta"
                 />
               ) : (
-                <div className="grid gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   {orderedImageItems.map((item, index) => {
                     const isCover = resolvedCoverImageKey === item.key
-                    const isFirst = index === 0
-                    const isLast = index === orderedImageItems.length - 1
 
                     return (
                       <div
                         key={item.key}
                         className={cn(
-                          'overflow-hidden rounded-2xl border border-border/70 bg-card',
-                          isCover ? 'ring-2 ring-primary/35' : undefined,
+                          'overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm',
+                          isCover ? 'border-primary/60 ring-2 ring-primary/35' : undefined,
                         )}
                       >
-                        <div className="grid gap-4 p-4 sm:grid-cols-[120px_minmax(0,1fr)]">
-                          <div className="aspect-square overflow-hidden rounded-2xl bg-muted">
+                        <div className="p-3">
+                          <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
                             <img
                               alt={
                                 item.kind === 'existing'
@@ -606,49 +573,21 @@ export function ListingEditor({
                               className="h-full w-full object-cover"
                               src={item.kind === 'existing' ? item.image.publicUrl : item.item.previewUrl}
                             />
+                            {isCover ? (
+                              <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-1 text-[11px] font-medium text-primary-foreground">
+                                <Star className="size-3" />
+                                Capa
+                              </span>
+                            ) : null}
                           </div>
 
-                          <div className="space-y-3">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
-                                {item.kind === 'existing' ? 'Imagem atual' : 'Novo upload'}
-                              </span>
-                              {isCover ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                                  <Star className="size-3.5" />
-                                  Capa
-                                </span>
-                              ) : null}
-                            </div>
-
-                            <p className="text-sm font-medium text-foreground">
-                              {item.kind === 'existing'
-                                ? `Imagem ${index + 1}`
-                                : item.item.file.name}
+                          <div className="mt-3 space-y-2">
+                            <p className="line-clamp-2 text-xs font-medium text-foreground">
+                              {item.kind === 'existing' ? `Imagem ${index + 1}` : item.item.file.name}
                             </p>
-
-                            <div className="flex flex-wrap gap-2">
+                            <div className="grid gap-2">
                               <Button
-                                disabled={isFirst}
-                                onClick={() => moveImage(item.key, 'up')}
-                                size="sm"
-                                type="button"
-                                variant="outline"
-                              >
-                                <ArrowUp className="size-4" />
-                                Subir
-                              </Button>
-                              <Button
-                                disabled={isLast}
-                                onClick={() => moveImage(item.key, 'down')}
-                                size="sm"
-                                type="button"
-                                variant="outline"
-                              >
-                                <ArrowDown className="size-4" />
-                                Descer
-                              </Button>
-                              <Button
+                                className="w-full"
                                 onClick={() => setCoverImageKey(item.key)}
                                 size="sm"
                                 type="button"
@@ -657,6 +596,7 @@ export function ListingEditor({
                                 {isCover ? 'Capa selecionada' : 'Definir capa'}
                               </Button>
                               <Button
+                                className="w-full"
                                 onClick={() =>
                                   item.kind === 'existing'
                                     ? removeExistingImage(item.image.id)
