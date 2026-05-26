@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Sobre Nós | Zap Sucatas</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-container": "#33852d",
+            "surface-container-highest": "#e4e2e1",
+            "error": "#ba1a1a",
+            "surface-container": "#f0eded",
+            "on-surface-variant": "#40493c",
+            "surface-dim": "#dcd9d9",
+            "tertiary": "#7a5500",
+            "industrial-gray-surface": "#F8F9FA",
+            "surface": "#fbf9f8",
+            "on-secondary-container": "#446c3d",
+            "on-secondary-fixed": "#002202",
+            "background": "#fbf9f8",
+            "surface-bright": "#fbf9f8",
+            "inverse-surface": "#303030",
+            "surface-container-high": "#eae8e7",
+            "primary-fixed-dim": "#85da77",
+            "primary-fixed": "#a0f790",
+            "outline": "#707a6b",
+            "on-background": "#1b1c1c",
+            "primary": "#146b15",
+            "on-primary-container": "#f8fff0",
+            "on-secondary-fixed-variant": "#284f24",
+            "on-tertiary": "#ffffff",
+            "on-error-container": "#93000a",
+            "tertiary-fixed": "#ffdeaa",
+            "on-tertiary-container": "#fffbff",
+            "on-primary": "#ffffff",
+            "on-error": "#ffffff",
+            "on-surface": "#1b1c1c",
+            "inverse-primary": "#85da77",
+            "on-tertiary-fixed": "#271900",
+            "error-container": "#ffdad6",
+            "surface-container-low": "#f6f3f2",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary": "#ffffff",
+            "tertiary-fixed-dim": "#ffba2d",
+            "secondary-container": "#beecb1",
+            "surface-variant": "#e4e2e1",
+            "outline-variant": "#bfcab8",
+            "tertiary-container": "#9a6c00",
+            "secondary": "#406839",
+            "industrial-gray-border": "#E2E8F0",
+            "surface-tint": "#176d17",
+            "inverse-on-surface": "#f3f0f0",
+            "on-primary-fixed": "#002201",
+            "on-tertiary-fixed-variant": "#5f4100",
+            "secondary-fixed": "#c1efb4",
+            "secondary-fixed-dim": "#a5d29a",
+            "on-primary-fixed-variant": "#005306",
+            "recycling-green-light": "#E9F5E8"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin-mobile": "16px",
+            "base": "8px",
+            "margin-desktop": "48px",
+            "max-width": "1280px",
+            "gutter": "24px"
+          },
+          "fontFamily": {
+            "body-sm": [
+              "Inter"
+            ],
+            "headline-lg-mobile": [
+              "Inter"
+            ],
+            "label-md": [
+              "Inter"
+            ],
+            "body-lg": [
+              "Inter"
+            ],
+            "headline-xl": [
+              "Inter"
+            ],
+            "headline-lg": [
+              "Inter"
+            ],
+            "body-md": [
+              "Inter"
+            ],
+            "headline-md": [
+              "Inter"
+            ],
+            "label-sm": [
+              "Inter"
+            ]
+          },
+          "fontSize": {
+            "body-sm": [
+              "14px",
+              {
+                "lineHeight": "20px",
+                "fontWeight": "400"
+              }
+            ],
+            "headline-lg-mobile": [
+              "28px",
+              {
+                "lineHeight": "36px",
+                "fontWeight": "700"
+              }
+            ],
+            "label-md": [
+              "14px",
+              {
+                "lineHeight": "16px",
+                "letterSpacing": "0.01em",
+                "fontWeight": "600"
+              }
+            ],
+            "body-lg": [
+              "18px",
+              {
+                "lineHeight": "28px",
+                "fontWeight": "400"
+              }
+            ],
+            "headline-xl": [
+              "48px",
+              {
+                "lineHeight": "56px",
+                "letterSpacing": "-0.02em",
+                "fontWeight": "700"
+              }
+            ],
+            "headline-lg": [
+              "32px",
+              {
+                "lineHeight": "40px",
+                "letterSpacing": "-0.01em",
+                "fontWeight": "700"
+              }
+            ],
+            "body-md": [
+              "16px",
+              {
+                "lineHeight": "24px",
+                "fontWeight": "400"
+              }
+            ],
+            "headline-md": [
+              "24px",
+              {
+                "lineHeight": "32px",
+                "fontWeight": "600"
+              }
+            ],
+            "label-sm": [
+              "12px",
+              {
+                "lineHeight": "16px",
+                "letterSpacing": "0.05em",
+                "fontWeight": "700"
+              }
+            ]
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-industrial-gray-surface text-on-surface min-h-screen flex flex-col pt-20">
+  <!-- TopNavBar Component -->
+  <nav
+    class="bg-surface dark:bg-inverse-surface shadow-sm fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-20 mx-auto">
+    <div class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed tracking-tight">
+      Zap Sucatas
+    </div>
+    <div class="hidden md:flex items-center gap-6">
+      <a class="text-on-surface-variant dark:text-outline-variant font-label-md text-label-md hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200"
+        href="#">Marketplace</a>
+      <a class="text-on-surface-variant dark:text-outline-variant font-label-md text-label-md hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200"
+        href="#">Materials</a>
+      <a class="text-primary dark:text-primary-fixed font-bold border-b-2 border-primary dark:border-primary-fixed pb-1 font-label-md text-label-md opacity-80 transition-opacity"
+        href="#">About Us</a>
+      <a class="text-on-surface-variant dark:text-outline-variant font-label-md text-label-md hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200"
+        href="#">Pricing</a>
+      <a class="text-on-surface-variant dark:text-outline-variant font-label-md text-label-md hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200"
+        href="#">Sustainability</a>
+    </div>
+    <div class="hidden md:flex items-center gap-4">
+      <button class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors">Log
+        In</button>
+      <button
+        class="bg-[#42943A] hover:bg-primary-container text-white font-label-md text-label-md px-6 py-2 rounded-full transition-colors shadow-sm">Join
+        Platform</button>
+    </div>
+    <button class="md:hidden text-on-surface-variant">
+      <span class="material-symbols-outlined" data-icon="menu">menu</span>
+    </button>
+  </nav>
+  <main class="flex-grow">
+    <!-- Hero Section -->
+    <section
+      class="relative w-full h-[500px] md:h-[600px] flex items-center justify-center text-center px-margin-mobile md:px-margin-desktop overflow-hidden">
+      <div class="absolute inset-0 z-0">
+        <img alt="Industrial recycling facility" class="w-full h-full object-cover"
+          src="https://lh3.googleusercontent.com/aida/ADBb0uivep0yuP2vTblRRd4CpRbdpr6TLcaeZyqWEQEbbMeEWXY5kmpgulnwtdRMw60qht4PcJ0M0LGjSpbIMQr8EcNCHSyRgvmnCFeFmBRznno-3ozPMYVni0Bb7sxMWpVVAsa8SQGSojTZdO6NRYviS480RibZFLgEwuNMDd0_ahsUOXjTQSzlsNmP3BnrV9B1xIuS2I4btuFuiW6koTFBX-Q36jVkZQUmtpZBNXcnBIYHi_C3d1w3Af7-EMo" />
+        <div class="absolute inset-0 bg-[#002202]/60 mix-blend-multiply"></div>
+      </div>
+      <div class="relative z-10 max-w-4xl mx-auto flex flex-col items-center gap-6">
+        <h1 class="font-headline-xl text-headline-lg-mobile md:text-headline-xl text-white">Transformando o Futuro
+          através da Reciclagem</h1>
+        <p class="font-body-lg text-body-lg text-white/90 max-w-2xl">
+          Conheça a nossa história e o nosso compromisso com o planeta.
+        </p>
+        <div class="mt-8 animate-bounce">
+          <span class="material-symbols-outlined text-white text-3xl" data-icon="expand_more">expand_more</span>
+        </div>
+      </div>
+    </section>
+    <!-- Quem Somos Section -->
+    <section class="py-24 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div class="relative rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.05)] bg-white p-4 group">
+          <img alt="Equipe Zap Sucatas"
+            class="w-full h-[400px] object-cover rounded-xl transition-transform duration-500 group-hover:scale-105"
+            data-alt="A diverse professional team of recycling facility workers wearing hard hats and high-visibility safety vests, standing confidently in front of heavy industrial machinery inside a modern, well-lit warehouse. The atmosphere conveys trust, experience, and a family-business values approach. Clean light-mode aesthetic with bright, crisp natural lighting."
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjg3xYiwTPpEhSWJvB8bozPqLJKEj2RJn3ja-t6H1vDzl8FBhNoXLwX5kiJvCBVet51AnwyL-mQmVM2VbFs-IAwI5ndbDr0X2VpaIKGJnR_Bj5Ra5-mWPS6dfaT4LLMTM2997s4YPe1EZJN-YHq9TvrtRptlAERbv8AQczsiZP8dxTPkieUIYSkDqdevQvEsCTo0wgujag3DKPE87BsmmFdpkp1WXj4Aks4pz4oHvs5GsSG92vENdik71K7kTQv5kOEAOoI52iZ3Jk" />
+          <div class="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-2xl"></div>
+        </div>
+        <div class="flex flex-col gap-6">
+          <h2 class="font-headline-lg text-headline-lg text-[#002202]">Quem Somos</h2>
+          <div class="font-body-md text-body-md text-on-surface-variant flex flex-col gap-4">
+            <p>A Zap Sucatas é especialista em comércio de sucatas ferrosas e não ferrosas, com mais de 20 anos de
+              experiência.</p>
+            <p>Empresa familiar com foco em transparência e logística eficiente, transformando resíduos em recursos
+              valiosos.</p>
+            <p class="font-bold text-[#42943A]">Nossa paixão é a sustentabilidade e a inovação.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Missão, Visão e Valores Section -->
+    <section class="py-24 bg-white px-margin-mobile md:px-margin-desktop">
+      <div class="max-w-max-width mx-auto">
+        <h2 class="font-headline-lg text-headline-lg text-center text-[#002202] mb-16">Missão, Visão e Valores</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+          <!-- Missão Card -->
+          <div
+            class="bg-industrial-gray-surface rounded-xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-industrial-gray-border hover:-translate-y-1 transition-transform duration-300">
+            <div class="w-12 h-12 rounded-full bg-recycling-green-light flex items-center justify-center mb-6">
+              <span class="material-symbols-outlined text-[#42943A] text-2xl" data-icon="target">target</span>
+            </div>
+            <h3 class="font-headline-md text-headline-md text-[#002202] mb-4">Missão</h3>
+            <p class="font-body-md text-body-md text-on-surface-variant">
+              Comercializar sucatas com excelência, garantindo sustentabilidade e parcerias duradouras.
+            </p>
+          </div>
+          <!-- Visão Card -->
+          <div
+            class="bg-industrial-gray-surface rounded-xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-industrial-gray-border hover:-translate-y-1 transition-transform duration-300">
+            <div class="w-12 h-12 rounded-full bg-recycling-green-light flex items-center justify-center mb-6">
+              <span class="material-symbols-outlined text-[#42943A] text-2xl" data-icon="visibility">visibility</span>
+            </div>
+            <h3 class="font-headline-md text-headline-md text-[#002202] mb-4">Visão</h3>
+            <p class="font-body-md text-body-md text-on-surface-variant">
+              Ser referência nacional no comércio de sucatas, reconhecida pela transparência e responsabilidade
+              ambiental.
+            </p>
+          </div>
+          <!-- Valores Card -->
+          <div
+            class="bg-industrial-gray-surface rounded-xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-industrial-gray-border hover:-translate-y-1 transition-transform duration-300">
+            <div class="w-12 h-12 rounded-full bg-recycling-green-light flex items-center justify-center mb-6">
+              <span class="material-symbols-outlined text-[#42943A] text-2xl" data-icon="diamond">diamond</span>
+            </div>
+            <h3 class="font-headline-md text-headline-md text-[#002202] mb-4">Valores</h3>
+            <ul class="font-body-md text-body-md text-on-surface-variant space-y-2">
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#42943A]"></span> Ética</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#42943A]"></span>
+                Transparência</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#42943A]"></span>
+                Comprometimento</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#42943A]"></span>
+                Sustentabilidade</li>
+              <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-[#42943A]"></span> Foco no
+                Cliente</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Stats Section -->
+    <section class="py-20 bg-[#002202] text-white px-margin-mobile md:px-margin-desktop">
+      <div class="max-w-max-width mx-auto">
+        <div
+          class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-white/20">
+          <div class="flex flex-col items-center justify-center pt-8 md:pt-0">
+            <span class="font-headline-xl text-headline-xl text-[#a0f790] mb-2 font-bold tracking-tight">500.000+</span>
+            <span class="font-body-lg text-body-lg text-white/80">Metais Reciclados (ton)</span>
+          </div>
+          <div class="flex flex-col items-center justify-center pt-8 md:pt-0">
+            <span class="font-headline-xl text-headline-xl text-[#a0f790] mb-2 font-bold tracking-tight">20+</span>
+            <span class="font-body-lg text-body-lg text-white/80">Anos de Atuação</span>
+          </div>
+          <div class="flex flex-col items-center justify-center pt-8 md:pt-0">
+            <span class="font-headline-xl text-headline-xl text-[#a0f790] mb-2 font-bold tracking-tight">2.500+</span>
+            <span class="font-body-lg text-body-lg text-white/80">Parceiros Satisfeitos</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- CTA Section -->
+    <section class="py-24 px-margin-mobile md:px-margin-desktop bg-surface">
+      <div
+        class="max-w-4xl mx-auto text-center bg-white rounded-2xl p-12 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-industrial-gray-border flex flex-col md:flex-row items-center justify-between gap-8">
+        <h2 class="font-headline-lg text-headline-lg text-[#002202] text-left">Faça Parte da Mudança</h2>
+        <button
+          class="bg-[#42943A] hover:bg-primary-container text-white font-label-md text-label-md px-8 py-4 rounded-full transition-all shadow-md hover:shadow-lg whitespace-nowrap focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+          Solicitar Orçamento
+        </button>
+      </div>
+    </section>
+  </main>
+  <!-- Footer Component -->
+  <footer
+    class="bg-surface-container dark:bg-inverse-surface border-t border-industrial-gray-border dark:border-outline w-full py-12 px-margin-mobile md:px-margin-desktop mt-auto flex flex-col md:flex-row justify-between items-center gap-base">
+    <div class="flex flex-col gap-2 mb-6 md:mb-0 text-center md:text-left">
+      <span class="font-headline-md text-headline-md font-bold text-on-surface dark:text-inverse-on-surface">Zap
+        Sucatas</span>
+      <p class="font-body-sm text-body-sm text-on-surface-variant dark:text-outline-variant">© 2024 Zap Sucatas.
+        Revolutionizing the Scrap Metal Ecosystem.</p>
+    </div>
+    <div class="flex flex-wrap justify-center gap-6">
+      <a class="font-label-sm text-label-sm text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed underline focus:ring-2 focus:ring-primary dark:focus:ring-primary-fixed rounded"
+        href="#">Privacy Policy</a>
+      <a class="font-label-sm text-label-sm text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed underline focus:ring-2 focus:ring-primary dark:focus:ring-primary-fixed rounded"
+        href="#">Terms of Service</a>
+      <a class="font-label-sm text-label-sm text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed underline focus:ring-2 focus:ring-primary dark:focus:ring-primary-fixed rounded"
+        href="#">Environmental Impact</a>
+      <a class="font-label-sm text-label-sm text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed underline focus:ring-2 focus:ring-primary dark:focus:ring-primary-fixed rounded"
+        href="#">Contact Support</a>
+      <a class="font-label-sm text-label-sm text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed underline focus:ring-2 focus:ring-primary dark:focus:ring-primary-fixed rounded"
+        href="#">Careers</a>
+    </div>
+  </footer>
+</body>
+
+</html>

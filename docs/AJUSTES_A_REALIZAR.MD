@@ -52,3 +52,5 @@ Moderacao antes da publicacao. Busca por categoria, material e localidade. Pagin
 [OK] T25 - Quando um anuncio é criado e enviado para revisão, aparece a mensagem "Destaque pago temporariamente indisponivel. A operacao de pagamentos esta desativada no momento. O destaque pago de anuncios fica indisponivel.". Essa mensagem não precisa aparecer, podemos removê-la.
 
 [OK] t26 - A página https://zap-sucatas.vercel.app/app/anuncios está muito branca.. com cards todos brancos.. Precisamos melhorar isso.. inserir fundos nos cards.. deixar mais moderna, sem tanto branco...
+
+[ ] t27 - Insira nos campos "resumo comercial" e "descrição", da página de criar novo anuncio, um editor rico reactquill.
