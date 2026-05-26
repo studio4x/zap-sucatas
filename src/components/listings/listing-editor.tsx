@@ -796,18 +796,19 @@ export function ListingEditor({
                             <p className="line-clamp-2 text-xs font-medium text-foreground">
                               {item.kind === 'existing' ? `Imagem ${index + 1}` : item.item.file.name}
                             </p>
-                            <div className="grid gap-2">
+                            <div className="flex flex-wrap gap-2">
                               <Button
-                                className="h-8 w-full px-2 text-xs font-medium"
+                                className="h-7 rounded-full px-2.5 text-[11px] font-medium"
                                 onClick={() => setCoverImageKey(item.key)}
                                 size="sm"
                                 type="button"
                                 variant={isCover ? 'default' : 'outline'}
                               >
+                                <Star className="size-3" />
                                 {isCover ? 'Capa selecionada' : 'Definir capa'}
                               </Button>
                               <Button
-                                className="h-8 w-full px-2 text-xs font-medium"
+                                className="h-7 rounded-full px-2.5 text-[11px] font-medium"
                                 onClick={() =>
                                   item.kind === 'existing'
                                     ? removeExistingImage(item.image.id)
@@ -817,6 +818,7 @@ export function ListingEditor({
                                 type="button"
                                 variant="outline"
                               >
+                                <Trash2 className="size-3" />
                                 Remover
                               </Button>
                             </div>
