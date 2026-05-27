@@ -133,6 +133,36 @@ const PRICE_OPTIONS = [
   'Faixa negociavel',
 ] as const
 
+const ATTRIBUTE_LABEL_OPTIONS = [
+  'Pureza',
+  'Granulometria',
+  'Liga',
+  'Volume estimado',
+  'Peso aproximado',
+  'Unidade de venda',
+  'Acondicionamento',
+  'Origem do material',
+  'Umidade',
+  'Contaminacao',
+  'Cor predominante',
+  'Disponibilidade',
+] as const
+
+const ATTRIBUTE_VALUE_PLACEHOLDERS: Record<string, string> = {
+  Pureza: 'Ex.: 98% Cu',
+  Granulometria: 'Ex.: 20 a 40 mm',
+  Liga: 'Ex.: AISI 304',
+  'Volume estimado': 'Ex.: 12 m3',
+  'Peso aproximado': 'Ex.: 3,5 toneladas',
+  'Unidade de venda': 'Ex.: kg, tonelada ou lote',
+  Acondicionamento: 'Ex.: Big bag, fardo, granel',
+  'Origem do material': 'Ex.: sobra industrial',
+  Umidade: 'Ex.: 8%',
+  Contaminacao: 'Ex.: baixa, sem oleo',
+  'Cor predominante': 'Ex.: cobre avermelhado',
+  Disponibilidade: 'Ex.: retirada imediata',
+}
+
 const OTHER_CONDITION_VALUE = '__other_condition__'
 const PRICE_OPTIONS_WITH_VALUE = ['Preco por kg', 'Preco por tonelada'] as const
 
@@ -699,7 +729,14 @@ export function ListingEditor({
                 >
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Rotulo</label>
-                    <Input {...form.register(`attributes.${index}.attributeLabel`)} />
+                    <Select {...form.register(`attributes.${index}.attributeLabel`)}>
+                      <option value="">Selecione um rótulo</option>
+                      {ATTRIBUTE_LABEL_OPTIONS.map((labelOption) => (
+                        <option key={labelOption} value={labelOption}>
+                          {labelOption}
+                        </option>
+                      ))}
+                    </Select>
                     {form.formState.errors.attributes?.[index]?.attributeLabel ? (
                       <p className="text-sm text-red-600">
                         {form.formState.errors.attributes[index]?.attributeLabel?.message}
@@ -709,7 +746,14 @@ export function ListingEditor({
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Valor</label>
-                    <Input {...form.register(`attributes.${index}.attributeValue`)} />
+                    <Input
+                      placeholder={
+                        ATTRIBUTE_VALUE_PLACEHOLDERS[
+                          form.watch(`attributes.${index}.attributeLabel`)?.trim() ?? ''
+                        ] ?? 'Ex.: informe o valor técnico'
+                      }
+                      {...form.register(`attributes.${index}.attributeValue`)}
+                    />
                     {form.formState.errors.attributes?.[index]?.attributeValue ? (
                       <p className="text-sm text-red-600">
                         {form.formState.errors.attributes[index]?.attributeValue?.message}
