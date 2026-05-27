@@ -65,7 +65,7 @@ export function ForgotPasswordPage() {
       highlights={[
         'Fluxo seguro de recuperacao via e-mail.',
         'Atualizacao imediata da senha ao retornar pelo link.',
-        'Acesso pensado para nao interromper a operacao do anunciante.',
+        'Acesso pensado para nao interromper a operacao da sua conta no marketplace.',
       ]}
       title="Recuperar senha"
     >

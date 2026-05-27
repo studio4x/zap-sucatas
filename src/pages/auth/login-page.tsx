@@ -74,9 +74,9 @@ export function LoginPage() {
   return (
     <PublicAuthShell
       badge="Entrar"
-      description="Acesse sua conta para publicar anuncios, responder perguntas e acompanhar o status da sua operacao no portal."
+      description="Acesse sua conta para anunciar, comprar, enviar perguntas em outros anúncios e acompanhar sua operação no portal."
       highlights={[]}
-      title="Login do anunciante"
+      title="Login da conta"
     >
       <div className="space-y-6">
         {!isSupabaseConfigured ? (
@@ -89,7 +89,7 @@ export function LoginPage() {
           <div className="space-y-1">
             <h2 className="text-2xl font-semibold text-foreground">Entrar com senha</h2>
             <p className="text-sm leading-7 text-muted-foreground">
-              Fluxo principal para anunciantes e administracao da plataforma.
+              Fluxo principal para compradores, anunciantes e administração da plataforma.
             </p>
           </div>
 

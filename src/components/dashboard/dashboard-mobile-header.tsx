@@ -20,7 +20,7 @@ export function DashboardMobileHeader({
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-foreground">{currentLabel}</p>
           <p className="truncate text-xs text-muted-foreground">
-            {user?.fullName?.trim() || user?.email || 'Área do anunciante'}
+            {user?.fullName?.trim() || user?.email || 'Área da conta'}
           </p>
         </div>
         <div className="flex items-center gap-2">

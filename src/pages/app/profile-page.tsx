@@ -163,7 +163,7 @@ export function AppProfilePage() {
               </p>
               <p>
                 <span className="font-medium text-foreground">Perfil:</span>{' '}
-                {profileQuery.data.role === 'admin' ? 'Administrador' : 'Anunciante'}
+                {profileQuery.data.role === 'admin' ? 'Administrador' : 'Comprador e anunciante'}
               </p>
               <p>
                 <span className="font-medium text-foreground">E-mail:</span> {user?.email}

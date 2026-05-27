@@ -292,7 +292,7 @@ export function ListingDetailsPage() {
                     Enviar pergunta
                   </button>
                 ) : (
-                  <Link to={paths.auth.login}>Entrar para perguntar</Link>
+                  <Link to={paths.auth.login}>Entrar para perguntar ao vendedor</Link>
                 )}
               </Button>
             </div>
@@ -431,7 +431,7 @@ export function ListingDetailsPage() {
             </Button>
             {!canAskQuestion && !isAuthenticated ? (
               <Button asChild type="button" variant="outline">
-                <Link to={paths.auth.login}>Entrar para perguntar</Link>
+                <Link to={paths.auth.login}>Entrar para perguntar ao vendedor</Link>
               </Button>
             ) : null}
           </div>
@@ -441,7 +441,7 @@ export function ListingDetailsPage() {
               <p className="text-sm leading-7 text-muted-foreground">
                 {isAuthenticated
                   ? 'Sua conta ainda nao pode interagir com perguntas neste momento.'
-                  : 'Faca login para perguntar sobre este anuncio e acompanhar a resposta do anunciante.'}
+                  : 'Faca login para perguntar sobre este anuncio e acompanhar a resposta do vendedor.'}
               </p>
             ) : (
               <div className="space-y-4 rounded-[1.35rem] border border-border bg-[linear-gradient(180deg,#fafcf9_0%,#f5f8f4_100%)] p-4">

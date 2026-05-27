@@ -40,7 +40,7 @@ export function SellerCard({
   publishedAtLabel,
 }: SellerCardProps) {
   return (
-    <ListingSidebarCard title="Anunciante">
+    <ListingSidebarCard title="Vendedor">
       <div className="flex items-center gap-4 rounded-[1.4rem] border border-border bg-white p-4">
         <div className="flex size-14 items-center justify-center rounded-[1.2rem] bg-primary/10 text-primary">
           <UserRound className="size-6" />

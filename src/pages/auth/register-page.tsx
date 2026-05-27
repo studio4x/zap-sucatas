@@ -54,19 +54,19 @@ export function RegisterPage() {
   return (
     <PublicAuthShell
       badge="Cadastro"
-      description="Crie sua conta para publicar anuncios, acompanhar perguntas e operar o seu catalogo no portal."
+      description="Crie sua conta para anunciar, comprar, enviar perguntas e acompanhar suas negociações no portal."
       highlights={[
-        'Cadastro aberto para anunciantes do marketplace.',
+        'Cadastro aberto para compradores e anunciantes do marketplace.',
         'Fluxo administrativo segue separado e controlado.',
-        'Conta pensada para anunciar, responder perguntas e acompanhar moderacao.',
+        'Conta pensada para anunciar, comprar, responder perguntas e acompanhar moderação.',
       ]}
-      title="Abra sua conta de anunciante"
+      title="Abra sua conta"
     >
       <div className="space-y-5">
         <div className="space-y-1">
           <h2 className="text-2xl font-semibold text-foreground">Criar conta</h2>
           <p className="text-sm leading-7 text-muted-foreground">
-            Cadastro aberto para anunciantes. O papel administrativo continua fechado.
+            Cadastro aberto para compradores e anunciantes. O papel administrativo continua fechado.
           </p>
         </div>
 
