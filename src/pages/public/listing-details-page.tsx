@@ -207,7 +207,7 @@ export function ListingDetailsPage() {
             <ListingGallery images={listing.images} listingTitle={listing.title} />
           </div>
 
-          <div className="rounded-[1.9rem] bg-[linear-gradient(180deg,rgba(19,54,40,0.96),rgba(12,34,25,0.98))] p-5 text-white shadow-[0_30px_72px_-40px_rgba(12,34,25,0.88)]">
+          <div className="h-fit self-start rounded-[1.9rem] bg-[linear-gradient(180deg,rgba(19,54,40,0.96),rgba(12,34,25,0.98))] p-5 text-white shadow-[0_30px_72px_-40px_rgba(12,34,25,0.88)] lg:sticky lg:top-24">
             <div className="space-y-5">
               <div className="space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100/70">
