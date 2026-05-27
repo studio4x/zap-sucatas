@@ -88,6 +88,10 @@ export const routes: RouteObject[] = [
         element: withSuspense(<ListingDetailsPage />),
       },
       {
+        path: 'anuncios/preview/:id',
+        element: withSuspense(<ListingDetailsPage />),
+      },
+      {
         path: 'categorias',
         element: withSuspense(<CategoriesPage />),
       },

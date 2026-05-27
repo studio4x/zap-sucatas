@@ -775,6 +775,22 @@ export async function fetchPublicListingBySlug(slug: string) {
   } satisfies ListingDetails
 }
 
+export async function fetchPublicListingPreviewById(listingId: string) {
+  const { data, error } = await buildBaseListingQuery().eq('id', listingId).single()
+
+  if (error || !data) {
+    throw error ?? new Error('Anuncio nao encontrado.')
+  }
+
+  const listing = data as ListingRow
+  const attributes = await fetchListingAttributes(listing.id)
+
+  return {
+    ...mapListing(listing),
+    attributes,
+  } satisfies ListingDetails
+}
+
 function mapListingPayload(values: ListingFormValues) {
   return {
     category_id: values.categoryId,

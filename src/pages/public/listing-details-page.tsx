@@ -14,6 +14,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
+  fetchPublicListingPreviewById,
   fetchPublicListingBySlug,
   fetchRelatedPublicListingsByCategory,
 } from '@/domains/listings/api'
@@ -42,7 +43,7 @@ function parseCommercialPrice(priceLabel: string | null) {
 }
 
 export function ListingDetailsPage() {
-  const { slug = '' } = useParams()
+  const { id = '', slug = '' } = useParams()
   const { isAuthenticated, user } = useAuth()
   const queryClient = useQueryClient()
   const [questionText, setQuestionText] = useState('')
@@ -50,10 +51,21 @@ export function ListingDetailsPage() {
   const [guestEmail, setGuestEmail] = useState('')
   const [feedback, setFeedback] = useState<string | null>(null)
 
+  const isAdminPreviewMode = Boolean(id)
+  const canUseAdminPreview = isAdminPreviewMode && isAuthenticated && user?.role === 'admin'
+
   const listingQuery = useQuery({
-    queryKey: ['listing', 'public', slug],
-    queryFn: () => fetchPublicListingBySlug(slug),
-    enabled: Boolean(slug),
+    queryKey: ['listing', 'public', isAdminPreviewMode ? `preview:${id}` : `slug:${slug}`],
+    queryFn: () => {
+      if (isAdminPreviewMode) {
+        if (!canUseAdminPreview) {
+          throw new Error('Somente administradores podem visualizar anuncios em revisao no site publico.')
+        }
+        return fetchPublicListingPreviewById(id)
+      }
+      return fetchPublicListingBySlug(slug)
+    },
+    enabled: isAdminPreviewMode ? Boolean(id) : Boolean(slug),
   })
 
   const relatedListingsQuery = useQuery({
@@ -150,9 +162,9 @@ export function ListingDetailsPage() {
   return (
     <div className="space-y-8 lg:space-y-10">
       <Button asChild variant="outline">
-        <Link to={paths.public.listings}>
+        <Link to={isAdminPreviewMode ? paths.admin.listings : paths.public.listings}>
           <ArrowLeft className="size-4" />
-          Voltar ao catalogo
+          {isAdminPreviewMode ? 'Voltar para anúncios' : 'Voltar ao catalogo'}
         </Link>
       </Button>
 

@@ -5,6 +5,7 @@ export const paths = {
     home: '/',
     listings: '/anuncios',
     listingDetails: (slug: string) => `/anuncios/${slug}`,
+    listingPreview: (id: string) => `/anuncios/preview/${id}`,
     categories: '/categorias',
     categoryDetails: (slug: string) => `/categorias/${slug}`,
     pricing: '/preco-dos-metais-lme',

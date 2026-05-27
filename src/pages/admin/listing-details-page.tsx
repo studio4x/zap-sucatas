@@ -174,6 +174,12 @@ export function AdminListingDetailsPage() {
             <Button asChild type="button" variant="outline">
               <Link to={paths.admin.editListing(id)}>Editar anúncio</Link>
             </Button>
+            <Button asChild type="button" variant="outline">
+              <Link to={paths.public.listingPreview(id)}>
+                <Eye className="size-4" />
+                Pré-visualizar no site
+              </Link>
+            </Button>
             {listing.slug && listing.status === 'approved' ? (
               <Button asChild type="button" variant="outline">
                 <Link to={paths.public.listingDetails(listing.slug)}>
@@ -226,7 +232,7 @@ export function AdminListingDetailsPage() {
               <CardTitle>Descrição e evidências</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
-              <p className="whitespace-pre-line text-sm leading-7 text-foreground">
+              <p className="whitespace-pre-wrap break-words text-sm leading-7 text-foreground [overflow-wrap:anywhere]">
                 {listing.description}
               </p>
 
