@@ -9,6 +9,17 @@ type ListingGalleryProps = {
   images: ListingImage[]
 }
 
+function resolveListingImageUrl(url: string, size: 'main' | 'thumb') {
+  if (!url.includes('/storage/v1/object/public/')) {
+    return url
+  }
+
+  const transformedBase = url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
+  const target = size === 'main' ? { height: 1200, width: 1600 } : { height: 360, width: 480 }
+  const separator = transformedBase.includes('?') ? '&' : '?'
+  return `${transformedBase}${separator}width=${target.width}&height=${target.height}&resize=cover&quality=85`
+}
+
 export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
   const orderedImages = useMemo(() => {
     const coverImage = images.find((image) => image.isCover)
@@ -59,7 +70,7 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
                 className="h-full w-full object-cover"
                 loading="eager"
                 sizes="(max-width: 1024px) 100vw, 760px"
-                src={activeImage?.publicUrl}
+                src={activeImage ? resolveListingImageUrl(activeImage.publicUrl, 'main') : undefined}
               />
             </div>
             <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-slate-950/80 to-transparent px-3 py-3 text-xs font-medium text-white">
@@ -71,12 +82,12 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
           <div className="flex items-center gap-3">
             <Button
               aria-label="Imagem anterior"
-              className="size-10 shrink-0 rounded-full border-primary !text-primary hover:!text-primary [&_svg]:!text-primary"
+              className="size-10 shrink-0 rounded-full border-primary text-primary hover:text-primary"
               onClick={showPreviousImage}
               type="button"
               variant="outline"
             >
-              <ChevronLeft className="size-4" />
+              <ChevronLeft className="block size-4 shrink-0 text-primary" strokeWidth={2.5} />
             </Button>
             <div className="grid auto-cols-[calc((100%_-_0.75rem)/2)] grid-flow-col gap-3 overflow-x-auto pb-1 sm:auto-cols-[calc((100%_-_1.5rem)/3)] lg:auto-cols-[calc((100%_-_2.25rem)/4)]">
               {orderedImages.map((image, index) => (
@@ -94,19 +105,19 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
                     className="h-full w-full object-cover"
                     loading={index < 4 ? 'eager' : 'lazy'}
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    src={image.publicUrl}
+                    src={resolveListingImageUrl(image.publicUrl, 'thumb')}
                   />
                 </button>
               ))}
             </div>
             <Button
               aria-label="Próxima imagem"
-              className="size-10 shrink-0 rounded-full border-primary !text-primary hover:!text-primary [&_svg]:!text-primary"
+              className="size-10 shrink-0 rounded-full border-primary text-primary hover:text-primary"
               onClick={showNextImage}
               type="button"
               variant="outline"
             >
-              <ChevronRight className="size-4" />
+              <ChevronRight className="block size-4 shrink-0 text-primary" strokeWidth={2.5} />
             </Button>
           </div>
         </div>
