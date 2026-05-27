@@ -203,36 +203,7 @@ export function ListingDetailsPage() {
                 {listing.summary || 'Página comercial com galeria, ficha técnica, localidade e perguntas para apoiar negociação real no setor de sucatas.'}
               </p>
             </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-[1.35rem] border border-white/80 bg-white/85 px-4 py-4 shadow-sm">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Localidade
-                </p>
-                <p className="mt-2 text-base font-semibold text-foreground">
-                  {listing.city} - {listing.state}
-                </p>
-              </div>
-              <div className="rounded-[1.35rem] border border-white/80 bg-white/85 px-4 py-4 shadow-sm">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Publicado em
-                </p>
-                <p className="mt-2 text-base font-semibold text-foreground">
-                  {formatListingDate(listing.publishedAt)}
-                </p>
-              </div>
-              <div className="rounded-[1.35rem] border border-white/80 bg-white/85 px-4 py-4 shadow-sm">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Tipo de preco
-                </p>
-                <p className="mt-2 text-base font-semibold text-foreground">
-                  {commercialPrice.type}
-                </p>
-                {commercialPrice.value ? (
-                  <p className="mt-1 text-sm text-muted-foreground">{commercialPrice.value}</p>
-                ) : null}
-              </div>
-            </div>
+            <ListingGallery images={listing.images} listingTitle={listing.title} />
           </div>
 
           <div className="rounded-[1.9rem] bg-[linear-gradient(180deg,rgba(19,54,40,0.96),rgba(12,34,25,0.98))] p-5 text-white shadow-[0_30px_72px_-40px_rgba(12,34,25,0.88)]">
@@ -287,7 +258,35 @@ export function ListingDetailsPage() {
 
       <div className="grid gap-8 xl:grid-cols-[1.12fr_0.88fr]">
         <div className="space-y-8">
-          <ListingGallery images={listing.images} listingTitle={listing.title} />
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-[1.35rem] border border-white/80 bg-white/85 px-4 py-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Localidade
+              </p>
+              <p className="mt-2 text-base font-semibold text-foreground">
+                {listing.city} - {listing.state}
+              </p>
+            </div>
+            <div className="rounded-[1.35rem] border border-white/80 bg-white/85 px-4 py-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Publicado em
+              </p>
+              <p className="mt-2 text-base font-semibold text-foreground">
+                {formatListingDate(listing.publishedAt)}
+              </p>
+            </div>
+            <div className="rounded-[1.35rem] border border-white/80 bg-white/85 px-4 py-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Tipo de preco
+              </p>
+              <p className="mt-2 text-base font-semibold text-foreground">
+                {commercialPrice.type}
+              </p>
+              {commercialPrice.value ? (
+                <p className="mt-1 text-sm text-muted-foreground">{commercialPrice.value}</p>
+              ) : null}
+            </div>
+          </div>
 
           <Card className="rounded-[1.9rem] border-[#d8e3d8] bg-white shadow-[0_24px_56px_-44px_rgba(19,33,23,0.28)]">
             <CardContent className="space-y-6 p-6 md:p-7">
