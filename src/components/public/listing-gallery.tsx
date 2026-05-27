@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ListingImage } from '@/domains/listings/types'
 import { cn } from '@/lib/utils'
 
@@ -8,15 +8,27 @@ type ListingGalleryProps = {
 }
 
 export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
-  const [activeImageId, setActiveImageId] = useState<string | null>(images[0]?.id ?? null)
+  const orderedImages = useMemo(() => {
+    const coverImage = images.find((image) => image.isCover)
+    if (!coverImage) {
+      return images
+    }
+    return [coverImage, ...images.filter((image) => image.id !== coverImage.id)]
+  }, [images])
+
+  const [activeImageId, setActiveImageId] = useState<string | null>(orderedImages[0]?.id ?? null)
+  useEffect(() => {
+    setActiveImageId(orderedImages[0]?.id ?? null)
+  }, [orderedImages])
+
   const activeImage = useMemo(
-    () => images.find((image) => image.id === activeImageId) ?? images[0],
-    [activeImageId, images],
+    () => orderedImages.find((image) => image.id === activeImageId) ?? orderedImages[0],
+    [activeImageId, orderedImages],
   )
-  const activeIndex = activeImage ? images.findIndex((image) => image.id === activeImage.id) : 0
+  const activeIndex = activeImage ? orderedImages.findIndex((image) => image.id === activeImage.id) : 0
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_28px_64px_-48px_rgba(19,33,23,0.3)]">
         <div className="relative aspect-[16/10] bg-[linear-gradient(160deg,#f0f8ed_0%,#d6ebd1_100%)]">
           {activeImage ? (
@@ -30,19 +42,30 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
               Sem imagens disponiveis
             </div>
           )}
+          {activeImage?.isCover ? (
+            <div className="absolute left-4 top-4 rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white">
+              Capa
+            </div>
+          ) : null}
           <div className="absolute bottom-4 right-4 rounded-full bg-slate-950/66 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
-            {images.length > 0 ? `${Math.min(activeIndex + 1, images.length)} / ${images.length}` : 'Galeria'}
+            {orderedImages.length > 0
+              ? `${Math.min(activeIndex + 1, orderedImages.length)} / ${orderedImages.length}`
+              : 'Galeria'}
           </div>
         </div>
       </div>
 
-      {images.length > 1 ? (
-        <div className="grid gap-3 grid-cols-4 lg:grid-cols-5">
-          {images.map((image, index) => (
+      {orderedImages.length > 1 ? (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            Galeria de imagens
+          </p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {orderedImages.map((image, index) => (
             <button
               key={image.id}
               className={cn(
-                'aspect-square overflow-hidden rounded-[1.15rem] border bg-white transition',
+                'group relative aspect-[16/10] overflow-hidden rounded-[1.15rem] border bg-white transition',
                 index === activeIndex
                   ? 'border-primary shadow-sm'
                   : 'border-border hover:border-primary/35',
@@ -55,8 +78,12 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
                 className="h-full w-full object-cover"
                 src={image.publicUrl}
               />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/65 to-transparent px-2 py-1 text-left text-[11px] font-medium text-white">
+                {image.isCover ? 'Capa' : `Imagem ${index + 1}`}
+              </div>
             </button>
-          ))}
+            ))}
+          </div>
         </div>
       ) : null}
     </div>
