@@ -177,81 +177,78 @@ export function ListingDetailsPage() {
         </Link>
       </Button>
 
-      <section className="overflow-hidden rounded-[2.25rem] border border-border bg-white">
-        <div className="grid gap-6 px-5 py-6 md:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:px-8 lg:py-8">
-          <div className="space-y-5">
-            <div className="flex flex-wrap gap-2">
-              {listing.categoryName ? (
-                <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
-                  {listing.categoryName}
-                </Badge>
-              ) : null}
-              {listing.materialName ? (
-                <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
-                  {listing.materialName}
-                </Badge>
-              ) : null}
-              <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
-                Anuncio moderado
-              </Badge>
-            </div>
+      <section className="space-y-5">
+        <div className="flex flex-wrap gap-2">
+          {listing.categoryName ? (
+            <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
+              {listing.categoryName}
+            </Badge>
+          ) : null}
+          {listing.materialName ? (
+            <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
+              {listing.materialName}
+            </Badge>
+          ) : null}
+          <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
+            Anuncio moderado
+          </Badge>
+        </div>
+        <h1 className="max-w-4xl break-words font-display text-4xl leading-[0.95] tracking-[-0.045em] text-foreground [overflow-wrap:anywhere] sm:text-[3.2rem]">
+          {listing.title}
+        </h1>
+        <p className="max-w-4xl break-words text-base leading-8 text-muted-foreground [overflow-wrap:anywhere]">
+          {listing.summary || 'Página comercial com galeria, ficha técnica, localidade e perguntas para apoiar negociação real no setor de sucatas.'}
+        </p>
+      </section>
 
-            <div className="space-y-4">
-              <h1 className="max-w-4xl break-words font-display text-4xl leading-[0.95] tracking-[-0.045em] text-foreground [overflow-wrap:anywhere] sm:text-[3.2rem]">
-                {listing.title}
-              </h1>
-              <p className="max-w-3xl break-words text-base leading-8 text-muted-foreground [overflow-wrap:anywhere]">
-                {listing.summary || 'Página comercial com galeria, ficha técnica, localidade e perguntas para apoiar negociação real no setor de sucatas.'}
+      <section className="grid items-stretch gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
+        <div className="rounded-[2.25rem] border border-border bg-white p-5 md:p-6 lg:p-8">
+          <ListingGallery images={listing.images} listingTitle={listing.title} />
+        </div>
+        <div className="h-full rounded-[1.9rem] bg-[linear-gradient(180deg,rgba(19,54,40,0.96),rgba(12,34,25,0.98))] p-5 text-white shadow-[0_30px_72px_-40px_rgba(12,34,25,0.88)]">
+          <div className="flex h-full flex-col space-y-5">
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100/70">
+                Janela comercial
+              </p>
+              <p className="text-4xl font-semibold tracking-[-0.04em] text-white">
+                {commercialPrice.type}
+              </p>
+              {commercialPrice.value ? <p className="text-lg font-medium text-emerald-100">{commercialPrice.value}</p> : null}
+              <p className="text-sm leading-7 text-emerald-50/78">
+                Use os dados tecnicos e as perguntas publicas para validar o lote antes do contato.
               </p>
             </div>
-            <ListingGallery images={listing.images} listingTitle={listing.title} />
-          </div>
 
-          <div className="h-fit self-start rounded-[1.9rem] bg-[linear-gradient(180deg,rgba(19,54,40,0.96),rgba(12,34,25,0.98))] p-5 text-white shadow-[0_30px_72px_-40px_rgba(12,34,25,0.88)] lg:sticky lg:top-24">
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100/70">
-                  Janela comercial
-                </p>
-                <p className="text-4xl font-semibold tracking-[-0.04em] text-white">
-                  {commercialPrice.type}
-                </p>
-                {commercialPrice.value ? <p className="text-lg font-medium text-emerald-100">{commercialPrice.value}</p> : null}
-                <p className="text-sm leading-7 text-emerald-50/78">
-                  Use os dados tecnicos e as perguntas publicas para validar o lote antes do contato.
-                </p>
-              </div>
-
-              <div className="space-y-3 border-y border-white/10 py-4 text-sm text-white/86">
+            <div className="space-y-3 border-y border-white/10 py-4 text-sm text-white/86">
+              <p className="flex items-center gap-2">
+                <MapPin className="size-4 text-emerald-300" />
+                {listing.city} - {listing.state}
+              </p>
+              {listing.materialName ? (
                 <p className="flex items-center gap-2">
-                  <MapPin className="size-4 text-emerald-300" />
-                  {listing.city} - {listing.state}
+                  <Package className="size-4 text-emerald-300" />
+                  {listing.materialName}
                 </p>
-                {listing.materialName ? (
-                  <p className="flex items-center gap-2">
-                    <Package className="size-4 text-emerald-300" />
-                    {listing.materialName}
-                  </p>
-                ) : null}
-                <p className="flex items-center gap-2">
-                  <ShieldCheck className="size-4 text-emerald-300" />
-                  Publicado em {formatListingDate(listing.publishedAt)}
-                </p>
-              </div>
+              ) : null}
+              <p className="flex items-center gap-2">
+                <ShieldCheck className="size-4 text-emerald-300" />
+                Publicado em {formatListingDate(listing.publishedAt)}
+              </p>
+            </div>
 
-              <div className="grid gap-3">
-                {listing.contactPhone ? (
-                  <Button asChild className="h-12 rounded-[1.1rem] bg-white !text-slate-950 hover:bg-white/90" style={{ color: '#020617' }}>
-                    <a href={`tel:${listing.contactPhone}`}>
-                      <Phone className="size-4" />
-                      Ligar para o anunciante
-                    </a>
-                  </Button>
-                ) : null}
-                <Button asChild className="h-12 rounded-[1.1rem] border-white/20 bg-transparent !text-white hover:bg-white/10 hover:!text-white" style={{ color: '#ffffff' }} variant="outline">
-                  <Link to={paths.auth.login}>Entrar para perguntar</Link>
+            <div className="mt-auto grid gap-3">
+              {listing.contactPhone ? (
+                <Button asChild className="h-12 rounded-[1.1rem] bg-white !text-slate-950 hover:bg-white/90" style={{ color: '#020617' }}>
+                  <a href={`tel:${listing.contactPhone}`}>
+                    <Phone className="size-4" />
+                    Ligar para o anunciante
+                  </a>
                 </Button>
-              </div>
+              ) : null}
+              <Button asChild className="h-12 rounded-[1.1rem] border-white/20 bg-transparent !text-white hover:bg-white/10 hover:!text-white" style={{ color: '#ffffff' }} variant="outline">
+                <Link to={paths.auth.login}>Entrar para perguntar</Link>
+              </Button>
             </div>
           </div>
         </div>

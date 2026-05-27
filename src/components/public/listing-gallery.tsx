@@ -49,11 +49,11 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex h-full min-h-0 flex-col space-y-4">
       {orderedImages.length > 0 ? (
-        <div className="space-y-4">
-          <div className="relative overflow-hidden rounded-[1.4rem] border border-border bg-white">
-            <div className="aspect-[4/3]">
+        <div className="flex h-full min-h-0 flex-col space-y-4">
+          <div className="relative flex-1 overflow-hidden rounded-[1.4rem] border border-border bg-white">
+            <div className="h-full min-h-[260px]">
               <img
                 alt={activeImage?.altText ?? listingTitle}
                 className="h-full w-full object-cover"
