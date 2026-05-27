@@ -71,7 +71,7 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
           <div className="flex items-center gap-3">
             <Button
               aria-label="Imagem anterior"
-              className="size-10 shrink-0 rounded-full"
+              className="size-10 shrink-0 rounded-full border-primary/45 text-primary hover:text-primary"
               onClick={showPreviousImage}
               type="button"
               variant="outline"
@@ -104,7 +104,7 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
             </div>
             <Button
               aria-label="Próxima imagem"
-              className="size-10 shrink-0 rounded-full"
+              className="size-10 shrink-0 rounded-full border-primary/45 text-primary hover:text-primary"
               onClick={showNextImage}
               type="button"
               variant="outline"
