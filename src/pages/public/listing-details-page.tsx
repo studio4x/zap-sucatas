@@ -286,38 +286,38 @@ export function ListingDetailsPage() {
         </Link>
       </Button>
 
-      <section className="space-y-5">
-        <div className="flex flex-wrap gap-2">
-          {listing.categoryName ? (
-            <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
-              {listing.categoryName}
-            </Badge>
-          ) : null}
-          {listing.materialName ? (
-            <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
-              {listing.materialName}
-            </Badge>
-          ) : null}
-          <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
-            Anuncio moderado
-          </Badge>
-        </div>
-        <h1 className="max-w-4xl break-words font-display text-4xl leading-[0.95] tracking-[-0.045em] text-foreground [overflow-wrap:anywhere] sm:text-[3.2rem]">
-          {listing.title}
-        </h1>
-      </section>
-
       <section className="grid items-stretch gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
         <div className="h-full overflow-hidden rounded-[2.25rem] border border-border bg-white">
           <ListingGallery images={listing.images} listingTitle={listing.title} />
         </div>
-        <div className="h-full rounded-[1.9rem] bg-[linear-gradient(180deg,rgba(19,54,40,0.96),rgba(12,34,25,0.98))] p-5 text-white shadow-[0_30px_72px_-40px_rgba(12,34,25,0.88)]">
+        <div className="h-full rounded-[1.9rem] bg-[linear-gradient(180deg,rgba(19,54,40,0.96),rgba(12,34,25,0.98))] p-8 text-white shadow-[0_30px_72px_-40px_rgba(12,34,25,0.88)] md:p-10">
           <div className="flex h-full flex-col">
+            <div className="space-y-4 pb-5">
+              <div className="flex flex-wrap gap-2">
+                {listing.categoryName ? (
+                  <Badge className="border-emerald-300/30 bg-emerald-300/10 text-emerald-100" variant="outline">
+                    {listing.categoryName}
+                  </Badge>
+                ) : null}
+                {listing.materialName ? (
+                  <Badge className="border-emerald-300/30 bg-emerald-300/10 text-emerald-100" variant="outline">
+                    {listing.materialName}
+                  </Badge>
+                ) : null}
+                <Badge className="border-emerald-300/30 bg-emerald-300/10 text-emerald-100" variant="outline">
+                  Anuncio moderado
+                </Badge>
+              </div>
+              <h1 className="break-words font-display text-5xl leading-[0.95] tracking-[-0.04em] text-white [overflow-wrap:anywhere]">
+                {listing.title}
+              </h1>
+            </div>
+
             <div className="space-y-2">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100/70">
                 Janela comercial
               </p>
-              <p className="text-4xl font-semibold tracking-[-0.04em] text-white">
+              <p className="text-3xl font-semibold tracking-[-0.03em] text-white">
                 {commercialPrice.type}
               </p>
               {commercialPrice.value ? <p className="text-lg font-medium text-emerald-100">{commercialPrice.value}</p> : null}
