@@ -43,6 +43,10 @@ function parseCommercialPrice(priceLabel: string | null) {
   return { type, value }
 }
 
+function normalizeListingRichText(value: string) {
+  return value.replace(/&nbsp;/gi, ' ').replace(/\u00a0/g, ' ')
+}
+
 export function ListingDetailsPage() {
   const { id = '', slug = '' } = useParams()
   const { isAuthenticated, user } = useAuth()
@@ -159,8 +163,9 @@ export function ListingDetailsPage() {
 
   const listing = listingQuery.data
   const commercialPrice = parseCommercialPrice(listing.priceLabel)
-  const descriptionHasHtml = blogContentHasHtml({ raw: listing.description })
-  const descriptionContent = blogContentToPlainText({ raw: listing.description })
+  const normalizedDescription = normalizeListingRichText(listing.description)
+  const descriptionHasHtml = blogContentHasHtml({ raw: normalizedDescription })
+  const descriptionContent = blogContentToPlainText({ raw: normalizedDescription })
 
   return (
     <div className="space-y-8 lg:space-y-10">
@@ -191,10 +196,10 @@ export function ListingDetailsPage() {
             </div>
 
             <div className="space-y-4">
-              <h1 className="max-w-4xl font-display text-4xl leading-[0.95] tracking-[-0.045em] text-foreground sm:text-[3.2rem]">
+              <h1 className="max-w-4xl break-words font-display text-4xl leading-[0.95] tracking-[-0.045em] text-foreground [overflow-wrap:anywhere] sm:text-[3.2rem]">
                 {listing.title}
               </h1>
-              <p className="max-w-3xl text-base leading-8 text-muted-foreground">
+              <p className="max-w-3xl break-words text-base leading-8 text-muted-foreground [overflow-wrap:anywhere]">
                 {listing.summary || 'Página comercial com galeria, ficha técnica, localidade e perguntas para apoiar negociação real no setor de sucatas.'}
               </p>
             </div>
@@ -291,7 +296,7 @@ export function ListingDetailsPage() {
                   Descricao comercial
                 </p>
                 {descriptionHasHtml ? (
-                  <article className="prose prose-zinc max-w-none break-words text-foreground/92 prose-p:leading-8 prose-li:leading-8 [overflow-wrap:anywhere]">
+                  <article className="prose prose-zinc max-w-none text-foreground/92 [overflow-wrap:anywhere] prose-p:break-words prose-p:leading-8 prose-p:[overflow-wrap:anywhere] prose-li:leading-8 prose-li:[overflow-wrap:anywhere]">
                     <div dangerouslySetInnerHTML={{ __html: descriptionContent }} />
                   </article>
                 ) : (
