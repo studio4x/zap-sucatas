@@ -202,7 +202,7 @@ export function ListingDetailsPage() {
       </section>
 
       <section className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
-        <div className="rounded-[2.25rem] border border-border bg-white p-5 md:p-6 lg:p-8">
+        <div className="overflow-hidden rounded-[2.25rem] border border-border bg-white">
           <ListingGallery images={listing.images} listingTitle={listing.title} />
         </div>
         <div className="rounded-[1.9rem] bg-[linear-gradient(180deg,rgba(19,54,40,0.96),rgba(12,34,25,0.98))] p-5 text-white shadow-[0_30px_72px_-40px_rgba(12,34,25,0.88)]">
