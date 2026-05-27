@@ -314,10 +314,11 @@ export function AdminListingsPage() {
           },
           {
             header: 'Anúncio',
+            className: 'w-[280px]',
             cell: (listing) => (
-              <div className="space-y-1">
-                <p className="font-medium text-foreground">{listing.title}</p>
-                <p className="text-xs text-muted-foreground">{listing.summary || listing.description}</p>
+              <div className="max-w-[280px] space-y-1">
+                <p className="line-clamp-2 font-medium text-foreground">{listing.title}</p>
+                <p className="line-clamp-2 text-xs text-muted-foreground">{listing.summary || listing.description}</p>
               </div>
             ),
           },
@@ -386,9 +387,10 @@ export function AdminListingsPage() {
                 />
               </div>
             ) as unknown as string,
-            className: 'w-[300px] text-right',
+            className: 'w-[144px] text-right',
             cell: (listing) => (
               <AdminRowActions
+                compact
                 actions={[
                   {
                     icon: Pencil,

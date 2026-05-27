@@ -13,9 +13,10 @@ type AdminRowAction = {
 
 type AdminRowActionsProps = {
   actions: AdminRowAction[]
+  compact?: boolean
 }
 
-export function AdminRowActions({ actions }: AdminRowActionsProps) {
+export function AdminRowActions({ actions, compact = false }: AdminRowActionsProps) {
   return (
     <div className="flex justify-end gap-2">
       {actions.map((action) => {
@@ -23,10 +24,18 @@ export function AdminRowActions({ actions }: AdminRowActionsProps) {
 
         if (action.to) {
           return (
-            <Button asChild key={`${action.label}-${action.to}`} size="sm" type="button" variant={action.variant ?? 'outline'}>
+            <Button
+              aria-label={action.label}
+              asChild
+              key={`${action.label}-${action.to}`}
+              size={compact ? 'icon' : 'sm'}
+              title={action.label}
+              type="button"
+              variant={action.variant ?? 'outline'}
+            >
               <Link to={action.to}>
                 {Icon ? <Icon className="size-4" /> : null}
-                {action.label}
+                {compact ? <span className="sr-only">{action.label}</span> : action.label}
               </Link>
             </Button>
           )
@@ -34,15 +43,17 @@ export function AdminRowActions({ actions }: AdminRowActionsProps) {
 
         return (
           <Button
+            aria-label={action.label}
             disabled={action.disabled}
             key={action.label}
             onClick={action.onClick}
-            size="sm"
+            size={compact ? 'icon' : 'sm'}
+            title={action.label}
             type="button"
             variant={action.variant ?? 'outline'}
           >
             {Icon ? <Icon className="size-4" /> : null}
-            {action.label}
+            {compact ? <span className="sr-only">{action.label}</span> : action.label}
           </Button>
         )
       })}
