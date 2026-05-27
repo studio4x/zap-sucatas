@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, BadgeCheck, MapPin, Package, Phone, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, ChevronDown, ChevronUp, MapPin, MessageSquareQuote, Package, Phone, ShieldCheck } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { FeaturedListingsSection } from '@/components/public/featured-listings-section'
 import { ListingGallery } from '@/components/public/listing-gallery'
-import { ListingSidebarCard } from '@/components/public/listing-sidebar-card'
-import { QuestionAnswerBlock } from '@/components/public/question-answer-block'
+import { PublicEmptyState } from '@/components/public/public-empty-state'
 import { SellerCard } from '@/components/public/seller-card'
+import { QuestionThreadCard } from '@/components/questions/question-thread-card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -55,6 +55,7 @@ export function ListingDetailsPage() {
   const [guestName, setGuestName] = useState('')
   const [guestEmail, setGuestEmail] = useState('')
   const [feedback, setFeedback] = useState<string | null>(null)
+  const [isQuestionFormOpen, setIsQuestionFormOpen] = useState(false)
 
   const isAdminPreviewMode = Boolean(id)
   const canUseAdminPreview = isAdminPreviewMode && isAuthenticated && user?.role === 'admin'
@@ -260,7 +261,7 @@ export function ListingDetailsPage() {
         <div className="space-y-8">
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-[1.35rem] border border-white/80 bg-white/85 px-4 py-4 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                 Localidade
               </p>
               <p className="mt-2 text-base font-semibold text-foreground">
@@ -268,7 +269,7 @@ export function ListingDetailsPage() {
               </p>
             </div>
             <div className="rounded-[1.35rem] border border-white/80 bg-white/85 px-4 py-4 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                 Publicado em
               </p>
               <p className="mt-2 text-base font-semibold text-foreground">
@@ -276,7 +277,7 @@ export function ListingDetailsPage() {
               </p>
             </div>
             <div className="rounded-[1.35rem] border border-white/80 bg-white/85 px-4 py-4 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                 Tipo de preco
               </p>
               <p className="mt-2 text-base font-semibold text-foreground">
@@ -350,26 +351,54 @@ export function ListingDetailsPage() {
             </CardContent>
           </Card>
 
-          <QuestionAnswerBlock questions={questionsQuery.data ?? []} />
         </div>
 
         <div className="space-y-5 xl:sticky xl:top-28 xl:self-start">
-          <ListingSidebarCard title="Enviar uma pergunta">
-            {!canAskQuestion ? (
-              <div className="space-y-4">
-                <p className="text-sm leading-7 text-muted-foreground">
-                  {isAuthenticated
-                    ? 'Sua conta ainda nao pode interagir com perguntas neste momento.'
-                    : 'Faca login para perguntar sobre este anuncio e acompanhar a resposta do anunciante.'}
-                </p>
-                {!isAuthenticated ? (
-                  <Button asChild>
-                    <Link to={paths.auth.login}>Entrar para perguntar</Link>
-                  </Button>
-                ) : null}
-              </div>
+          <SellerCard
+            contactName={listing.contactName}
+            contactPhone={listing.contactPhone}
+            publishedAtLabel={formatListingDate(listing.publishedAt)}
+          />
+        </div>
+      </div>
+
+      <Card className="overflow-hidden rounded-[1.9rem] border-0 bg-white shadow-[0_24px_56px_-44px_rgba(19,33,23,0.28)]">
+        <CardContent className="space-y-5 p-6 md:p-7">
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/75">
+              Perguntas
+            </p>
+            <h2 className="text-3xl font-semibold tracking-[-0.03em] text-foreground">Perguntas e respostas</h2>
+            <p className="text-sm leading-7 text-muted-foreground">
+              Perguntas públicas ajudam a acelerar a negociação e dão mais contexto para quem está avaliando o anúncio.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              onClick={() => setIsQuestionFormOpen((current) => !current)}
+              type="button"
+              variant={isQuestionFormOpen ? 'outline' : 'default'}
+            >
+              {isQuestionFormOpen ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+              Enviar pergunta
+            </Button>
+            {!canAskQuestion && !isAuthenticated ? (
+              <Button asChild type="button" variant="outline">
+                <Link to={paths.auth.login}>Entrar para perguntar</Link>
+              </Button>
+            ) : null}
+          </div>
+
+          {isQuestionFormOpen ? (
+            !canAskQuestion ? (
+              <p className="text-sm leading-7 text-muted-foreground">
+                {isAuthenticated
+                  ? 'Sua conta ainda nao pode interagir com perguntas neste momento.'
+                  : 'Faca login para perguntar sobre este anuncio e acompanhar a resposta do anunciante.'}
+              </p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4 rounded-[1.35rem] border border-border bg-[linear-gradient(180deg,#fafcf9_0%,#f5f8f4_100%)] p-4">
                 {!isAuthenticated && canAskAsGuest ? (
                   <div className="grid gap-4 md:grid-cols-2">
                     <Input
@@ -398,7 +427,7 @@ export function ListingDetailsPage() {
                 ) : null}
 
                 <Button
-                  className="w-full"
+                  className="w-full md:w-auto"
                   disabled={createQuestionMutation.isPending || Boolean(questionValidationMessage)}
                   onClick={() => {
                     setFeedback(null)
@@ -409,16 +438,24 @@ export function ListingDetailsPage() {
                   {createQuestionMutation.isPending ? 'Enviando...' : 'Enviar pergunta'}
                 </Button>
               </div>
-            )}
-          </ListingSidebarCard>
+            )
+          ) : null}
 
-          <SellerCard
-            contactName={listing.contactName}
-            contactPhone={listing.contactPhone}
-            publishedAtLabel={formatListingDate(listing.publishedAt)}
-          />
-        </div>
-      </div>
+          <div className="space-y-4 border-t border-border pt-5">
+            {questionsQuery.data?.length ? (
+              questionsQuery.data.map((question) => (
+                <QuestionThreadCard key={question.id} question={question} />
+              ))
+            ) : (
+              <PublicEmptyState
+                description="Ainda não há perguntas publicadas para este anúncio. Você pode ser a primeira pessoa a iniciar a conversa."
+                icon={MessageSquareQuote}
+                title="Sem perguntas publicadas"
+              />
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {relatedListingsQuery.data?.length ? (
         <FeaturedListingsSection

@@ -49,10 +49,7 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
   }
 
   return (
-    <div className="space-y-4 overflow-hidden rounded-[2rem] border border-border bg-white p-4 shadow-[0_28px_64px_-48px_rgba(19,33,23,0.3)] sm:p-5">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-        Galeria de imagens
-      </p>
+    <div className="space-y-4">
       {orderedImages.length > 0 ? (
         <div className="space-y-4">
           <div className="relative overflow-hidden rounded-[1.4rem] border border-border bg-white">
