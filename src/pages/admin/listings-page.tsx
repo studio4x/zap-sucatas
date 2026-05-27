@@ -299,7 +299,17 @@ export function AdminListingsPage() {
       <AdminDataTable
         columns={[
           {
-            header: 'Seleção',
+            header: (
+              <div className="flex items-center">
+                <input
+                  aria-label="Selecionar todos os anúncios da página"
+                  checked={allSelectableChecked}
+                  className="size-4 rounded border border-border"
+                  onChange={(event) => toggleSelectAll(event.target.checked)}
+                  type="checkbox"
+                />
+              </div>
+            ) as unknown as string,
             className: 'w-[72px]',
             cell: (listing) =>
               listing.status === 'archived' ? null : (
@@ -376,17 +386,7 @@ export function AdminListingsPage() {
             ),
           },
           {
-            header: (
-              <div className="flex justify-end">
-                <input
-                  aria-label="Selecionar todos os anúncios da página"
-                  checked={allSelectableChecked}
-                  className="size-4 rounded border border-border"
-                  onChange={(event) => toggleSelectAll(event.target.checked)}
-                  type="checkbox"
-                />
-              </div>
-            ) as unknown as string,
+            header: 'Ações',
             className: 'w-[144px] text-right',
             cell: (listing) => (
               <AdminRowActions
