@@ -305,9 +305,6 @@ export function ListingDetailsPage() {
         <h1 className="max-w-4xl break-words font-display text-4xl leading-[0.95] tracking-[-0.045em] text-foreground [overflow-wrap:anywhere] sm:text-[3.2rem]">
           {listing.title}
         </h1>
-        <p className="max-w-4xl break-words text-base leading-8 text-muted-foreground [overflow-wrap:anywhere]">
-          {listing.summary || 'Página comercial com galeria, ficha técnica, localidade e perguntas para apoiar negociação real no setor de sucatas.'}
-        </p>
       </section>
 
       <section className="grid items-stretch gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
@@ -346,7 +343,17 @@ export function ListingDetailsPage() {
               </p>
             </div>
 
-            <div className="mt-auto grid gap-3 pt-5">
+            <div className="mt-4 space-y-2 rounded-2xl border border-white/10 bg-white/[0.03] p-3.5">
+              <div className="flex items-center gap-2 text-emerald-100">
+                <MessageSquareQuote className="size-4 text-emerald-300" />
+                <p className="text-xs font-semibold uppercase tracking-[0.16em]">Prévia de conteúdo</p>
+              </div>
+              <p className="line-clamp-4 text-sm leading-6 text-emerald-50/88">
+                {listing.summary || 'Sem resumo comercial preenchido para este anúncio no momento.'}
+              </p>
+            </div>
+
+            <div className="mt-4 grid gap-3 pt-1">
               {listing.contactPhone ? (
                 <Button asChild className="h-12 rounded-[1.1rem] bg-white !text-slate-950 hover:bg-white/90" style={{ color: '#020617' }}>
                   <a
