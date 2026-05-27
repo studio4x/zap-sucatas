@@ -28,6 +28,7 @@ type ListingRow = {
   condition_type: string | null
   contact_name: string | null
   contact_phone: string | null
+  contact_phone_is_whatsapp: boolean | null
   created_at: string
   description: string
   expires_at: string | null
@@ -153,6 +154,7 @@ function mapListing(row: ListingRow): Listing {
     conditionType: row.condition_type,
     contactName: row.contact_name,
     contactPhone: row.contact_phone,
+    contactPhoneIsWhatsapp: Boolean(row.contact_phone_is_whatsapp),
     createdAt: row.created_at,
     description: row.description,
     expiresAt: row.expires_at,
@@ -203,6 +205,7 @@ function buildBaseListingQuery() {
         price_label,
         contact_name,
         contact_phone,
+        contact_phone_is_whatsapp,
         city,
         state,
         status,
@@ -798,6 +801,7 @@ function mapListingPayload(values: ListingFormValues) {
     condition_type: values.conditionType.trim() || null,
     contact_name: values.contactName.trim() || null,
     contact_phone: values.contactPhone.trim() || null,
+    contact_phone_is_whatsapp: values.contactPhoneIsWhatsapp,
     description: values.description.trim(),
     price_label: values.priceLabel.trim() || null,
     primary_material_id: values.primaryMaterialId.trim() || null,

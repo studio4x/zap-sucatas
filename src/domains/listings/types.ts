@@ -35,6 +35,7 @@ export type Listing = {
   conditionType: string | null
   contactName: string | null
   contactPhone: string | null
+  contactPhoneIsWhatsapp: boolean
   createdAt: string
   description: string
   expiresAt: string | null
@@ -85,6 +86,7 @@ export type ListingFormValues = {
   conditionType: string
   contactName: string
   contactPhone: string
+  contactPhoneIsWhatsapp: boolean
   description: string
   priceLabel: string
   primaryMaterialId: string

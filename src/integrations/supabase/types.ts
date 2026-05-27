@@ -558,6 +558,7 @@ export type Database = {
           condition_type: string | null
           contact_name: string | null
           contact_phone: string | null
+          contact_phone_is_whatsapp: boolean
           created_at: string
           description: string
           expires_at: string | null
@@ -581,6 +582,7 @@ export type Database = {
           condition_type?: string | null
           contact_name?: string | null
           contact_phone?: string | null
+          contact_phone_is_whatsapp?: boolean
           created_at?: string
           description: string
           expires_at?: string | null
@@ -604,6 +606,7 @@ export type Database = {
           condition_type?: string | null
           contact_name?: string | null
           contact_phone?: string | null
+          contact_phone_is_whatsapp?: boolean
           created_at?: string
           description?: string
           expires_at?: string | null

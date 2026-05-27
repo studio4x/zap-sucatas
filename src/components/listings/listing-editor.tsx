@@ -617,6 +617,14 @@ export function ListingEditor({
                     },
                   })}
                 />
+                <label className="mt-2 inline-flex items-center gap-2 text-sm text-foreground">
+                  <input
+                    className="size-4 accent-primary"
+                    type="checkbox"
+                    {...form.register('contactPhoneIsWhatsapp')}
+                  />
+                  Este telefone também é WhatsApp
+                </label>
               </FormField>
 
               <FormField fieldId="listing-condition" label="Condicao">

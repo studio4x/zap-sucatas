@@ -13,6 +13,7 @@ export const listingFormSchema = z.object({
   conditionType: z.string().trim(),
   contactName: z.string().trim(),
   contactPhone: z.string().trim(),
+  contactPhoneIsWhatsapp: z.boolean(),
   description: z.string().trim().min(20, 'A descricao precisa ter pelo menos 20 caracteres.'),
   priceLabel: z.string().trim(),
   primaryMaterialId: z.string().trim(),
