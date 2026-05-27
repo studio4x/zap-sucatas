@@ -30,11 +30,13 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
   return (
     <div className="space-y-5">
       <div className="overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_28px_64px_-48px_rgba(19,33,23,0.3)]">
-        <div className="relative aspect-[16/10] bg-[linear-gradient(160deg,#f0f8ed_0%,#d6ebd1_100%)]">
+        <div className="relative h-[280px] bg-[linear-gradient(160deg,#f0f8ed_0%,#d6ebd1_100%)] sm:h-[360px] lg:h-[460px]">
           {activeImage ? (
             <img
               alt={activeImage.altText ?? listingTitle}
               className="h-full w-full object-cover"
+              loading="eager"
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 66vw, 760px"
               src={activeImage.publicUrl}
             />
           ) : (
@@ -65,7 +67,7 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
             <button
               key={image.id}
               className={cn(
-                'group relative aspect-[16/10] overflow-hidden rounded-[1.15rem] border bg-white transition',
+                'group relative h-24 overflow-hidden rounded-[1.15rem] border bg-white transition sm:h-28 lg:h-32',
                 index === activeIndex
                   ? 'border-primary shadow-sm'
                   : 'border-border hover:border-primary/35',
@@ -76,6 +78,8 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
               <img
                 alt={image.altText ?? listingTitle}
                 className="h-full w-full object-cover"
+                loading="lazy"
+                sizes="(max-width: 768px) 45vw, (max-width: 1280px) 22vw, 200px"
                 src={image.publicUrl}
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/65 to-transparent px-2 py-1 text-left text-[11px] font-medium text-white">
