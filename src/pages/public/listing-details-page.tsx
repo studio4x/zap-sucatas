@@ -201,12 +201,12 @@ export function ListingDetailsPage() {
         </p>
       </section>
 
-      <section className="grid items-stretch gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
+      <section className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
         <div className="rounded-[2.25rem] border border-border bg-white p-5 md:p-6 lg:p-8">
           <ListingGallery images={listing.images} listingTitle={listing.title} />
         </div>
-        <div className="h-full rounded-[1.9rem] bg-[linear-gradient(180deg,rgba(19,54,40,0.96),rgba(12,34,25,0.98))] p-5 text-white shadow-[0_30px_72px_-40px_rgba(12,34,25,0.88)]">
-          <div className="flex h-full flex-col space-y-5">
+        <div className="rounded-[1.9rem] bg-[linear-gradient(180deg,rgba(19,54,40,0.96),rgba(12,34,25,0.98))] p-5 text-white shadow-[0_30px_72px_-40px_rgba(12,34,25,0.88)]">
+          <div className="space-y-5">
             <div className="space-y-2">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100/70">
                 Janela comercial
@@ -237,7 +237,7 @@ export function ListingDetailsPage() {
               </p>
             </div>
 
-            <div className="mt-auto grid gap-3">
+            <div className="grid gap-3">
               {listing.contactPhone ? (
                 <Button asChild className="h-12 rounded-[1.1rem] bg-white !text-slate-950 hover:bg-white/90" style={{ color: '#020617' }}>
                   <a href={`tel:${listing.contactPhone}`}>
