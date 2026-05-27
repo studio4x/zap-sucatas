@@ -63,14 +63,16 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
     <div className="flex h-full min-h-0 flex-col space-y-4">
       {orderedImages.length > 0 ? (
         <div className="flex h-full min-h-0 flex-col space-y-4">
-          <div className="relative flex-1 overflow-hidden rounded-[1.4rem] border border-border bg-white">
-            <div className="h-full min-h-[260px]">
+          <div className="relative overflow-hidden rounded-[1.4rem] border border-border bg-white">
+            <div className="aspect-[4/3]">
               <img
                 alt={activeImage?.altText ?? listingTitle}
                 className="h-full w-full object-cover"
                 loading="eager"
+                height={1200}
                 sizes="(max-width: 1024px) 100vw, 760px"
                 src={activeImage ? resolveListingImageUrl(activeImage.publicUrl, 'main') : undefined}
+                width={1600}
               />
             </div>
             <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-slate-950/80 to-transparent px-3 py-3 text-xs font-medium text-white">
@@ -103,9 +105,11 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
                   <img
                     alt={image.altText ?? listingTitle}
                     className="h-full w-full object-cover"
+                    height={360}
                     loading={index < 4 ? 'eager' : 'lazy'}
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     src={resolveListingImageUrl(image.publicUrl, 'thumb')}
+                    width={480}
                   />
                 </button>
               ))}
