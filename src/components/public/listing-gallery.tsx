@@ -62,12 +62,12 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             Galeria de imagens
           </p>
-          <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1">
+          <div className="grid auto-cols-[calc((100%_-_0.75rem)/2)] grid-flow-col gap-3 overflow-x-auto pb-1 sm:auto-cols-[calc((100%_-_1.5rem)/3)] lg:auto-cols-[calc((100%_-_2.25rem)/4)]">
             {orderedImages.map((image, index) => (
             <button
               key={image.id}
               className={cn(
-                'group relative aspect-[4/3] min-w-[calc(50%-0.375rem)] snap-start overflow-hidden rounded-[1.15rem] border bg-white transition sm:min-w-[calc(33.333%-0.5rem)] lg:min-w-[calc(25%-0.5625rem)]',
+                'group relative aspect-[4/3] w-full shrink-0 snap-start overflow-hidden rounded-[1.15rem] border bg-white transition',
                 index === activeIndex
                   ? 'border-primary shadow-sm'
                   : 'border-border hover:border-primary/35',

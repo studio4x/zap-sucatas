@@ -287,7 +287,7 @@ export function ListingDetailsPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/75">
                   Descricao comercial
                 </p>
-                <p className="whitespace-pre-line text-sm leading-8 text-foreground/92">
+                <p className="whitespace-pre-wrap break-words text-sm leading-8 text-foreground/92 [overflow-wrap:anywhere]">
                   {listing.description}
                 </p>
               </div>
