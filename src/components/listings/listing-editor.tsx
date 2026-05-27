@@ -935,6 +935,9 @@ export function ListingEditor({
               >
                 {isSubmitting && submitAfterSave ? 'Processando...' : resolvedFinalActionLabel}
               </Button>
+              <p className="text-xs leading-6 text-muted-foreground">
+                Mesmo que o anúncio já esteja aprovado, toda edição enviada novamente passará por uma nova revisão de moderação.
+              </p>
               {!canSubmitForReview ? (
                 <DashboardAlertCard
                   description="Adicione fotos do lote antes de enviar para revisão."

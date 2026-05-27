@@ -112,7 +112,7 @@ Acesse o painel para moderar: /admin/anuncios/${listing.id}`,
       })
     }
 
-    if (!['draft', 'rejected', 'paused'].includes(listing.status)) {
+    if (!['draft', 'rejected', 'paused', 'approved'].includes(listing.status)) {
       return jsonResponse({ error: 'Listing cannot be submitted from the current status.' }, 409)
     }
 
