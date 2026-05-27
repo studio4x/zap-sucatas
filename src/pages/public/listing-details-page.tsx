@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, BadgeCheck, ChevronDown, ChevronUp, MapPin, MessageSquareQuote, Package, Phone, ShieldCheck } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
@@ -78,6 +78,7 @@ export function ListingDetailsPage() {
   const [guestEmail, setGuestEmail] = useState('')
   const [feedback, setFeedback] = useState<string | null>(null)
   const [isQuestionFormOpen, setIsQuestionFormOpen] = useState(false)
+  const questionsSectionRef = useRef<HTMLDivElement | null>(null)
 
   const isAdminPreviewMode = Boolean(id)
   const canUseAdminPreview = isAdminPreviewMode && isAuthenticated && user?.role === 'admin'
@@ -189,6 +190,7 @@ export function ListingDetailsPage() {
   const normalizedDescription = normalizeListingRichText(listing.description)
   const descriptionHasHtml = blogContentHasHtml({ raw: normalizedDescription })
   const descriptionContent = blogContentToPlainText({ raw: normalizedDescription })
+  const canOpenQuestionFlow = isAuthenticated && user?.status === 'active'
 
   return (
     <div className="space-y-8 lg:space-y-10">
@@ -279,7 +281,19 @@ export function ListingDetailsPage() {
                 </Button>
               ) : null}
               <Button asChild className="h-12 rounded-[1.1rem] border-white/20 bg-transparent !text-white hover:bg-white/10 hover:!text-white" style={{ color: '#ffffff' }} variant="outline">
-                <Link to={paths.auth.login}>Entrar para perguntar</Link>
+                {canOpenQuestionFlow ? (
+                  <button
+                    onClick={() => {
+                      setIsQuestionFormOpen(true)
+                      questionsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    }}
+                    type="button"
+                  >
+                    Enviar pergunta
+                  </button>
+                ) : (
+                  <Link to={paths.auth.login}>Entrar para perguntar</Link>
+                )}
               </Button>
             </div>
           </div>
@@ -393,8 +407,9 @@ export function ListingDetailsPage() {
         </div>
       </div>
 
-      <Card className="overflow-hidden rounded-[1.9rem] border-0 bg-white shadow-[0_24px_56px_-44px_rgba(19,33,23,0.28)]">
-        <CardContent className="space-y-5 p-6 md:p-7">
+      <div ref={questionsSectionRef}>
+        <Card className="overflow-hidden rounded-[1.9rem] border-0 bg-white shadow-[0_24px_56px_-44px_rgba(19,33,23,0.28)]">
+          <CardContent className="space-y-5 p-6 md:p-7">
           <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/75">
               Perguntas
@@ -485,8 +500,9 @@ export function ListingDetailsPage() {
               />
             )}
           </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
       {relatedListingsQuery.data?.length ? (
         <FeaturedListingsSection
