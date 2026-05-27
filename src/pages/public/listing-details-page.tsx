@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, BadgeCheck, ChevronDown, ChevronUp, MapPin, MessageSquareQuote, Package, Phone, ShieldCheck } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { signInWithPassword, signUp } from '@/domains/auth/api'
 import { blogContentHasHtml, blogContentToPlainText } from '@/domains/blog/utils'
 import {
   fetchPublicListingPreviewById,
@@ -78,6 +79,14 @@ export function ListingDetailsPage() {
   const [guestEmail, setGuestEmail] = useState('')
   const [feedback, setFeedback] = useState<string | null>(null)
   const [isQuestionFormOpen, setIsQuestionFormOpen] = useState(false)
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
+  const [authMessage, setAuthMessage] = useState<string | null>(null)
+  const [authEmail, setAuthEmail] = useState('')
+  const [authPassword, setAuthPassword] = useState('')
+  const [authFullName, setAuthFullName] = useState('')
+  const [authConfirmPassword, setAuthConfirmPassword] = useState('')
+  const [isAuthSubmitting, setIsAuthSubmitting] = useState(false)
   const questionsSectionRef = useRef<HTMLDivElement | null>(null)
 
   const isAdminPreviewMode = Boolean(id)
@@ -147,6 +156,23 @@ export function ListingDetailsPage() {
   const canAskAsGuest = settingsQuery.data?.allowGuestQuestions ?? false
   const canAskQuestion = isAuthenticated ? user?.status === 'active' : canAskAsGuest
 
+  useEffect(() => {
+    if (!isAuthenticated || user?.status !== 'active') {
+      return
+    }
+
+    const currentUrl = new URL(window.location.href)
+    if (currentUrl.searchParams.get('ask') !== '1') {
+      return
+    }
+
+    currentUrl.searchParams.delete('ask')
+    window.history.replaceState({}, '', `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`)
+
+    setIsQuestionFormOpen(true)
+    questionsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [isAuthenticated, user?.status])
+
   const questionValidationMessage = useMemo(() => {
     if (questionText.trim().length < 10) {
       return 'A pergunta precisa ter pelo menos 10 caracteres.'
@@ -191,6 +217,70 @@ export function ListingDetailsPage() {
   const descriptionHasHtml = blogContentHasHtml({ raw: normalizedDescription })
   const descriptionContent = blogContentToPlainText({ raw: normalizedDescription })
   const canOpenQuestionFlow = isAuthenticated && user?.status === 'active'
+  const authRedirectPath = useMemo(() => {
+    if (isAdminPreviewMode) {
+      return `/anuncios/preview/${id}?ask=1`
+    }
+    return `/anuncios/${slug}?ask=1`
+  }, [id, isAdminPreviewMode, slug])
+
+  async function handleInlineLogin() {
+    if (!authEmail.trim() || !authPassword.trim()) {
+      setAuthMessage('Informe e-mail e senha para entrar.')
+      return
+    }
+
+    setAuthMessage(null)
+    setIsAuthSubmitting(true)
+    try {
+      await signInWithPassword({ email: authEmail.trim(), password: authPassword })
+      setIsAuthModalOpen(false)
+      window.location.reload()
+    } catch (error) {
+      setAuthMessage(error instanceof Error ? error.message : 'Falha ao autenticar.')
+    } finally {
+      setIsAuthSubmitting(false)
+    }
+  }
+
+  async function handleInlineRegister() {
+    if (!authFullName.trim() || !authEmail.trim() || !authPassword.trim()) {
+      setAuthMessage('Preencha nome, e-mail e senha para criar a conta.')
+      return
+    }
+
+    if (authPassword !== authConfirmPassword) {
+      setAuthMessage('A confirmação de senha não confere.')
+      return
+    }
+
+    setAuthMessage(null)
+    setIsAuthSubmitting(true)
+    try {
+      const sessionUser = await signUp(
+        {
+          email: authEmail.trim(),
+          fullName: authFullName.trim(),
+          password: authPassword,
+        },
+        authRedirectPath,
+      )
+
+      if (sessionUser) {
+        setIsAuthModalOpen(false)
+        window.location.reload()
+        return
+      }
+
+      setAuthMessage(
+        'Conta criada. Enviamos um e-mail para ativação. Ao ativar a conta, você será redirecionado para este anúncio com perguntas liberadas.',
+      )
+    } catch (error) {
+      setAuthMessage(error instanceof Error ? error.message : 'Falha ao criar conta.')
+    } finally {
+      setIsAuthSubmitting(false)
+    }
+  }
 
   return (
     <div className="space-y-8 lg:space-y-10">
@@ -292,7 +382,16 @@ export function ListingDetailsPage() {
                     Enviar pergunta
                   </button>
                 ) : (
-                  <Link to={paths.auth.login}>Entrar para perguntar ao vendedor</Link>
+                  <button
+                    onClick={() => {
+                      setAuthMode('login')
+                      setAuthMessage(null)
+                      setIsAuthModalOpen(true)
+                    }}
+                    type="button"
+                  >
+                    Entrar para perguntar ao vendedor
+                  </button>
                 )}
               </Button>
             </div>
@@ -431,7 +530,16 @@ export function ListingDetailsPage() {
             </Button>
             {!canAskQuestion && !isAuthenticated ? (
               <Button asChild type="button" variant="outline">
-                <Link to={paths.auth.login}>Entrar para perguntar ao vendedor</Link>
+                <button
+                  onClick={() => {
+                    setAuthMode('login')
+                    setAuthMessage(null)
+                    setIsAuthModalOpen(true)
+                  }}
+                  type="button"
+                >
+                  Entrar para perguntar ao vendedor
+                </button>
               </Button>
             ) : null}
           </div>
@@ -511,6 +619,51 @@ export function ListingDetailsPage() {
           listings={relatedListingsQuery.data}
           title="Mais anuncios desta categoria"
         />
+      ) : null}
+
+      {isAuthModalOpen ? (
+        <div className="fixed inset-0 z-[95] flex items-center justify-center px-4">
+          <button
+            aria-label="Fechar autenticação"
+            className="absolute inset-0 bg-slate-950/45"
+            onClick={() => setIsAuthModalOpen(false)}
+            type="button"
+          />
+          <div className="relative w-full max-w-lg rounded-[1.75rem] border border-border bg-card p-6 shadow-2xl">
+            <div className="mb-4 flex items-center gap-2">
+              <Button onClick={() => setAuthMode('login')} size="sm" type="button" variant={authMode === 'login' ? 'default' : 'outline'}>
+                Entrar
+              </Button>
+              <Button onClick={() => setAuthMode('register')} size="sm" type="button" variant={authMode === 'register' ? 'default' : 'outline'}>
+                Criar conta
+              </Button>
+            </div>
+
+            {authMode === 'login' ? (
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold text-foreground">Entrar para perguntar ao vendedor</h3>
+                <Input onChange={(event) => setAuthEmail(event.target.value)} placeholder="Seu e-mail" type="email" value={authEmail} />
+                <Input onChange={(event) => setAuthPassword(event.target.value)} placeholder="Sua senha" type="password" value={authPassword} />
+                <Button className="w-full" disabled={isAuthSubmitting} onClick={() => void handleInlineLogin()} type="button">
+                  {isAuthSubmitting ? 'Entrando...' : 'Entrar'}
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold text-foreground">Criar conta para perguntar e negociar</h3>
+                <Input onChange={(event) => setAuthFullName(event.target.value)} placeholder="Nome completo" value={authFullName} />
+                <Input onChange={(event) => setAuthEmail(event.target.value)} placeholder="Seu e-mail" type="email" value={authEmail} />
+                <Input onChange={(event) => setAuthPassword(event.target.value)} placeholder="Crie uma senha" type="password" value={authPassword} />
+                <Input onChange={(event) => setAuthConfirmPassword(event.target.value)} placeholder="Confirme a senha" type="password" value={authConfirmPassword} />
+                <Button className="w-full" disabled={isAuthSubmitting} onClick={() => void handleInlineRegister()} type="button">
+                  {isAuthSubmitting ? 'Criando conta...' : 'Criar conta'}
+                </Button>
+              </div>
+            )}
+
+            {authMessage ? <p className="mt-4 text-sm text-muted-foreground">{authMessage}</p> : null}
+          </div>
+        </div>
       ) : null}
     </div>
   )

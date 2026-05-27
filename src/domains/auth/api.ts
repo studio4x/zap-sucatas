@@ -87,12 +87,12 @@ export async function signInWithPassword(payload: AuthPayload) {
   return resolveSessionUser(data.session)
 }
 
-export async function sendMagicLink(email: string) {
+export async function sendMagicLink(email: string, redirectPath = '/app') {
   const client = ensureSupabase()
   const { error } = await client.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${getBaseUrl()}/app`,
+      emailRedirectTo: `${getBaseUrl()}${redirectPath}`,
     },
   })
 
@@ -101,13 +101,13 @@ export async function sendMagicLink(email: string) {
   }
 }
 
-export async function signUp(payload: SignUpPayload) {
+export async function signUp(payload: SignUpPayload, redirectPath = '/app') {
   const client = ensureSupabase()
   const { data, error } = await client.auth.signUp({
     email: payload.email,
     password: payload.password,
     options: {
-      emailRedirectTo: `${getBaseUrl()}/app`,
+      emailRedirectTo: `${getBaseUrl()}${redirectPath}`,
       data: {
         full_name: payload.fullName,
       },
