@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { fetchFeaturedPublicListings, fetchListingReferences, fetchPublicListingsPage } from '@/domains/listings/api'
 import type { PublicListingSort } from '@/domains/listings/types'
+import { useSystemSettings } from '@/hooks/use-system-settings'
 
 const sortOptions = [
   { label: 'Mais recentes', value: 'recent' },
@@ -24,6 +25,7 @@ const sortOptions = [
 const PAGE_SIZE = 9
 
 export function ListingsPage() {
+  const { featuredPaymentsEnabled } = useSystemSettings()
   const [searchParams, setSearchParams] = useSearchParams()
   const [query, setQuery] = useState(searchParams.get('q') ?? '')
   const [categoryId, setCategoryId] = useState(searchParams.get('categoria') ?? '')
@@ -55,6 +57,7 @@ export function ListingsPage() {
   })
 
   const featuredListingsQuery = useQuery({
+    enabled: featuredPaymentsEnabled,
     queryKey: ['listings', 'public', 'featured', { categoryId, city, state }],
     queryFn: async () => {
       const featured = await fetchFeaturedPublicListings(6)
@@ -253,7 +256,7 @@ export function ListingsPage() {
         </aside>
 
         <div className="space-y-6">
-          {!hasSearchQuery && featuredListingsQuery.data?.length ? (
+          {!hasSearchQuery && featuredPaymentsEnabled && featuredListingsQuery.data?.length ? (
             <div className="rounded-[2rem] bg-[linear-gradient(180deg,#fff9ec_0%,#fff3d6_100%)] p-5 shadow-[0_26px_55px_-42px_rgba(168,111,0,0.45)] md:p-6">
               <FeaturedListingsSection
                 description="Anuncios com maior prioridade de exibicao no catalogo."
