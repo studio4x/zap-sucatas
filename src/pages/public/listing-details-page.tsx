@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { blogContentHasHtml, blogContentToPlainText } from '@/domains/blog/utils'
 import {
   fetchPublicListingPreviewById,
   fetchPublicListingBySlug,
@@ -158,6 +159,8 @@ export function ListingDetailsPage() {
 
   const listing = listingQuery.data
   const commercialPrice = parseCommercialPrice(listing.priceLabel)
+  const descriptionHasHtml = blogContentHasHtml({ raw: listing.description })
+  const descriptionContent = blogContentToPlainText({ raw: listing.description })
 
   return (
     <div className="space-y-8 lg:space-y-10">
@@ -287,9 +290,15 @@ export function ListingDetailsPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/75">
                   Descricao comercial
                 </p>
-                <p className="whitespace-pre-wrap break-words text-sm leading-8 text-foreground/92 [overflow-wrap:anywhere]">
-                  {listing.description}
-                </p>
+                {descriptionHasHtml ? (
+                  <article className="prose prose-zinc max-w-none break-words text-foreground/92 prose-p:leading-8 prose-li:leading-8 [overflow-wrap:anywhere]">
+                    <div dangerouslySetInnerHTML={{ __html: descriptionContent }} />
+                  </article>
+                ) : (
+                  <p className="whitespace-pre-wrap break-words text-sm leading-8 text-foreground/92 [overflow-wrap:anywhere]">
+                    {descriptionContent}
+                  </p>
+                )}
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">
