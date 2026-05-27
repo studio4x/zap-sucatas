@@ -29,5 +29,6 @@ supabase/.temp
 supabase/templates/
 playwright-report
 test-results
+tmp_prod_index.js
 
 .vercel
