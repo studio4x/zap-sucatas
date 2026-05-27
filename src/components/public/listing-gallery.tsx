@@ -63,7 +63,7 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
               />
             </div>
             <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-slate-950/80 to-transparent px-3 py-3 text-xs font-medium text-white">
-              <span>{activeImage?.isCover ? 'Capa' : `Imagem ${activeIndex + 1}`}</span>
+              <span />
               <span>{activeIndex + 1} / {orderedImages.length}</span>
             </div>
           </div>
@@ -71,7 +71,7 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
           <div className="flex items-center gap-3">
             <Button
               aria-label="Imagem anterior"
-              className="size-10 shrink-0 rounded-full border-primary/45 text-primary hover:text-primary"
+              className="size-10 shrink-0 rounded-full border-primary !text-primary hover:!text-primary [&_svg]:!text-primary"
               onClick={showPreviousImage}
               type="button"
               variant="outline"
@@ -96,15 +96,12 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     src={image.publicUrl}
                   />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/70 to-transparent px-2 py-1 text-left text-[11px] font-medium text-white">
-                    {image.isCover ? 'Capa' : `Imagem ${index + 1}`}
-                  </div>
                 </button>
               ))}
             </div>
             <Button
               aria-label="Próxima imagem"
-              className="size-10 shrink-0 rounded-full border-primary/45 text-primary hover:text-primary"
+              className="size-10 shrink-0 rounded-full border-primary !text-primary hover:!text-primary [&_svg]:!text-primary"
               onClick={showNextImage}
               type="button"
               variant="outline"
