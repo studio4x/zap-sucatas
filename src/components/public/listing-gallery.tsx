@@ -30,7 +30,7 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
   return (
     <div className="space-y-5">
       <div className="overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_28px_64px_-48px_rgba(19,33,23,0.3)]">
-        <div className="relative h-[280px] bg-[linear-gradient(160deg,#f0f8ed_0%,#d6ebd1_100%)] sm:h-[360px] lg:h-[460px]">
+        <div className="relative aspect-[4/3] bg-[linear-gradient(160deg,#f0f8ed_0%,#d6ebd1_100%)]">
           {activeImage ? (
             <img
               alt={activeImage.altText ?? listingTitle}
@@ -62,12 +62,12 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             Galeria de imagens
           </p>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1">
             {orderedImages.map((image, index) => (
             <button
               key={image.id}
               className={cn(
-                'group relative h-24 overflow-hidden rounded-[1.15rem] border bg-white transition sm:h-28 lg:h-32',
+                'group relative aspect-[4/3] min-w-[calc(50%-0.375rem)] snap-start overflow-hidden rounded-[1.15rem] border bg-white transition sm:min-w-[calc(33.333%-0.5rem)] lg:min-w-[calc(25%-0.5625rem)]',
                 index === activeIndex
                   ? 'border-primary shadow-sm'
                   : 'border-border hover:border-primary/35',
@@ -79,7 +79,7 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
                 alt={image.altText ?? listingTitle}
                 className="h-full w-full object-cover"
                 loading="lazy"
-                sizes="(max-width: 768px) 45vw, (max-width: 1280px) 22vw, 200px"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 src={image.publicUrl}
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/65 to-transparent px-2 py-1 text-left text-[11px] font-medium text-white">
