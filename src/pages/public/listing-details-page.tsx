@@ -155,6 +155,7 @@ export function ListingDetailsPage() {
 
   const canAskAsGuest = settingsQuery.data?.allowGuestQuestions ?? false
   const canAskQuestion = isAuthenticated ? user?.status === 'active' : canAskAsGuest
+  const authRedirectPath = isAdminPreviewMode ? `/anuncios/preview/${id}?ask=1` : `/anuncios/${slug}?ask=1`
 
   useEffect(() => {
     if (!isAuthenticated || user?.status !== 'active') {
@@ -217,12 +218,6 @@ export function ListingDetailsPage() {
   const descriptionHasHtml = blogContentHasHtml({ raw: normalizedDescription })
   const descriptionContent = blogContentToPlainText({ raw: normalizedDescription })
   const canOpenQuestionFlow = isAuthenticated && user?.status === 'active'
-  const authRedirectPath = useMemo(() => {
-    if (isAdminPreviewMode) {
-      return `/anuncios/preview/${id}?ask=1`
-    }
-    return `/anuncios/${slug}?ask=1`
-  }, [id, isAdminPreviewMode, slug])
 
   async function handleInlineLogin() {
     if (!authEmail.trim() || !authPassword.trim()) {
