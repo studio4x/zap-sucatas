@@ -747,7 +747,7 @@ export function ListingEditor({
                     JPG, PNG ou WEBP. Você pode escolher várias imagens de uma vez.
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Recomendado: proporção 16:10 (ex.: 1600x1000) para melhor encaixe no catálogo.
+                    Recomendado: proporção 4:3 (ex.: 1600x1200) para melhor encaixe no catálogo.
                   </p>
                 </div>
                 <input accept="image/*" className="hidden" multiple onChange={handleFileSelection} type="file" />
