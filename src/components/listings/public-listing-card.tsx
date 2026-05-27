@@ -11,6 +11,16 @@ type PublicListingCardProps = {
   listing: Listing
 }
 
+function resolveListingCardImageUrl(url: string) {
+  if (!url.includes('/storage/v1/object/public/')) {
+    return url
+  }
+
+  const transformedBase = url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
+  const separator = transformedBase.includes('?') ? '&' : '?'
+  return `${transformedBase}${separator}width=1200&height=900&resize=cover&quality=85`
+}
+
 export function PublicListingCard({ listing }: PublicListingCardProps) {
   const coverImage = listing.images[0]?.publicUrl
   const targetPath = listing.slug ? paths.public.listingDetails(listing.slug) : paths.public.listings
@@ -18,13 +28,16 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
   return (
     <Link className="group block h-full focus-visible:outline-none" to={targetPath}>
       <Card className="h-full overflow-hidden rounded-[1.85rem] border-0 bg-white transition duration-200 hover:-translate-y-1 hover:shadow-[0_26px_60px_-36px_rgba(19,33,23,0.35)] group-focus-visible:ring-2 group-focus-visible:ring-primary/30">
-        <div className="relative aspect-[16/10] overflow-hidden bg-[linear-gradient(160deg,#f0f8ed_0%,#d6ebd1_100%)]">
+        <div className="relative aspect-[4/3] overflow-hidden bg-[linear-gradient(160deg,#f0f8ed_0%,#d6ebd1_100%)]">
           {coverImage ? (
             <img
               alt={listing.title}
               className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+              height={900}
               loading="lazy"
-              src={coverImage}
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+              src={resolveListingCardImageUrl(coverImage)}
+              width={1200}
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
