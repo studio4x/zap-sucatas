@@ -100,7 +100,15 @@ export function AppEditListingPage() {
       ])
 
       if (payload.submitAfterSave) {
-        navigate(paths.app.listings, { replace: true })
+        navigate(paths.app.listings, {
+          replace: true,
+          state: {
+            reviewSubmission: {
+              listingId: id,
+              listingTitle: payload.values.title.trim(),
+            },
+          },
+        })
       }
     },
   })

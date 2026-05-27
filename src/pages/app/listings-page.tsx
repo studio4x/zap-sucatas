@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Archive, Eye, FilePlus2, PauseCircle, SendHorizontal, Star } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { DashboardEmptyState } from '@/components/dashboard/dashboard-empty-state'
@@ -33,13 +33,26 @@ type FeedbackState = {
   tone: 'error' | 'success' | 'warning'
 }
 
+type ReviewSubmissionState = {
+  reviewSubmission?: {
+    listingId: string
+    listingTitle: string
+  }
+}
+
 export function AppListingsPage() {
   const queryClient = useQueryClient()
   const { user } = useAuth()
   const { featuredPaymentsEnabled } = useSystemSettings()
+  const location = useLocation()
+  const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<AppListingsStatusFilter>('all')
   const [feedback, setFeedback] = useState<FeedbackState | null>(null)
+  const [reviewSubmissionModal, setReviewSubmissionModal] = useState<{
+    listingId: string
+    listingTitle: string
+  } | null>(null)
   const [listingPendingArchive, setListingPendingArchive] = useState<{ id: string; title: string } | null>(
     null,
   )
@@ -169,6 +182,17 @@ export function AppListingsPage() {
     pauseMutation.isPending ||
     archiveMutation.isPending ||
     createFeaturedPaymentMutation.isPending
+
+  useEffect(() => {
+    const routeState = location.state as ReviewSubmissionState | null
+    const reviewSubmission = routeState?.reviewSubmission
+    if (!reviewSubmission) {
+      return
+    }
+
+    setReviewSubmissionModal(reviewSubmission)
+    navigate(location.pathname + location.search, { replace: true, state: null })
+  }, [location.pathname, location.search, location.state, navigate])
 
   return (
     <section className="space-y-6">
@@ -451,6 +475,32 @@ export function AppListingsPage() {
         title="Confirmar arquivamento"
         tone="default"
       />
+
+      {reviewSubmissionModal ? (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center px-4">
+          <button
+            aria-label="Fechar confirmação de envio para revisão"
+            className="absolute inset-0 bg-slate-950/45"
+            onClick={() => setReviewSubmissionModal(null)}
+            type="button"
+          />
+          <div className="relative w-full max-w-md rounded-[1.75rem] border border-border bg-card p-6 shadow-2xl">
+            <p className="text-base font-semibold text-foreground">Anúncio enviado para revisão</p>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              Seu anúncio
+              {' '}
+              <span className="font-medium text-foreground">"{reviewSubmissionModal.listingTitle || reviewSubmissionModal.listingId}"</span>
+              {' '}
+              foi enviado para moderação com sucesso. Você pode acompanhar o status nesta página.
+            </p>
+            <div className="mt-6 flex justify-end">
+              <Button onClick={() => setReviewSubmissionModal(null)} type="button">
+                Entendi
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }

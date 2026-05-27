@@ -78,7 +78,15 @@ export function AppNewListingPage() {
       await queryClient.invalidateQueries({ queryKey: ['listings', 'owner', user.profileId] })
 
       if (payload.submitAfterSave) {
-        navigate(paths.app.listings, { replace: true })
+        navigate(paths.app.listings, {
+          replace: true,
+          state: {
+            reviewSubmission: {
+              listingId,
+              listingTitle: payload.values.title.trim(),
+            },
+          },
+        })
       } else {
         navigate(paths.app.editListing(listingId), { replace: true })
       }
