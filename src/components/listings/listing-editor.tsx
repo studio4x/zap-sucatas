@@ -239,6 +239,7 @@ export function ListingEditor({
     null,
   )
   const [submitAfterSave, setSubmitAfterSave] = useState(false)
+  const [descriptionEditorTab, setDescriptionEditorTab] = useState<'html' | 'visual'>('visual')
 
   const form = useForm<ListingFormSchemaValues>({
     resolver: zodResolver(listingFormSchema),
@@ -535,21 +536,60 @@ export function ListingEditor({
                   control={form.control}
                   name="description"
                   render={({ field }) => (
-                    <ReactQuill
-                      id="listing-description"
-                      modules={{
-                        toolbar: [
-                          [{ header: [2, 3, false] }],
-                          ['bold', 'italic', 'underline', 'strike'],
-                          [{ list: 'ordered' }, { list: 'bullet' }],
-                          ['link', 'blockquote'],
-                          ['clean'],
-                        ],
-                      }}
-                      onChange={field.onChange}
-                      theme="snow"
-                      value={field.value ?? ''}
-                    />
+                    <div className="space-y-3">
+                      <div className="inline-flex rounded-xl border border-border bg-muted/40 p-1">
+                        <button
+                          className={cn(
+                            'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+                            descriptionEditorTab === 'visual'
+                              ? 'bg-background text-foreground shadow-sm'
+                              : 'text-muted-foreground hover:text-foreground',
+                          )}
+                          onClick={() => setDescriptionEditorTab('visual')}
+                          type="button"
+                        >
+                          Visual
+                        </button>
+                        <button
+                          className={cn(
+                            'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+                            descriptionEditorTab === 'html'
+                              ? 'bg-background text-foreground shadow-sm'
+                              : 'text-muted-foreground hover:text-foreground',
+                          )}
+                          onClick={() => setDescriptionEditorTab('html')}
+                          type="button"
+                        >
+                          HTML
+                        </button>
+                      </div>
+
+                      {descriptionEditorTab === 'visual' ? (
+                        <ReactQuill
+                          id="listing-description"
+                          modules={{
+                            toolbar: [
+                              [{ header: [2, 3, false] }],
+                              ['bold', 'italic', 'underline', 'strike'],
+                              [{ list: 'ordered' }, { list: 'bullet' }],
+                              ['link', 'blockquote'],
+                              ['clean'],
+                            ],
+                          }}
+                          onChange={field.onChange}
+                          theme="snow"
+                          value={field.value ?? ''}
+                        />
+                      ) : (
+                        <Textarea
+                          className="min-h-52 font-mono text-sm"
+                          id="listing-description-html"
+                          onChange={(event) => field.onChange(event.target.value)}
+                          spellCheck={false}
+                          value={field.value ?? ''}
+                        />
+                      )}
+                    </div>
                   )}
                 />
                 <p className="text-xs text-muted-foreground">
