@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { fetchAdminFeaturedPayments } from '@/domains/featured-payments/api'
+import { blogContentHasHtml, blogContentToPlainText } from '@/domains/blog/utils'
 import {
   approveListing,
   archiveListing,
@@ -162,6 +163,9 @@ export function AdminListingDetailsPage() {
   const canApproveOrReject = listing.status === 'pending_review'
   const canPause = listing.status === 'approved'
   const canArchive = listing.status !== 'archived'
+  const normalizedDescription = listing.description.replace(/&nbsp;/gi, ' ').replace(/\u00a0/g, ' ')
+  const descriptionHasHtml = blogContentHasHtml({ raw: normalizedDescription })
+  const descriptionContent = blogContentToPlainText({ raw: normalizedDescription })
 
   return (
     <section className="space-y-6">
@@ -232,9 +236,15 @@ export function AdminListingDetailsPage() {
               <CardTitle>Descrição e evidências</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
-              <p className="whitespace-pre-wrap break-words text-sm leading-7 text-foreground [overflow-wrap:anywhere]">
-                {listing.description}
-              </p>
+              {descriptionHasHtml ? (
+                <article className="prose prose-zinc max-w-none text-foreground/92 [overflow-wrap:anywhere] prose-p:break-words prose-p:leading-8 prose-p:[overflow-wrap:anywhere] prose-li:leading-8 prose-li:[overflow-wrap:anywhere]">
+                  <div dangerouslySetInnerHTML={{ __html: descriptionContent }} />
+                </article>
+              ) : (
+                <p className="whitespace-pre-wrap break-words text-sm leading-7 text-foreground [overflow-wrap:anywhere]">
+                  {descriptionContent}
+                </p>
+              )}
 
               <div className="space-y-3">
                 <h2 className="text-sm font-semibold text-foreground">Mídia enviada</h2>
