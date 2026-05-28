@@ -14,7 +14,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { signInWithPassword, signUp } from '@/domains/auth/api'
-import { blogContentHasHtml, blogContentToPlainText } from '@/domains/blog/utils'
+import { blogContentHasHtml } from '@/domains/blog/utils'
 import {
   fetchPublicListingPreviewById,
   fetchPublicListingBySlug,
@@ -223,7 +223,7 @@ export function ListingDetailsPage() {
   const commercialPrice = parseCommercialPrice(listing.priceLabel)
   const normalizedDescription = normalizeListingRichText(listing.description)
   const descriptionHasHtml = blogContentHasHtml({ raw: normalizedDescription })
-  const descriptionContent = blogContentToPlainText({ raw: normalizedDescription })
+  const descriptionContent = normalizedDescription
   const canOpenQuestionFlow = isAuthenticated && user?.status === 'active'
 
   async function handleInlineLogin() {

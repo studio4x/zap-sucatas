@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { fetchAdminFeaturedPayments } from '@/domains/featured-payments/api'
-import { blogContentHasHtml, blogContentToPlainText } from '@/domains/blog/utils'
+import { blogContentHasHtml } from '@/domains/blog/utils'
 import {
   approveListing,
   archiveListing,
@@ -176,7 +176,7 @@ export function AdminListingDetailsPage() {
   const canArchive = listing.status !== 'archived'
   const normalizedDescription = normalizeListingRichText(listing.description)
   const descriptionHasHtml = blogContentHasHtml({ raw: normalizedDescription })
-  const descriptionContent = blogContentToPlainText({ raw: normalizedDescription })
+  const descriptionContent = normalizedDescription
 
   return (
     <section className="space-y-6">
