@@ -91,7 +91,7 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
             >
               <ChevronLeft className="block size-4 shrink-0 text-primary" strokeWidth={2.5} />
             </Button>
-            <div className="grid auto-cols-[calc((100%_-_0.75rem)/2)] grid-flow-col gap-3 overflow-x-auto pb-1 sm:auto-cols-[calc((100%_-_1.5rem)/3)] lg:auto-cols-[calc((100%_-_2.25rem)/4)]">
+            <div className="grid auto-cols-[calc((100%_-_0.75rem)/2)] grid-flow-col gap-3 overflow-x-auto pb-1 sm:auto-cols-[calc((100%_-_1.5rem)/3)] lg:auto-cols-[calc((100%_-_1.5rem)/3)]">
               {orderedImages.map((image, index) => (
                 <button
                   key={image.id}
@@ -107,7 +107,7 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
                     className="h-full w-full object-cover"
                     height={360}
                     loading={index < 4 ? 'eager' : 'lazy'}
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    sizes="(max-width: 640px) 50vw, 33vw"
                     src={resolveListingImageUrl(image.publicUrl, 'thumb')}
                     width={480}
                   />
