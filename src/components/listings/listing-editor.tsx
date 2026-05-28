@@ -195,7 +195,10 @@ function formatBRLInput(value: string) {
 }
 
 function normalizeHtmlForCodeView(value: string) {
-  return value.replace(/&nbsp;/g, ' ')
+  return value
+    .replace(/&nbsp;/g, ' ')
+    .replace(/>\s+</g, '>\n<')
+    .trim()
 }
 
 function FormField({
