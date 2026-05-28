@@ -248,9 +248,10 @@ export function AdminListingDetailsPage() {
             </CardHeader>
             <CardContent className="space-y-5">
               {descriptionHasHtml ? (
-                <article className="listing-rich-content max-w-none text-foreground/92 [overflow-wrap:anywhere]">
-                  <div dangerouslySetInnerHTML={{ __html: descriptionContent }} />
-                </article>
+                <article
+                  className="listing-rich-content max-w-none text-foreground/92 [overflow-wrap:anywhere]"
+                  dangerouslySetInnerHTML={{ __html: descriptionContent }}
+                />
               ) : (
                 <p className="whitespace-pre-wrap break-words text-sm leading-7 text-foreground [overflow-wrap:anywhere]">
                   {descriptionContent}

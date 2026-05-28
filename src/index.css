@@ -264,6 +264,7 @@ a {
 }
 
 .listing-rich-content {
+  white-space: normal;
   line-height: 1.9;
 }
 

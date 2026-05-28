@@ -447,9 +447,10 @@ export function ListingDetailsPage() {
                   Descricao comercial
                 </p>
                 {descriptionHasHtml ? (
-                  <article className="listing-rich-content max-w-none text-foreground/92 [overflow-wrap:anywhere]">
-                    <div dangerouslySetInnerHTML={{ __html: descriptionContent }} />
-                  </article>
+                  <article
+                    className="listing-rich-content max-w-none text-foreground/92 [overflow-wrap:anywhere]"
+                    dangerouslySetInnerHTML={{ __html: descriptionContent }}
+                  />
                 ) : (
                   <p className="whitespace-pre-wrap break-words text-sm leading-8 text-foreground/92 [overflow-wrap:anywhere]">
                     {descriptionContent}
