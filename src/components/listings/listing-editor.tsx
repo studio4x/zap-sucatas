@@ -250,6 +250,7 @@ export function ListingEditor({
     name: 'attributes',
   })
   const selectedState = form.watch('state')
+  const summaryValue = form.watch('summary') ?? ''
   const conditionValue = form.watch('conditionType') ?? ''
   const priceValue = form.watch('priceLabel') ?? ''
   const parsedPrice = useMemo(() => parsePriceLabel(priceValue), [priceValue])
@@ -518,9 +519,12 @@ export function ListingEditor({
                   className="min-h-24"
                   maxLength={147}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Descreva o lote em poucas linhas: tipo de sucata, volume, diferencial e objetivo da negociacao (maximo de 147 caracteres).
-                </p>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs text-muted-foreground">
+                    Descreva o lote em poucas linhas: tipo de sucata, volume, diferencial e objetivo da negociacao (maximo de 147 caracteres).
+                  </p>
+                  <p className="shrink-0 text-xs font-medium text-muted-foreground">{summaryValue.length}/147</p>
+                </div>
                 {form.formState.errors.summary ? (
                   <p className="text-sm text-red-600">{form.formState.errors.summary.message}</p>
                 ) : null}
