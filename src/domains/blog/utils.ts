@@ -16,6 +16,17 @@ function stripHtml(value: string) {
     .trim()
 }
 
+export function normalizeBlogHtmlEntities(value: string) {
+  return value
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\u00a0/g, ' ')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&amp;/gi, '&')
+}
+
 export function parseBlogTagsInput(value: string) {
   return Array.from(
     new Set(
@@ -90,6 +101,18 @@ export function createBlogContentDocument(rawText: string): BlogContentDocument 
     raw: normalized || plain,
     version: 1,
   }
+}
+
+export function blogContentToEditableHtml(content: unknown) {
+  if (content && typeof content === 'object' && 'raw' in content) {
+    const raw = (content as { raw?: unknown }).raw
+
+    if (typeof raw === 'string') {
+      return normalizeBlogHtmlEntities(raw)
+    }
+  }
+
+  return blogContentToPlainText(content)
 }
 
 export function blogContentToPlainText(content: unknown) {

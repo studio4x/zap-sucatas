@@ -14,7 +14,7 @@ import type {
   BlogPostFormValues,
 } from '@/domains/blog/schemas'
 import {
-  blogContentToPlainText,
+  blogContentToEditableHtml,
   createBlogContentDocument,
   estimateBlogReadTime,
   formatBlogTagsInput,
@@ -220,7 +220,7 @@ export function createEmptyBlogPostFormValues(): BlogPostFormValues {
 export function blogPostToFormValues(post: AdminBlogPost): BlogPostFormValues {
   return {
     categoryId: post.categoryId ?? '',
-    contentText: blogContentToPlainText(post.content),
+    contentText: blogContentToEditableHtml(post.content),
     excerpt: post.excerpt ?? '',
     seoDescription: post.seoDescription ?? '',
     seoTitle: post.seoTitle ?? '',

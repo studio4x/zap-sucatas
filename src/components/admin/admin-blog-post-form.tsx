@@ -10,6 +10,7 @@ import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { blogPostSchema, type BlogPostFormValues } from '@/domains/blog/schemas'
 import type { AdminBlogCategory, AdminBlogPost } from '@/domains/blog/types'
+import { cn } from '@/lib/utils'
 
 type AdminBlogPostFormProps = {
   categories: AdminBlogCategory[]
@@ -32,6 +33,7 @@ export function AdminBlogPostForm({
 }: AdminBlogPostFormProps) {
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [didNormalizeInitialEditorValue, setDidNormalizeInitialEditorValue] = useState(false)
+  const [contentEditorTab, setContentEditorTab] = useState<'html' | 'visual'>('visual')
   const form = useForm<BlogPostFormValues>({
     defaultValues,
     resolver: zodResolver(blogPostSchema),
@@ -48,6 +50,13 @@ export function AdminBlogPostForm({
       .split(/\n{2,}/)
       .map((paragraph) => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
       .join('')
+  }
+
+  const toCodeViewHtml = (value: string) => {
+    return value
+      .replace(/&nbsp;/g, ' ')
+      .replace(/>\s+</g, '>\n<')
+      .trim()
   }
 
   useEffect(() => {
@@ -157,23 +166,65 @@ export function AdminBlogPostForm({
                 control={form.control}
                 name="contentText"
                 render={({ field }) => (
-                  <ReactQuill
-                    id="blog-post-content"
-                    modules={{
-                      toolbar: [
-                        [{ header: [2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ list: 'ordered' }, { list: 'bullet' }],
-                        ['link', 'blockquote'],
-                        ['clean'],
-                      ],
-                    }}
-                    onChange={field.onChange}
-                    theme="snow"
-                    value={field.value ?? ''}
-                  />
+                  <div className="space-y-3">
+                    <div className="inline-flex rounded-xl border border-border bg-muted/40 p-1">
+                      <button
+                        className={cn(
+                          'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+                          contentEditorTab === 'visual'
+                            ? 'bg-background text-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground',
+                        )}
+                        onClick={() => setContentEditorTab('visual')}
+                        type="button"
+                      >
+                        Visual
+                      </button>
+                      <button
+                        className={cn(
+                          'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+                          contentEditorTab === 'html'
+                            ? 'bg-background text-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground',
+                        )}
+                        onClick={() => setContentEditorTab('html')}
+                        type="button"
+                      >
+                        HTML
+                      </button>
+                    </div>
+
+                    {contentEditorTab === 'visual' ? (
+                      <ReactQuill
+                        id="blog-post-content"
+                        modules={{
+                          toolbar: [
+                            [{ header: [2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ list: 'ordered' }, { list: 'bullet' }],
+                            ['link', 'blockquote'],
+                            ['clean'],
+                          ],
+                        }}
+                        onChange={field.onChange}
+                        theme="snow"
+                        value={field.value ?? ''}
+                      />
+                    ) : (
+                      <Textarea
+                        className="min-h-64 font-mono text-sm"
+                        id="blog-post-content-html"
+                        onChange={(event) => field.onChange(event.target.value)}
+                        spellCheck={false}
+                        value={toCodeViewHtml(field.value ?? '')}
+                      />
+                    )}
+                  </div>
                 )}
               />
+              <p className="text-xs text-muted-foreground">
+                Na aba visual, o editor renderiza o HTML do artigo. Na aba HTML, voce pode colar ou ajustar o codigo manualmente.
+              </p>
               {form.formState.errors.contentText ? (
                 <p className="text-sm text-destructive">{form.formState.errors.contentText.message}</p>
               ) : null}
