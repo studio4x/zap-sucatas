@@ -124,6 +124,14 @@ export const routes: RouteObject[] = [
         ),
       },
       {
+        path: 'blog/preview/:id',
+        element: (
+          <BlogPublicGuard>
+            {withSuspense(<BlogPostPage />)}
+          </BlogPublicGuard>
+        ),
+      },
+      {
         path: 'sobre',
         element: withSuspense(<AboutPage />),
       },

@@ -509,3 +509,19 @@ export async function fetchPublicBlogPostBySlug(slug: string) {
 
   return mapPublicBlogPost(data as BlogPostRow)
 }
+
+export async function fetchPublicBlogPostPreviewById(postId: string) {
+  const { data, error } = await ensureSupabase()
+    .from('blog_posts')
+    .select(
+      'id, category_id, author_user_id, title, slug, excerpt, content, cover_image_path, seo_title, seo_description, status, published_at, created_at, updated_at, tags, blog_categories(name)',
+    )
+    .eq('id', postId)
+    .single()
+
+  if (error || !data) {
+    throw error ?? new Error('Post não encontrado.')
+  }
+
+  return mapPublicBlogPost(data as BlogPostRow)
+}

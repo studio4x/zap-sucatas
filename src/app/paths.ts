@@ -12,6 +12,7 @@ export const paths = {
     scrapPrices: '/tabela-de-preco-do-ferro-velho',
     blog: '/blog',
     blogPost: (slug: string) => `/blog/${slug}`,
+    blogPostPreview: (id: string) => `/blog/preview/${id}`,
     about: '/sobre',
     support: '/suporte',
     contact: '/contato',

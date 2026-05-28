@@ -7,8 +7,9 @@ import { BlogPostCard } from '@/components/public/blog-post-card'
 import { PublicSectionHeading } from '@/components/public/public-section-heading'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { fetchPublicBlogPostBySlug, fetchPublicBlogPosts } from '@/domains/blog/api'
+import { fetchPublicBlogPostBySlug, fetchPublicBlogPostPreviewById, fetchPublicBlogPosts } from '@/domains/blog/api'
 import { blogContentHasHtml, blogContentToPlainText, extractBlogParagraphs } from '@/domains/blog/utils'
+import { useAuth } from '@/hooks/use-auth'
 
 function formatBlogDate(value: string | null) {
   if (!value) {
@@ -21,12 +22,23 @@ function formatBlogDate(value: string | null) {
 }
 
 export function BlogPostPage() {
-  const { slug = '' } = useParams()
+  const { id = '', slug = '' } = useParams()
+  const { isAuthenticated, user } = useAuth()
+  const isAdminPreviewMode = Boolean(id)
+  const canUseAdminPreview = isAdminPreviewMode && isAuthenticated && user?.role === 'admin'
 
   const postQuery = useQuery({
-    queryKey: ['blog', 'public', slug],
-    queryFn: () => fetchPublicBlogPostBySlug(slug),
-    enabled: Boolean(slug),
+    queryKey: ['blog', 'public', isAdminPreviewMode ? `preview:${id}` : `slug:${slug}`],
+    queryFn: () => {
+      if (isAdminPreviewMode) {
+        if (!canUseAdminPreview) {
+          throw new Error('Somente administradores podem visualizar artigos em rascunho.')
+        }
+        return fetchPublicBlogPostPreviewById(id)
+      }
+      return fetchPublicBlogPostBySlug(slug)
+    },
+    enabled: isAdminPreviewMode ? Boolean(id) : Boolean(slug),
   })
 
   const relatedPostsQuery = useQuery({

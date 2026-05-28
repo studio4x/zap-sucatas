@@ -439,6 +439,16 @@ export function AdminBlogPage() {
                         },
                       ]
                     : []),
+                  ...(post.status === 'draft'
+                    ? [
+                        {
+                          icon: Eye,
+                          label: 'Pré-visualizar',
+                          to: paths.public.blogPostPreview(post.id),
+                          variant: 'ghost' as const,
+                        },
+                      ]
+                    : []),
                   {
                     disabled: deletePostMutation.isPending,
                     icon: Trash2,
