@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Menu, Search, X } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 import { getDefaultPathByRole, paths } from '@/app/paths'
@@ -20,6 +20,7 @@ const baseNavItems = [
 export function SiteHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isCompact, setIsCompact] = useState(false)
+  const isCompactRef = useRef(false)
   const { blogEnabled, settings } = useSystemSettings()
   const { isAuthenticated, user } = useAuth()
   const baseLogoScale = settings?.headerLogoScalePercent ?? 100
@@ -33,13 +34,36 @@ export function SiteHeader() {
   const dashboardPath = user ? getDefaultPathByRole(user.role) : paths.auth.login
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsCompact(window.scrollY > 24)
+    const ENTER_COMPACT_AT = 56
+    const EXIT_COMPACT_AT = 16
+    let rafId = 0
+
+    const syncCompactState = () => {
+      const y = window.scrollY
+      const nextCompact = isCompactRef.current ? y > EXIT_COMPACT_AT : y > ENTER_COMPACT_AT
+
+      if (nextCompact !== isCompactRef.current) {
+        isCompactRef.current = nextCompact
+        setIsCompact(nextCompact)
+      }
     }
 
-    handleScroll()
+    const handleScroll = () => {
+      if (rafId) return
+      rafId = window.requestAnimationFrame(() => {
+        rafId = 0
+        syncCompactState()
+      })
+    }
+
+    syncCompactState()
     window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      if (rafId) {
+        window.cancelAnimationFrame(rafId)
+      }
+    }
   }, [])
 
   return (
