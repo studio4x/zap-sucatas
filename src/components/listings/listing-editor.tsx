@@ -516,10 +516,10 @@ export function ListingEditor({
                   id="listing-summary"
                   {...form.register('summary')}
                   className="min-h-24"
-                  maxLength={240}
+                  maxLength={147}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Descreva o lote em poucas linhas: tipo de sucata, volume, diferencial e objetivo da negociacao.
+                  Descreva o lote em poucas linhas: tipo de sucata, volume, diferencial e objetivo da negociacao (maximo de 147 caracteres).
                 </p>
                 {form.formState.errors.summary ? (
                   <p className="text-sm text-red-600">{form.formState.errors.summary.message}</p>

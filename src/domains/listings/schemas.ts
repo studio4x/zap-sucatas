@@ -22,7 +22,7 @@ export const listingFormSchema = z.object({
     .trim()
     .transform(normalizeListingState)
     .refine((value) => /^[A-Z]{2}$/.test(value), 'Use a sigla do estado com 2 letras.'),
-  summary: z.string().trim().max(240, 'Resumo com no maximo 240 caracteres.'),
+  summary: z.string().trim().max(147, 'Resumo com no maximo 147 caracteres.'),
   title: z.string().trim().min(5, 'Informe um titulo mais descritivo.'),
 })
 
