@@ -45,7 +45,14 @@ function parseCommercialPrice(priceLabel: string | null) {
 }
 
 function normalizeListingRichText(value: string) {
-  return value.replace(/&nbsp;/gi, ' ').replace(/\u00a0/g, ' ')
+  return value
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\u00a0/g, ' ')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&amp;/gi, '&')
 }
 
 function toPhoneDigits(value: string) {

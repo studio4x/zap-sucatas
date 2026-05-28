@@ -40,6 +40,17 @@ function getListingStatusMeta(status: string) {
   }
 }
 
+function normalizeListingRichText(value: string) {
+  return value
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\u00a0/g, ' ')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&amp;/gi, '&')
+}
+
 type FeedbackState = {
   message: string
   tone: 'error' | 'success' | 'warning'
@@ -163,7 +174,7 @@ export function AdminListingDetailsPage() {
   const canApproveOrReject = listing.status === 'pending_review'
   const canPause = listing.status === 'approved'
   const canArchive = listing.status !== 'archived'
-  const normalizedDescription = listing.description.replace(/&nbsp;/gi, ' ').replace(/\u00a0/g, ' ')
+  const normalizedDescription = normalizeListingRichText(listing.description)
   const descriptionHasHtml = blogContentHasHtml({ raw: normalizedDescription })
   const descriptionContent = blogContentToPlainText({ raw: normalizedDescription })
 
