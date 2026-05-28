@@ -263,6 +263,89 @@ a {
     0 10px 18px -18px rgba(39, 153, 31, 0.2);
 }
 
+.listing-rich-content {
+  line-height: 1.9;
+}
+
+.listing-rich-content > *:first-child {
+  margin-top: 0;
+}
+
+.listing-rich-content > *:last-child {
+  margin-bottom: 0;
+}
+
+.listing-rich-content p,
+.listing-rich-content ul,
+.listing-rich-content ol,
+.listing-rich-content blockquote {
+  margin: 0 0 1.25rem;
+  font-size: 0.98rem;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+
+.listing-rich-content h1,
+.listing-rich-content h2,
+.listing-rich-content h3,
+.listing-rich-content h4 {
+  margin: 2rem 0 0.9rem;
+  color: var(--foreground);
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.listing-rich-content h1 {
+  font-size: 2rem;
+}
+
+.listing-rich-content h2 {
+  font-size: 1.65rem;
+}
+
+.listing-rich-content h3 {
+  font-size: 1.35rem;
+}
+
+.listing-rich-content h4 {
+  font-size: 1.15rem;
+}
+
+.listing-rich-content ul,
+.listing-rich-content ol {
+  padding-left: 1.4rem;
+}
+
+.listing-rich-content ul {
+  list-style: disc;
+}
+
+.listing-rich-content ol {
+  list-style: decimal;
+}
+
+.listing-rich-content li + li {
+  margin-top: 0.45rem;
+}
+
+.listing-rich-content strong {
+  font-weight: 700;
+}
+
+.listing-rich-content a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.listing-rich-content blockquote {
+  border-left: 4px solid color-mix(in srgb, var(--primary) 45%, white);
+  padding-left: 1rem;
+  color: color-mix(in srgb, var(--foreground) 82%, white);
+}
+
 .admin-theme [data-slot='button'],
 .admin-theme [data-slot='input'],
 .admin-theme [data-slot='textarea'],
