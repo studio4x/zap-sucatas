@@ -194,6 +194,10 @@ function formatBRLInput(value: string) {
   }).format(numericValue)
 }
 
+function normalizeHtmlForCodeView(value: string) {
+  return value.replace(/&nbsp;/g, ' ')
+}
+
 function FormField({
   children,
   fieldId,
@@ -586,7 +590,7 @@ export function ListingEditor({
                           id="listing-description-html"
                           onChange={(event) => field.onChange(event.target.value)}
                           spellCheck={false}
-                          value={field.value ?? ''}
+                          value={normalizeHtmlForCodeView(field.value ?? '')}
                         />
                       )}
                     </div>
