@@ -174,12 +174,12 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ### 4.6.2 Testes sugeridos - BLK-NOTIFICACOES
 
-1. [ ] `NTF-01` Disparar envio manual para usuarios especificos.
-2. [ ] `NTF-02` Validar criacao em `notifications` e `notification_queue`.
-3. [ ] `NTF-03` Processar fila e validar transicao de status.
-4. [ ] `NTF-04` Testar reprocessamento e cancelamento por item.
-5. [ ] `NTF-05` Validar notificacao aparecendo no widget/central do usuario.
-6. [ ] `NTF-06` Validar aba "Registro de envios" com filtros por canal/status/origem.
+1. [OK] `NTF-01` Disparar envio manual para usuarios especificos.
+2. [OK] `NTF-02` Validar criacao em `notifications` e `notification_queue`.
+3. [OK] `NTF-03` Processar fila e validar transicao de status.
+4. [OK] `NTF-04` Testar reprocessamento e cancelamento por item.
+5. [OK] `NTF-05` Validar notificacao aparecendo no widget/central do usuario.
+6. [OK] `NTF-06` Validar aba "Registro de envios" com filtros por canal/status/origem.
 
 ## 4.7 Suporte por tickets
 

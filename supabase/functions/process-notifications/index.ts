@@ -1,7 +1,7 @@
 /// <reference types="jsr:@supabase/functions-js/edge-runtime.d.ts" />
 
 import nodemailer from 'npm:nodemailer@6.10.1'
-import { requireAdminProfile } from '../_shared/auth.ts'
+import { requireAdminProfile, resolveHttpErrorStatus } from '../_shared/auth.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { renderBrandedEmail } from '../_shared/email-template.ts'
 import { insertIntegrationLog } from '../_shared/logging.ts'
@@ -208,28 +208,36 @@ Deno.serve(async (request) => {
             nextStatus = shouldRetry(attempt) ? 'retry' : 'failed'
             errorMessage = 'smtp_nao_configurado_ou_destinatario_invalido'
           } else {
-            const transporter = nodemailer.createTransport({
-              host: smtp.host,
-              port: smtp.port,
-              secure: smtp.secure,
-              auth: { user: smtp.user, pass: smtp.password },
-            })
-            const response = await transporter.sendMail({
-              from: `${smtp.emailFromName} <${smtp.emailFrom}>`,
-              to: profile.email,
-              subject: queueRow.title,
-              html: (
-                await renderBrandedEmail({
-                  bodyHtml: `<p style="margin:0 0 16px 0;font-size:15px;line-height:1.7;color:#334155;">${queueRow.body}</p>`,
-                  footerText: 'Zap Sucatas · Este e-mail foi enviado automaticamente pela plataforma.',
-                  title: queueRow.title,
-                })
-              ).html,
-              text: queueRow.body,
-            })
-            providerMessageId = response.messageId ?? `${queueRow.channel}-${crypto.randomUUID()}`
-            deliveredAt = new Date().toISOString()
-            nextStatus = 'sent'
+            try {
+              const transporter = nodemailer.createTransport({
+                host: smtp.host,
+                port: smtp.port,
+                secure: smtp.secure,
+                auth: { user: smtp.user, pass: smtp.password },
+              })
+              const response = await transporter.sendMail({
+                from: `${smtp.emailFromName} <${smtp.emailFrom}>`,
+                to: profile.email,
+                subject: queueRow.title,
+                html: (
+                  await renderBrandedEmail({
+                    bodyHtml: `<p style="margin:0 0 16px 0;font-size:15px;line-height:1.7;color:#334155;">${queueRow.body}</p>`,
+                    footerText: 'Zap Sucatas · Este e-mail foi enviado automaticamente pela plataforma.',
+                    title: queueRow.title,
+                  })
+                ).html,
+                text: queueRow.body,
+              })
+              providerMessageId = response.messageId ?? `${queueRow.channel}-${crypto.randomUUID()}`
+              deliveredAt = new Date().toISOString()
+              nextStatus = 'sent'
+            } catch (smtpError) {
+              nextStatus = shouldRetry(attempt) ? 'retry' : 'failed'
+              errorMessage =
+                smtpError instanceof Error && smtpError.message.trim().length > 0
+                  ? `smtp_send_failed:${smtpError.message}`
+                  : 'smtp_send_failed'
+            }
           }
         } else {
           providerMessageId = `${queueRow.channel}-${crypto.randomUUID()}`
@@ -242,7 +250,7 @@ Deno.serve(async (request) => {
         nextStatus = 'failed'
       }
 
-      const nextRetryAt = nextStatus === 'retry' ? computeNextRetryAt(attempt) : null
+      const nextRetryAt = nextStatus === 'retry' ? computeNextRetryAt(attempt) : new Date().toISOString()
 
       const { error: updateError } = await admin
         .from('notification_queue')
@@ -306,7 +314,12 @@ Deno.serve(async (request) => {
       success: true,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error
+      ? error.message
+      : typeof error === 'object' && error !== null
+        ? JSON.stringify(error)
+        : 'Unexpected error.'
+    const status = resolveHttpErrorStatus(error)
 
     await insertIntegrationLog({
       integrationName: 'notifications_queue_processor',
@@ -317,6 +330,6 @@ Deno.serve(async (request) => {
       status: 'error',
     })
 
-    return jsonResponse({ error: message }, 400)
+    return jsonResponse({ error: message }, status)
   }
 })
