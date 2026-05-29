@@ -218,10 +218,10 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ### 4.8.2 Testes sugeridos - BLK-ANALYTICS
 
-1. [ ] `ANL-01` Navegar em paginas publicas/dashboard/admin para gerar eventos.
-2. [ ] `ANL-02` Validar gravacao em `analytics_events`.
-3. [ ] `ANL-03` Validar filtros por periodo no admin analytics.
-4. [ ] `ANL-04` Conferir consistencia entre eventos e KPIs exibidos.
+1. [OK] `ANL-01` Navegar em paginas publicas/dashboard/admin para gerar eventos.
+2. [OK] `ANL-02` Validar gravacao em `analytics_events`.
+3. [OK] `ANL-03` Validar filtros por periodo no admin analytics.
+4. [OK] `ANL-04` Conferir consistencia entre eventos e KPIs exibidos.
 
 ## 4.9 Configuracoes globais e definicoes visuais
 
