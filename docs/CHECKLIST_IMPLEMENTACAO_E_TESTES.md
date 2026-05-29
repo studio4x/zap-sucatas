@@ -157,9 +157,9 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ### 4.5.2 Testes sugeridos - BLK-PRECOS
 
-1. [ ] `PRC-01` Inserir preco manual no admin e validar na pagina publica.
-2. [ ] `PRC-02` Editar/remover registro e validar historico/resultado.
-3. [ ] `PRC-03` Rodar rotina de sincronizacao (quando aplicavel) e validar logs.
+1. [OK] `PRC-01` Inserir preco manual no admin e validar na pagina publica.
+2. [OK] `PRC-02` Editar/remover registro e validar historico/resultado.
+3. [OK] `PRC-03` Rodar rotina de sincronizacao (quando aplicavel) e validar logs.
 
 ## 4.6 Notificacoes
 
