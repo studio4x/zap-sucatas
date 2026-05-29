@@ -240,11 +240,11 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ### 4.9.2 Testes sugeridos - BLK-SETTINGS-VISUAL
 
-1. [ ] `SET-01` Fazer upload de logo dark e validar no header publico.
-2. [ ] `SET-02` Fazer upload de logo light e validar no rodape publico.
-3. [ ] `SET-03` Fazer upload de favicon e validar na aba do navegador.
-4. [ ] `SET-04` Atualizar nome do site/SEO e validar reflexo onde aplicavel.
-5. [ ] `SET-05` Validar fallback visual caso asset esteja ausente/corrompido.
+1. [OK] `SET-01` Fazer upload de logo dark e validar no header publico.
+2. [OK] `SET-02` Fazer upload de logo light e validar no rodape publico.
+3. [OK] `SET-03` Fazer upload de favicon e validar na aba do navegador.
+4. [OK] `SET-04` Atualizar nome do site/SEO e validar reflexo onde aplicavel.
+5. [OK] `SET-05` Validar fallback visual caso asset esteja ausente/corrompido.
 
 ## 4.10 Contato
 
