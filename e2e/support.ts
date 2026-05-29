@@ -19,7 +19,7 @@ export function requireEnv(name: string) {
 export async function signIn(page: Page, email: string, password: string) {
   await page.goto('/login')
   await page.getByLabel('E-mail').first().fill(email)
-  await page.getByLabel('Senha').fill(password)
+  await page.locator('#login-password').fill(password)
   await page.getByRole('button', { name: /^Entrar$/i }).click()
 }
 
