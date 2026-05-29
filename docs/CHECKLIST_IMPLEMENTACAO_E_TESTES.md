@@ -300,6 +300,17 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 3. [ ] Usuario owner deve acessar somente seus dados privados.
 4. [ ] Admin deve conseguir operacao total em modulos administrativos.
 
+## 5.5 Validacao estrutural obrigatoria por migration/tabela sensivel
+
+1. [ ] Todas as tabelas sensiveis possuem `created_at`.
+2. [ ] Todas as tabelas sensiveis possuem `updated_at` quando aplicavel.
+3. [ ] Trigger de `updated_at` ativo nas tabelas com `updated_at`.
+4. [ ] Foreign keys presentes e coerentes com o dominio.
+5. [ ] Constraints de integridade (checks, uniques) aplicadas conforme regra de negocio.
+6. [ ] Indices essenciais criados para filtros e consultas operacionais.
+7. [ ] RLS habilitado em todas as tabelas privadas/sensiveis.
+8. [ ] Policies de owner/admin/public validadas por teste positivo e negativo.
+
 ## 6) Edge Functions existentes
 
 - [x] `submit-listing-for-review`
@@ -327,6 +338,21 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 2. [ ] Validar respostas de erro para payload invalido.
 3. [ ] Validar trilha de logs das funcoes sensiveis.
 
+### Testes obrigatorios de autenticacao/autorizacao (Edge Functions sensiveis)
+
+1. [ ] Requisicao sem `Authorization: Bearer <access_token>` retorna `401`.
+2. [ ] Requisicao com token invalido/expirado retorna `401`.
+3. [ ] Requisicao com usuario sem permissao admin retorna `403` quando aplicavel.
+4. [ ] Funcoes administrativas validam `profiles.is_admin` ou `profiles.role = 'admin'`.
+5. [ ] Respostas de erro retornam JSON claro e consistente (`401`/`403`/`400`).
+
+## 6.1 Segredos e uso de service role
+
+1. [ ] Nao ha segredo exposto no frontend (incluindo chaves administrativas).
+2. [ ] `service_role` usado apenas no backend/Edge Functions.
+3. [ ] Variaveis de ambiente publicas contem apenas dados seguros para cliente.
+4. [ ] Fluxos sensiveis nao dependem de permissao apenas no frontend.
+
 ## 7) Itens fora de escopo atual / nao encontrados como concluidos
 
 - [ ] Billing recorrente e assinatura ativa no produto.
@@ -349,9 +375,52 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 9. [ ] Dashboard de analytics com dados recentes.
 10. [ ] Deploy em producao refletindo a `BUILD_VERSION` mais recente.
 
+## 8.1 Build version e rastreabilidade
+
+1. [ ] `src/lib/build-version.ts` revisado e incrementado na entrega.
+2. [ ] Rodape da area publica exibindo `Build <BUILD_VERSION>-<COMMIT_SHA_CURTO>`.
+3. [ ] Rodape do dashboard (`/app`) exibindo `Build <BUILD_VERSION>-<COMMIT_SHA_CURTO>`.
+4. [ ] Rodape do admin (`/admin`) exibindo `Build <BUILD_VERSION>-<COMMIT_SHA_CURTO>`.
+5. [ ] `COMMIT_SHA_CURTO` exibido corresponde ao commit publicado.
+
+## 8.2 Validacao obrigatoria de deploy em producao
+
+1. [ ] Deploy mais recente em estado `READY`.
+2. [ ] Dominio canonico apontando para o deploy mais recente.
+3. [ ] Revisao ativa em producao corresponde ao `HEAD` atual.
+4. [ ] Em caso de divergencia (HEAD/deploy/dominio), alias corrigido antes do encerramento.
+
+## 8.3 Fluxo critico ponta a ponta com auditoria
+
+1. [ ] Usuario cria anuncio e salva em rascunho.
+2. [ ] Usuario envia anuncio para revisao (`pending_review`).
+3. [ ] Admin aprova anuncio e valida `slug` + `published_at` + exibicao publica.
+4. [ ] Admin rejeita anuncio e valida motivo + bloqueio de exibicao publica.
+5. [ ] Cada acao critica gera rastreabilidade em logs/auditoria.
+
+## 8.4 Storage e permissoes por bucket
+
+1. [ ] Upload de imagens de anuncio funcional em `listing-media`.
+2. [ ] Upload de assets de blog funcional em `blog-media`.
+3. [ ] Upload de logos/favicon funcional em `site-assets`.
+4. [ ] Leitura publica apenas onde previsto por policy.
+5. [ ] Tentativa de escrita indevida por usuario sem permissao falha.
+
+## 8.5 Estados de UX obrigatorios (telas criticas)
+
+1. [ ] Estados de loading validados nas telas principais (publico, `/app`, `/admin`).
+2. [ ] Estados de erro com mensagem clara e recuperacao basica.
+3. [ ] Estados vazios com orientacao de proximo passo.
+4. [ ] Estados de sucesso com feedback visivel ao usuario.
+
 ## 9) Observacoes para uso deste documento
 
 - Este checklist mistura estado de implementacao (codigo) e validacao funcional (QA).
 - Sempre que um item for retestado, registrar data, ambiente e responsavel.
 - Para auditoria de release, anexar evidencias (prints, logs, ids de registro e build version).
 - Documento recomendado para validacao de Go/No-Go antes de publicacao critica.
+
+## 10) Higiene documental (fonte de verdade)
+
+- [ ] Confirmar que os caminhos dos documentos-base referenciados no AGENTS.md existem e estao atualizados.
+- [ ] Em caso de renomeacao/movimentacao de arquivos de arquitetura, atualizar referencias internas antes da release.
