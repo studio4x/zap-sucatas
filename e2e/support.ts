@@ -53,22 +53,27 @@ export async function fillListingEditor(page: Page, title: string) {
   await selectFirstRealOption(page, '#listing-category')
   await selectFirstRealOption(page, '#listing-material')
   await page.getByLabel('Resumo comercial').fill(`${title} com leitura comercial para fluxo E2E.`)
-  await page.getByLabel('Descricao').fill(
+  await page.locator('.ql-editor').first().fill(
     `${title} criado automaticamente para validar criacao, moderacao e publicacao do marketplace.`,
   )
-  await page.getByLabel('Cidade').fill('Sao Paulo')
-  await page.getByLabel('Estado').fill('SP')
+  await page.getByLabel('Estado').selectOption('SP')
+  await page.waitForTimeout(500)
+  await selectFirstRealOption(page, '#listing-city')
   await page.getByLabel('Nome de contato').fill('Zap Sucatas QA')
   await page.getByLabel('Telefone de contato').fill('(11) 99999-0000')
-  await page.getByLabel('Condicao').fill('Lote para validacao automatizada')
-  await page.getByLabel('Faixa de preço').fill('Sob consulta')
 
   await page.locator('input[type="file"]').setInputFiles(REAL_IMAGE_PATH)
   await expect(page.getByRole('button', { name: /salvar e enviar para revis/i })).toBeEnabled()
 }
 
 export async function searchForText(page: Page, placeholderPattern: RegExp, value: string) {
-  const input = page.getByPlaceholder(placeholderPattern)
+  let input = page.getByPlaceholder(placeholderPattern).first()
+  const hasPlaceholderInput = (await page.getByPlaceholder(placeholderPattern).count()) > 0
+
+  if (!hasPlaceholderInput) {
+    input = page.locator('input[type="search"], input[type="text"], input:not([type])').first()
+  }
+
   await input.fill('')
   await input.fill(value)
 }

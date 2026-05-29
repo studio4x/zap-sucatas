@@ -109,12 +109,12 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ### 4.2.2 Testes sugeridos - BLK-CATALOGO-ANUNCIOS
 
-1. [ ] `CAT-01` Criar anuncio no dashboard e salvar como rascunho.
-2. [ ] `CAT-02` Enviar anuncio para revisao e validar mudanca de status.
-3. [ ] `CAT-03` Aprovar anuncio no admin e validar exibicao publica.
-4. [ ] `CAT-04` Reprovar anuncio no admin e validar motivo/feedback ao usuario.
-5. [ ] `CAT-05` Editar anuncio aprovado e validar consistencia dos dados.
-6. [ ] `CAT-06` Validar filtros publicos por categoria/material/localidade.
+1. [OK] `CAT-01` Criar anuncio no dashboard e salvar como rascunho.
+2. [OK] `CAT-02` Enviar anuncio para revisao e validar mudanca de status.
+3. [OK] `CAT-03` Aprovar anuncio no admin e validar exibicao publica.
+4. [OK] `CAT-04` Reprovar anuncio no admin e validar motivo/feedback ao usuario.
+5. [OK] `CAT-05` Editar anuncio aprovado e validar consistencia dos dados.
+6. [OK] `CAT-06` Validar filtros publicos por categoria/material/localidade.
 
 ## 4.3 Perguntas e respostas
 
