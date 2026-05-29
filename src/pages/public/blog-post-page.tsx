@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Clock3 } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
@@ -73,6 +73,38 @@ export function BlogPostPage() {
       .map(({ item }) => item)
   }, [postQuery.data, relatedPostsQuery.data])
 
+  const seoTitle = postQuery.data?.seoTitle?.trim() || postQuery.data?.title || 'Zap Sucatas'
+  const seoDescription =
+    postQuery.data?.seoDescription?.trim() ||
+    postQuery.data?.excerpt?.trim() ||
+    'Conteudo editorial da Zap Sucatas.'
+
+  useEffect(() => {
+    if (!postQuery.data) {
+      return
+    }
+
+    const previousTitle = document.title
+    const previousDescription = document.querySelector('meta[name="description"]')?.getAttribute('content') ?? null
+    let descriptionMeta = document.querySelector('meta[name="description"]')
+
+    if (!descriptionMeta) {
+      descriptionMeta = document.createElement('meta')
+      descriptionMeta.setAttribute('name', 'description')
+      document.head.appendChild(descriptionMeta)
+    }
+
+    document.title = seoTitle
+    descriptionMeta.setAttribute('content', seoDescription)
+
+    return () => {
+      document.title = previousTitle
+      if (previousDescription !== null) {
+        descriptionMeta?.setAttribute('content', previousDescription)
+      }
+    }
+  }, [postQuery.data, seoDescription, seoTitle])
+
   if (postQuery.isLoading) {
     return (
       <Card>
@@ -98,7 +130,6 @@ export function BlogPostPage() {
   const rawContent = blogContentToPlainText(post.content)
   const contentIsHtml = blogContentHasHtml(post.content)
   const articleCategory = post.categoryName ?? 'Notícias'
-
   return (
     <div className="space-y-8 lg:space-y-10">
       <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 overflow-hidden">

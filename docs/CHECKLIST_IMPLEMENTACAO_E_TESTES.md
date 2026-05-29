@@ -142,10 +142,10 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ### 4.4.2 Testes sugeridos - BLK-BLOG
 
-1. [ ] `BLOG-01` Criar post em rascunho no admin.
-2. [ ] `BLOG-02` Publicar post e validar rota publica por slug.
-3. [ ] `BLOG-03` Editar SEO do post e validar metadados na pagina.
-4. [ ] `BLOG-04` Arquivar/remover post e validar que sai da listagem publica.
+1. [OK] `BLOG-01` Criar post em rascunho no admin.
+2. [OK] `BLOG-02` Publicar post e validar rota publica por slug.
+3. [OK] `BLOG-03` Editar SEO do post e validar metadados na pagina.
+4. [OK] `BLOG-04` Arquivar/remover post e validar que sai da listagem publica.
 
 ## 4.5 Tabela de precos
 
