@@ -56,6 +56,8 @@ export function AdminBlogPostForm({
     return value
       .replace(/&nbsp;/g, ' ')
       .replace(/>\s+</g, '>\n<')
+      .replace(/<\/(p|h1|h2|h3|h4|h5|h6|li|blockquote|pre|div|section|article)>\n?/gi, '</$1>\n\n')
+      .replace(/\n{3,}/g, '\n\n')
       .trim()
   }
 
