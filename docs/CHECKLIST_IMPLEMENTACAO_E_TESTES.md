@@ -192,11 +192,11 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ### 4.7.2 Testes sugeridos - BLK-SUPORTE-TICKETS
 
-1. [ ] `SUP-01` Abrir ticket como usuario.
-2. [ ] `SUP-02` Responder ticket como admin.
-3. [ ] `SUP-03` Validar alteracao de status e SLA.
-4. [ ] `SUP-04` Validar atualizacao no detalhe para usuario e admin.
-5. [ ] `SUP-05` Encerrar ticket e validar estado final.
+1. [OK] `SUP-01` Abrir ticket como usuario.
+2. [OK] `SUP-02` Responder ticket como admin.
+3. [OK] `SUP-03` Validar alteracao de status e SLA.
+4. [OK] `SUP-04` Validar atualizacao no detalhe para usuario e admin.
+5. [OK] `SUP-05` Encerrar ticket e validar estado final.
 
 ## 4.8 Analytics admin
 
