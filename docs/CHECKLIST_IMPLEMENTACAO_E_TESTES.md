@@ -377,11 +377,11 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ## 8.1 Build version e rastreabilidade - BLK-BUILD-VERSION
 
-1. [ ] `BLD-01` `src/lib/build-version.ts` revisado e incrementado na entrega.
-2. [ ] `BLD-02` Rodape da area publica exibindo `Build <BUILD_VERSION>-<COMMIT_SHA_CURTO>`.
-3. [ ] `BLD-03` Rodape do dashboard (`/app`) exibindo `Build <BUILD_VERSION>-<COMMIT_SHA_CURTO>`.
-4. [ ] `BLD-04` Rodape do admin (`/admin`) exibindo `Build <BUILD_VERSION>-<COMMIT_SHA_CURTO>`.
-5. [ ] `BLD-05` `COMMIT_SHA_CURTO` exibido corresponde ao commit publicado.
+1. [OK] `BLD-01` `src/lib/build-version.ts` revisado e incrementado na entrega.
+2. [OK] `BLD-02` Rodape da area publica exibindo `Build <BUILD_VERSION>-<COMMIT_SHA_CURTO>`.
+3. [OK] `BLD-03` Rodape do dashboard (`/app`) exibindo `Build <BUILD_VERSION>-<COMMIT_SHA_CURTO>`.
+4. [OK] `BLD-04` Rodape do admin (`/admin`) exibindo `Build <BUILD_VERSION>-<COMMIT_SHA_CURTO>`.
+5. [OK] `BLD-05` `COMMIT_SHA_CURTO` exibido corresponde ao commit publicado.
 
 ## 8.2 Validacao obrigatoria de deploy em producao - BLK-DEPLOY-PROD
 
