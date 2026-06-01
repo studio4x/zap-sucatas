@@ -302,14 +302,14 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ## 5.5 Validacao estrutural obrigatoria por migration/tabela sensivel - BLK-DB-ESTRUTURA
 
-1. [ ] `DB-01` Todas as tabelas sensiveis possuem `created_at`.
-2. [ ] `DB-02` Todas as tabelas sensiveis possuem `updated_at` quando aplicavel.
-3. [ ] `DB-03` Trigger de `updated_at` ativo nas tabelas com `updated_at`.
-4. [ ] `DB-04` Foreign keys presentes e coerentes com o dominio.
-5. [ ] `DB-05` Constraints de integridade (checks, uniques) aplicadas conforme regra de negocio.
-6. [ ] `DB-06` Indices essenciais criados para filtros e consultas operacionais.
-7. [ ] `DB-07` RLS habilitado em todas as tabelas privadas/sensiveis.
-8. [ ] `DB-08` Policies de owner/admin/public validadas por teste positivo e negativo.
+1. [OK] `DB-01` Todas as tabelas sensiveis possuem `created_at`.
+2. [OK] `DB-02` Todas as tabelas sensiveis possuem `updated_at` quando aplicavel.
+3. [OK] `DB-03` Trigger de `updated_at` ativo nas tabelas com `updated_at`.
+4. [OK] `DB-04` Foreign keys presentes e coerentes com o dominio.
+5. [OK] `DB-05` Constraints de integridade (checks, uniques) aplicadas conforme regra de negocio.
+6. [OK] `DB-06` Indices essenciais criados para filtros e consultas operacionais.
+7. [OK] `DB-07` RLS habilitado em todas as tabelas privadas/sensiveis.
+8. [OK] `DB-08` Policies de owner/admin/public validadas por teste positivo e negativo.
 
 ## 6) Edge Functions existentes
 
