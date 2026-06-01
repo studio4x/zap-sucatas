@@ -1,6 +1,6 @@
 /// <reference types="jsr:@supabase/functions-js/edge-runtime.d.ts" />
 
-import { getBearerToken } from '../_shared/auth.ts'
+import { getBearerToken, HttpError, resolveHttpErrorStatus } from '../_shared/auth.ts'
 import { sendAdminNotificationEmail } from '../_shared/admin-notification-email.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertIntegrationLog } from '../_shared/logging.ts'
@@ -40,7 +40,7 @@ async function requireActor(request: Request) {
   } = await admin.auth.getUser(token)
 
   if (userError || !user) {
-    throw new Error('Sessao invalida para notificacao de suporte.')
+    throw new HttpError('Invalid or expired session.', 401)
   }
 
   const { data: profile, error: profileError } = await admin
@@ -50,7 +50,7 @@ async function requireActor(request: Request) {
     .single()
 
   if (profileError || !profile || profile.status !== 'active') {
-    throw new Error('Perfil ativo nao encontrado para notificacao de suporte.')
+    throw new HttpError('Active profile not found.', 403)
   }
 
   return profile
@@ -239,8 +239,8 @@ Deno.serve(async (request) => {
   }
 
   try {
-    const payload = validatePayload((await request.json()) as RequestBody)
     const actor = await requireActor(request)
+    const payload = validatePayload((await request.json()) as RequestBody)
 
     if (payload.type === 'ticket_closed' && actor.role !== 'admin') {
       return jsonResponse({ error: 'Apenas admins podem disparar ticket_closed.' }, 403)
@@ -280,6 +280,7 @@ Deno.serve(async (request) => {
     return jsonResponse({ success: true, ...enqueueResult })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const status = resolveHttpErrorStatus(error)
     await insertIntegrationLog({
       integrationName: 'support_notifications',
       message,
@@ -289,6 +290,6 @@ Deno.serve(async (request) => {
       },
       status: 'error',
     })
-    return jsonResponse({ error: message }, 400)
+    return jsonResponse({ error: message }, status === 500 ? 400 : status)
   }
 })

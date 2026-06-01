@@ -340,11 +340,11 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ### 6.2 Testes obrigatorios de autenticacao/autorizacao (Edge Functions sensiveis) - BLK-EF-AUTHZ
 
-1. [ ] `EFA-01` Requisicao sem `Authorization: Bearer <access_token>` retorna `401`.
-2. [ ] `EFA-02` Requisicao com token invalido/expirado retorna `401`.
-3. [ ] `EFA-03` Requisicao com usuario sem permissao admin retorna `403` quando aplicavel.
-4. [ ] `EFA-04` Funcoes administrativas validam `profiles.is_admin` ou `profiles.role = 'admin'`.
-5. [ ] `EFA-05` Respostas de erro retornam JSON claro e consistente (`401`/`403`/`400`).
+1. [OK] `EFA-01` Requisicao sem `Authorization: Bearer <access_token>` retorna `401`.
+2. [OK] `EFA-02` Requisicao com token invalido/expirado retorna `401`.
+3. [OK] `EFA-03` Requisicao com usuario sem permissao admin retorna `403` quando aplicavel.
+4. [OK] `EFA-04` Funcoes administrativas validam `profiles.is_admin` ou `profiles.role = 'admin'`.
+5. [OK] `EFA-05` Respostas de erro retornam JSON claro e consistente (`401`/`403`/`400`).
 
 ## 6.1 Segredos e uso de service role - BLK-SEG-SEGREDOS
 

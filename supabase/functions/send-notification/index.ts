@@ -1,6 +1,6 @@
 /// <reference types="jsr:@supabase/functions-js/edge-runtime.d.ts" />
 
-import { requireAdminProfile } from '../_shared/auth.ts'
+import { requireAdminProfile, resolveHttpErrorStatus } from '../_shared/auth.ts'
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { insertAdminAuditLog, insertIntegrationLog } from '../_shared/logging.ts'
 import { normalizeChannels } from '../_shared/notifications.ts'
@@ -259,6 +259,7 @@ Deno.serve(async (request) => {
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const status = resolveHttpErrorStatus(error)
 
     await insertIntegrationLog({
       integrationName: 'notifications',
@@ -269,6 +270,6 @@ Deno.serve(async (request) => {
       status: 'error',
     })
 
-    return jsonResponse({ error: message }, 400)
+    return jsonResponse({ error: message }, status === 500 ? 400 : status)
   }
 })

@@ -39,6 +39,19 @@ type ResetPasswordPayload = {
 
 type RequestBody = CreatePayload | DeletePayload | ResetPasswordPayload | UpdatePayload
 
+const VALIDATION_ERRORS = [
+  'Invalid mode for create.',
+  'Invalid mode for update.',
+  'Invalid mode for delete.',
+  'Invalid mode for reset password.',
+  'Invalid role.',
+  'Invalid status.',
+  'Valid email is required.',
+  'Full name is required.',
+  'Password must be at least 8 characters long.',
+  'profileId is required.',
+]
+
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase()
 }
@@ -537,6 +550,8 @@ Deno.serve(async (request) => {
         : typeof error === 'object' && error !== null && 'message' in error
           ? String((error as { message?: unknown }).message ?? 'Unexpected error.')
           : 'Unexpected error.'
-    return jsonResponse({ error: message }, 500)
+
+    const isValidationError = VALIDATION_ERRORS.includes(message)
+    return jsonResponse({ error: message }, isValidationError ? 400 : 500)
   }
 })
