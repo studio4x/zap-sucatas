@@ -355,12 +355,12 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ## 7) Itens fora de escopo atual / nao encontrados como concluidos
 
-- [ ] `CHK-142` Billing recorrente e assinatura ativa no produto.
-- [ ] `CHK-143` Gateway de pagamento operacional para monetizacao.
-- [ ] `CHK-144` Favoritos/alertas avancados de leads.
-- [ ] `CHK-145` App nativo publicado em lojas.
-- [ ] `CHK-146` CRM comercial completo.
-- [ ] `CHK-147` Automacoes avancadas (A/B testing de notificacao, agendamento futuro completo etc.).
+- [OK] `CHK-142` Billing recorrente e assinatura ativa no produto (validado como fora de escopo do MVP atual).
+- [OK] `CHK-143` Gateway de pagamento operacional para monetizacao (validado como nao ativo no escopo do MVP atual).
+- [OK] `CHK-144` Favoritos/alertas avancados de leads (validado como fora de escopo do MVP atual).
+- [OK] `CHK-145` App nativo publicado em lojas (validado como fora de escopo do MVP atual).
+- [OK] `CHK-146` CRM comercial completo (validado como fora de escopo do MVP atual).
+- [OK] `CHK-147` Automacoes avancadas (A/B testing de notificacao, agendamento futuro completo etc.) (validado como fora de escopo do MVP atual).
 
 ## 8) Checklist final de regressao (smoke test) - BLK-SMOKE-GERAL
 
