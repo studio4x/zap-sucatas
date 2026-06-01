@@ -295,10 +295,10 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ## 5.4 Testes sugeridos de seguranca - BLK-SEG-RLS-POLICIES
 
-1. [ ] `SEC-01` Usuario comum tentar editar dado admin deve falhar.
-2. [ ] `SEC-02` Usuario anonimo tentar escrever em tabela privada deve falhar.
-3. [ ] `SEC-03` Usuario owner deve acessar somente seus dados privados.
-4. [ ] `SEC-04` Admin deve conseguir operacao total em modulos administrativos.
+1. [OK] `SEC-01` Usuario comum tentar editar dado admin deve falhar.
+2. [OK] `SEC-02` Usuario anonimo tentar escrever em tabela privada deve falhar.
+3. [OK] `SEC-03` Usuario owner deve acessar somente seus dados privados.
+4. [OK] `SEC-04` Admin deve conseguir operacao total em modulos administrativos.
 
 ## 5.5 Validacao estrutural obrigatoria por migration/tabela sensivel - BLK-DB-ESTRUTURA
 
