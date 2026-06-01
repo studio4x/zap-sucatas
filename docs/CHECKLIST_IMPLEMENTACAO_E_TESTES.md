@@ -364,16 +364,16 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ## 8) Checklist final de regressao (smoke test) - BLK-SMOKE-GERAL
 
-1. [ ] `SMK-01` Build local (`npm run build`) sem erros.
-2. [ ] `SMK-02` Login admin e acesso a todas as rotas `/admin`.
-3. [ ] `SMK-03` Login usuario e acesso a todas as rotas `/app`.
-4. [ ] `SMK-04` Home publica renderizando corretamente em desktop e mobile.
-5. [ ] `SMK-05` Header e rodape exibindo logos corretos apos upload.
-6. [ ] `SMK-06` Notificacoes chegando no centro do usuario.
-7. [ ] `SMK-07` Criacao e moderacao de anuncio ponta a ponta.
-8. [ ] `SMK-08` Ticket de suporte ponta a ponta.
-9. [ ] `SMK-09` Dashboard de analytics com dados recentes.
-10. [ ] `SMK-10` Deploy em producao refletindo a `BUILD_VERSION` mais recente.
+1. [OK] `SMK-01` Build local (`npm run build`) sem erros.
+2. [OK] `SMK-02` Login admin e acesso a todas as rotas `/admin`.
+3. [OK] `SMK-03` Login usuario e acesso a todas as rotas `/app`.
+4. [OK] `SMK-04` Home publica renderizando corretamente em desktop e mobile.
+5. [OK] `SMK-05` Header e rodape exibindo logos corretos apos upload.
+6. [OK] `SMK-06` Notificacoes chegando no centro do usuario.
+7. [OK] `SMK-07` Criacao e moderacao de anuncio ponta a ponta.
+8. [OK] `SMK-08` Ticket de suporte ponta a ponta.
+9. [OK] `SMK-09` Dashboard de analytics com dados recentes.
+10. [OK] `SMK-10` Deploy em producao refletindo a `BUILD_VERSION` mais recente.
 
 ## 8.1 Build version e rastreabilidade - BLK-BUILD-VERSION
 
