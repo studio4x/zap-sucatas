@@ -256,9 +256,9 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ### 4.10.2 Testes sugeridos - BLK-CONTATO
 
-1. [ ] `CTT-01` Enviar mensagem no formulario publico.
-2. [ ] `CTT-02` Validar entrada no admin de contato.
-3. [ ] `CTT-03` Alterar status da mensagem no admin e validar persistencia.
+1. [OK] `CTT-01` Enviar mensagem no formulario publico.
+2. [OK] `CTT-02` Validar entrada no admin de contato.
+3. [OK] `CTT-03` Alterar status da mensagem no admin e validar persistencia.
 
 ## 4.11 Logs e auditoria
 
