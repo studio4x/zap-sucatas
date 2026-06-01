@@ -270,9 +270,9 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ### 4.11.2 Testes sugeridos - BLK-LOGS-AUDITORIA
 
-1. [ ] `LOG-01` Executar operacoes criticas (aprovacao/reprovacao/envios).
-2. [ ] `LOG-02` Validar rastros em logs administrativos.
-3. [ ] `LOG-03` Confirmar se payloads e status estao coerentes com a acao.
+1. [OK] `LOG-01` Executar operacoes criticas (aprovacao/reprovacao/envios).
+2. [OK] `LOG-02` Validar rastros em logs administrativos.
+3. [OK] `LOG-03` Confirmar se payloads e status estao coerentes com a acao.
 
 ## 5) Banco de dados, migrations e seguranca
 
