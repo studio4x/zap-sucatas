@@ -334,9 +334,9 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ### 6.1 Testes sugeridos - BLK-EF-GERAL
 
-1. [ ] `EF-01` Validar cada funcao com perfil/permissao correta.
-2. [ ] `EF-02` Validar respostas de erro para payload invalido.
-3. [ ] `EF-03` Validar trilha de logs das funcoes sensiveis.
+1. [OK] `EF-01` Validar cada funcao com perfil/permissao correta.
+2. [OK] `EF-02` Validar respostas de erro para payload invalido.
+3. [OK] `EF-03` Validar trilha de logs das funcoes sensiveis.
 
 ### 6.2 Testes obrigatorios de autenticacao/autorizacao (Edge Functions sensiveis) - BLK-EF-AUTHZ
 
