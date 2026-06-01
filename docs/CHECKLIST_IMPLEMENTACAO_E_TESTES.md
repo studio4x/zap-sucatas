@@ -348,10 +348,10 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ## 6.1 Segredos e uso de service role - BLK-SEG-SEGREDOS
 
-1. [ ] `SEG-01` Nao ha segredo exposto no frontend (incluindo chaves administrativas).
-2. [ ] `SEG-02` `service_role` usado apenas no backend/Edge Functions.
-3. [ ] `SEG-03` Variaveis de ambiente publicas contem apenas dados seguros para cliente.
-4. [ ] `SEG-04` Fluxos sensiveis nao dependem de permissao apenas no frontend.
+1. [OK] `SEG-01` Nao ha segredo exposto no frontend (incluindo chaves administrativas).
+2. [OK] `SEG-02` `service_role` usado apenas no backend/Edge Functions.
+3. [OK] `SEG-03` Variaveis de ambiente publicas contem apenas dados seguros para cliente.
+4. [OK] `SEG-04` Fluxos sensiveis nao dependem de permissao apenas no frontend.
 
 ## 7) Itens fora de escopo atual / nao encontrados como concluidos
 
