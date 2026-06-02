@@ -400,11 +400,11 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ## 8.4 Storage e permissoes por bucket - BLK-STORAGE-PERMISSOES
 
-1. [ ] `STR-01` Upload de imagens de anuncio funcional em `listing-media`.
-2. [ ] `STR-02` Upload de assets de blog funcional em `blog-media`.
-3. [ ] `STR-03` Upload de logos/favicon funcional em `site-assets`.
-4. [ ] `STR-04` Leitura publica apenas onde previsto por policy.
-5. [ ] `STR-05` Tentativa de escrita indevida por usuario sem permissao falha.
+1. [OK] `STR-01` Upload de imagens de anuncio funcional em `listing-media`.
+2. [OK] `STR-02` Upload de assets de blog funcional em `blog-media`.
+3. [OK] `STR-03` Upload de logos/favicon funcional em `site-assets`.
+4. [OK] `STR-04` Leitura publica apenas onde previsto por policy.
+5. [OK] `STR-05` Tentativa de escrita indevida por usuario sem permissao falha.
 
 ## 8.5 Estados de UX obrigatorios (telas criticas) - BLK-UX-ESTADOS
 
