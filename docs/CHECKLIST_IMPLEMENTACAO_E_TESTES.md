@@ -392,11 +392,11 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ## 8.3 Fluxo critico ponta a ponta com auditoria - BLK-FLUXO-E2E-AUDIT
 
-1. [ ] `E2E-01` Usuario cria anuncio e salva em rascunho.
-2. [ ] `E2E-02` Usuario envia anuncio para revisao (`pending_review`).
-3. [ ] `E2E-03` Admin aprova anuncio e valida `slug` + `published_at` + exibicao publica.
-4. [ ] `E2E-04` Admin rejeita anuncio e valida motivo + bloqueio de exibicao publica.
-5. [ ] `E2E-05` Cada acao critica gera rastreabilidade em logs/auditoria.
+1. [OK] `E2E-01` Usuario cria anuncio e salva em rascunho.
+2. [OK] `E2E-02` Usuario envia anuncio para revisao (`pending_review`).
+3. [OK] `E2E-03` Admin aprova anuncio e valida `slug` + `published_at` + exibicao publica.
+4. [OK] `E2E-04` Admin rejeita anuncio e valida motivo + bloqueio de exibicao publica.
+5. [OK] `E2E-05` Cada acao critica gera rastreabilidade em logs/auditoria.
 
 ## 8.4 Storage e permissoes por bucket - BLK-STORAGE-PERMISSOES
 
