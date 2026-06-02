@@ -76,6 +76,12 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 - [x] `CHK-055` `/admin/configuracoes`
 - [x] `CHK-056` `/admin/logs`
 
+### 3.4 Complementos de precos e monetizacao
+
+- [x] `CHK-150` `/preco-dos-metais-lme`
+- [x] `CHK-151` `/admin/preco-das-sucatas`
+- [x] `CHK-152` `/admin/pagamentos`
+
 ## 4) Checklist funcional por modulo
 
 ## 4.1 Autenticação e controle de acesso
@@ -274,6 +280,26 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 2. [OK] `LOG-02` Validar rastros em logs administrativos.
 3. [OK] `LOG-03` Confirmar se payloads e status estao coerentes com a ação.
 
+## 4.12 Monetização e preços operacionais
+
+### 4.12.1 Implementação
+
+- [x] `CHK-150` Página pública de preços dos metais LME.
+- [x] `CHK-151` CRUD admin de preço das sucatas (`/admin/preco-das-sucatas`).
+- [x] `CHK-152` Painel admin de pagamentos de destaque (`/admin/pagamentos`).
+- [x] `CHK-153` Criação de cobrança para anúncio em destaque via Asaas.
+- [x] `CHK-154` Webhook Asaas para atualização automática do status do pagamento.
+- [x] `CHK-155` Validação da integração Asaas e alternância de ambiente sandbox/production.
+
+### 4.12.2 Testes sugeridos - BLK-PAGAMENTOS-DESTAQUE
+
+1. [ ] `PAY-01` Abrir `/preco-dos-metais-lme` e validar dados, loading, erro e atualização da página.
+2. [ ] `PAY-02` Criar, editar e remover item em `/admin/preco-das-sucatas` e validar reflexo público.
+3. [ ] `PAY-03` Abrir `/admin/pagamentos` e validar listagem, filtros e toggle de ativação.
+4. [ ] `PAY-04` Criar cobrança de destaque e validar URLs de pagamento geradas pelo Asaas.
+5. [ ] `PAY-05` Disparar webhook Asaas e validar transição de status para `paid`, `expired`, `canceled` ou `failed`.
+6. [ ] `PAY-06` Validar ambiente Asaas, URL do webhook e token configurados na checagem de integração.
+
 ## 5) Banco de dados, migrations e seguranca
 
 ## 5.1 Migrations existentes
@@ -331,6 +357,15 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 - [x] `CHK-139` `process-notifications`
 - [x] `CHK-140` `get-notifications`
 - [x] `CHK-141` `mark-notification-read`
+
+### 6.3 Monetização e integração Asaas
+
+- [x] `CHK-156` `create-featured-listing-payment`
+- [x] `CHK-157` `asaas-payment-webhook`
+- [x] `CHK-158` `list-admin-featured-payments`
+- [x] `CHK-159` `list-featured-listing-payments`
+- [x] `CHK-160` `validate-asaas-integration`
+- [x] `CHK-161` `update-asaas-environment`
 
 ### 6.1 Testes sugeridos - BLK-EF-GERAL
 
