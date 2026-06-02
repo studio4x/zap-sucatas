@@ -385,10 +385,10 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ## 8.2 Validacao obrigatoria de deploy em producao - BLK-DEPLOY-PROD
 
-1. [ ] `DEP-01` Deploy mais recente em estado `READY`.
-2. [ ] `DEP-02` Dominio canonico apontando para o deploy mais recente.
-3. [ ] `DEP-03` Revisao ativa em producao corresponde ao `HEAD` atual.
-4. [ ] `DEP-04` Em caso de divergencia (HEAD/deploy/dominio), alias corrigido antes do encerramento.
+1. [OK] `DEP-01` Deploy mais recente em estado `READY`.
+2. [OK] `DEP-02` Dominio canonico apontando para o deploy mais recente.
+3. [OK] `DEP-03` Revisao ativa em producao corresponde ao `HEAD` atual.
+4. [OK] `DEP-04` Em caso de divergencia (HEAD/deploy/dominio), alias corrigido antes do encerramento.
 
 ## 8.3 Fluxo critico ponta a ponta com auditoria - BLK-FLUXO-E2E-AUDIT
 
