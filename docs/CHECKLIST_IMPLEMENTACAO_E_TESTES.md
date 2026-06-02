@@ -408,10 +408,10 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ## 8.5 Estados de UX obrigatorios (telas criticas) - BLK-UX-ESTADOS
 
-1. [ ] `UX-01` Estados de loading validados nas telas principais (publico, `/app`, `/admin`).
-2. [ ] `UX-02` Estados de erro com mensagem clara e recuperacao basica.
-3. [ ] `UX-03` Estados vazios com orientacao de proximo passo.
-4. [ ] `UX-04` Estados de sucesso com feedback visivel ao usuario.
+1. [OK] `UX-01` Estados de loading validados nas telas principais (publico, `/app`, `/admin`).
+2. [OK] `UX-02` Estados de erro com mensagem clara e recuperacao basica.
+3. [OK] `UX-03` Estados vazios com orientacao de proximo passo.
+4. [OK] `UX-04` Estados de sucesso com feedback visivel ao usuario.
 
 ## 9) Observacoes para uso deste documento
 
