@@ -88,7 +88,7 @@ export function AppOverviewPage() {
         <DashboardTableCard
           columns={[
             {
-              header: 'Anuncio',
+              header: 'Anúncio',
               cell: (listing) => (
                 <div className="space-y-1">
                   <p className="font-medium text-foreground">{listing.title}</p>
@@ -111,7 +111,7 @@ export function AppOverviewPage() {
               ),
             },
             {
-              header: 'Acao',
+              header: 'Ação',
               className: 'w-[120px] text-right',
               cell: (listing) => (
                 <Button asChild size="sm" type="button" variant="ghost">

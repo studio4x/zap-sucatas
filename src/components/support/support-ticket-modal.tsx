@@ -119,7 +119,7 @@ export function SupportTicketModal({ initialStep = 'choice', onOpenChange, open 
             <div className="grid gap-3">
               <Link className="rounded-[1.4rem] border border-border bg-background px-5 py-4 text-left transition hover:bg-muted" onClick={() => onOpenChange(false)} to={paths.public.support}>
                 <p className="font-semibold text-foreground">Ver perguntas frequentes</p>
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">Abra a central publica de suporte e SLA.</p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">Abra a central pública de suporte e SLA.</p>
               </Link>
               <button className="rounded-[1.4rem] border border-primary/20 bg-primary/5 px-5 py-4 text-left transition hover:bg-primary/10" onClick={() => setStep('form')} type="button">
                 <p className="font-semibold text-foreground">Abrir um chamado</p>
@@ -141,7 +141,7 @@ export function SupportTicketModal({ initialStep = 'choice', onOpenChange, open 
                   <div>
                     <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">Novo chamado</p>
                     <h2 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">Abrir ticket de suporte</h2>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">Registre contexto, urgencia e anexo opcional para acelerar a triagem.</p>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">Registre contexto, urgência e anexo opcional para acelerar a triagem.</p>
                   </div>
                 </div>
                 <button className="rounded-full border border-border p-2 text-muted-foreground transition hover:bg-background hover:text-foreground" onClick={() => onOpenChange(false)} type="button">
@@ -153,8 +153,8 @@ export function SupportTicketModal({ initialStep = 'choice', onOpenChange, open 
               <div className="rounded-[1.4rem] border border-primary/10 bg-primary/5 p-4">
                 <p className="text-sm font-semibold text-foreground">SLA da categoria selecionada</p>
                 <p className="mt-2 text-sm leading-7 text-muted-foreground">{selectedCategory.description}</p>
-                <p className="mt-2 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Horario: {formatBusinessHours((config ?? configQuery.data)?.businessHours ?? { timezone: 'America/Sao_Paulo', daysOfWeek: [1,2,3,4,5], startHour: 8, endHour: 18 })}</p>
-                <p className="mt-2 text-xs text-muted-foreground">A prioridade serve apenas para triagem interna. Nao altera a promessa publica de SLA.</p>
+                <p className="mt-2 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Horário: {formatBusinessHours((config ?? configQuery.data)?.businessHours ?? { timezone: 'America/Sao_Paulo', daysOfWeek: [1,2,3,4,5], startHour: 8, endHour: 18 })}</p>
+                <p className="mt-2 text-xs text-muted-foreground">A prioridade serve apenas para triagem interna. Não altera a promessa pública de SLA.</p>
               </div>
 
               {!user?.profileId ? (
@@ -193,8 +193,8 @@ export function SupportTicketModal({ initialStep = 'choice', onOpenChange, open 
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor="support-description">Descricao</label>
-                  <Textarea id="support-description" placeholder="Explique o contexto, os passos ja tentados e o que voce precisa destravar agora." {...form.register('description')} />
+                  <label className="text-sm font-medium text-foreground" htmlFor="support-description">Descrição</label>
+                  <Textarea id="support-description" placeholder="Explique o contexto, os passos ja tentados e o que você precisa destravar agora." {...form.register('description')} />
                   {form.formState.errors.description ? <p className="text-sm text-destructive">{form.formState.errors.description.message}</p> : null}
                 </div>
 
@@ -209,7 +209,7 @@ export function SupportTicketModal({ initialStep = 'choice', onOpenChange, open 
                   ) : null}
                 </div>
 
-                {createMutation.isError ? <p className="text-sm text-destructive">{createMutation.error instanceof Error ? createMutation.error.message : 'Nao foi possivel abrir o chamado.'}</p> : null}
+                {createMutation.isError ? <p className="text-sm text-destructive">{createMutation.error instanceof Error ? createMutation.error.message : 'Não foi possível abrir o chamado.'}</p> : null}
 
                 <div className="flex justify-between gap-3 pt-2">
                   <Button onClick={() => setStep(initialStep === 'form' ? 'form' : 'choice')} type="button" variant="outline">Voltar</Button>

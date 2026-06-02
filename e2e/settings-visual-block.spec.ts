@@ -84,12 +84,12 @@ test.describe('BLK-SETTINGS-VISUAL (4.9.2)', () => {
       expect((faviconHref ?? '').includes('favicon')).toBeTruthy()
 
       await page.goto('/admin/configuracoes')
-      await page.getByRole('button', { name: /^operação|operacao/i }).click()
+      await page.getByRole('button', { name: /^operação|operação/i }).click()
       await page.locator('#site-name').fill(siteName)
       await page.locator('#seo-title').fill(seoTitle)
       await page.locator('#seo-description').fill(seoDescription)
-      await page.getByRole('button', { name: /salvar configurações|salvar configuracoes/i }).click()
-      await expect(page.getByText(/configurações globais atualizadas com sucesso|configuracoes globais atualizadas com sucesso/i)).toBeVisible({ timeout: 30000 })
+      await page.getByRole('button', { name: /salvar configurações|salvar configurações/i }).click()
+      await expect(page.getByText(/configurações globais atualizadas com sucesso|configurações globais atualizadas com sucesso/i)).toBeVisible({ timeout: 30000 })
 
       const { data: settingsAfter } = await supabaseAdmin
         .from('system_settings')

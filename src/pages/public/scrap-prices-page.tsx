@@ -21,7 +21,7 @@ export function ScrapPricesPage() {
     return (
       <Card className="w-full border-destructive/20 bg-destructive/5">
         <CardContent className="p-6 text-sm text-destructive">
-          Nao foi possivel carregar o preço das sucatas neste momento.
+          Não foi possível carregar o preço das sucatas neste momento.
         </CardContent>
       </Card>
     )

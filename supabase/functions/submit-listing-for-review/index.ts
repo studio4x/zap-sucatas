@@ -90,17 +90,17 @@ Acesse o painel para moderar: /admin/anuncios/${listing.id}`,
 
       await enqueueTransactionalNotification({
         actionUrl: '/app/anuncios',
-        body: `Seu anuncio "${listing.title}" foi enviado para revisao.`,
+        body: `Seu anúncio "${listing.title}" foi enviado para revisao.`,
         category: 'listing_status',
-        title: 'Anuncio enviado para revisao',
+        title: 'Anúncio enviado para revisao',
         userId: listing.user_id,
       })
       if (adminRecipientProfileId && adminRecipientProfileId !== listing.user_id) {
         await enqueueTransactionalNotification({
           actionUrl: `/admin/anuncios/${listing.id}`,
-          body: `O anuncio "${listing.title}" foi reenviado para revisao e aguarda moderacao.`,
+          body: `O anúncio "${listing.title}" foi reenviado para revisao e aguarda moderação.`,
           category: 'listing_status',
-          title: 'Anuncio pendente de revisao no admin',
+          title: 'Anúncio pendente de revisao no admin',
           userId: adminRecipientProfileId,
         })
       }
@@ -180,17 +180,17 @@ Acesse o painel para moderar: /admin/anuncios/${listing.id}`,
 
     await enqueueTransactionalNotification({
       actionUrl: '/app/anuncios',
-      body: `Seu anuncio "${listing.title}" foi enviado para revisao.`,
+      body: `Seu anúncio "${listing.title}" foi enviado para revisao.`,
       category: 'listing_status',
-      title: 'Anuncio enviado para revisao',
+      title: 'Anúncio enviado para revisao',
       userId: listing.user_id,
     })
     if (adminRecipientProfileId && adminRecipientProfileId !== listing.user_id) {
       await enqueueTransactionalNotification({
         actionUrl: `/admin/anuncios/${listing.id}`,
-        body: `Novo anuncio "${listing.title}" enviado para revisao e aguardando moderacao.`,
+        body: `Novo anúncio "${listing.title}" enviado para revisao e aguardando moderação.`,
         category: 'listing_status',
-        title: 'Anuncio pendente de revisao no admin',
+        title: 'Anúncio pendente de revisao no admin',
         userId: adminRecipientProfileId,
       })
     }

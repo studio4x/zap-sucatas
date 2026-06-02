@@ -112,9 +112,9 @@ Deno.serve(async (request) => {
     })
     await enqueueTransactionalNotification({
       actionUrl: '/app/anuncios',
-      body: `Seu anuncio "${listing.title}" foi ${transition.nextStatus === 'paused' ? 'pausado' : 'arquivado'}.`,
+      body: `Seu anúncio "${listing.title}" foi ${transition.nextStatus === 'paused' ? 'pausado' : 'arquivado'}.`,
       category: 'listing_status',
-      title: transition.nextStatus === 'paused' ? 'Anuncio pausado' : 'Anuncio arquivado',
+      title: transition.nextStatus === 'paused' ? 'Anúncio pausado' : 'Anúncio arquivado',
       userId: listing.user_id,
     })
 

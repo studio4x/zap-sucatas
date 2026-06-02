@@ -41,7 +41,7 @@ type SupportSettingsRow = {
 
 function ensureSupabase() {
   if (!supabase) {
-    throw new Error('Supabase nao configurado no ambiente atual.')
+    throw new Error('Supabase não configurado no ambiente atual.')
   }
 
   return supabase
@@ -118,7 +118,7 @@ async function getFreshAccessToken() {
 
   if (!session?.refresh_token) {
     if (!session?.access_token) {
-      throw new Error('Sessao invalida. Faca login novamente.')
+      throw new Error('Sessão inválida. Faça login novamente.')
     }
 
     return session.access_token
@@ -250,7 +250,7 @@ export async function fetchSupportTicketDetail(ticketId: string): Promise<Suppor
     .single()
 
   if (ticketError || !ticketData) {
-    throw ticketError ?? new Error('Chamado nao encontrado.')
+    throw ticketError ?? new Error('Chamado não encontrado.')
   }
 
   const ticket = mapSupportTicket(ticketData as SupportTicketRow)
@@ -336,7 +336,7 @@ export async function createSupportTicket(input: {
     .single()
 
   if (error || !data) {
-    throw error ?? new Error('Nao foi possivel abrir o chamado.')
+    throw error ?? new Error('Não foi possível abrir o chamado.')
   }
 
   const ticket = mapSupportTicket(data as SupportTicketRow)
@@ -365,7 +365,7 @@ export async function sendSupportMessage(input: {
     .single()
 
   if (error || !data) {
-    throw error ?? new Error('Nao foi possivel enviar a mensagem.')
+    throw error ?? new Error('Não foi possível enviar a mensagem.')
   }
 
   const message = data as SupportMessageRow
@@ -383,7 +383,7 @@ export async function updateSupportTicketStatus(input: { status: SupportTicketSt
     .single()
 
   if (error || !data) {
-    throw error ?? new Error('Nao foi possivel atualizar o status do chamado.')
+    throw error ?? new Error('Não foi possível atualizar o status do chamado.')
   }
 
   if (input.status === 'closed') {

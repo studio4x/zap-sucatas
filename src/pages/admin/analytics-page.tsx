@@ -141,13 +141,13 @@ export function AdminAnalyticsPage() {
           value={data?.clickCount ?? 0}
         />
         <AdminStatCard
-          description="Taxa de cliques sobre acessos totais do periodo."
+          description="Taxa de cliques sobre acessos totais do período."
           label="CTR"
           value={`${(data?.ctr ?? 0).toFixed(2)}%`}
         />
         <AdminStatCard
-          description="Tempo medio de permanencia por pagina no recorte."
-          label="Tempo medio"
+          description="Tempo médio de permanência por página no recorte."
+          label="Tempo médio"
           value={formatDuration(data?.avgNavigationSeconds ?? 0)}
         />
       </div>
@@ -172,8 +172,8 @@ export function AdminAnalyticsPage() {
           value={data?.recurringUsers ?? 0}
         />
         <AdminStatCard
-          description="Eventos de visualizacao realizados por usuarios autenticados."
-          helper="Comparativo entre trafego logado e geral"
+          description="Eventos de visualização realizados por usuários autenticados."
+          helper="Comparativo entre tráfego logado e geral"
           label="Eventos logados"
           value={data?.loggedUserEvents ?? 0}
         />

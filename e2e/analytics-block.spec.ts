@@ -94,7 +94,7 @@ test.describe('BLK-ANALYTICS (4.8.2)', () => {
     await page.waitForTimeout(800)
     await emitAnalyticsEvent(page, { eventType: 'page_view', pathname: '/' })
     await emitAnalyticsEvent(page, { eventType: 'click', pathname: '/', target: 'public:hero-cta' })
-    await page.getByRole('link', { name: /anúncios|anuncios/i }).first().click()
+    await page.getByRole('link', { name: /anúncios|anúncios/i }).first().click()
     await page.waitForTimeout(800)
     await page.goto('/anuncios')
     await page.waitForTimeout(800)

@@ -43,8 +43,8 @@ Deno.serve(async (request) => {
         .from('notifications')
         .insert({
           user_id: pref.user_id,
-          title: 'Resumo de notificacoes',
-          body: `Voce recebeu ${count} notificacoes nao lidas no periodo.`,
+          title: 'Resumo de notificações',
+          body: `Você recebeu ${count} notificações não lidas no período.`,
           category: 'digest',
           priority: 'low',
           is_actionable: true,
@@ -58,8 +58,8 @@ Deno.serve(async (request) => {
         notification_id: notification.id,
         user_id: pref.user_id,
         channel: 'email',
-        title: 'Resumo de notificacoes',
-        body: `Voce recebeu ${count} notificacoes nao lidas no periodo.`,
+        title: 'Resumo de notificações',
+        body: `Você recebeu ${count} notificações não lidas no período.`,
         category: 'digest',
         priority: 'low',
         payload: { dispatch_type: 'digest', digest_type: pref.email_digest },

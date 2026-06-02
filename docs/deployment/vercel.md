@@ -3,9 +3,9 @@
 ## Fluxo recomendado
 
 - conectar o repositorio `studio4x/zap-sucatas` ao projeto `zap-sucatas` na Vercel
-- definir `main` como branch de producao
+- definir `main` como branch de produção
 - deixar previews habilitados para pull requests
-- nao usar deploy manual por CLI
+- não usar deploy manual por CLI
 
 ## Variaveis de ambiente na Vercel
 
@@ -43,7 +43,7 @@ Garantir no painel do Supabase:
   - `https://zapsucatas.com.br/cadastro`
   - `https://zapsucatas.com.br/recuperar-senha`
 
-## Segredos que nao vao para Vercel
+## Segredos que não vao para Vercel
 
 Estes valores ficam apenas no Supabase ou em execucao administrativa local:
 
@@ -61,4 +61,4 @@ Estes valores ficam apenas no Supabase ou em execucao administrativa local:
 
 Os e-mails do produto enviados pelas Edge Functions usam SMTP configurado nos secrets do Supabase.
 
-Os e-mails de autenticacao do Supabase Auth tambem devem usar SMTP customizado no proprio projeto Supabase.
+Os e-mails de autenticação do Supabase Auth tambem devem usar SMTP customizado no proprio projeto Supabase.

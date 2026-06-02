@@ -20,7 +20,7 @@ export function PricingPage() {
     return (
       <Card>
         <CardContent className="p-6 text-sm text-muted-foreground">
-          Carregando tabela de precos...
+          Carregando tabela de preços...
         </CardContent>
       </Card>
     )
@@ -30,7 +30,7 @@ export function PricingPage() {
     return (
       <Card className="border-destructive/20 bg-destructive/5">
         <CardContent className="p-6 text-sm text-destructive">
-          Nao foi possivel carregar a tabela de precos neste momento.
+          Não foi possível carregar a tabela de preços neste momento.
         </CardContent>
       </Card>
     )
@@ -42,16 +42,16 @@ export function PricingPage() {
     <div className="space-y-8 lg:space-y-10">
       <PricingMonthlyIndicators rows={data.historyRows} />
 
-      <PricingHistoryTable rows={data.historyRows} title="Historico consolidado dos ultimos 6 meses" />
+      <PricingHistoryTable rows={data.historyRows} title="Histórico consolidado dos ultimos 6 meses" />
 
       <Card className="overflow-hidden rounded-[1.95rem] border-border/80">
         <CardHeader className="border-b border-border/70">
-          <CardTitle>Referencias comerciais de sucata</CardTitle>
+          <CardTitle>Referências comerciais de sucata</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {data.manualEntries.length === 0 ? (
             <div className="p-6 text-sm text-muted-foreground">
-              Nenhuma referencia manual foi publicada ainda.
+              Nenhuma referência manual foi publicada ainda.
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -60,7 +60,7 @@ export function PricingPage() {
                   <tr className="bg-[#27991f] text-left text-white">
                     <th className="px-4 py-3 font-semibold">Material</th>
                     <th className="px-4 py-3 font-semibold">Regiao</th>
-                    <th className="px-4 py-3 font-semibold">Preco</th>
+                    <th className="px-4 py-3 font-semibold">Preço</th>
                     <th className="px-4 py-3 font-semibold">Unidade</th>
                     <th className="px-4 py-3 font-semibold">Vigencia</th>
                   </tr>
@@ -99,7 +99,7 @@ export function PricingPage() {
         actionLabel="Criar conta para anunciar"
         actionTo={paths.auth.register}
         description="Use a leitura de preços para embasar sua negociação e publique seus anúncios em um portal focado no mercado de sucatas."
-        title="Quer transformar referencia de mercado em oportunidade comercial?"
+        title="Quer transformar referência de mercado em oportunidade comercial?"
       />
     </div>
   )

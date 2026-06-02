@@ -53,11 +53,11 @@ export function SellerCard({
 
       <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
         <ShieldCheck className="mr-2 size-3.5" />
-        Anuncio moderado pela plataforma
+        Anúncio moderado pela plataforma
       </Badge>
 
       <p className="text-sm leading-7 text-muted-foreground">
-        Esta pagina organiza dados comerciais, atributos tecnicos e perguntas publicas para apoiar uma negociacao mais segura e objetiva.
+        Esta página organiza dados comerciais, atributos técnicos e perguntas públicas para apoiar uma negociação mais segura e objetiva.
       </p>
 
       {contactPhone ? (

@@ -43,30 +43,30 @@ export function AppSupportTicketsPage() {
             <Button onClick={() => setIsModalOpen(true)} type="button"><PlusCircle className="size-4" /> Novo chamado</Button>
           </>
         }
-        description="Acompanhe os chamados abertos, o prazo da primeira resposta e o historico de conversas com a equipe."
+        description="Acompanhe os chamados abertos, o prazo da primeira resposta e o histórico de conversas com a equipe."
         title="Meus chamados"
       />
 
       <Card className="rounded-[1.8rem] !border-none bg-primary/5 shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
         <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-semibold text-foreground">SLA publico de primeira resposta</p>
+            <p className="text-sm font-semibold text-foreground">SLA público de primeira resposta</p>
             <p className="mt-2 text-sm leading-7 text-muted-foreground">Pagamentos em ate 2 horas uteis. Demais categorias em ate 24 horas uteis.</p>
             <p className="mt-2 text-xs uppercase tracking-[0.12em] text-muted-foreground">{formatBusinessHours(config.businessHours)}</p>
           </div>
-          <div className="inline-flex rounded-full border border-primary/20 bg-background px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-primary">Nao e prazo de resolucao final</div>
+          <div className="inline-flex rounded-full border border-primary/20 bg-background px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-primary">Não e prazo de resolucao final</div>
         </CardContent>
       </Card>
 
       <Card className="rounded-[1.8rem] !border-none shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
         <CardContent className="p-0">
           {ticketsQuery.isLoading ? <div className="px-6 py-8 text-sm text-muted-foreground">Carregando chamados...</div> : null}
-          {ticketsQuery.isError ? <div className="px-6 py-8 text-sm text-destructive">Nao foi possivel carregar os chamados.</div> : null}
+          {ticketsQuery.isError ? <div className="px-6 py-8 text-sm text-destructive">Não foi possível carregar os chamados.</div> : null}
           {!ticketsQuery.isLoading && !ticketsQuery.isError && tickets.length === 0 ? (
             <div className="p-6">
               <DashboardEmptyState
                 className="border-none border-transparent bg-transparent shadow-none"
-                description="Voce ainda nao abriu nenhum chamado."
+                description="Você ainda não abriu nenhum chamado."
                 icon={MessageSquare}
                 title="Nenhum chamado encontrado"
               />
@@ -77,7 +77,7 @@ export function AppSupportTicketsPage() {
               <table className="min-w-[860px] w-full text-sm">
                 <thead className="bg-muted/60 text-left">
                   <tr>
-                    {['Assunto', 'Categoria', 'Status', 'SLA', 'Prazo', 'Acoes'].map((header) => <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground" key={header}>{header}</th>)}
+                    {['Assunto', 'Categoria', 'Status', 'SLA', 'Prazo', 'Ações'].map((header) => <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground" key={header}>{header}</th>)}
                   </tr>
                 </thead>
                 <tbody>

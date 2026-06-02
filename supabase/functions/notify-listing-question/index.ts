@@ -57,7 +57,7 @@ Deno.serve(async (request) => {
     const questionId = typeof payload.questionId === 'string' ? payload.questionId.trim() : ''
 
     if (!questionId) {
-      return jsonResponse({ error: 'questionId e obrigatorio.' }, 400)
+      return jsonResponse({ error: 'questionId e obrigatório.' }, 400)
     }
 
     const admin = createAdminClient()
@@ -68,7 +68,7 @@ Deno.serve(async (request) => {
       .single()
 
     if (questionError || !question) {
-      return jsonResponse({ error: 'Pergunta nao encontrada.' }, 404)
+      return jsonResponse({ error: 'Pergunta não encontrada.' }, 404)
     }
 
     const { data: listing, error: listingError } = await admin
@@ -78,7 +78,7 @@ Deno.serve(async (request) => {
       .single()
 
     if (listingError || !listing) {
-      return jsonResponse({ error: 'Anuncio nao encontrado.' }, 404)
+      return jsonResponse({ error: 'Anúncio não encontrado.' }, 404)
     }
 
     if (question.author_user_id && question.author_user_id === listing.user_id) {
@@ -87,7 +87,7 @@ Deno.serve(async (request) => {
 
     const result = await enqueueTransactionalNotification({
       actionUrl: '/app/perguntas',
-      body: `Seu anuncio "${listing.title}" recebeu uma nova pergunta.`,
+      body: `Seu anúncio "${listing.title}" recebeu uma nova pergunta.`,
       category: 'listing_questions',
       payload: {
         entity_type: 'listing_question',
@@ -95,7 +95,7 @@ Deno.serve(async (request) => {
         question_id: question.id,
       },
       priority: 'normal',
-      title: 'Nova pergunta em anuncio',
+      title: 'Nova pergunta em anúncio',
       userId: listing.user_id,
     })
 
@@ -107,7 +107,7 @@ Deno.serve(async (request) => {
         .single()
 
       if (ownerProfileError || !ownerProfile) {
-        throw ownerProfileError ?? new Error('Perfil do anunciante nao encontrado.')
+        throw ownerProfileError ?? new Error('Perfil do anunciante não encontrado.')
       }
 
       let ownerEmail = ownerProfile.email?.trim() ?? ''
@@ -120,12 +120,12 @@ Deno.serve(async (request) => {
       }
 
       if (!ownerEmail) {
-        throw new Error('E-mail do anunciante nao encontrado.')
+        throw new Error('E-mail do anunciante não encontrado.')
       }
 
       const smtp = getSmtpConfig()
       if (!smtp) {
-        throw new Error('SMTP nao configurado para envio imediato de e-mail.')
+        throw new Error('SMTP não configurado para envio imediato de e-mail.')
       }
 
       const transporter = nodemailer.createTransport({
@@ -140,7 +140,7 @@ Deno.serve(async (request) => {
         : `${Deno.env.get('SITE_URL') ?? 'https://zap-sucatas.vercel.app'}/app/perguntas`
 
       const recipientName = ownerProfile.full_name?.trim() || 'anunciante'
-      const subject = 'Nova pergunta recebida em seu anuncio'
+      const subject = 'Nova pergunta recebida em seu anúncio'
       const bodyHtml = `
         <p style="margin:0 0 14px 0;font-size:15px;line-height:1.7;color:#334155;">Olá ${escapeHtml(recipientName)},</p>
         <p style="margin:0 0 14px 0;font-size:15px;line-height:1.7;color:#334155;">Seu anúncio <strong>${escapeHtml(listing.title)}</strong> recebeu uma nova pergunta e está aguardando sua resposta.</p>
@@ -178,7 +178,7 @@ Deno.serve(async (request) => {
 
     await insertIntegrationLog({
       integrationName: 'listing_questions',
-      message: 'Notificacao de nova pergunta enfileirada.',
+      message: 'Notificação de nova pergunta enfileirada.',
       payload: {
         listingId: listing.id,
         notificationId: result.notificationId,

@@ -7,7 +7,7 @@ import type { PublicBlogPost } from '@/domains/blog/types'
 
 function formatBlogDate(value: string | null) {
   if (!value) {
-    return 'Em atualizacao'
+    return 'Em atualização'
   }
 
   return new Intl.DateTimeFormat('pt-BR', {
@@ -52,7 +52,7 @@ export function BlogPostCard({ post }: BlogPostCardProps) {
               {post.title}
             </h3>
             <p className="line-clamp-3 text-sm leading-7 text-muted-foreground">
-              {post.excerpt ?? 'Conteudo editorial da Zap Sucatas sobre sucatas, metais e mercado industrial.'}
+              {post.excerpt ?? 'Conteúdo editorial da Zap Sucatas sobre sucatas, metais e mercado industrial.'}
             </p>
           </div>
 

@@ -173,16 +173,16 @@ async function renderListingStatusEmail(input: {
   const shortDescription = input.context.description.trim().slice(0, 280)
   const statusCopy: Record<ListingStatus, { body: string; subject: string }> = {
     pending_review: {
-      subject: 'Seu anuncio foi enviado para revisao',
-      body: `O anuncio "${input.context.listingTitle}" foi enviado para revisao e agora aguarda moderacao.`,
+      subject: 'Seu anúncio foi enviado para revisao',
+      body: `O anúncio "${input.context.listingTitle}" foi enviado para revisao e agora aguarda moderação.`,
     },
     approved: {
-      subject: 'Seu anuncio foi aprovado',
-      body: `O anuncio "${input.context.listingTitle}" foi aprovado e ja pode ser exibido publicamente.`,
+      subject: 'Seu anúncio foi aprovado',
+      body: `O anúncio "${input.context.listingTitle}" foi aprovado e ja pode ser exibido publicamente.`,
     },
     rejected: {
-      subject: 'Seu anuncio foi reprovado',
-      body: `O anuncio "${input.context.listingTitle}" foi reprovado.${input.reason ? ` Motivo: ${input.reason}` : ''}`,
+      subject: 'Seu anúncio foi reprovado',
+      body: `O anúncio "${input.context.listingTitle}" foi reprovado.${input.reason ? ` Motivo: ${input.reason}` : ''}`,
     },
   }
 

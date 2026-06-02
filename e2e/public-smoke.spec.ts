@@ -69,7 +69,7 @@ test.describe('public marketplace smoke', () => {
 
     await expect(
       page.getByRole('heading', {
-        name: /Canal direto com a operacao/i,
+        name: /Canal direto com a operação/i,
       }),
     ).toBeVisible()
     await expect(page.getByRole('heading', { name: /Enviar mensagem/i })).toBeVisible()

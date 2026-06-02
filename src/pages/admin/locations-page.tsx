@@ -106,7 +106,7 @@ export function AdminLocationsPage() {
               Adicionar localidade
             </Button>
             <Button asChild type="button">
-              <Link to={paths.admin.listings}>Anuncios</Link>
+              <Link to={paths.admin.listings}>Anúncios</Link>
             </Button>
             <Button asChild type="button" variant="outline">
               <Link to={paths.public.listings}>Catálogo público</Link>
@@ -177,7 +177,7 @@ export function AdminLocationsPage() {
             cell: (location) => <span className="font-medium text-foreground">{location.city}</span>,
           },
           {
-            header: 'Anuncios',
+            header: 'Anúncios',
             cell: (location) => (
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>{location.totalListings} total</p>
@@ -283,7 +283,7 @@ export function AdminLocationsPage() {
       {selectedLocation ? (
         <div className="fixed inset-0 z-[90] flex items-center justify-center px-4">
           <button
-            aria-label="Fechar modal de anuncios"
+            aria-label="Fechar modal de anúncios"
             className="absolute inset-0 bg-slate-950/45"
             onClick={() => setSelectedLocation(null)}
             type="button"

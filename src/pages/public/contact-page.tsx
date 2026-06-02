@@ -42,7 +42,7 @@ export function ContactPage() {
   const submitMutation = useMutation({
     mutationFn: submitContactMessage,
     onError: (error) => {
-      setErrorFeedback(error, 'Nao foi possivel enviar a mensagem agora.')
+      setErrorFeedback(error, 'Não foi possível enviar a mensagem agora.')
     },
     onSuccess: () => {
       setSuccessFeedback('Mensagem enviada com sucesso. Nossa equipe vai retornar o contato em breve.')
@@ -83,7 +83,7 @@ export function ContactPage() {
           </div>
 
           <p className="max-w-xl text-2xl leading-8 text-muted-foreground">
-            Se desejar fazer alguma sugestao, reclamacao, elogio ou denuncia utilize nosso formulario ou entre em contato em nosso WhatsApp.
+            Se desejar fazer alguma sugestão, reclamação, elogio ou denuncia utilize nosso formulário ou entre em contato em nosso WhatsApp.
           </p>
 
           <div className="inline-flex items-center gap-3 text-primary">

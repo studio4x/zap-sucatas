@@ -81,7 +81,7 @@ export function AppNotificationsPage() {
       value: boolean | string
     }) => {
       if (!user?.profileId || !preferencesQuery.data) {
-        throw new Error('Preferencias indisponiveis para atualizacao.')
+        throw new Error('Preferencias indisponiveis para atualização.')
       }
 
       const current = preferencesQuery.data
@@ -127,21 +127,21 @@ export function AppNotificationsPage() {
   return (
     <section className="space-y-6">
       <DashboardSectionHeader
-        description="Acompanhe alertas operacionais, marque leitura e ajuste os canais de comunicacao da sua conta."
-        title="Notificacoes"
+        description="Acompanhe alertas operacionais, marque leitura e ajuste os canais de comunicação da sua conta."
+        title="Notificações"
       />
 
       <div className="grid gap-4 md:grid-cols-3">
-        <DashboardStatCard label="Nao lidas" value={unreadCount} />
+        <DashboardStatCard label="Não lidas" value={unreadCount} />
         <DashboardStatCard label="Total" value={totalCount} />
-        <DashboardStatCard label="Filtro ativo" value={onlyUnread ? 'Somente nao lidas' : 'Todas'} />
+        <DashboardStatCard label="Filtro ativo" value={onlyUnread ? 'Somente não lidas' : 'Todas'} />
       </div>
 
       <DashboardFilterCard
         actions={
           <div className="flex flex-wrap gap-2">
             <Button onClick={() => setOnlyUnread((value) => !value)} type="button" variant={onlyUnread ? 'default' : 'outline'}>
-              {onlyUnread ? 'Mostrando nao lidas' : 'Somente nao lidas'}
+              {onlyUnread ? 'Mostrando não lidas' : 'Somente não lidas'}
             </Button>
             <Button disabled={unreadCount === 0 || markAllMutation.isPending} onClick={() => markAllMutation.mutate()} type="button" variant="outline">
               <CheckCheck className="size-4" />
@@ -149,11 +149,11 @@ export function AppNotificationsPage() {
             </Button>
           </div>
         }
-        description="Filtre por categoria, busque por palavra-chave e abra diretamente o contexto da notificacao."
-        title="Central de notificacoes"
+        description="Filtre por categoria, busque por palavra-chave e abra diretamente o contexto da notificação."
+        title="Central de notificações"
       >
         <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
-          <Input onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por titulo, categoria ou mensagem" value={query} />
+          <Input onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por título, categoria ou mensagem" value={query} />
           <Select onChange={(event) => setCategoryFilter(event.target.value)} value={categoryFilter}>
             <option value="all">Todas as categorias</option>
             {categoryOptions
@@ -168,12 +168,12 @@ export function AppNotificationsPage() {
       </DashboardFilterCard>
 
       {notificationsQuery.isLoading ? (
-        <div className="rounded-xl bg-card px-5 py-6 text-sm text-muted-foreground shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">Carregando notificacoes...</div>
+        <div className="rounded-xl bg-card px-5 py-6 text-sm text-muted-foreground shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">Carregando notificações...</div>
       ) : null}
 
       {notificationsQuery.isError ? (
         <DashboardAlertCard
-          description="Nao foi possivel carregar sua central de notificacoes neste momento."
+          description="Não foi possível carregar sua central de notificações neste momento."
           title="Falha na leitura"
           tone="error"
         />
@@ -182,7 +182,7 @@ export function AppNotificationsPage() {
       {!notificationsQuery.isLoading && !notificationsQuery.isError ? (
         <div className="space-y-3">
           {notifications.length === 0 ? (
-            <div className="rounded-xl bg-card px-5 py-7 text-sm text-muted-foreground shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">Nenhuma notificacao encontrada para os filtros atuais.</div>
+            <div className="rounded-xl bg-card px-5 py-7 text-sm text-muted-foreground shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">Nenhuma notificação encontrada para os filtros atuais.</div>
           ) : (
             notifications.map((notification) => {
               const priorityMeta = getNotificationPriorityMeta(notification.priority)
@@ -203,7 +203,7 @@ export function AppNotificationsPage() {
                           {priorityMeta.label}
                         </span>
                         {!notification.readAt ? (
-                          <span className="inline-flex rounded-full border border-[#b5d3f1] bg-[#e8f2fc] px-2.5 py-0.5 text-xs font-semibold text-[#17508f]">Nao lida</span>
+                          <span className="inline-flex rounded-full border border-[#b5d3f1] bg-[#e8f2fc] px-2.5 py-0.5 text-xs font-semibold text-[#17508f]">Não lida</span>
                         ) : null}
                       </div>
                       <p className="text-sm leading-6 text-muted-foreground">{notification.body}</p>
@@ -238,8 +238,8 @@ export function AppNotificationsPage() {
       ) : null}
 
       <section className="rounded-xl bg-card p-5 shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
-        <h2 className="text-base font-semibold text-foreground">Preferencias de notificacao</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Controle os canais, horario silencioso e frequencia de e-mails para sua conta.</p>
+        <h2 className="text-base font-semibold text-foreground">Preferencias de notificação</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Controle os canais, horário silencioso e frequência de e-mails para sua conta.</p>
 
         {!preferences ? (
           <p className="mt-4 text-sm text-muted-foreground">Carregando preferencias...</p>
@@ -253,7 +253,7 @@ export function AppNotificationsPage() {
             </div>
 
             <div className="grid gap-3 md:grid-cols-3">
-              <label className="inline-flex items-center gap-2 text-sm text-foreground md:col-span-3"><input checked={preferences.quietHoursEnabled} onChange={(event) => preferencesMutation.mutate({ key: 'quietHoursEnabled', value: event.target.checked })} type="checkbox" /> Ativar horario silencioso</label>
+              <label className="inline-flex items-center gap-2 text-sm text-foreground md:col-span-3"><input checked={preferences.quietHoursEnabled} onChange={(event) => preferencesMutation.mutate({ key: 'quietHoursEnabled', value: event.target.checked })} type="checkbox" /> Ativar horário silencioso</label>
               <div className="space-y-1">
                 <label className="text-sm text-muted-foreground">Inicio</label>
                 <Input onChange={(event) => preferencesMutation.mutate({ key: 'quietHoursStart', value: event.target.value })} type="time" value={preferences.quietHoursStart ?? ''} />
@@ -269,7 +269,7 @@ export function AppNotificationsPage() {
             </div>
 
             <div className="space-y-1 md:max-w-xs">
-              <label className="text-sm text-muted-foreground">Frequencia de email</label>
+              <label className="text-sm text-muted-foreground">Frequência de email</label>
               <Select onChange={(event) => preferencesMutation.mutate({ key: 'emailDigest', value: event.target.value })} value={preferences.emailDigest}>
                 <option value="immediate">Imediato</option>
                 <option value="daily">Diario</option>

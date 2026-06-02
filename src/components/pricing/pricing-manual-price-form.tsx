@@ -36,7 +36,7 @@ export function PricingManualPriceForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Preco manual de sucata</CardTitle>
+        <CardTitle>Preço manual de sucata</CardTitle>
         <CardDescription>
           Cadastre entradas públicas por material, região e vigência. Esse bloco alimenta a tabela
           comercial exibida ao mercado.
@@ -73,7 +73,7 @@ export function PricingManualPriceForm({
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground" htmlFor="manual-price">
-              Preco numerico
+              Preço numerico
             </label>
             <Input id="manual-price" {...form.register('priceNumeric')} placeholder="Ex.: 1,25" />
             {form.formState.errors.priceNumeric ? (

@@ -368,7 +368,7 @@ async function resolveSnapshots(mode: SyncMode) {
       return {
         entries: dedupeSnapshots([usdSnapshot]),
         warningMessage:
-          'Westmetall sem cotacoes numericas no momento; sincronizacao parcial concluida (apenas dolar).',
+          'Westmetall sem cotações numericas no momento; sincronizacao parcial concluida (apenas dolar).',
       } satisfies SyncResolution
     }
 
@@ -482,7 +482,7 @@ Deno.serve(async (request) => {
     await updatePricingSyncStatus(admin, {
       lastMessage:
         accessSource === 'cron'
-          ? 'Sincronizacao automatica em andamento.'
+          ? 'Sincronizacao automática em andamento.'
           : 'Sincronizacao manual em andamento.',
       lastRunAt: new Date().toISOString(),
       lastStatus: 'running',
@@ -536,7 +536,7 @@ Deno.serve(async (request) => {
       lastMessage: resolution.warningMessage
         ? resolution.warningMessage
         : accessSource === 'cron'
-          ? `Sincronizacao automatica concluida com ${entries.length} snapshots.`
+          ? `Sincronizacao automática concluida com ${entries.length} snapshots.`
           : `Sincronizacao manual concluida com ${entries.length} snapshots.`,
       lastRunAt: new Date().toISOString(),
       lastSnapshotCount: entries.length,

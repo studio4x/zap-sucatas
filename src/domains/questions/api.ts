@@ -47,7 +47,7 @@ type AnswerRow = {
 
 function ensureSupabase() {
   if (!supabase) {
-    throw new Error('Supabase nao configurado no ambiente atual.')
+    throw new Error('Supabase não configurado no ambiente atual.')
   }
 
   return supabase
@@ -61,7 +61,7 @@ async function getFreshAccessToken() {
 
   if (!session?.refresh_token) {
     if (!session?.access_token) {
-      throw new Error('Sessao invalida. Faca login novamente.')
+      throw new Error('Sessão inválida. Faça login novamente.')
     }
 
     return session.access_token
@@ -78,7 +78,7 @@ async function getFreshAccessToken() {
   const accessToken = data.session?.access_token ?? session.access_token
 
   if (!accessToken) {
-    throw new Error('Sessao invalida. Faca login novamente.')
+    throw new Error('Sessão inválida. Faça login novamente.')
   }
 
   return accessToken
@@ -90,7 +90,7 @@ function normalizeQuestionInsertError(message: string) {
   }
 
   if (message.includes('valid guest email')) {
-    return 'Informe um e-mail valido para enviar a pergunta sem login.'
+    return 'Informe um e-mail válido para enviar a pergunta sem login.'
   }
 
   return message
@@ -100,7 +100,7 @@ async function invokeQuestionFunction<TBody extends object, TResponse>(name: str
   ensureSupabase()
 
   if (!env.supabaseUrl || !env.supabaseAnonKey) {
-    throw new Error('Supabase nao configurado no ambiente atual.')
+    throw new Error('Supabase não configurado no ambiente atual.')
   }
 
   const accessToken = await getFreshAccessToken()
@@ -370,7 +370,7 @@ export async function createListingQuestion(input: CreateQuestionInput) {
       }),
     })
   } catch {
-    // Notificacao de pergunta nao deve bloquear o envio da pergunta.
+    // Notificação de pergunta não deve bloquear o envio da pergunta.
   }
 
   return data.id as string

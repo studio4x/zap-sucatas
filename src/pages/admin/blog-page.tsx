@@ -50,7 +50,7 @@ function getStatusMeta(status: BlogPostStatus) {
 
 function formatDate(value: string | null) {
   if (!value) {
-    return 'Nao publicado'
+    return 'Não publicado'
   }
 
   return new Intl.DateTimeFormat('pt-BR', {
@@ -109,7 +109,7 @@ export function AdminBlogPage() {
         values,
       }),
     onError: (error) => {
-      setErrorFeedback(error, 'Nao foi possivel salvar a categoria.')
+      setErrorFeedback(error, 'Não foi possível salvar a categoria.')
     },
     onSuccess: async () => {
       setSuccessFeedback(
@@ -126,7 +126,7 @@ export function AdminBlogPage() {
   const deleteCategoryMutation = useMutation({
     mutationFn: deleteBlogCategory,
     onError: (error) => {
-      setErrorFeedback(error, 'Nao foi possivel remover a categoria.')
+      setErrorFeedback(error, 'Não foi possível remover a categoria.')
     },
     onSuccess: async () => {
       setSuccessFeedback('Categoria editorial removida com sucesso.')
@@ -139,7 +139,7 @@ export function AdminBlogPage() {
   const savePostMutation = useMutation({
     mutationFn: async (input: { coverFile: File | null; values: BlogPostFormValues }) => {
       if (!user?.id || !user.profileId) {
-        throw new Error('Sessao administrativa invalida para publicacao editorial.')
+        throw new Error('Sessão administrativa inválida para publicação editorial.')
       }
 
       return saveAdminBlogPost({
@@ -151,7 +151,7 @@ export function AdminBlogPage() {
       })
     },
     onError: (error) => {
-      setErrorFeedback(error, 'Nao foi possivel salvar o post.')
+      setErrorFeedback(error, 'Não foi possível salvar o post.')
     },
     onSuccess: async (savedPost) => {
       setSuccessFeedback(
@@ -168,7 +168,7 @@ export function AdminBlogPage() {
   const deletePostMutation = useMutation({
     mutationFn: deleteBlogPost,
     onError: (error) => {
-      setErrorFeedback(error, 'Nao foi possivel remover o post.')
+      setErrorFeedback(error, 'Não foi possível remover o post.')
     },
     onSuccess: async () => {
       setSuccessFeedback('Post removido com sucesso.')
@@ -202,7 +202,7 @@ export function AdminBlogPage() {
       })
     },
     onError: (error) => {
-      setErrorFeedback(error, 'Nao foi possivel atualizar o status do blog.')
+      setErrorFeedback(error, 'Não foi possível atualizar o status do blog.')
     },
     onSuccess: async (updated) => {
       setSuccessFeedback(updated.blogEnabled ? 'Blog ativado com sucesso.' : 'Blog desativado com sucesso.')
@@ -251,13 +251,13 @@ export function AdminBlogPage() {
               Nova categoria
             </Button>
             <Button asChild type="button" variant="outline">
-              <Link to={paths.public.blog}>Blog publico</Link>
+              <Link to={paths.public.blog}>Blog público</Link>
             </Button>
           </>
         }
-        description="Painel editorial do MVP com foco em criacao, edicao, categorias, status e publicacao."
+        description="Painel editorial do MVP com foco em criação, edição, categorias, status e publicação."
         eyebrow="Admin / blog"
-        title="Gestao do blog"
+        title="Gestão do blog"
       />
 
       {feedback ? <OperationFeedback feedback={feedback} /> : null}
@@ -326,7 +326,7 @@ export function AdminBlogPage() {
                   setPage(1)
                   setQuery(event.target.value)
                 }}
-                placeholder="Buscar por titulo, slug ou resumo"
+                placeholder="Buscar por título, slug ou resumo"
                 value={query}
               />
               <Select
@@ -406,7 +406,7 @@ export function AdminBlogPage() {
             ),
           },
           {
-            header: 'Publicacao',
+            header: 'Publicação',
             cell: (post) => (
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>{formatDate(post.publishedAt)}</p>
@@ -415,7 +415,7 @@ export function AdminBlogPage() {
             ),
           },
           {
-            header: 'Acoes',
+            header: 'Ações',
             className: 'w-[240px] text-right',
             cell: (post) => (
               <AdminRowActions
@@ -433,7 +433,7 @@ export function AdminBlogPage() {
                     ? [
                         {
                           icon: Eye,
-                          label: 'Publico',
+                          label: 'Público',
                           to: paths.public.blogPost(post.slug),
                           variant: 'ghost' as const,
                         },
@@ -464,7 +464,7 @@ export function AdminBlogPage() {
         data={posts}
         emptyDescription="Nenhum post corresponde ao recorte atual."
         emptyTitle="Sem posts neste filtro"
-        errorMessage="Nao foi possivel carregar os posts do blog."
+        errorMessage="Não foi possível carregar os posts do blog."
         getRowKey={(post) => post.id}
         isError={blogQuery.isError || categoriesQuery.isError}
         isLoading={blogQuery.isLoading || categoriesQuery.isLoading}
@@ -499,7 +499,7 @@ export function AdminBlogPage() {
               ),
             },
             {
-              header: 'Acoes',
+              header: 'Ações',
               className: 'w-[220px] text-right',
               cell: (category) => (
                 <AdminRowActions
@@ -528,7 +528,7 @@ export function AdminBlogPage() {
           data={categories}
           emptyDescription="Nenhuma categoria editorial cadastrada ainda."
           emptyTitle="Sem categorias editoriais"
-          errorMessage="Nao foi possivel carregar as categorias."
+          errorMessage="Não foi possível carregar as categorias."
           getRowKey={(category) => category.id}
           isError={categoriesQuery.isError}
           isLoading={categoriesQuery.isLoading}
@@ -592,7 +592,7 @@ export function AdminBlogPage() {
         confirmLabel="Excluir categoria"
         description={
           categoryPendingRemoval
-            ? `Excluir a categoria "${categoryPendingRemoval.name}"? Essa acao so e segura quando nao houver posts vinculados.`
+            ? `Excluir a categoria "${categoryPendingRemoval.name}"? Essa ação so e segura quando não houver posts vinculados.`
             : ''
         }
         isPending={deleteCategoryMutation.isPending}
@@ -615,7 +615,7 @@ export function AdminBlogPage() {
         confirmLabel="Excluir post"
         description={
           postPendingRemoval
-            ? `Excluir o post "${postPendingRemoval.title}"? Essa acao remove o conteudo editorial do sistema.`
+            ? `Excluir o post "${postPendingRemoval.title}"? Essa ação remove o conteúdo editorial do sistema.`
             : ''
         }
         isPending={deletePostMutation.isPending}

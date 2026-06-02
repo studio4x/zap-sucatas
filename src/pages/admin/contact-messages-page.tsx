@@ -71,7 +71,7 @@ export function AdminContactMessagesPage() {
   const updateStatusMutation = useMutation({
     mutationFn: updateAdminContactMessageStatus,
     onError: (error) => {
-      setErrorFeedback(error, 'Nao foi possivel atualizar o status desta mensagem.')
+      setErrorFeedback(error, 'Não foi possível atualizar o status desta mensagem.')
     },
     onSuccess: async (message) => {
       setSuccessFeedback('Status da mensagem atualizado com sucesso.')
@@ -102,14 +102,14 @@ export function AdminContactMessagesPage() {
         actions={
           <>
             <Button asChild type="button">
-              <Link to={paths.public.contact}>Ver pagina publica</Link>
+              <Link to={paths.public.contact}>Ver página pública</Link>
             </Button>
             <Button asChild type="button" variant="outline">
               <Link to={paths.admin.logs}>Abrir logs</Link>
             </Button>
           </>
         }
-        description="Triagem operacional das mensagens recebidas pelo formulario publico, com status de atendimento e detalhe do contexto."
+        description="Triagem operacional das mensagens recebidas pelo formulário público, com status de atendimento e detalhe do contexto."
         eyebrow="Admin / contato"
         title="Inbox comercial"
       />
@@ -137,7 +137,7 @@ export function AdminContactMessagesPage() {
             Limpar filtros
           </Button>
         }
-        description="Busque por remetente, assunto ou conteudo e mova a mensagem entre os estados operacionais."
+        description="Busque por remetente, assunto ou conteúdo e mova a mensagem entre os estados operacionais."
       >
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
           <Input
@@ -211,7 +211,7 @@ export function AdminContactMessagesPage() {
             ),
           },
           {
-            header: 'Acoes',
+            header: 'Ações',
             className: 'w-[240px] text-right',
             cell: (message) => (
               <AdminRowActions
@@ -255,7 +255,7 @@ export function AdminContactMessagesPage() {
         data={messages}
         emptyDescription="Nenhuma mensagem foi encontrada para os filtros atuais."
         emptyTitle="Inbox sem mensagens neste recorte"
-        errorMessage="Nao foi possivel carregar as mensagens de contato."
+        errorMessage="Não foi possível carregar as mensagens de contato."
         getRowKey={(message) => message.id}
         isError={messagesQuery.isError || statsQuery.isError}
         isLoading={messagesQuery.isLoading || statsQuery.isLoading}

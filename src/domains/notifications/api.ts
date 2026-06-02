@@ -18,7 +18,7 @@ type ProfileRecipientRow = Pick<Database['public']['Tables']['profiles']['Row'],
 
 function ensureSupabase() {
   if (!supabase) {
-    throw new Error('Supabase nao configurado no ambiente atual.')
+    throw new Error('Supabase não configurado no ambiente atual.')
   }
 
   return supabase
@@ -160,7 +160,7 @@ async function getFreshAccessToken() {
 
   if (!session?.refresh_token) {
     if (!session?.access_token) {
-      throw new Error('Sessao invalida. Faca login novamente.')
+      throw new Error('Sessão inválida. Faça login novamente.')
     }
 
     return session.access_token
@@ -184,12 +184,12 @@ async function callEdgeFunction<TResponse>(input: {
   queryParams?: URLSearchParams
 }) {
   if (!env.supabaseUrl || !env.supabaseAnonKey) {
-    throw new Error('Variaveis do Supabase nao configuradas para Edge Functions.')
+    throw new Error('Variáveis do Supabase não configuradas para Edge Functions.')
   }
 
   const accessToken = await getFreshAccessToken()
   if (!accessToken) {
-    throw new Error('Sessao invalida. Faca login novamente.')
+    throw new Error('Sessão inválida. Faça login novamente.')
   }
 
   const query = input.queryParams ? `?${input.queryParams.toString()}` : ''
@@ -206,7 +206,7 @@ async function callEdgeFunction<TResponse>(input: {
   const payload = (await response.json()) as TResponse & { error?: string }
 
   if (!response.ok || payload.error) {
-    throw new Error(payload.error ?? 'Falha ao executar acao de notificacao.')
+    throw new Error(payload.error ?? 'Falha ao executar ação de notificação.')
   }
 
   return payload
@@ -287,7 +287,7 @@ export async function fetchNotificationPreferences(profileId: string) {
       .single()
 
     if (insertError || !inserted) {
-      throw insertError ?? new Error('Nao foi possivel inicializar as preferencias de notificacao.')
+      throw insertError ?? new Error('Não foi possível inicializar as preferencias de notificação.')
     }
 
     return mapNotificationPreference(inserted as NotificationPreferenceRow)
@@ -327,7 +327,7 @@ export async function updateNotificationPreferences(input: {
     .single()
 
   if (error || !data) {
-    throw error ?? new Error('Nao foi possivel salvar as preferencias de notificacao.')
+    throw error ?? new Error('Não foi possível salvar as preferencias de notificação.')
   }
 
   return mapNotificationPreference(data as NotificationPreferenceRow)

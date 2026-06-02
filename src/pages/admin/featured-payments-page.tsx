@@ -32,13 +32,13 @@ function formatCurrency(value: number) {
 
 function formatDateTime(value: string | null) {
   if (!value) {
-    return 'Nao informado'
+    return 'Não informado'
   }
 
   const date = new Date(value)
 
   if (Number.isNaN(date.getTime())) {
-    return 'Nao informado'
+    return 'Não informado'
   }
 
   return date.toLocaleString('pt-BR', {
@@ -94,7 +94,7 @@ export function AdminFeaturedPaymentsPage() {
     mutationFn: (enabled: boolean) => {
       const settingsId = settingsQuery.data?.id
       if (!settingsId) {
-        throw new Error('Configuracoes do sistema indisponiveis.')
+        throw new Error('Configurações do sistema indisponiveis.')
       }
       return updateFeaturedPaymentsEnabled({ enabled, id: settingsId })
     },
@@ -138,10 +138,10 @@ export function AdminFeaturedPaymentsPage() {
       <AdminPageHeader
         actions={
           <Button asChild type="button" variant="outline">
-            <Link to={paths.admin.listings}>Anuncios</Link>
+            <Link to={paths.admin.listings}>Anúncios</Link>
           </Button>
         }
-        description="Controle operacional dos pagamentos de destaque e validacao de conectividade da integracao Asaas."
+        description="Controle operacional dos pagamentos de destaque e validação de conectividade da integração Asaas."
         eyebrow="Admin / pagamentos"
         title="Pagamentos de destaque"
       />
@@ -159,7 +159,7 @@ export function AdminFeaturedPaymentsPage() {
           onClick={() => setActiveTab('config')}
           type="button"
         >
-          Configuracao Asaas
+          Configuração Asaas
         </button>
       </div>
 
@@ -168,7 +168,7 @@ export function AdminFeaturedPaymentsPage() {
           <div>
             <p className="text-sm font-medium text-foreground">Pagamentos com Asaas</p>
             <p className="text-sm text-muted-foreground">
-              Quando desativado, a geracao de cobranca e o destaque pago ficam bloqueados.
+              Quando desativado, a geração de cobrança e o destaque pago ficam bloqueados.
             </p>
           </div>
           <Switch
@@ -189,14 +189,14 @@ export function AdminFeaturedPaymentsPage() {
 
       {settingsQuery.data?.featuredPaymentsEnabled === false ? (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-          Pagamentos desativados. A opcao de pagar para destacar anuncio esta bloqueada no dashboard.
+          Pagamentos desativados. A opcao de pagar para destacar anúncio esta bloqueada no dashboard.
         </div>
       ) : null}
 
       {activeTab === 'payments' ? (
         <>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <AdminStatCard label="Total de cobrancas" value={stats.total} />
+            <AdminStatCard label="Total de cobranças" value={stats.total} />
             <AdminStatCard label="Pendentes" value={stats.pending} />
             <AdminStatCard label="Pagas" value={stats.paid} />
             <AdminStatCard label="Volume pago" value={formatCurrency(stats.volumePaid)} />
@@ -217,7 +217,7 @@ export function AdminFeaturedPaymentsPage() {
                 Limpar filtros
               </Button>
             }
-            description="Filtre por status ou busque por anuncio, anunciante e id Asaas."
+            description="Filtre por status ou busque por anúncio, anunciante e id Asaas."
           >
             <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
               <Input
@@ -226,7 +226,7 @@ export function AdminFeaturedPaymentsPage() {
                   setPage(1)
                   setQuery(event.target.value)
                 }}
-                placeholder="Buscar por anuncio, anunciante ou id Asaas"
+                placeholder="Buscar por anúncio, anunciante ou id Asaas"
                 value={query}
               />
               <Select
@@ -250,7 +250,7 @@ export function AdminFeaturedPaymentsPage() {
           <AdminDataTable
             columns={[
               {
-                header: 'Anuncio',
+                header: 'Anúncio',
                 cell: (item) => (
                   <div className="space-y-1">
                     <p className="font-medium text-foreground">{item.listing.title}</p>
@@ -282,13 +282,13 @@ export function AdminFeaturedPaymentsPage() {
                 cell: (item) => <span className="text-sm text-muted-foreground">{formatDateTime(item.paidAt)}</span>,
               },
               {
-                header: 'Acoes',
+                header: 'Ações',
                 className: 'w-[220px] text-right',
                 cell: (item) => (
                   <div className="flex justify-end gap-2">
                     {item.listing.slug ? (
                       <Button asChild size="sm" type="button" variant="ghost">
-                        <Link to={paths.public.listingDetails(item.listing.slug)}>Publico</Link>
+                        <Link to={paths.public.listingDetails(item.listing.slug)}>Público</Link>
                       </Button>
                     ) : null}
                     {item.invoiceUrl ? (
@@ -304,9 +304,9 @@ export function AdminFeaturedPaymentsPage() {
               },
             ]}
             data={paginatedPayments}
-            emptyDescription="Nao ha pagamentos de destaque para os filtros atuais."
+            emptyDescription="Não ha pagamentos de destaque para os filtros atuais."
             emptyTitle="Sem pagamentos"
-            errorMessage="Nao foi possivel carregar os pagamentos de destaque."
+            errorMessage="Não foi possível carregar os pagamentos de destaque."
             getRowKey={(item) => item.id}
             isError={paymentsQuery.isError}
             isLoading={paymentsQuery.isLoading}
@@ -325,11 +325,11 @@ export function AdminFeaturedPaymentsPage() {
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <AdminStatCard
               label="API key"
-              value={validationMutation.data?.config.apiKeyConfigured ? 'Configurada' : 'Nao configurada'}
+              value={validationMutation.data?.config.apiKeyConfigured ? 'Configurada' : 'Não configurada'}
             />
             <AdminStatCard label="Billing type" value={validationMutation.data?.config.billingType ?? '--'} />
             <AdminStatCard
-              label="Preco destaque"
+              label="Preço destaque"
               value={
                 typeof validationMutation.data?.config.featuredPrice === 'number'
                   ? formatCurrency(validationMutation.data.config.featuredPrice)
@@ -343,14 +343,14 @@ export function AdminFeaturedPaymentsPage() {
                   ? validationMutation.data.connectivity.ok
                     ? 'OK'
                     : 'Falha'
-                  : 'Nao testado'
+                  : 'Não testado'
               }
             />
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>Validacao da integracao Asaas</CardTitle>
+              <CardTitle>Validação da integração Asaas</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
@@ -358,9 +358,9 @@ export function AdminFeaturedPaymentsPage() {
               </p>
 
               <div className="rounded-lg border border-border bg-muted/25 p-4">
-                <p className="text-sm font-semibold text-foreground">Modo da integracao</p>
+                <p className="text-sm font-semibold text-foreground">Modo da integração</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Escolha o ambiente ativo da integracao. Voce pode alternar entre sandbox e producao.
+                  Escolha o ambiente ativo da integração. Você pode alternar entre sandbox e produção.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Button
@@ -387,7 +387,7 @@ export function AdminFeaturedPaymentsPage() {
                     type="button"
                     variant={validationMutation.data?.config.asaasEnvironment === 'production' ? 'default' : 'outline'}
                   >
-                    Producao
+                    Produção
                   </Button>
                 </div>
               </div>
@@ -402,7 +402,7 @@ export function AdminFeaturedPaymentsPage() {
                 type="button"
               >
                 <RefreshCcw className="size-4" />
-                {validationMutation.isPending ? 'Validando...' : 'Validar integracao'}
+                {validationMutation.isPending ? 'Validando...' : 'Validar integração'}
               </Button>
 
               {updateEnvironmentMutation.isError ? (
@@ -417,7 +417,7 @@ export function AdminFeaturedPaymentsPage() {
                 <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                   {validationMutation.error instanceof Error
                     ? validationMutation.error.message
-                    : 'Falha ao validar integracao.'}
+                    : 'Falha ao validar integração.'}
                 </div>
               ) : null}
 
@@ -427,8 +427,8 @@ export function AdminFeaturedPaymentsPage() {
                     <p className="text-sm font-semibold text-foreground">Resultado da conectividade</p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {validationMutation.data.connectivity.ok
-                        ? 'Conexao com Asaas validada com sucesso.'
-                        : validationMutation.data.connectivity.errorMessage ?? 'Falha na validacao.'}
+                        ? 'Conexão com Asaas validada com sucesso.'
+                        : validationMutation.data.connectivity.errorMessage ?? 'Falha na validação.'}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       Testado em {formatDateTime(validationMutation.data.connectivity.testedAt)}
@@ -439,7 +439,7 @@ export function AdminFeaturedPaymentsPage() {
                     <div className="rounded-lg border border-border bg-card p-4 text-sm">
                       <p className="font-medium text-foreground">Ambiente ativo</p>
                       <p className="mt-1 text-muted-foreground">
-                        {validationMutation.data.config.asaasEnvironment === 'production' ? 'Producao' : 'Sandbox'}
+                        {validationMutation.data.config.asaasEnvironment === 'production' ? 'Produção' : 'Sandbox'}
                       </p>
                     </div>
                     <div className="rounded-lg border border-border bg-card p-4 text-sm">
@@ -449,7 +449,7 @@ export function AdminFeaturedPaymentsPage() {
                     <div className="rounded-lg border border-border bg-card p-4 text-sm">
                       <p className="font-medium text-foreground">Webhook token</p>
                       <p className="mt-1 text-muted-foreground">
-                        {validationMutation.data.config.webhookTokenConfigured ? 'Configurado' : 'Nao configurado'}
+                        {validationMutation.data.config.webhookTokenConfigured ? 'Configurado' : 'Não configurado'}
                       </p>
                     </div>
                     <div className="rounded-lg border border-border bg-card p-4 text-sm md:col-span-2">
@@ -465,7 +465,7 @@ export function AdminFeaturedPaymentsPage() {
                     <div className="rounded-lg border border-border bg-card p-4 text-sm">
                       <p className="font-medium text-foreground">API key</p>
                       <p className="mt-1 text-muted-foreground">
-                        {validationMutation.data.config.apiKeyConfigured ? 'Configurada' : 'Nao configurada'}
+                        {validationMutation.data.config.apiKeyConfigured ? 'Configurada' : 'Não configurada'}
                       </p>
                     </div>
                   </div>

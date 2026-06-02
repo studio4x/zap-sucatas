@@ -14,7 +14,7 @@ test('listing lifecycle stays coherent across user, admin and public', async ({ 
   const userPassword = process.env.E2E_FLOW_USER_PASSWORD ?? 'ZapSucatas@2026!FlowUser'
   const adminEmail = process.env.E2E_FLOW_ADMIN_EMAIL ?? 'qa-admin-flow@zapsucatas.local'
   const adminPassword = process.env.E2E_FLOW_ADMIN_PASSWORD ?? 'ZapSucatas@2026!FlowAdmin'
-  const listingTitle = buildQaTitle('QA anuncio ciclo completo')
+  const listingTitle = buildQaTitle('QA anúncio ciclo completo')
   let publicPath = ''
 
   const userContext = await browser.newContext({ baseURL: BASE_URL })
@@ -109,7 +109,7 @@ test('listing lifecycle stays coherent across user, admin and public', async ({ 
       await expect(adminPage.getByText(/^Pausado$/)).toBeVisible()
 
       await publicPage.goto(publicPath)
-      await expect(publicPage.getByText(/nao foi possivel carregar o anuncio solicitado/i)).toBeVisible()
+      await expect(publicPage.getByText(/nao foi possível carregar o anúncio solicitado/i)).toBeVisible()
 
       await adminPage.goto('/admin/anuncios')
       await searchForText(adminPage, /buscar por t/i, listingTitle)

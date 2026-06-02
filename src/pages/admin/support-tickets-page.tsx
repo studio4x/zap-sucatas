@@ -123,7 +123,7 @@ export function AdminSupportTicketsPage() {
       />
 
       <div className="grid gap-4 md:grid-cols-3">
-        <AdminStatCard helper="Pagamentos em ate 2h uteis. Demais categorias em ate 24h uteis." label="SLA publico" value="2h / 24h" />
+        <AdminStatCard helper="Pagamentos em ate 2h uteis. Demais categorias em ate 24h uteis." label="SLA público" value="2h / 24h" />
         <AdminStatCard label="Chamados filtrados" value={tickets.length} />
         <AdminStatCard helper={overdueCount > 0 ? 'Ha chamados com primeira resposta fora do prazo.' : 'Nenhum chamado atrasado neste recorte.'} label="SLA atrasado" value={overdueCount} />
       </div>
@@ -153,7 +153,7 @@ export function AdminSupportTicketsPage() {
             </Button>
           </div>
         }
-        description="Busque por assunto, nome ou e-mail e organize a fila pela urgencia operacional do backoffice."
+        description="Busque por assunto, nome ou e-mail e organize a fila pela urgência operacional do backoffice."
       >
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <div className="relative">
@@ -184,10 +184,10 @@ export function AdminSupportTicketsPage() {
       <AdminDataTable
         columns={[
           {
-            header: 'Usuario',
+            header: 'Usuário',
             cell: (ticket) => (
               <div className="space-y-1">
-                <p className="font-medium text-foreground">{ticket.userFullName ?? 'Usuario autenticado'}</p>
+                <p className="font-medium text-foreground">{ticket.userFullName ?? 'Usuário autenticado'}</p>
                 <p className="text-xs text-muted-foreground">{ticket.userEmail ?? 'Sem e-mail'}</p>
               </div>
             ),
@@ -222,7 +222,7 @@ export function AdminSupportTicketsPage() {
           },
           { header: 'Prazo', cell: (ticket) => <span className="text-sm text-muted-foreground">{ticket.firstResponseAt ? `Respondido em ${formatSupportDateTime(ticket.firstResponseAt)}` : ticket.firstResponseDueAt ? formatSupportDateTime(ticket.firstResponseDueAt) : 'Em calculo'}</span> },
           {
-            header: 'Acoes',
+            header: 'Ações',
             className: 'text-right w-[140px]',
             cell: (ticket) => <AdminRowActions actions={[{ icon: MessageSquare, label: 'Responder', to: paths.admin.supportDetail(ticket.id) }, { icon: Trash2, label: 'Excluir', onClick: () => setDeletingTicket(ticket), variant: 'ghost' }]} />,
           },
@@ -230,7 +230,7 @@ export function AdminSupportTicketsPage() {
         data={tickets}
         emptyDescription="Nenhum chamado encontrado."
         emptyTitle="Fila vazia"
-        errorMessage="Nao foi possivel carregar os tickets do suporte."
+        errorMessage="Não foi possível carregar os tickets do suporte."
         getRowKey={(ticket) => ticket.id}
         isError={ticketsQuery.isError || configQuery.isError}
         isLoading={ticketsQuery.isLoading || configQuery.isLoading}
@@ -239,7 +239,7 @@ export function AdminSupportTicketsPage() {
 
       <ConfirmActionDialog
         confirmLabel="Confirmar exclusao"
-        description={deletingTicket ? `O chamado \"${deletingTicket.subject}\" e todo o historico serao removidos permanentemente.` : ''}
+        description={deletingTicket ? `O chamado \"${deletingTicket.subject}\" e todo o histórico serao removidos permanentemente.` : ''}
         isPending={deleteMutation.isPending}
         onConfirm={() => {
           if (deletingTicket) {

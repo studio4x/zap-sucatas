@@ -15,7 +15,7 @@ test.describe('authenticated smoke', () => {
     await signIn(page, email, password)
 
     await expect(page).toHaveURL(/\/app(\/|$)/)
-    await expect(page.getByText(/visao geral|anuncios|perfil/i).first()).toBeVisible()
+    await expect(page.getByText(/visao geral|anúncios|perfil/i).first()).toBeVisible()
   })
 
   test('admin credentials reach the admin shell', async ({ page }) => {

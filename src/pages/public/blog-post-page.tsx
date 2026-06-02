@@ -13,7 +13,7 @@ import { useAuth } from '@/hooks/use-auth'
 
 function formatBlogDate(value: string | null) {
   if (!value) {
-    return 'Em atualizacao'
+    return 'Em atualização'
   }
 
   return new Intl.DateTimeFormat('pt-BR', {
@@ -77,7 +77,7 @@ export function BlogPostPage() {
   const seoDescription =
     postQuery.data?.seoDescription?.trim() ||
     postQuery.data?.excerpt?.trim() ||
-    'Conteudo editorial da Zap Sucatas.'
+    'Conteúdo editorial da Zap Sucatas.'
 
   useEffect(() => {
     if (!postQuery.data) {
@@ -119,7 +119,7 @@ export function BlogPostPage() {
     return (
       <Card className="border-destructive/20 bg-destructive/5">
         <CardContent className="p-6 text-sm text-destructive">
-          Nao foi possivel carregar o artigo solicitado.
+          Não foi possível carregar o artigo solicitado.
         </CardContent>
       </Card>
     )
@@ -177,7 +177,7 @@ export function BlogPostPage() {
               <div dangerouslySetInnerHTML={{ __html: rawContent }} />
             </article>
           ) : (
-            (paragraphs.length > 0 ? paragraphs : [post.excerpt ?? 'Conteudo em atualizacao.']).map((paragraph, index) => (
+            (paragraphs.length > 0 ? paragraphs : [post.excerpt ?? 'Conteúdo em atualização.']).map((paragraph, index) => (
               <p key={`${paragraph.slice(0, 32)}-${index}`} className="text-base leading-8 text-foreground/90">
                 {paragraph}
               </p>
@@ -189,7 +189,7 @@ export function BlogPostPage() {
       {relatedPosts.length > 0 ? (
         <section className="space-y-6">
           <PublicSectionHeading
-            description="Mais conteudo editorial para aprofundar a leitura de mercado e operacao do segmento."
+            description="Mais conteúdo editorial para aprofundar a leitura de mercado e operação do segmento."
             eyebrow="Relacionados"
             title="Continue a leitura"
           />

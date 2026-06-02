@@ -37,7 +37,7 @@ test.describe('BLK-AUTH-ACESSO', () => {
     await expect(page.getByRole('heading', { name: /login da conta/i })).toBeVisible()
   })
 
-  test('AUTH-02: acessar /admin com usuario nao-admin bloqueia acesso', async ({ page }) => {
+  test('AUTH-02: acessar /admin com usuário não-admin bloqueia acesso', async ({ page }) => {
     await signInAsUser(page)
     await page.goto('/admin')
 
@@ -45,7 +45,7 @@ test.describe('BLK-AUTH-ACESSO', () => {
     await expect(page.getByRole('heading', { name: /vis[aã]o geral|painel/i })).toBeVisible()
   })
 
-  test('AUTH-03: criar conta nova e confirmar sessao no dashboard', async ({ page }) => {
+  test('AUTH-03: criar conta nova e confirmar sessão no dashboard', async ({ page }) => {
     const admin = createClient(
       requireEnv('VITE_SUPABASE_URL', process.env.VITE_SUPABASE_URL ?? supabaseUrl),
       requireEnv('SUPABASE_SERVICE_ROLE_KEY', process.env.SUPABASE_SERVICE_ROLE_KEY ?? serviceRoleKey),
@@ -104,7 +104,7 @@ test.describe('BLK-AUTH-ACESSO', () => {
     await expect(page.getByRole('heading', { name: /vis[aã]o geral|painel/i })).toBeVisible()
   })
 
-  test('AUTH-04: solicitar recuperacao de senha e validar fluxo completo', async ({ page }) => {
+  test('AUTH-04: solicitar recuperação de senha e validar fluxo completo', async ({ page }) => {
     const admin = createClient(
       requireEnv('VITE_SUPABASE_URL', process.env.VITE_SUPABASE_URL ?? supabaseUrl),
       requireEnv('SUPABASE_SERVICE_ROLE_KEY', process.env.SUPABASE_SERVICE_ROLE_KEY ?? serviceRoleKey),
@@ -134,7 +134,7 @@ test.describe('BLK-AUTH-ACESSO', () => {
       await page.getByLabel('E-mail').fill(email)
       await page.getByRole('button', { name: /enviar link/i }).click()
       await page.waitForTimeout(1000)
-      const successMessage = page.getByText(/e-?mail de recuperacao enviado/i)
+      const successMessage = page.getByText(/e-?mail de recuperação enviado/i)
       const rateLimitMessage = page.getByText(/rate limit/i)
       if (!(await successMessage.isVisible()) && !(await rateLimitMessage.isVisible())) {
         throw new Error('Password reset request returned an unexpected response message.')
@@ -181,7 +181,7 @@ test.describe('BLK-AUTH-ACESSO', () => {
     }
   })
 
-  test('AUTH-05: logout encerra sessao e restringe rotas privadas', async ({ page }) => {
+  test('AUTH-05: logout encerra sessão e restringe rotas privadas', async ({ page }) => {
     await signIn(page, process.env.E2E_USER_EMAIL ?? DEFAULT_E2E_USER_EMAIL, process.env.E2E_USER_PASSWORD ?? DEFAULT_E2E_USER_PASSWORD)
     await expect(page).toHaveURL(/\/(app|admin)(\/|$)/)
 

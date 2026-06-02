@@ -75,7 +75,7 @@ export function listingToFormValues(listing: ListingDetails): ListingFormValues 
 
 export function formatListingDate(value: string | null) {
   if (!value) {
-    return 'Nao publicado'
+    return 'Não publicado'
   }
 
   return new Intl.DateTimeFormat('pt-BR', {

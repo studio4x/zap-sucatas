@@ -39,7 +39,7 @@ const toneStyles = {
 } as const
 
 function getRoleLabel(role: 'admin' | 'user') {
-  return role === 'admin' ? 'Administrador' : 'Usuario'
+  return role === 'admin' ? 'Administrador' : 'Usuário'
 }
 
 function getStatusLabel(status: 'active' | 'suspended' | 'under_review') {
@@ -51,7 +51,7 @@ function getStatusLabel(status: 'active' | 'suspended' | 'under_review') {
     return 'Perfil suspenso'
   }
 
-  return 'Perfil em analise'
+  return 'Perfil em análise'
 }
 
 export function AppShell({
@@ -69,7 +69,7 @@ export function AppShell({
     <div className={cn('min-h-screen px-4 py-4 md:px-6 lg:px-8', toneStyle.layout)}>
       <div className="mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-7xl overflow-hidden rounded-[2rem] border border-border/70 bg-background/90 shadow-[0_24px_80px_rgba(17,24,39,0.12)] backdrop-blur lg:grid-cols-[280px_1fr]">
         <aside className="border-b border-border/70 bg-sidebar/85 p-6 lg:border-b-0 lg:border-r">
-          <Brand subtitle={tone === 'admin' ? 'Backoffice / Governanca' : 'Operacao do cliente'} />
+          <Brand subtitle={tone === 'admin' ? 'Backoffice / Governanca' : 'Operação do cliente'} />
 
           <div className={cn('mt-8 rounded-3xl border border-border/70 p-5', toneStyle.badge)}>
             <div
@@ -111,13 +111,13 @@ export function AppShell({
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <Badge className={toneStyle.badge} variant="outline">
-                  {tone === 'admin' ? 'Nivel administrativo' : 'Sessao autenticada'}
+                  {tone === 'admin' ? 'Nivel administrativo' : 'Sessão autenticada'}
                 </Badge>
                 <h1 className="mt-3 font-display text-3xl tracking-tight text-foreground">
                   {title}
                 </h1>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                  Estrutura pronta para conectar navegacao operacional, permissoes reais e modulos
+                  Estrutura pronta para conectar navegação operacional, permissões reais e módulos
                   do MVP.
                 </p>
               </div>
@@ -125,7 +125,7 @@ export function AppShell({
               <div className="flex flex-wrap items-center gap-3">
                 <div className="rounded-2xl border border-border/70 bg-card/90 px-4 py-3 text-sm">
                   <p className="font-medium text-foreground">
-                    {user?.fullName?.trim() || user?.email || 'Sessao autenticada'}
+                    {user?.fullName?.trim() || user?.email || 'Sessão autenticada'}
                   </p>
                   <p className="text-muted-foreground">{user?.email ?? 'Sem email carregado'}</p>
                   <p className="text-muted-foreground">
@@ -145,7 +145,7 @@ export function AppShell({
           <main className="flex-1 px-6 py-8 lg:px-8">
             <div className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
               <ArrowRightLeft className="size-4" />
-              Navegacao estrutural pronta para receber os fluxos reais do MVP.
+              Navegação estrutural pronta para receber os fluxos reais do MVP.
             </div>
             {children}
           </main>

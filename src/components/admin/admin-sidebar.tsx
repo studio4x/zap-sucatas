@@ -36,7 +36,7 @@ const adminNavGroups: AdminNavGroup[] = [
     values: [paths.admin.root, paths.admin.analytics],
   },
   {
-    key: 'conteudo',
+    key: 'conteúdo',
     title: 'Conteúdo',
     description: 'Catálogo, experiência pública e edição da plataforma.',
     values: [

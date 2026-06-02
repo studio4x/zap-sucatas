@@ -81,7 +81,7 @@ export function LoginPage() {
       <div className="space-y-6">
         {!isSupabaseConfigured ? (
           <div className="rounded-[1.4rem] border border-destructive/20 bg-destructive/5 px-4 py-4 text-sm text-destructive">
-            Supabase nao configurado. Defina as variaveis publicas para habilitar o login real.
+            Supabase não configurado. Defina as variaveis públicas para habilitar o login real.
           </div>
         ) : null}
 

@@ -73,7 +73,7 @@ export function AdminBlogPostForm({
       <CardHeader>
         <CardTitle>{existingPost ? 'Editar post' : 'Novo post'}</CardTitle>
         <CardDescription>
-          Trabalhe titulo, resumo, categoria, tags, SEO e publicacao no mesmo fluxo operacional.
+          Trabalhe título, resumo, categoria, tags, SEO e publicação no mesmo fluxo operacional.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -84,9 +84,9 @@ export function AdminBlogPostForm({
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-medium text-foreground" htmlFor="blog-post-title">
-                Titulo
+                Título
               </label>
-              <Input id="blog-post-title" {...form.register('title')} placeholder="Titulo editorial do artigo" />
+              <Input id="blog-post-title" {...form.register('title')} placeholder="Título editorial do artigo" />
               {form.formState.errors.title ? (
                 <p className="text-sm text-destructive">{form.formState.errors.title.message}</p>
               ) : null}
@@ -124,7 +124,7 @@ export function AdminBlogPostForm({
               <Input
                 id="blog-post-slug"
                 {...form.register('slug')}
-                placeholder="Opcional. Se vazio, sera gerado a partir do titulo."
+                placeholder="Opcional. Se vazio, sera gerado a partir do título."
               />
               {form.formState.errors.slug ? (
                 <p className="text-sm text-destructive">{form.formState.errors.slug.message}</p>
@@ -138,7 +138,7 @@ export function AdminBlogPostForm({
               <Textarea
                 className="min-h-24"
                 id="blog-post-excerpt"
-                placeholder="Resumo curto para cards, listagem publica e SEO social."
+                placeholder="Resumo curto para cards, listagem pública e SEO social."
                 {...form.register('excerpt')}
               />
               {form.formState.errors.excerpt ? (
@@ -156,13 +156,13 @@ export function AdminBlogPostForm({
                 {...form.register('tagsText')}
               />
               <p className="text-xs text-muted-foreground">
-                Separe as tags por virgula para melhorar descoberta e relacionados.
+                Separe as tags por vírgula para melhorar descoberta e relacionados.
               </p>
             </div>
 
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-medium text-foreground" htmlFor="blog-post-content">
-                Conteudo
+                Conteúdo
               </label>
               <Controller
                 control={form.control}
@@ -225,7 +225,7 @@ export function AdminBlogPostForm({
                 )}
               />
               <p className="text-xs text-muted-foreground">
-                Na aba visual, o editor renderiza o HTML do artigo. Na aba HTML, voce pode colar ou ajustar o codigo manualmente.
+                Na aba visual, o editor renderiza o HTML do artigo. Na aba HTML, você pode colar ou ajustar o codigo manualmente.
               </p>
               {form.formState.errors.contentText ? (
                 <p className="text-sm text-destructive">{form.formState.errors.contentText.message}</p>

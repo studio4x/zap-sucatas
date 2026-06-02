@@ -132,9 +132,9 @@ export function AdminContactMessageDialog({
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 Telemetria
               </p>
-              <p className="text-sm text-muted-foreground">IP: {message.requestIp ?? 'nao registrado'}</p>
+              <p className="text-sm text-muted-foreground">IP: {message.requestIp ?? 'não registrado'}</p>
               <p className="break-all text-sm text-muted-foreground">
-                User-Agent: {message.userAgent ?? 'nao registrado'}
+                User-Agent: {message.userAgent ?? 'não registrado'}
               </p>
             </div>
 

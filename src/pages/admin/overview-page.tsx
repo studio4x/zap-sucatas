@@ -57,7 +57,7 @@ export function AdminOverviewPage() {
             <Button asChild type="button" variant="outline">
               <Link to={paths.admin.pricing}>
                 <SlidersHorizontal className="size-4" />
-                Precos
+                Preços
               </Link>
             </Button>
           </>
@@ -108,7 +108,7 @@ export function AdminOverviewPage() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <AdminStatCard
-          description="Itens que exigem decisao editorial imediata."
+          description="Itens que exigem decisão editorial imediata."
           label="Anúncios pendentes"
           value={stats.pendingListings}
         />

@@ -61,11 +61,11 @@ function validatePayload(payload: RequestBody) {
   const type = payload.type
 
   if (!ticketId) {
-    throw new Error('ticketId e obrigatorio.')
+    throw new Error('ticketId e obrigatório.')
   }
 
   if (type !== 'new_ticket' && type !== 'new_message' && type !== 'ticket_closed') {
-    throw new Error('Tipo de notificacao invalido.')
+    throw new Error('Tipo de notificação invalido.')
   }
 
   return {
@@ -89,7 +89,7 @@ async function resolveRecipients(input: {
     .single<TicketRow>()
 
   if (ticketError || !ticket) {
-    throw new Error('Chamado de suporte nao encontrado.')
+    throw new Error('Chamado de suporte não encontrado.')
   }
 
   const { data: admins, error: adminsError } = await admin
@@ -105,8 +105,8 @@ async function resolveRecipients(input: {
 
   const adminIds = (admins ?? []).map((profile) => profile.id)
   const recipientSet = new Set<string>()
-  let title = 'Atualizacao em chamado de suporte'
-  let body = `O chamado "${ticket.subject}" recebeu uma atualizacao.`
+  let title = 'Atualização em chamado de suporte'
+  let body = `O chamado "${ticket.subject}" recebeu uma atualização.`
 
   if (input.type === 'new_ticket') {
     title = 'Novo chamado de suporte'
@@ -116,7 +116,7 @@ async function resolveRecipients(input: {
 
   if (input.type === 'new_message') {
     if (!input.messageId) {
-      throw new Error('messageId e obrigatorio para new_message.')
+      throw new Error('messageId e obrigatório para new_message.')
     }
 
     const { data: message, error: messageError } = await admin
@@ -126,7 +126,7 @@ async function resolveRecipients(input: {
       .single<SupportMessageRow>()
 
     if (messageError || !message) {
-      throw new Error('Mensagem de suporte nao encontrada.')
+      throw new Error('Mensagem de suporte não encontrada.')
     }
 
     if (adminIds.includes(message.sender_id)) {
@@ -136,8 +136,8 @@ async function resolveRecipients(input: {
         recipientSet.add(ticket.user_id)
       }
     } else {
-      title = 'Novo retorno do usuario no suporte'
-      body = `O chamado "${ticket.subject}" recebeu uma nova mensagem do usuario.`
+      title = 'Novo retorno do usuário no suporte'
+      body = `O chamado "${ticket.subject}" recebeu uma nova mensagem do usuário.`
       adminIds.filter((id) => id !== message.sender_id).forEach((id) => recipientSet.add(id))
     }
   }

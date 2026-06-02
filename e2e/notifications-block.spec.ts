@@ -62,7 +62,7 @@ test.describe('BLK-NOTIFICACOES (4.6.2)', () => {
     await page.locator('#notification-title').fill(title)
     await page.locator('#notification-category').fill(category)
     await page.locator('#notification-body').fill(message)
-    await page.locator('select').filter({ hasText: /todos os usuarios ativos|lista de user_ids/i }).first().selectOption('users')
+    await page.locator('select').filter({ hasText: /todos os usuários ativos|lista de user_ids/i }).first().selectOption('users')
     await page.locator('#notification-users').fill(userProfile!.id)
 
     const inAppCheckbox = page.getByLabel(/widget \(in-app\)|in-app/i)
@@ -76,7 +76,7 @@ test.describe('BLK-NOTIFICACOES (4.6.2)', () => {
       if (!checked) await emailCheckbox.check()
     }
 
-    await page.getByRole('button', { name: /enviar notificacao/i }).click()
+    await page.getByRole('button', { name: /enviar notificação/i }).click()
     await expect(page.locator('tr', { hasText: title }).first()).toBeVisible({ timeout: 30000 })
 
     const manualRow = page.locator('tr', { hasText: title }).first()
@@ -160,7 +160,7 @@ test.describe('BLK-NOTIFICACOES (4.6.2)', () => {
 
     const transacionalCard = page.locator('section, div').filter({ hasText: /historico transacional|registro consolidado/i }).first()
     await expect(transacionalCard).toBeVisible()
-    await transacionalCard.getByPlaceholder(/buscar por titulo, mensagem ou categoria/i).fill(title)
+    await transacionalCard.getByPlaceholder(/buscar por título, mensagem ou categoria/i).fill(title)
     const transacionalSelects = transacionalCard.locator('select')
     await transacionalSelects.nth(1).selectOption('failed')
     await transacionalSelects.nth(2).selectOption('all')
@@ -169,7 +169,7 @@ test.describe('BLK-NOTIFICACOES (4.6.2)', () => {
     await signOut(page)
     await signInAsUser(page, 'qa-user@zapsucatas.local', 'ZapSucatas@2026!User')
     await page.goto('/app/notificacoes')
-    await page.getByPlaceholder(/buscar por titulo, categoria ou mensagem/i).fill(title)
+    await page.getByPlaceholder(/buscar por título, categoria ou mensagem/i).fill(title)
     await expect(page.getByText(title).first()).toBeVisible({ timeout: 30000 })
   })
 })

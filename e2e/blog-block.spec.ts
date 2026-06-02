@@ -20,7 +20,7 @@ function requireEnv(name: 'VITE_SUPABASE_URL' | 'SUPABASE_SERVICE_ROLE_KEY', val
 }
 
 test.describe('BLK-BLOG', () => {
-  test('BLOG-01..BLOG-04 em producao', async ({ browser }) => {
+  test('BLOG-01..BLOG-04 em produção', async ({ browser }) => {
     test.setTimeout(240000)
 
     const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'https://zap-sucatas.vercel.app/'
@@ -29,10 +29,10 @@ test.describe('BLK-BLOG', () => {
 
     const postTitle = buildQaTitle('BLOG QA post')
     const postSlug = `blog-qa-${Date.now()}`
-    const excerpt = `Resumo do ${postTitle} para validar fluxo editorial em producao.`
+    const excerpt = `Resumo do ${postTitle} para validar fluxo editorial em produção.`
     const content = `<p>${postTitle} com conteúdo técnico para validação de publicação, SEO e arquivamento no portal.</p><p>Texto complementar com mais de quarenta caracteres para cumprir regra de conteúdo.</p>`
     const seoTitle = `${postTitle} SEO`
-    const seoDescription = `Descricao SEO do ${postTitle} validada no metatag description.`
+    const seoDescription = `Descrição SEO do ${postTitle} validada no metatag description.`
 
     const adminClient = createClient(
       requireEnv('VITE_SUPABASE_URL', process.env.VITE_SUPABASE_URL),
@@ -67,7 +67,7 @@ test.describe('BLK-BLOG', () => {
         await adminPage.getByRole('button', { name: /criar post/i }).click()
         await expect(adminPage.getByText(/criado com sucesso/i)).toBeVisible({ timeout: 30000 })
 
-        await adminPage.locator('input[placeholder="Buscar por titulo, slug ou resumo"]').fill(postTitle)
+        await adminPage.locator('input[placeholder="Buscar por título, slug ou resumo"]').fill(postTitle)
         const row = adminPage.locator('tr', { hasText: postTitle }).first()
         await expect(row).toBeVisible()
         await expect(row).toContainText(/rascunho/i)
@@ -84,7 +84,7 @@ test.describe('BLK-BLOG', () => {
         expect(draftData.status).toBe('draft')
       })
 
-      await test.step('BLOG-02: publicar post e validar rota publica por slug', async () => {
+      await test.step('BLOG-02: publicar post e validar rota pública por slug', async () => {
         const row = adminPage.locator('tr', { hasText: postTitle }).first()
         await row.getByRole('button', { name: /editar/i }).click()
 
@@ -92,7 +92,7 @@ test.describe('BLK-BLOG', () => {
         await adminPage.getByRole('button', { name: /atualizar post/i }).click()
         await expect(adminPage.getByText(/atualizado com sucesso/i)).toBeVisible({ timeout: 30000 })
 
-        await adminPage.locator('input[placeholder="Buscar por titulo, slug ou resumo"]').fill(postTitle)
+        await adminPage.locator('input[placeholder="Buscar por título, slug ou resumo"]').fill(postTitle)
         const publishedRow = adminPage.locator('tr', { hasText: postTitle }).first()
         await expect(publishedRow).toContainText(/publicado/i)
 
@@ -115,8 +115,8 @@ test.describe('BLK-BLOG', () => {
         await expect(publicPage.getByRole('heading', { level: 1, name: new RegExp(postTitle) })).toBeVisible()
       })
 
-      await test.step('BLOG-03: editar SEO e validar metadados na pagina', async () => {
-        await adminPage.locator('input[placeholder="Buscar por titulo, slug ou resumo"]').fill(postTitle)
+      await test.step('BLOG-03: editar SEO e validar metadados na página', async () => {
+        await adminPage.locator('input[placeholder="Buscar por título, slug ou resumo"]').fill(postTitle)
         const row = adminPage.locator('tr', { hasText: postTitle }).first()
         await row.getByRole('button', { name: /editar/i }).click()
 
@@ -138,8 +138,8 @@ test.describe('BLK-BLOG', () => {
           .toBe(seoDescription)
       })
 
-      await test.step('BLOG-04: arquivar post e validar que sai da listagem publica', async () => {
-        await adminPage.locator('input[placeholder="Buscar por titulo, slug ou resumo"]').fill(postTitle)
+      await test.step('BLOG-04: arquivar post e validar que sai da listagem pública', async () => {
+        await adminPage.locator('input[placeholder="Buscar por título, slug ou resumo"]').fill(postTitle)
         const row = adminPage.locator('tr', { hasText: postTitle }).first()
         await row.getByRole('button', { name: /editar/i }).click()
 
@@ -165,7 +165,7 @@ test.describe('BLK-BLOG', () => {
         await expect(publicPage.getByText(postTitle)).toHaveCount(0)
 
         await publicPage.goto(`/blog/${postSlug}`)
-        await expect(publicPage.getByText(/nao foi possivel carregar o artigo solicitado/i)).toBeVisible()
+        await expect(publicPage.getByText(/nao foi possível carregar o artigo solicitado/i)).toBeVisible()
       })
     } finally {
       await Promise.allSettled([adminContext.close(), publicContext.close()])

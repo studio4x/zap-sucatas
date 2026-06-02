@@ -37,7 +37,7 @@ export function BlogPage() {
           <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.32em] text-primary">Blog</p>
             <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
-              Conteudo setorial da Zap Sucatas
+              Conteúdo setorial da Zap Sucatas
             </h1>
             <p className="max-w-3xl text-xl leading-8 text-muted-foreground">
               Conteúdo editorial para fortalecer autoridade, SEO e leitura de mercado sobre sucatas, metais e recicláveis.
@@ -49,7 +49,7 @@ export function BlogPage() {
             </div>
           <Input
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Buscar por tema, material, operacao ou tag editorial"
+            placeholder="Buscar por tema, material, operação ou tag editorial"
             value={query}
           />
           </div>
@@ -76,7 +76,7 @@ export function BlogPage() {
               : 'Assim que os primeiros artigos forem publicados, esta area vai apoiar SEO, confianca e leitura de mercado.'
           }
           icon={BookOpenText}
-          title={posts.length > 0 ? 'Sem artigos neste recorte' : 'Blog em preparacao'}
+          title={posts.length > 0 ? 'Sem artigos neste recorte' : 'Blog em preparação'}
         />
       )}
     </div>

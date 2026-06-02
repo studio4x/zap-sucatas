@@ -13,7 +13,7 @@ function hasEnv(name: string) {
 function resolveWebhookUrl() {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')?.trim()
   if (!supabaseUrl) {
-    return 'Nao disponivel'
+    return 'Não disponível'
   }
 
   return `${supabaseUrl}/functions/v1/asaas-payment-webhook`

@@ -14,7 +14,7 @@ export const listingFormSchema = z.object({
   contactName: z.string().trim(),
   contactPhone: z.string().trim(),
   contactPhoneIsWhatsapp: z.boolean(),
-  description: z.string().trim().min(20, 'A descricao precisa ter pelo menos 20 caracteres.'),
+  description: z.string().trim().min(20, 'A descrição precisa ter pelo menos 20 caracteres.'),
   priceLabel: z.string().trim(),
   primaryMaterialId: z.string().trim(),
   state: z
@@ -22,8 +22,8 @@ export const listingFormSchema = z.object({
     .trim()
     .transform(normalizeListingState)
     .refine((value) => /^[A-Z]{2}$/.test(value), 'Use a sigla do estado com 2 letras.'),
-  summary: z.string().trim().max(147, 'Resumo com no maximo 147 caracteres.'),
-  title: z.string().trim().min(5, 'Informe um titulo mais descritivo.'),
+  summary: z.string().trim().max(147, 'Resumo com no máximo 147 caracteres.'),
+  title: z.string().trim().min(5, 'Informe um título mais descritivo.'),
 })
 
 export type ListingFormSchemaValues = z.infer<typeof listingFormSchema>

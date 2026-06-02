@@ -64,9 +64,9 @@ Deno.serve(async (request) => {
     })
     await enqueueTransactionalNotification({
       actionUrl: '/app/anuncios',
-      body: `Seu anuncio "${listing.title}" foi reprovado. Motivo: ${reason.trim()}`,
+      body: `Seu anúncio "${listing.title}" foi reprovado. Motivo: ${reason.trim()}`,
       category: 'listing_status',
-      title: 'Anuncio reprovado',
+      title: 'Anúncio reprovado',
       userId: listing.user_id,
     })
 

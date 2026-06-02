@@ -27,7 +27,7 @@ type ContactMessageRow = {
 
 function ensureSupabase() {
   if (!supabase) {
-    throw new Error('Supabase nao configurado no ambiente atual.')
+    throw new Error('Supabase não configurado no ambiente atual.')
   }
 
   return supabase
@@ -53,7 +53,7 @@ function mapContactMessage(row: ContactMessageRow): ContactMessage {
 
 export async function submitContactMessage(values: ContactMessageValues) {
   if (!env.supabaseUrl || !env.supabaseAnonKey) {
-    throw new Error('Supabase nao configurado no ambiente atual.')
+    throw new Error('Supabase não configurado no ambiente atual.')
   }
 
   const session = supabase ? (await supabase.auth.getSession()).data.session : null
@@ -80,7 +80,7 @@ export async function submitContactMessage(values: ContactMessageValues) {
       }
     }
 
-    throw new Error('Nao foi possivel enviar a mensagem agora.')
+    throw new Error('Não foi possível enviar a mensagem agora.')
   }
 
   return (await response.json()) as { success: boolean }
@@ -169,7 +169,7 @@ export async function updateAdminContactMessageStatus(input: {
     .single()
 
   if (error || !data) {
-    throw error ?? new Error('Nao foi possivel atualizar o status da mensagem.')
+    throw error ?? new Error('Não foi possível atualizar o status da mensagem.')
   }
 
   return mapContactMessage(data as ContactMessageRow)

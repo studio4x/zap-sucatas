@@ -18,7 +18,7 @@ export const defaultSupportCategories: SupportSlaCategoryConfig[] = [
   },
   {
     key: 'technical',
-    label: 'Problema tecnico',
+    label: 'Problema técnico',
     firstResponseHours: 24,
     position: 2,
     description: 'Primeira resposta em ate 24 horas uteis.',
@@ -50,39 +50,39 @@ export const defaultSupportConfig: SupportConfig = {
   categories: defaultSupportCategories,
   businessHours: defaultSupportBusinessHours,
   publicNote:
-    'Os prazos acima se referem ao tempo da primeira resposta humana da equipe. Nao representam prazo de resolucao final.',
+    'Os prazos acima se referem ao tempo da primeira resposta humana da equipe. Não representam prazo de resolucao final.',
   crisisNote:
-    'Se houver risco, fraude ou situacao critica, abra o chamado e registre o contexto com o maximo de detalhe.',
+    'Se houver risco, fraude ou situação critica, abra o chamado e registre o contexto com o máximo de detalhe.',
 }
 
 export const supportFaqItems = [
   {
     id: 'faq-1',
     category: 'payment' as SupportTicketCategory,
-    question: 'Como envio uma duvida sobre pagamento ou cobranca?',
+    question: 'Como envio uma duvida sobre pagamento ou cobrança?',
     answer:
-      'Abra um chamado na categoria Pagamentos e informe o anuncio, a etapa da negociacao e qualquer comprovante que ajude a equipe a analisar o caso.',
+      'Abra um chamado na categoria Pagamentos e informe o anúncio, a etapa da negociação e qualquer comprovante que ajude a equipe a analisar o caso.',
   },
   {
     id: 'faq-2',
     category: 'technical' as SupportTicketCategory,
-    question: 'O que devo incluir em um problema tecnico?',
+    question: 'O que devo incluir em um problema técnico?',
     answer:
-      'Descreva a tela, a acao executada, o horario aproximado, a mensagem exibida e anexe imagem se isso ajudar a reproduzir o erro.',
+      'Descreva a tela, a ação executada, o horário aproximado, a mensagem exibida e anexe imagem se isso ajudar a reproduzir o erro.',
   },
   {
     id: 'faq-3',
     category: 'account' as SupportTicketCategory,
     question: 'Como resolver bloqueio de conta ou acesso restrito?',
     answer:
-      'Use a categoria Conta e acesso para registrar o contexto do bloqueio. Esse canal continua disponivel mesmo quando o restante do dashboard estiver temporariamente restrito.',
+      'Use a categoria Conta e acesso para registrar o contexto do bloqueio. Esse canal continua disponível mesmo quando o restante do dashboard estiver temporariamente restrito.',
   },
   {
     id: 'faq-4',
     category: 'general' as SupportTicketCategory,
-    question: 'Posso pedir orientacao para publicar um anuncio melhor?',
+    question: 'Posso pedir orientação para publicar um anúncio melhor?',
     answer:
-      'Sim. A equipe pode orientar sobre cadastro, estrutura do anuncio, dados comerciais e melhores praticas de preenchimento.',
+      'Sim. A equipe pode orientar sobre cadastro, estrutura do anúncio, dados comerciais e melhores praticas de preenchimento.',
   },
 ]
 

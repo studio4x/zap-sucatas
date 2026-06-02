@@ -10,7 +10,7 @@ test('question lifecycle stays coherent across public, owner and admin', async (
   const userPassword = process.env.E2E_QUESTION_USER_PASSWORD ?? 'ZapSucatas@2026!QuestionUser'
   const adminEmail = process.env.E2E_QUESTION_ADMIN_EMAIL ?? 'qa-admin-question@zapsucatas.local'
   const adminPassword = process.env.E2E_QUESTION_ADMIN_PASSWORD ?? 'ZapSucatas@2026!QuestionAdmin'
-  const listingTitle = buildQaTitle('QA anuncio perguntas')
+  const listingTitle = buildQaTitle('QA anúncio perguntas')
   const questionText = buildQaTitle('Pergunta QA automatizada')
   const answerText = `Resposta para ${questionText}`
   let publicPath = ''

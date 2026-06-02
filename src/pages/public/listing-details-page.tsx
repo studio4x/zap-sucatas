@@ -104,7 +104,7 @@ export function ListingDetailsPage() {
     queryFn: () => {
       if (isAdminPreviewMode) {
         if (!canUseAdminPreview) {
-          throw new Error('Somente administradores podem visualizar anuncios em revisao no site publico.')
+          throw new Error('Somente administradores podem visualizar anúncios em revisao no site público.')
         }
         return fetchPublicListingPreviewById(id)
       }
@@ -155,7 +155,7 @@ export function ListingDetailsPage() {
     },
     onError: (error) => {
       setFeedback(
-        error instanceof Error ? error.message : 'Nao foi possivel enviar a pergunta no momento.',
+        error instanceof Error ? error.message : 'Não foi possível enviar a pergunta no momento.',
       )
     },
   })
@@ -192,7 +192,7 @@ export function ListingDetailsPage() {
       }
 
       if (!guestEmail.includes('@')) {
-        return 'Informe um e-mail valido.'
+        return 'Informe um e-mail válido.'
       }
     }
 
@@ -203,7 +203,7 @@ export function ListingDetailsPage() {
     return (
       <Card>
         <CardContent className="p-6 text-sm text-muted-foreground">
-          Carregando pagina do anuncio...
+          Carregando página do anúncio...
         </CardContent>
       </Card>
     )
@@ -213,7 +213,7 @@ export function ListingDetailsPage() {
     return (
       <Card className="border-destructive/20 bg-destructive/5">
         <CardContent className="p-6 text-sm text-destructive">
-          Nao foi possivel carregar o anuncio solicitado.
+          Não foi possível carregar o anúncio solicitado.
         </CardContent>
       </Card>
     )
@@ -289,7 +289,7 @@ export function ListingDetailsPage() {
       <Button asChild variant="outline">
         <Link to={isAdminPreviewMode ? paths.admin.listings : paths.public.listings}>
           <ArrowLeft className="size-4" />
-          {isAdminPreviewMode ? 'Voltar para anúncios' : 'Voltar ao catalogo'}
+          {isAdminPreviewMode ? 'Voltar para anúncios' : 'Voltar ao catálogo'}
         </Link>
       </Button>
 
@@ -312,7 +312,7 @@ export function ListingDetailsPage() {
                   </Badge>
                 ) : null}
                 <Badge className="border-emerald-300/30 bg-emerald-300/10 text-emerald-100" variant="outline">
-                  Anuncio moderado
+                  Anúncio moderado
                 </Badge>
               </div>
               <h1 className="break-words font-display text-5xl leading-[0.95] tracking-[-0.04em] text-white [overflow-wrap:anywhere]">
@@ -329,7 +329,7 @@ export function ListingDetailsPage() {
               </p>
               {commercialPrice.value ? <p className="text-lg font-medium text-emerald-100">{commercialPrice.value}</p> : null}
               <p className="text-sm leading-7 text-emerald-50/78">
-                Use os dados tecnicos e as perguntas publicas para validar o lote antes do contato.
+                Use os dados técnicos e as perguntas públicas para validar o lote antes do contato.
               </p>
             </div>
 
@@ -429,7 +429,7 @@ export function ListingDetailsPage() {
             </div>
             <div className="rounded-[1.35rem] border border-white/80 bg-white/85 px-4 py-4 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                Tipo de preco
+                Tipo de preço
               </p>
               <p className="mt-2 text-base font-semibold text-foreground">
                 {commercialPrice.type}
@@ -444,7 +444,7 @@ export function ListingDetailsPage() {
             <CardContent className="space-y-6 p-6 md:p-7">
               <div className="space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/75">
-                  Descricao comercial
+                  Descrição comercial
                 </p>
                 {descriptionHasHtml ? (
                   <article
@@ -464,7 +464,7 @@ export function ListingDetailsPage() {
                     Categoria
                   </p>
                   <p className="mt-2 text-sm font-medium text-foreground">
-                    {listing.categoryName ?? 'Nao informada'}
+                    {listing.categoryName ?? 'Não informada'}
                   </p>
                 </div>
                 <div className="rounded-[1.4rem] border border-border bg-[linear-gradient(180deg,#fafcf9_0%,#f5f8f4_100%)] p-4">
@@ -472,7 +472,7 @@ export function ListingDetailsPage() {
                     Material principal
                   </p>
                   <p className="mt-2 text-sm font-medium text-foreground">
-                    {listing.materialName ?? 'Nao informado'}
+                    {listing.materialName ?? 'Não informado'}
                   </p>
                 </div>
               </div>
@@ -481,7 +481,7 @@ export function ListingDetailsPage() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <BadgeCheck className="size-4 text-primary" />
-                    <p className="text-sm font-semibold text-foreground">Ficha tecnica do anuncio</p>
+                    <p className="text-sm font-semibold text-foreground">Ficha técnica do anúncio</p>
                   </div>
                   <div className="grid gap-3 md:grid-cols-2">
                     {listing.attributes.map((attribute) => (
@@ -558,8 +558,8 @@ export function ListingDetailsPage() {
             !canAskQuestion ? (
               <p className="text-sm leading-7 text-muted-foreground">
                 {isAuthenticated
-                  ? 'Sua conta ainda nao pode interagir com perguntas neste momento.'
-                  : 'Faca login para perguntar sobre este anuncio e acompanhar a resposta do vendedor.'}
+                  ? 'Sua conta ainda não pode interagir com perguntas neste momento.'
+                  : 'Faça login para perguntar sobre este anúncio e acompanhar a resposta do vendedor.'}
               </p>
             ) : (
               <div className="space-y-4 rounded-[1.35rem] border border-border bg-[linear-gradient(180deg,#fafcf9_0%,#f5f8f4_100%)] p-4">
@@ -581,7 +581,7 @@ export function ListingDetailsPage() {
 
                 <Textarea
                   onChange={(event) => setQuestionText(event.target.value)}
-                  placeholder="Descreva sua duvida sobre lote, condicao, retirada ou negociacao."
+                  placeholder="Descreva sua duvida sobre lote, condicao, retirada ou negociação."
                   value={questionText}
                 />
 
@@ -624,10 +624,10 @@ export function ListingDetailsPage() {
 
       {relatedListingsQuery.data?.length ? (
         <FeaturedListingsSection
-          description="Outros anuncios aprovados na mesma categoria para ampliar comparacao e navegacao comercial."
+          description="Outros anúncios aprovados na mesma categoria para ampliar comparação e navegação comercial."
           eyebrow="Relacionados"
           listings={relatedListingsQuery.data}
-          title="Mais anuncios desta categoria"
+          title="Mais anúncios desta categoria"
         />
       ) : null}
 

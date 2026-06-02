@@ -43,7 +43,7 @@ O fluxo central do produto é publicação moderada. O usuário cria o anúncio,
 - usuário autenticado cria anúncio
 - mídia é enviada ao storage
 - anúncio é salvo como `draft` ou submetido
-- Edge Function valida o anúncio
+- Edge Function válida o anúncio
 - status muda para `pending_review`
 - admin aprova ou rejeita
 - aprovação define `slug` e `published_at`
@@ -61,7 +61,7 @@ O fluxo central do produto é publicação moderada. O usuário cria o anúncio,
 
 ### Blog
 - admin cria rascunho
-- publica com SEO e slug
+- pública com SEO e slug
 - conteúdo aparece no blog público
 
 ## Áreas e rotas do MVP
@@ -72,7 +72,7 @@ O fluxo central do produto é publicação moderada. O usuário cria o anúncio,
 - `/anuncios/:slug`
 - `/categorias`
 - `/categorias/:slug`
-- `/tabela-de-precos`
+- `/tabela-de-preços`
 - `/blog`
 - `/blog/:slug`
 - `/sobre`

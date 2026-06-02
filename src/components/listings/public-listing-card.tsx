@@ -41,7 +41,7 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              Imagem em atualizacao
+              Imagem em atualização
             </div>
           )}
           <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
@@ -89,7 +89,7 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
             {listing.contactPhone ? (
               <p className="flex items-center gap-2">
                 <Phone className="size-4 text-primary" />
-                Contato comercial disponivel
+                Contato comercial disponível
               </p>
             ) : null}
             <p className="flex items-center gap-2">
@@ -109,7 +109,7 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
             </div>
 
             <span className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition group-hover:gap-3">
-              Ver anuncio
+              Ver anúncio
               <ArrowUpRight className="size-4" />
             </span>
           </div>

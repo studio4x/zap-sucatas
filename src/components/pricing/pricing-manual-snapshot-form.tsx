@@ -44,7 +44,7 @@ export function PricingManualSnapshotForm({
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground" htmlFor="snapshot-date">
-                Data da cotacao
+                Data da cotação
               </label>
               <Input id="snapshot-date" type="date" {...form.register('quotedDate')} />
             </div>

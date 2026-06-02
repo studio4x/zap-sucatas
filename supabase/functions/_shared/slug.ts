@@ -45,7 +45,7 @@ export async function generateUniqueSlug(input: {
 export async function generateUniqueListingSlug(title: string, listingId: string) {
   return generateUniqueSlug({
     currentId: listingId,
-    fallback: 'anuncio',
+    fallback: 'anúncio',
     source: title,
     table: 'listings',
   })

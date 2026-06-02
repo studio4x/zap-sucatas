@@ -24,11 +24,11 @@ Deno.serve(async (request) => {
     const city = normalizeCity(payload.city ?? '')
 
     if (state.length !== 2) {
-      return jsonResponse({ error: 'Informe uma UF valida com 2 letras.' }, 400)
+      return jsonResponse({ error: 'Informe uma UF válida com 2 letras.' }, 400)
     }
 
     if (city.length < 2) {
-      return jsonResponse({ error: 'Informe uma cidade valida.' }, 400)
+      return jsonResponse({ error: 'Informe uma cidade válida.' }, 400)
     }
 
     const admin = createAdminClient()

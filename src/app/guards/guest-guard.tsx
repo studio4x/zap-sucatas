@@ -8,7 +8,7 @@ export function GuestGuard({ children }: PropsWithChildren) {
   const { status, user } = useAuth()
 
   if (status === 'loading') {
-    return <GuardFallback title="Preparando autenticacao" />
+    return <GuardFallback title="Preparando autenticação" />
   }
 
   if (user) {

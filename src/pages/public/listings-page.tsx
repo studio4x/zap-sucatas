@@ -17,8 +17,8 @@ import { useSystemSettings } from '@/hooks/use-system-settings'
 const sortOptions = [
   { label: 'Mais recentes', value: 'recent' },
   { label: 'Mais antigos', value: 'oldest' },
-  { label: 'Titulo A-Z', value: 'title_asc' },
-  { label: 'Titulo Z-A', value: 'title_desc' },
+  { label: 'Título A-Z', value: 'title_asc' },
+  { label: 'Título Z-A', value: 'title_desc' },
   { label: 'Destaques primeiro', value: 'featured' },
 ]
 
@@ -32,7 +32,7 @@ export function ListingsPage() {
   const [state, setState] = useState(searchParams.get('uf') ?? '')
   const [city, setCity] = useState(searchParams.get('cidade') ?? '')
   const [sort, setSort] = useState<PublicListingSort>((searchParams.get('ordem') as PublicListingSort) ?? 'recent')
-  const [page, setPage] = useState(Number(searchParams.get('pagina') ?? '1'))
+  const [page, setPage] = useState(Number(searchParams.get('página') ?? '1'))
   const catalogSectionRef = useRef<HTMLDivElement | null>(null)
   const normalizedPage = Number.isFinite(page) && page > 0 ? page : 1
 
@@ -103,7 +103,7 @@ export function ListingsPage() {
     }
 
     if (normalizedPage > 1) {
-      nextParams.set('pagina', String(normalizedPage))
+      nextParams.set('página', String(normalizedPage))
     }
 
     setSearchParams(nextParams, { replace: true })
@@ -140,8 +140,8 @@ export function ListingsPage() {
     <section className="space-y-6 lg:space-y-8">
       <div className="overflow-hidden rounded-[2.25rem] bg-[linear-gradient(180deg,#f6faf5_0%,#eef4ef_100%)] px-5 py-6 shadow-[0_20px_48px_-36px_rgba(19,33,23,0.3)] md:px-6 lg:px-8 lg:py-8">
         <PublicSectionHeading
-          description="Encontre anuncios por categoria, localidade e material."
-          eyebrow="Catalogo publico"
+          description="Encontre anúncios por categoria, localidade e material."
+          eyebrow="Catálogo público"
           title="Anúncios de sucatas e metais"
         />
       </div>
@@ -259,7 +259,7 @@ export function ListingsPage() {
           {!hasSearchQuery && featuredPaymentsEnabled && featuredListingsQuery.data?.length ? (
             <div className="rounded-[2rem] bg-[linear-gradient(180deg,#fff9ec_0%,#fff3d6_100%)] p-5 shadow-[0_26px_55px_-42px_rgba(168,111,0,0.45)] md:p-6">
               <FeaturedListingsSection
-                description="Anuncios com maior prioridade de exibicao no catalogo."
+                description="Anúncios com maior prioridade de exibição no catálogo."
                 listings={featuredListingsQuery.data}
                 onViewAllClick={() => {
                   catalogSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -276,7 +276,7 @@ export function ListingsPage() {
                 setSort(value as PublicListingSort)
               }}
               options={sortOptions}
-              resultLabel={`${totalCount} anuncio${totalCount === 1 ? '' : 's'} neste recorte${activeFiltersCount > 0 ? ` • ${activeFiltersCount} filtro${activeFiltersCount === 1 ? '' : 's'} ativo${activeFiltersCount === 1 ? '' : 's'}` : ''}`}
+              resultLabel={`${totalCount} anúncio${totalCount === 1 ? '' : 's'} neste recorte${activeFiltersCount > 0 ? ` • ${activeFiltersCount} filtro${activeFiltersCount === 1 ? '' : 's'} ativo${activeFiltersCount === 1 ? '' : 's'}` : ''}`}
               value={sort}
             />
           </div>
@@ -284,7 +284,7 @@ export function ListingsPage() {
           {listingsQuery.isLoading ? (
             <Card className="rounded-[1.8rem] border-0">
               <CardContent className="p-6 text-sm text-muted-foreground">
-                Carregando catalogo publico...
+                Carregando catálogo público...
               </CardContent>
             </Card>
           ) : null}
@@ -292,7 +292,7 @@ export function ListingsPage() {
           {listingsQuery.isError ? (
             <Card className="rounded-[1.8rem] border-destructive/20 bg-destructive/5">
               <CardContent className="p-6 text-sm text-destructive">
-                Nao foi possivel carregar os anuncios publicos neste momento.
+                Não foi possível carregar os anúncios públicos neste momento.
               </CardContent>
             </Card>
           ) : null}
@@ -300,7 +300,7 @@ export function ListingsPage() {
           {!listingsQuery.isLoading ? (
             <ListingGrid
               emptyDescription="Ajuste a busca ou limpe os filtros para encontrar outros lotes e materiais aprovados."
-              emptyTitle="Nenhum anuncio encontrado"
+              emptyTitle="Nenhum anúncio encontrado"
               listings={listings}
             />
           ) : null}
@@ -308,7 +308,7 @@ export function ListingsPage() {
           {totalCount > PAGE_SIZE ? (
             <div className="flex flex-col gap-3 rounded-[1.7rem] bg-card/88 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
-                Pagina {normalizedPage} de {totalPages}
+                Página {normalizedPage} de {totalPages}
               </p>
               <div className="flex flex-wrap gap-2">
                 <button
@@ -325,7 +325,7 @@ export function ListingsPage() {
                   onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
                   type="button"
                 >
-                  Proxima
+                  Próxima
                 </button>
               </div>
             </div>

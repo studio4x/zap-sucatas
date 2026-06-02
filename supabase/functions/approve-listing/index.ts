@@ -67,9 +67,9 @@ Deno.serve(async (request) => {
     })
     await enqueueTransactionalNotification({
       actionUrl: `/anuncios/${slug}`,
-      body: `Seu anuncio "${listing.title}" foi aprovado e ja esta publicado.`,
+      body: `Seu anúncio "${listing.title}" foi aprovado e ja esta publicado.`,
       category: 'listing_status',
-      title: 'Anuncio aprovado',
+      title: 'Anúncio aprovado',
       userId: listing.user_id,
     })
 

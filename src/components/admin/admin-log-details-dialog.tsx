@@ -20,7 +20,7 @@ function formatJson(value: unknown) {
   try {
     return JSON.stringify(value, null, 2)
   } catch {
-    return 'Nao foi possivel serializar este contexto.'
+    return 'Não foi possível serializar este contexto.'
   }
 }
 
@@ -60,7 +60,7 @@ export function AdminLogDetailsDialog({
               <h2 className="text-lg font-semibold text-foreground">{log.label}</h2>
               <AdminStatusBadge tone={log.severity}>{log.severity}</AdminStatusBadge>
             </div>
-            <p className="text-sm text-muted-foreground">{log.secondaryLabel || 'Sem classificacao secundaria.'}</p>
+            <p className="text-sm text-muted-foreground">{log.secondaryLabel || 'Sem classificação secundaria.'}</p>
           </div>
           <Button onClick={() => onOpenChange(false)} type="button" variant="outline">
             Fechar
@@ -74,20 +74,20 @@ export function AdminLogDetailsDialog({
                 Tipo
               </p>
               <p className="text-sm text-foreground">
-                {log.kind === 'audit' ? 'Auditoria' : 'Integracao'}
+                {log.kind === 'audit' ? 'Auditoria' : 'Integração'}
               </p>
             </div>
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 Origem
               </p>
-              <p className="text-sm text-foreground">{log.sourceName ?? 'Nao informada'}</p>
+              <p className="text-sm text-foreground">{log.sourceName ?? 'Não informada'}</p>
             </div>
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                Chave da acao
+                Chave da ação
               </p>
-              <p className="text-sm text-foreground">{log.actionKey ?? 'Nao informada'}</p>
+              <p className="text-sm text-foreground">{log.actionKey ?? 'Não informada'}</p>
             </div>
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -105,7 +105,7 @@ export function AdminLogDetailsDialog({
                 Ator
               </p>
               <p className="text-sm text-foreground">
-                {log.actorName ?? log.actorUserId ?? 'Nao identificado'}
+                {log.actorName ?? log.actorUserId ?? 'Não identificado'}
               </p>
             </div>
             <div className="space-y-1">
@@ -113,7 +113,7 @@ export function AdminLogDetailsDialog({
                 Entidade
               </p>
               <p className="text-sm text-foreground">
-                {log.entityType ?? 'Nao aplicavel'}
+                {log.entityType ?? 'Não aplicável'}
                 {log.entityId ? ` / ${log.entityId}` : ''}
               </p>
             </div>

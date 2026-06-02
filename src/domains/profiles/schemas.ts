@@ -8,7 +8,7 @@ export const profileFormSchema = z.object({
 export type ProfileFormValues = z.infer<typeof profileFormSchema>
 
 const baseAdminUserSchema = z.object({
-  email: z.string().trim().email('Informe um e-mail valido.'),
+  email: z.string().trim().email('Informe um e-mail válido.'),
   fullName: z.string().trim().min(3, 'Informe o nome completo.'),
   phone: z.string().trim(),
   role: z.enum(['admin', 'user']),

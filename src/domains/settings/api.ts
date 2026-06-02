@@ -27,7 +27,7 @@ type SystemSettingsRow = {
 
 function ensureSupabase() {
   if (!supabase) {
-    throw new Error('Supabase nao configurado no ambiente atual.')
+    throw new Error('Supabase não configurado no ambiente atual.')
   }
 
   return supabase
@@ -184,7 +184,7 @@ export async function fetchSystemSettings() {
     .single()
 
   if (error || !data) {
-    throw error ?? new Error('Configuracoes do sistema nao encontradas.')
+    throw error ?? new Error('Configurações do sistema não encontradas.')
   }
 
   return mapSystemSettings(data as SystemSettingsRow)

@@ -51,7 +51,7 @@ export function CategoryDetailsPage() {
     return (
       <Card className="border-destructive/20 bg-destructive/5">
         <CardContent className="p-6 text-sm text-destructive">
-          Nao foi possivel carregar a categoria solicitada.
+          Não foi possível carregar a categoria solicitada.
         </CardContent>
       </Card>
     )
@@ -72,7 +72,7 @@ export function CategoryDetailsPage() {
               }
               description={
                 category.description ??
-                'Recorte comercial com anuncios aprovados, descoberta direcionada e navegacao clara para o segmento.'
+                'Recorte comercial com anúncios aprovados, descoberta direcionada e navegação clara para o segmento.'
               }
               eyebrow="Categoria"
               title={category.name}
@@ -82,7 +82,7 @@ export function CategoryDetailsPage() {
           <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
             <div className="rounded-[1.5rem] border border-white/85 bg-white/88 p-4 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Anuncios publicados
+                Anúncios publicados
               </p>
               <p className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-foreground">
                 {category.approvedListings}
@@ -93,15 +93,15 @@ export function CategoryDetailsPage() {
                 Descoberta
               </p>
               <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                Pagina dedicada para leitura setorial e navegacao mais rapida.
+                Página dedicada para leitura setorial e navegação mais rápida.
               </p>
             </div>
             <div className="rounded-[1.5rem] border border-white/85 bg-white/88 p-4 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Moderacao
+                Moderação
               </p>
               <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                O catalogo so mostra anuncios aprovados pela plataforma.
+                O catálogo so mostra anúncios aprovados pela plataforma.
               </p>
             </div>
           </div>
@@ -109,15 +109,15 @@ export function CategoryDetailsPage() {
       </section>
 
       <ListingGrid
-        emptyDescription="Ainda nao ha anuncios publicados nesta categoria. Voce pode explorar outras categorias ou publicar o primeiro anuncio deste segmento."
-        emptyTitle="Sem anuncios nesta categoria"
+        emptyDescription="Ainda não ha anúncios publicados nesta categoria. Você pode explorar outras categorias ou publicar o primeiro anúncio deste segmento."
+        emptyTitle="Sem anúncios nesta categoria"
         listings={listingsQuery.data?.items ?? []}
       />
 
       {totalCount > PAGE_SIZE ? (
         <div className="flex flex-col gap-3 rounded-[1.7rem] border border-border bg-card/88 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
-            Pagina {page} de {totalPages}
+            Página {page} de {totalPages}
           </p>
           <div className="flex flex-wrap gap-2">
             <button
@@ -134,7 +134,7 @@ export function CategoryDetailsPage() {
               onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
               type="button"
             >
-              Proxima
+              Próxima
             </button>
           </div>
         </div>
@@ -143,7 +143,7 @@ export function CategoryDetailsPage() {
       <CtaBanner
         actionLabel="Anunciar nesta categoria"
         actionTo={paths.auth.register}
-        description="Publique seu lote com contexto comercial e alcance um publico que ja navega por este segmento do portal."
+        description="Publique seu lote com contexto comercial e alcance um público que ja navega por este segmento do portal."
         title={`Tem ${category.name.toLowerCase()} para vender?`}
       />
     </div>

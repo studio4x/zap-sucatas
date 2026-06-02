@@ -39,10 +39,10 @@ export function ForgotPasswordPage() {
 
     try {
       await requestPasswordReset(values.email)
-      setMessage('E-mail de recuperacao enviado. Verifique sua caixa de entrada.')
+      setMessage('E-mail de recuperação enviado. Verifique sua caixa de entrada.')
       emailForm.reset()
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Falha ao enviar recuperacao.')
+      setMessage(error instanceof Error ? error.message : 'Falha ao enviar recuperação.')
     }
   }
 
@@ -61,23 +61,23 @@ export function ForgotPasswordPage() {
   return (
     <PublicAuthShell
       badge="Recuperar acesso"
-      description="Solicite o link de redefinicao ou, se voce ja voltou pelo e-mail, defina uma nova senha para acessar sua conta."
+      description="Solicite o link de redefinicao ou, se você ja voltou pelo e-mail, defina uma nova senha para acessar sua conta."
       highlights={[
-        'Fluxo seguro de recuperacao via e-mail.',
-        'Atualizacao imediata da senha ao retornar pelo link.',
-        'Acesso pensado para nao interromper a operacao da sua conta no marketplace.',
+        'Fluxo seguro de recuperação via e-mail.',
+        'Atualização imediata da senha ao retornar pelo link.',
+        'Acesso pensado para não interromper a operação da sua conta no marketplace.',
       ]}
       title="Recuperar senha"
     >
       <div className="space-y-5">
         <div className="space-y-1">
           <h2 className="text-2xl font-semibold text-foreground">
-            {isAuthenticated ? 'Definir nova senha' : 'Solicitar recuperacao'}
+            {isAuthenticated ? 'Definir nova senha' : 'Solicitar recuperação'}
           </h2>
           <p className="text-sm leading-7 text-muted-foreground">
             {isAuthenticated
-              ? 'Sessao de recuperacao detectada. Defina sua nova senha.'
-              : 'Envie o e-mail da conta para receber um link seguro de recuperacao.'}
+              ? 'Sessão de recuperação detectada. Defina sua nova senha.'
+              : 'Envie o e-mail da conta para receber um link seguro de recuperação.'}
           </p>
         </div>
 

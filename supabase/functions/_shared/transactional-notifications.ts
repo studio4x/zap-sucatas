@@ -32,7 +32,7 @@ export async function enqueueTransactionalNotification(input: {
     .single()
 
   if (notificationError || !notification) {
-    throw notificationError ?? new Error('Falha ao inserir notificacao transacional.')
+    throw notificationError ?? new Error('Falha ao inserir notificação transacional.')
   }
 
   const queueRows = channels.map((channel) => ({

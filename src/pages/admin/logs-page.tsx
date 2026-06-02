@@ -120,21 +120,21 @@ export function AdminLogsPage() {
         actions={
           <>
             <Button asChild type="button">
-              <Link to={paths.admin.pricing}>Precos</Link>
+              <Link to={paths.admin.pricing}>Preços</Link>
             </Button>
             <Button asChild type="button" variant="outline">
-              <Link to={paths.admin.listings}>Anuncios</Link>
+              <Link to={paths.admin.listings}>Anúncios</Link>
             </Button>
           </>
         }
-        description="Trilha administrativa com severidade, origem do evento e sinais operacionais para leitura rapida."
+        description="Trilha administrativa com severidade, origem do evento e sinais operacionais para leitura rápida."
         eyebrow="Admin / logs"
         title="Logs e auditoria"
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard label="Total" value={stats.total} />
-        <AdminStatCard label="Integracoes" value={stats.integrations} />
+        <AdminStatCard label="Integrações" value={stats.integrations} />
         <AdminStatCard label="Auditoria" value={stats.audits} />
         <AdminStatCard label="Falhas" value={stats.withErrors} />
       </div>
@@ -146,23 +146,23 @@ export function AdminLogsPage() {
           value={health.errors24h}
         />
         <AdminStatCard
-          description="Entradas recebidas pelo contato publico nas ultimas 24h."
+          description="Entradas recebidas pelo contato público nas ultimas 24h."
           label="Contato 24h"
           value={health.contactMessages24h}
         />
         <AdminStatCard
-          description="Acoes administrativas registradas nas ultimas 24h."
+          description="Ações administrativas registradas nas ultimas 24h."
           label="Auditoria 24h"
           value={health.auditEvents24h}
         />
         <AdminStatCard
           description={formatLatestEvent(health.latestPricingSync)}
-          label="Ultimo sync LME"
+          label="Último sync LME"
           value={health.latestPricingSync?.status ?? 'Sem sync'}
         />
         <AdminStatCard
           description={formatLatestEvent(health.latestIntegrationEvent)}
-          label="Ultima integracao"
+          label="Última integração"
           value={health.latestIntegrationEvent?.integration_name ?? 'Sem evento'}
         />
       </div>
@@ -192,7 +192,7 @@ export function AdminLogsPage() {
               setPage(1)
               setQuery(event.target.value)
             }}
-            placeholder="Buscar por evento, origem, acao, entidade ou detalhe"
+            placeholder="Buscar por evento, origem, ação, entidade ou detalhe"
             value={query}
           />
           <Select
@@ -203,7 +203,7 @@ export function AdminLogsPage() {
             value={kindFilter}
           >
             <option value="all">Todos os tipos</option>
-            <option value="integration">Integracoes</option>
+            <option value="integration">Integrações</option>
             <option value="audit">Auditoria</option>
           </Select>
           <Select
@@ -217,7 +217,7 @@ export function AdminLogsPage() {
             <option value="info">Info</option>
             <option value="success">Sucesso</option>
             <option value="warning">Aviso</option>
-            <option value="danger">Critico</option>
+            <option value="danger">Crítico</option>
           </Select>
           <Select
             onChange={(event) => {
@@ -266,7 +266,7 @@ export function AdminLogsPage() {
               <div className="space-y-1">
                 <p className="font-medium text-foreground">{log.label}</p>
                 <p className="text-xs text-muted-foreground">
-                  {log.actionKey ?? log.secondaryLabel ?? 'Sem classificacao complementar'}
+                  {log.actionKey ?? log.secondaryLabel ?? 'Sem classificação complementar'}
                 </p>
               </div>
             ),
@@ -276,7 +276,7 @@ export function AdminLogsPage() {
             cell: (log) => (
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>{log.sourceName ?? 'sem origem declarada'}</p>
-                <p>Tipo: {log.kind === 'integration' ? 'Integracao' : 'Auditoria'}</p>
+                <p>Tipo: {log.kind === 'integration' ? 'Integração' : 'Auditoria'}</p>
                 <p>Ator: {log.actorName ?? log.actorUserId ?? 'Sistema'}</p>
               </div>
             ),
@@ -300,7 +300,7 @@ export function AdminLogsPage() {
             ),
           },
           {
-            header: 'Acoes',
+            header: 'Ações',
             className: 'w-[130px] text-right',
             cell: (log) => (
               <AdminRowActions
@@ -319,7 +319,7 @@ export function AdminLogsPage() {
         data={logs}
         emptyDescription="Nenhum evento corresponde aos filtros atuais."
         emptyTitle="Sem logs neste recorte"
-        errorMessage="Nao foi possivel carregar a trilha de logs."
+        errorMessage="Não foi possível carregar a trilha de logs."
         getRowKey={(log) => `${log.kind}-${log.id}`}
         isError={logsQuery.isError || statsQuery.isError || healthQuery.isError}
         isLoading={logsQuery.isLoading || statsQuery.isLoading || healthQuery.isLoading}

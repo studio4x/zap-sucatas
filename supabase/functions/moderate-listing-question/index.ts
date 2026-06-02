@@ -71,7 +71,7 @@ Deno.serve(async (request) => {
 
     if (question.author_user_id) {
       const statusCopy: Record<QuestionStatus, string> = {
-        blocked: 'foi bloqueada pela moderacao',
+        blocked: 'foi bloqueada pela moderação',
         hidden: 'foi ocultada temporariamente',
         published: 'foi publicada',
       }
@@ -86,7 +86,7 @@ Deno.serve(async (request) => {
           status: questionStatus,
         },
         priority: 'normal',
-        title: 'Atualizacao na moderacao da sua pergunta',
+        title: 'Atualização na moderação da sua pergunta',
         userId: question.author_user_id,
       })
     }

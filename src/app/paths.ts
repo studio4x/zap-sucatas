@@ -9,7 +9,7 @@ export const paths = {
     categories: '/categorias',
     categoryDetails: (slug: string) => `/categorias/${slug}`,
     pricing: '/preco-dos-metais-lme',
-    scrapPrices: '/tabela-de-preco-do-ferro-velho',
+    scrapPrices: '/tabela-de-precos',
     blog: '/blog',
     blogPost: (slug: string) => `/blog/${slug}`,
     blogPostPreview: (id: string) => `/blog/preview/${id}`,

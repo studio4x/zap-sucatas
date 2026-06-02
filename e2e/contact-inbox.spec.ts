@@ -33,7 +33,7 @@ test.describe('contact inbox operational flow', () => {
 
     test.skip(
       submitOutcome !== 'success',
-      'Fluxo pulado porque o formulario publico nao confirmou envio nesta execucao. Em producao isso costuma ocorrer por rate limit anti-abuso do endpoint.',
+      'Fluxo pulado porque o formulário público não confirmou envio nesta execucao. Em produção isso costuma ocorrer por rate limit anti-abuso do endpoint.',
     )
 
     const adminContext = await browser.newContext()

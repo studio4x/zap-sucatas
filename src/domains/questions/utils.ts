@@ -23,5 +23,5 @@ export function getQuestionAuthorLabel(question: ListingQuestion) {
     return question.guestEmail
   }
 
-  return question.authorUserId ? 'Usuario autenticado' : 'Visitante'
+  return question.authorUserId ? 'Usuário autenticado' : 'Visitante'
 }

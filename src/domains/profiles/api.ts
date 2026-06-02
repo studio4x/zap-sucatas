@@ -19,7 +19,7 @@ type ProfileRow = {
 
 function ensureSupabase() {
   if (!supabase) {
-    throw new Error('Supabase nao configurado no ambiente atual.')
+    throw new Error('Supabase não configurado no ambiente atual.')
   }
 
   return supabase
@@ -33,7 +33,7 @@ async function getFreshAccessToken() {
 
   if (!session?.refresh_token) {
     if (!session?.access_token) {
-      throw new Error('Sessao invalida. Faca login novamente.')
+      throw new Error('Sessão inválida. Faça login novamente.')
     }
 
     return session.access_token
@@ -50,7 +50,7 @@ async function getFreshAccessToken() {
   const accessToken = data.session?.access_token ?? session.access_token
 
   if (!accessToken) {
-    throw new Error('Sessao invalida. Faca login novamente.')
+    throw new Error('Sessão inválida. Faça login novamente.')
   }
 
   return accessToken
@@ -107,7 +107,7 @@ export async function fetchCurrentProfile(profileId: string) {
     .single()
 
   if (error || !data) {
-    throw error ?? new Error('Perfil nao encontrado.')
+    throw error ?? new Error('Perfil não encontrado.')
   }
 
   return mapProfile(data as ProfileRow)
@@ -322,7 +322,7 @@ async function invokeUserManagementFunction(body: Record<string, unknown>) {
   ensureSupabase()
 
   if (!env.supabaseUrl || !env.supabaseAnonKey) {
-    throw new Error('Supabase nao configurado no ambiente atual.')
+    throw new Error('Supabase não configurado no ambiente atual.')
   }
 
   const accessToken = await getFreshAccessToken()

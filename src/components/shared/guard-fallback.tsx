@@ -7,7 +7,7 @@ type GuardFallbackProps = {
 }
 
 export function GuardFallback({
-  description = 'Acesso protegido em verificacao. Aqui entram sessao real, refresh token e validacoes de permissao.',
+  description = 'Acesso protegido em verificação. Aqui entram sessão real, refresh token e validações de permissão.',
   loading = true,
   title,
 }: GuardFallbackProps) {

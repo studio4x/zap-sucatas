@@ -128,8 +128,8 @@ const CONDITION_OPTIONS = [
 const PRICE_OPTIONS = [
   'Sob consulta',
   'A combinar',
-  'Preco por kg',
-  'Preco por tonelada',
+  'Preço por kg',
+  'Preço por tonelada',
   'Faixa negociavel',
 ] as const
 
@@ -143,7 +143,7 @@ const ATTRIBUTE_LABEL_OPTIONS = [
   'Acondicionamento',
   'Origem do material',
   'Umidade',
-  'Contaminacao',
+  'Contaminação',
   'Cor predominante',
   'Disponibilidade',
 ] as const
@@ -158,13 +158,13 @@ const ATTRIBUTE_VALUE_PLACEHOLDERS: Record<string, string> = {
   Acondicionamento: 'Ex.: Big bag, fardo, granel',
   'Origem do material': 'Ex.: sobra industrial',
   Umidade: 'Ex.: 8%',
-  Contaminacao: 'Ex.: baixa, sem oleo',
+  Contaminação: 'Ex.: baixa, sem óleo',
   'Cor predominante': 'Ex.: cobre avermelhado',
   Disponibilidade: 'Ex.: retirada imediata',
 }
 
 const OTHER_CONDITION_VALUE = '__other_condition__'
-const PRICE_OPTIONS_WITH_VALUE = ['Preco por kg', 'Preco por tonelada'] as const
+const PRICE_OPTIONS_WITH_VALUE = ['Preço por kg', 'Preço por tonelada'] as const
 
 function parsePriceLabel(value: string) {
   const normalized = value.trim()
@@ -471,8 +471,8 @@ export function ListingEditor({
 
       {status === 'archived' ? (
         <DashboardAlertCard
-          description="Anuncios arquivados nao podem ser editados novamente nesta etapa do MVP."
-          title="Anuncio arquivado"
+          description="Anúncios arquivados não podem ser editados novamente nesta etapa do MVP."
+          title="Anúncio arquivado"
           tone="warning"
         />
       ) : null}
@@ -484,7 +484,7 @@ export function ListingEditor({
             title="Dados principais"
           >
             <div className="grid gap-4">
-              <FormField fieldId="listing-title" label="Titulo">
+              <FormField fieldId="listing-title" label="Título">
                 <Input id="listing-title" {...form.register('title')} />
                 {form.formState.errors.title ? (
                   <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
@@ -529,7 +529,7 @@ export function ListingEditor({
                 />
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-xs text-muted-foreground">
-                    Descreva o lote em poucas linhas: tipo de sucata, volume, diferencial e objetivo da negociacao (maximo de 147 caracteres).
+                    Descreva o lote em poucas linhas: tipo de sucata, volume, diferencial e objetivo da negociação (máximo de 147 caracteres).
                   </p>
                   <p className="shrink-0 text-xs font-medium text-muted-foreground">{summaryValue.length}/147</p>
                 </div>
@@ -538,7 +538,7 @@ export function ListingEditor({
                 ) : null}
               </FormField>
 
-              <FormField fieldId="listing-description" label="Descricao">
+              <FormField fieldId="listing-description" label="Descrição">
                 <Controller
                   control={form.control}
                   name="description"
@@ -613,7 +613,7 @@ export function ListingEditor({
 
           <DashboardFormSection
             description="Dados usados no detalhe do anúncio e no filtro geográfico do catálogo."
-            title="Localizacao e contato"
+            title="Localização e contato"
           >
             <div className="grid gap-4 md:grid-cols-2">
               <FormField fieldId="listing-state" label="Estado">
@@ -771,8 +771,8 @@ export function ListingEditor({
                 Adicionar atributo
               </Button>
             }
-            description="Informacoes adicionais para detalhar o lote, peso, volume ou especificacao."
-            title="Atributos tecnicos"
+            description="Informações adicionais para detalhar o lote, peso, volume ou especificação."
+            title="Atributos técnicos"
           >
             <div className="space-y-4">
               {attributesFieldArray.fields.length === 0 ? (
@@ -964,12 +964,12 @@ export function ListingEditor({
           {feedback ? (
             <DashboardAlertCard
               description={feedback.message}
-              title={feedback.tone === 'success' ? 'Rascunho salvo' : 'Ajuste necessario'}
+              title={feedback.tone === 'success' ? 'Rascunho salvo' : 'Ajuste necessário'}
               tone={feedback.tone}
             />
           ) : null}
 
-          <DashboardFormSection description={resolvedFinalActionDescription} title="Publicacao">
+          <DashboardFormSection description={resolvedFinalActionDescription} title="Publicação">
             <div className="space-y-3">
               <Button
                 disabled={isSubmitting || status === 'archived'}

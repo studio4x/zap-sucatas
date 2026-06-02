@@ -14,7 +14,7 @@ test.describe('admin operational CRUDs', () => {
 
     await page.getByLabel('Nome').fill(categoryName)
     await page.getByLabel('Slug').fill(`qa-categoria-${Date.now()}`)
-    await page.getByLabel('Descrição').fill('Categoria criada automaticamente para validacao E2E.')
+    await page.getByLabel('Descrição').fill('Categoria criada automaticamente para validação E2E.')
     await page.getByRole('button', { name: /criar categoria/i }).click()
     await expect(page.getByText(/categoria criada com sucesso/i)).toBeVisible()
 
@@ -127,13 +127,13 @@ test.describe('admin operational CRUDs', () => {
 
     await page.locator('#blog-post-title').fill(title)
     await page.locator('#blog-post-slug').fill(`qa-post-${Date.now()}`)
-    await page.locator('#blog-post-excerpt').fill('Post de rascunho criado automaticamente para validacao editorial.')
+    await page.locator('#blog-post-excerpt').fill('Post de rascunho criado automaticamente para validação editorial.')
     await page.locator('#blog-post-tags').fill('qa, automacao, blog')
     await page.locator('#blog-post-content').fill('Primeiro paragrafo do post automatizado.\n\nSegundo paragrafo do fluxo E2E.')
     await page.getByRole('button', { name: /criar post/i }).click()
     await expect(page.getByText(/criado com sucesso/i)).toBeVisible()
 
-    await searchForText(page, /buscar por titulo, slug ou resumo/i, title)
+    await searchForText(page, /buscar por título, slug ou resumo/i, title)
     let row = page.locator('tr', { hasText: title }).first()
     await expect(row).toBeVisible()
 
@@ -142,7 +142,7 @@ test.describe('admin operational CRUDs', () => {
     await page.getByRole('button', { name: /atualizar post/i }).click()
     await expect(page.getByText(/atualizado com sucesso/i)).toBeVisible()
 
-    await searchForText(page, /buscar por titulo, slug ou resumo/i, updatedTitle)
+    await searchForText(page, /buscar por título, slug ou resumo/i, updatedTitle)
     row = page.locator('tr', { hasText: updatedTitle }).first()
     await expect(row).toBeVisible()
 

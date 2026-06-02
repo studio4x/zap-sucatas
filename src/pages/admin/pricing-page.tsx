@@ -198,7 +198,7 @@ export function AdminPricingPage() {
   const nextSyncAt = getNextHourlySyncTimestamp(syncStatus?.lastTriggeredAt ?? null)
   const isWestmetallUnavailable =
     syncStatus?.lastStatus === 'warning' &&
-    (syncStatus.lastMessage ?? '').toLowerCase().includes('westmetall sem cotacoes numericas')
+    (syncStatus.lastMessage ?? '').toLowerCase().includes('westmetall sem cotações numericas')
   const paginatedManualEntries = data.manualEntries.slice(
     (manualPage - 1) * MANUAL_PAGE_SIZE,
     manualPage * MANUAL_PAGE_SIZE,

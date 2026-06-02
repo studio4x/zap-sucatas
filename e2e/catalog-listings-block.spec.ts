@@ -20,7 +20,7 @@ function requireEnv(name: 'VITE_SUPABASE_URL' | 'SUPABASE_SERVICE_ROLE_KEY', val
 }
 
 test.describe('BLK-CATALOGO-ANUNCIOS', () => {
-  test('CAT-01..CAT-06 em producao', async ({ browser }) => {
+  test('CAT-01..CAT-06 em produção', async ({ browser }) => {
     test.setTimeout(240000)
 
     const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'https://zap-sucatas.vercel.app/'
@@ -52,7 +52,7 @@ test.describe('BLK-CATALOGO-ANUNCIOS', () => {
     const publicPage = await publicContext.newPage()
 
     try {
-      await test.step('CAT-01: criar anuncio e salvar como rascunho', async () => {
+      await test.step('CAT-01: criar anúncio e salvar como rascunho', async () => {
         await signIn(userPage, userEmail, userPassword)
         await expect(userPage).toHaveURL(/\/app(\/|$)/, { timeout: 30000 })
         await userPage.goto('/app/anuncios/novo')
@@ -100,7 +100,7 @@ test.describe('BLK-CATALOGO-ANUNCIOS', () => {
           .toBe('pending_review')
       })
 
-      await test.step('CAT-03: aprovar no admin e validar exibicao publica', async () => {
+      await test.step('CAT-03: aprovar no admin e validar exibição pública', async () => {
         await signIn(adminPage, adminEmail, adminPassword)
         await expect(adminPage).toHaveURL(/\/admin(\/|$)/, { timeout: 30000 })
         await adminPage.goto(`/admin/anuncios/${approvedListingId}`)
@@ -132,7 +132,7 @@ test.describe('BLK-CATALOGO-ANUNCIOS', () => {
         await expect(publicPage.getByRole('heading', { level: 1, name: listingApprovedTitle })).toBeVisible()
       })
 
-      await test.step('CAT-04: reprovar anuncio e validar motivo para usuario', async () => {
+      await test.step('CAT-04: reprovar anúncio e validar motivo para usuário', async () => {
         await userPage.goto('/app/anuncios/novo')
         await fillListingEditor(userPage, listingRejectedTitle)
         await userPage.getByRole('button', { name: /salvar rascunho/i }).click()
@@ -197,9 +197,9 @@ test.describe('BLK-CATALOGO-ANUNCIOS', () => {
         await expect(userPage.getByText(rejectionReason)).toBeVisible()
       })
 
-      await test.step('CAT-05: editar anuncio aprovado e validar consistencia', async () => {
+      await test.step('CAT-05: editar anúncio aprovado e validar consistencia', async () => {
         await userPage.goto(`/app/anuncios/${approvedListingId}/editar`)
-        await userPage.getByLabel('Titulo').fill(editedTitle)
+        await userPage.getByLabel('Título').fill(editedTitle)
         await userPage.getByRole('button', { name: /salvar rascunho/i }).click()
         await expect(userPage).toHaveURL(/\/app\/anuncios(\/|$)/, { timeout: 30000 })
 
@@ -221,7 +221,7 @@ test.describe('BLK-CATALOGO-ANUNCIOS', () => {
         await expect(adminPage.getByRole('heading', { level: 1, name: editedTitle })).toBeVisible()
       })
 
-      await test.step('CAT-06: validar filtros publicos por categoria/material/localidade', async () => {
+      await test.step('CAT-06: validar filtros públicos por categoria/material/localidade', async () => {
         const { data: listing, error: listingError } = await adminClient
           .from('listings')
           .select('id, category_id, primary_material_id, city, state')

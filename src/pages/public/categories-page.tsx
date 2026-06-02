@@ -34,10 +34,10 @@ export function CategoriesPage() {
             <PublicSectionHeading
               actions={
                 <Button asChild variant="outline">
-                  <Link to={paths.public.listings}>Abrir catalogo completo</Link>
+                  <Link to={paths.public.listings}>Abrir catálogo completo</Link>
                 </Button>
               }
-              description="Navegue pelos principais recortes do portal e encontre anuncios com mais rapidez por segmento de sucata, metal ou maquinario."
+              description="Navegue pelos principais recortes do portal e encontre anúncios com mais rapidez por segmento de sucata, metal ou maquinário."
               eyebrow="Categorias"
               title="Explore o mercado por segmento"
             />
@@ -46,10 +46,10 @@ export function CategoriesPage() {
                 SEO por categoria
               </Badge>
               <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
-                Descoberta orientada ao catalogo
+                Descoberta orientada ao catálogo
               </Badge>
               <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
-                Navegacao setorial mais rapida
+                Navegação setorial mais rápida
               </Badge>
             </div>
           </div>
@@ -73,7 +73,7 @@ export function CategoriesPage() {
             </div>
             <div className="rounded-[1.5rem] border border-white/85 bg-white/88 p-4 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Anuncios publicados
+                Anúncios publicados
               </p>
               <p className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-foreground">
                 {stats.totalApproved}
@@ -85,7 +85,7 @@ export function CategoriesPage() {
 
       {categoriesQuery.isLoading ? (
         <div className="rounded-[2rem] border border-border bg-card/85 p-6 text-sm text-muted-foreground">
-          Carregando categorias publicas...
+          Carregando categorias públicas...
         </div>
       ) : null}
 
@@ -93,16 +93,16 @@ export function CategoriesPage() {
         <CategoryHighlights categories={categoriesQuery.data} />
       ) : (
         <PublicEmptyState
-          description="As categorias publicas aparecerao aqui quando o catalogo estiver mais preenchido."
-          title="Categorias ainda em preparacao"
+          description="As categorias públicas aparecerão aqui quando o catálogo estiver mais preenchido."
+          title="Categorias ainda em preparação"
         />
       )}
 
       <CtaBanner
-        actionLabel="Quero publicar um anuncio"
+        actionLabel="Quero publicar um anúncio"
         actionTo={paths.auth.register}
         description="Se você atua no mercado de sucatas, publique seu lote em uma plataforma pensada para descoberta e negociação."
-        title="Leve seu anuncio para um portal especializado em mercado industrial."
+        title="Leve seu anúncio para um portal especializado em mercado industrial."
       />
     </div>
   )

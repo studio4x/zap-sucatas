@@ -93,7 +93,7 @@ Deno.serve(async (request) => {
     if (question.author_user_id && question.author_user_id !== actor.id) {
       await enqueueTransactionalNotification({
         actionUrl: '/app/perguntas',
-        body: `Sua pergunta no anuncio "${listing.title}" foi respondida.`,
+        body: `Sua pergunta no anúncio "${listing.title}" foi respondida.`,
         category: 'listing_questions',
         payload: {
           entity_type: 'listing_question',

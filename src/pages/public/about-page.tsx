@@ -8,19 +8,19 @@ import quemSomosImage from '@/assets/about/quem-somos.png'
 const principles = [
   {
     description:
-      'Comercializar sucatas com excelencia operacional, elevando transparencia, previsibilidade e confianca na negociacao.',
+      'Comercializar sucatas com excelencia operacional, elevando transparência, previsibilidade e confianca na negociação.',
     icon: Target,
     title: 'Missao',
   },
   {
     description:
-      'Ser referencia nacional em marketplace de sucatas, conectando vendedores e compradores com inteligencia de mercado.',
+      'Ser referência nacional em marketplace de sucatas, conectando vendedores e compradores com inteligencia de mercado.',
     icon: Eye,
     title: 'Visao',
   },
   {
     description:
-      'Etica, transparencia, comprometimento, sustentabilidade e foco no cliente em cada interacao da plataforma.',
+      'Etica, transparência, comprometimento, sustentabilidade e foco no cliente em cada interação da plataforma.',
     icon: Gem,
     title: 'Valores',
   },
@@ -28,7 +28,7 @@ const principles = [
 
 const highlights = [
   { label: 'Metais reciclados (ton)', value: '500.000+' },
-  { label: 'Anos de atuacao no setor', value: '20+' },
+  { label: 'Anos de atuação no setor', value: '20+' },
   { label: 'Parceiros satisfeitos', value: '2.500+' },
 ]
 
@@ -37,7 +37,7 @@ export function AboutPage() {
     <div className="space-y-10 lg:space-y-12">
       <section className="relative left-1/2 right-1/2 w-screen -translate-x-1/2 overflow-hidden">
         <img
-          alt="Patio industrial com separacao de sucatas e operacao de reciclagem"
+          alt="Patio industrial com separação de sucatas e operação de reciclagem"
           className="h-[420px] w-full object-cover md:h-[560px]"
           src="https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=1800&q=80"
         />
@@ -49,11 +49,11 @@ export function AboutPage() {
                 Sobre a plataforma
               </p>
               <h1 className="text-4xl font-semibold leading-tight tracking-[-0.03em] text-white md:text-6xl">
-                Transformando o futuro da reciclacao com comercio digital inteligente
+                Transformando o futuro da reciclagem com comércio digital inteligente
               </h1>
               <p className="mx-auto max-w-2xl text-base leading-7 text-white/88 md:text-lg">
-                A Zap Sucatas une experiencia setorial, tecnologia e leitura de mercado para tornar a negociacao de
-                sucatas mais clara, rapida e confiavel.
+                A Zap Sucatas une experiencia setorial, tecnologia e leitura de mercado para tornar a negociação de
+                sucatas mais clara, rápida e confiavel.
               </p>
             </div>
           </div>
@@ -63,7 +63,7 @@ export function AboutPage() {
       <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center">
         <div className="overflow-hidden rounded-[2rem] shadow-[0_26px_60px_-42px_rgba(19,33,23,0.35)]">
           <img
-            alt="Equipe operacional em patio de reciclagem e classificacao de metais"
+            alt="Equipe operacional em patio de reciclagem e classificação de metais"
             className="h-[420px] w-full object-cover"
             src={quemSomosImage}
           />
@@ -75,11 +75,11 @@ export function AboutPage() {
             e claro: menos portal generico, mais estrutura comercial real para o setor.
           </p>
           <p className="text-base leading-8 text-foreground/90">
-            A plataforma combina catalogo publico, paginas de anuncio detalhadas, conteudo editorial e leitura de
-            precos para apoiar decisao de compra e venda em um unico ecossistema.
+            A plataforma combina catálogo público, páginas de anúncio detalhadas, conteúdo editorial e leitura de
+            preços para apoiar decisão de compra e venda em um unico ecossistema.
           </p>
           <p className="text-base font-semibold leading-8 text-primary">
-            Nossa paixao e transformar residuos em oportunidade com transparencia e eficiencia operacional.
+            Nossa paixao e transformar residuos em oportunidade com transparência e eficiencia operacional.
           </p>
         </div>
       </section>
@@ -121,10 +121,10 @@ export function AboutPage() {
               Anunciar na plataforma
             </p>
             <h3 className="font-display text-3xl tracking-tight md:text-4xl">
-              Faca parte da mudanca no mercado de sucatas
+              Faça parte da mudança no mercado de sucatas
             </h3>
             <p className="max-w-2xl text-sm leading-7 text-primary-foreground/86">
-              Se voce movimenta sucatas e metais, publique anuncios em um ambiente com descoberta comercial e leitura
+              Se você movimenta sucatas e metais, publique anúncios em um ambiente com descoberta comercial e leitura
               de mercado.
             </p>
             <div className="inline-flex items-center gap-2 text-sm text-white/80">

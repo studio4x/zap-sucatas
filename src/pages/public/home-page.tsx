@@ -72,7 +72,7 @@ const categoryIconMap: Record<string, typeof Factory> = {
   eletronicos: ScanSearch,
   equipamentos: Wrench,
   'equipamentos-industriais': Factory,
-  maquinarios: Factory,
+  maquinários: Factory,
   plastico: Recycle,
 }
 

@@ -10,7 +10,7 @@ test.describe('admin user management', () => {
       'Set E2E_RUN_ADMIN_USERS=1 after redeploying manage-user-account in Supabase.',
     )
 
-    const initialName = buildQaTitle('QA usuario')
+    const initialName = buildQaTitle('QA usuário')
     const updatedName = `${initialName} revisado`
     const initialEmail = buildQaEmail('qa-user-admin-flow')
     const updatedEmail = buildQaEmail('qa-user-admin-flow-updated')

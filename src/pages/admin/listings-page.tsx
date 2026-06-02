@@ -459,7 +459,7 @@ export function AdminListingsPage() {
       />
 
       <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-sm">
-        A fila administrativa agora pagina no servidor para reduzir custo de leitura em bases maiores.
+        A fila administrativa agora página no servidor para reduzir custo de leitura em bases maiores.
       </div>
 
       <ConfirmActionDialog

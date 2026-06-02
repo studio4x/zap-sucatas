@@ -159,7 +159,7 @@ export function SupportTicketDetailPage() {
   }
 
   if (detailQuery.isError) {
-    return <div className="rounded-[1.8rem] border border-rose-200 bg-rose-50 px-6 py-8 text-sm text-rose-700">Nao foi possivel carregar o detalhe do chamado.</div>
+    return <div className="rounded-[1.8rem] border border-rose-200 bg-rose-50 px-6 py-8 text-sm text-rose-700">Não foi possível carregar o detalhe do chamado.</div>
   }
 
   return (
@@ -181,7 +181,7 @@ export function SupportTicketDetailPage() {
             <CardContent className="space-y-0 p-0">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Historico de mensagens</p>
+                  <p className="text-sm font-semibold text-foreground">Histórico de mensagens</p>
                   <p className="text-sm text-muted-foreground">A conversa fica sincronizada em tempo real enquanto esta tela estiver aberta.</p>
                 </div>
                 {isAdmin ? (
@@ -193,8 +193,8 @@ export function SupportTicketDetailPage() {
 
               <div className="h-[600px] space-y-4 overflow-y-auto px-5 py-5" ref={scrollRef}>
                 <div className="max-w-[85%] rounded-[1.4rem] border border-border bg-card px-4 py-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Descricao do problema</p>
-                  <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-foreground">{ticket.description ?? 'Sem descricao complementar.'}</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Descrição do problema</p>
+                  <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-foreground">{ticket.description ?? 'Sem descrição complementar.'}</p>
                   <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                     <TicketAttachment attachmentName={ticket.attachmentName} attachmentUrl={ticket.attachmentUrl} />
                     <span>{formatSupportDateTime(ticket.createdAt)}</span>
@@ -206,7 +206,7 @@ export function SupportTicketDetailPage() {
                   return (
                     <div className={`flex ${ownMessage ? 'justify-end' : 'justify-start'}`} key={entry.id}>
                       <div className={`max-w-[85%] rounded-[1.4rem] px-4 py-4 ${ownMessage ? 'rounded-tr-md bg-primary text-primary-foreground' : 'rounded-tl-md border border-border bg-card text-foreground'}`}>
-                        {!ownMessage ? <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{entry.senderRole === 'admin' ? 'Equipe de suporte' : entry.senderName ?? 'Usuario'}</p> : null}
+                        {!ownMessage ? <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{entry.senderRole === 'admin' ? 'Equipe de suporte' : entry.senderName ?? 'Usuário'}</p> : null}
                         <p className="mt-2 whitespace-pre-wrap text-sm leading-7">{entry.message}</p>
                         <div className={`mt-3 flex flex-wrap items-center gap-3 text-xs ${ownMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                           <TicketAttachment attachmentName={entry.attachmentName} attachmentUrl={entry.attachmentUrl} />
@@ -229,7 +229,7 @@ export function SupportTicketDetailPage() {
                   <Input disabled={isClosedForUser || sendMutation.isPending} onChange={(event) => setMessage(event.target.value)} placeholder={isClosedForUser ? 'Chamado encerrado pelo suporte.' : 'Escreva sua mensagem'} value={message} />
                   <Button disabled={(isClosedForUser || sendMutation.isPending) || (!message.trim() && !selectedFile)} onClick={() => sendMutation.mutate()} type="button"><Send className="size-4" /> Enviar</Button>
                 </div>
-                {sendMutation.isError ? <p className="mt-3 text-sm text-destructive">{sendMutation.error instanceof Error ? sendMutation.error.message : 'Nao foi possivel enviar a mensagem.'}</p> : null}
+                {sendMutation.isError ? <p className="mt-3 text-sm text-destructive">{sendMutation.error instanceof Error ? sendMutation.error.message : 'Não foi possível enviar a mensagem.'}</p> : null}
               </div>
             </CardContent>
           </Card>
@@ -238,15 +238,15 @@ export function SupportTicketDetailPage() {
         <div className="space-y-4">
           <Card className="rounded-[1.8rem] border-border/80">
             <CardContent className="space-y-4 p-5">
-              <p className="text-sm font-semibold text-foreground">Informacoes</p>
+              <p className="text-sm font-semibold text-foreground">Informações</p>
               <div className="space-y-3 text-sm text-muted-foreground">
-                <div><p className="text-xs font-semibold uppercase tracking-[0.12em]">Usuario</p><p className="mt-1 text-foreground">{ticket.userFullName ?? 'Usuario autenticado'}</p><p>{ticket.userEmail ?? 'Sem e-mail'}</p></div>
+                <div><p className="text-xs font-semibold uppercase tracking-[0.12em]">Usuário</p><p className="mt-1 text-foreground">{ticket.userFullName ?? 'Usuário autenticado'}</p><p>{ticket.userEmail ?? 'Sem e-mail'}</p></div>
                 <div><p className="text-xs font-semibold uppercase tracking-[0.12em]">Categoria</p><p className="mt-1 text-foreground">{category?.label}</p></div>
                 <div><p className="text-xs font-semibold uppercase tracking-[0.12em]">Prioridade</p><p className="mt-1 text-foreground">{ticket.priority}</p></div>
                 <div><p className="text-xs font-semibold uppercase tracking-[0.12em]">SLA da primeira resposta</p><div className="mt-1"><TicketSlaBadge status={ticket.slaStatus} /></div></div>
                 <div><p className="text-xs font-semibold uppercase tracking-[0.12em]">Prazo previsto</p><p className="mt-1 text-foreground">{ticket.firstResponseDueAt ? formatSupportDateTime(ticket.firstResponseDueAt) : 'Em calculo'}</p></div>
-                <div><p className="text-xs font-semibold uppercase tracking-[0.12em]">Primeira resposta</p><p className="mt-1 text-foreground">{ticket.firstResponseAt ? formatSupportDateTime(ticket.firstResponseAt) : 'Ainda nao registrada'}</p></div>
-                <div><p className="text-xs font-semibold uppercase tracking-[0.12em]">Ultima atualizacao</p><p className="mt-1 text-foreground">{formatSupportDateTime(ticket.updatedAt)}</p></div>
+                <div><p className="text-xs font-semibold uppercase tracking-[0.12em]">Primeira resposta</p><p className="mt-1 text-foreground">{ticket.firstResponseAt ? formatSupportDateTime(ticket.firstResponseAt) : 'Ainda não registrada'}</p></div>
+                <div><p className="text-xs font-semibold uppercase tracking-[0.12em]">Última atualização</p><p className="mt-1 text-foreground">{formatSupportDateTime(ticket.updatedAt)}</p></div>
               </div>
             </CardContent>
           </Card>
@@ -254,13 +254,13 @@ export function SupportTicketDetailPage() {
           <Card className="rounded-[1.8rem] border-amber-200 bg-amber-50">
             <CardContent className="p-5 text-sm leading-7 text-amber-950">
               <p className="font-semibold">{category?.description}</p>
-              <p className="mt-2">Horario de atendimento: {formatBusinessHours(config.businessHours)}</p>
+              <p className="mt-2">Horário de atendimento: {formatBusinessHours(config.businessHours)}</p>
             </CardContent>
           </Card>
 
           <Card className="rounded-[1.8rem] border-rose-200 bg-rose-50">
             <CardContent className="p-5 text-sm leading-7 text-rose-900">
-              Mantenha o chamado ativo enquanto houver contexto importante. Se houver risco, fraude ou tentativa de golpe, registre tudo com horario e evidencias disponiveis.
+              Mantenha o chamado ativo enquanto houver contexto importante. Se houver risco, fraude ou tentativa de golpe, registre tudo com horário e evidencias disponíveis.
             </CardContent>
           </Card>
         </div>

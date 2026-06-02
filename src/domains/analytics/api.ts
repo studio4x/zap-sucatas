@@ -10,7 +10,7 @@ type ProfileCreatedRow = Pick<Database['public']['Tables']['profiles']['Row'], '
 
 function ensureSupabase() {
   if (!supabase) {
-    throw new Error('Supabase nao configurado no ambiente atual.')
+    throw new Error('Supabase não configurado no ambiente atual.')
   }
 
   return supabase

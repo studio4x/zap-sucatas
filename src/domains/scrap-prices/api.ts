@@ -4,7 +4,7 @@ import type { ScrapPriceItem } from '@/domains/scrap-prices/types'
 
 function ensureSupabase() {
   if (!supabase) {
-    throw new Error('Supabase nao configurado no ambiente atual.')
+    throw new Error('Supabase não configurado no ambiente atual.')
   }
 
   return supabase
@@ -18,7 +18,7 @@ async function getFreshAccessToken() {
 
   if (!session?.refresh_token) {
     if (!session?.access_token) {
-      throw new Error('Sessao invalida. Faça login novamente.')
+      throw new Error('Sessão inválida. Faça login novamente.')
     }
 
     return session.access_token
@@ -31,14 +31,14 @@ async function getFreshAccessToken() {
   if (error) throw error
 
   const accessToken = data.session?.access_token ?? session.access_token
-  if (!accessToken) throw new Error('Sessao invalida. Faça login novamente.')
+  if (!accessToken) throw new Error('Sessão inválida. Faça login novamente.')
   return accessToken
 }
 
 async function invokeFn<TBody extends object, TResponse>(name: string, body: TBody, withAuth = true) {
   ensureSupabase()
   if (!env.supabaseUrl || !env.supabaseAnonKey) {
-    throw new Error('Supabase nao configurado no ambiente atual.')
+    throw new Error('Supabase não configurado no ambiente atual.')
   }
 
   const accessToken = withAuth ? await getFreshAccessToken() : null

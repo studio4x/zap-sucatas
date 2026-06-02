@@ -5,7 +5,7 @@ docs/CHECKLIST_IMPLEMENTACAO_E_TESTES.md
 
 Execute apenas o bloco:
 
-"[Modulo Autenticacao Publica]"
+"[Modulo Autenticação Pública]"
 
 Regras:
 - Não execute outros blocos

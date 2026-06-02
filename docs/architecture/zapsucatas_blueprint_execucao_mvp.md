@@ -83,7 +83,7 @@ Listagem pública com:
 - busca por termo;
 - filtros por categoria, material, estado e cidade;
 - ordenação;
-- paginação;
+- páginação;
 - cards de anúncios.
 
 ### `/anuncios/:slug`
@@ -102,7 +102,7 @@ Página com categorias principais.
 ### `/categorias/:slug`
 Landing de categoria com SEO próprio.
 
-### `/tabela-de-precos`
+### `/tabela-de-preços`
 Página pública com:
 - preços internos de sucatas;
 - bloco de metais LME;
@@ -216,7 +216,7 @@ Logs e auditoria.
 2. cria anúncio;
 3. envia imagens;
 4. salva rascunho ou envia para revisão;
-5. sistema valida campos obrigatórios;
+5. sistema válida campos obrigatórios;
 6. status vira `pending_review`;
 7. admin aprova ou rejeita;
 8. se aprovado, anúncio ganha slug público e `published_at`.
@@ -239,7 +239,7 @@ Logs e auditoria.
 
 1. admin cria rascunho;
 2. edita conteúdo;
-3. publica com slug e SEO;
+3. pública com slug e SEO;
 4. post aparece no blog público.
 
 ---
@@ -774,7 +774,7 @@ Categorias iniciais sugeridas:
 /anuncios/:slug
 /categorias
 /categorias/:slug
-/tabela-de-precos
+/tabela-de-preços
 /blog
 /blog/:slug
 /sobre
@@ -1124,4 +1124,3 @@ O MVP estará pronto quando:
 - RLS estiver aplicada nas tabelas sensíveis;
 - painel admin estiver utilizável para operação diária;
 - projeto estiver homologado para troca do site atual.
-

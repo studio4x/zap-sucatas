@@ -38,7 +38,7 @@ function getHistoryOriginMeta(origin: NotificationHistoryItem['origin']) {
     return { label: 'Manual', tone: 'border-primary/30 bg-primary/10 text-primary' }
   }
   if (origin === 'automatic') {
-    return { label: 'Automatica', tone: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' }
+    return { label: 'Automática', tone: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' }
   }
   return { label: 'Indefinida', tone: 'border-border bg-background text-muted-foreground' }
 }
@@ -136,25 +136,25 @@ export function AdminNotificationsPage() {
             Processar fila
           </Button>
         ) : undefined}
-        description="Gestao de disparos manuais e acompanhamento operacional das notificacoes transacionais."
-        eyebrow="Admin / notificacoes"
-        title="Central de notificacoes"
+        description="Gestão de disparos manuais e acompanhamento operacional das notificações transacionais."
+        eyebrow="Admin / notificações"
+        title="Central de notificações"
       />
 
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-2 shadow-sm">
-        <button className={activeTab === 'manual' ? 'rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground' : 'rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted'} onClick={() => setActiveTab('manual')} type="button">Notificacoes manuais</button>
-        <button className={activeTab === 'transactional' ? 'rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground' : 'rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted'} onClick={() => setActiveTab('transactional')} type="button">Notificacoes transacionais</button>
+        <button className={activeTab === 'manual' ? 'rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground' : 'rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted'} onClick={() => setActiveTab('manual')} type="button">Notificações manuais</button>
+        <button className={activeTab === 'transactional' ? 'rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground' : 'rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted'} onClick={() => setActiveTab('transactional')} type="button">Notificações transacionais</button>
       </div>
 
       {activeTab === 'manual' ? (
         <>
           <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-            <h2 className="text-base font-semibold text-foreground">Enviar notificacao em massa</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Envio administrativo para todos os usuarios ativos ou uma lista especifica de perfis.</p>
+            <h2 className="text-base font-semibold text-foreground">Enviar notificação em massa</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Envio administrativo para todos os usuários ativos ou uma lista específica de perfis.</p>
             <form className="mt-4 space-y-4" onSubmit={form.handleSubmit((values) => broadcastMutation.mutate(values))}>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor="notification-title">Titulo</label>
+                  <label className="text-sm font-medium text-foreground" htmlFor="notification-title">Título</label>
                   <Input id="notification-title" {...form.register('title')} />
                   {form.formState.errors.title ? <p className="text-sm text-destructive">{form.formState.errors.title.message}</p> : null}
                 </div>
@@ -178,7 +178,7 @@ export function AdminNotificationsPage() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Alvo</label>
                   <Select {...form.register('target')} value={form.watch('target')}>
-                    <option value="all">Todos os usuarios ativos</option><option value="users">Lista de user_ids</option>
+                    <option value="all">Todos os usuários ativos</option><option value="users">Lista de user_ids</option>
                   </Select>
                 </div>
                 <div className="space-y-2 md:col-span-2">
@@ -188,7 +188,7 @@ export function AdminNotificationsPage() {
               </div>
               {form.watch('target') === 'users' ? (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor="notification-users">User IDs (separados por virgula)</label>
+                  <label className="text-sm font-medium text-foreground" htmlFor="notification-users">User IDs (separados por vírgula)</label>
                   <Input id="notification-users" placeholder="uuid1, uuid2" {...form.register('userIds')} />
                 </div>
               ) : null}
@@ -204,17 +204,17 @@ export function AdminNotificationsPage() {
                 </div>
                 {form.formState.errors.channels ? <p className="text-sm text-destructive">{form.formState.errors.channels.message}</p> : null}
               </div>
-              <Button disabled={broadcastMutation.isPending} type="submit"><Send className="size-4" />{broadcastMutation.isPending ? 'Enviando...' : 'Enviar notificacao'}</Button>
+              <Button disabled={broadcastMutation.isPending} type="submit"><Send className="size-4" />{broadcastMutation.isPending ? 'Enviando...' : 'Enviar notificação'}</Button>
             </form>
           </section>
 
           <AdminFilterCard
             actions={<Button onClick={() => { setHistoryQuery(''); setHistoryChannelFilter('all'); setHistoryStatusFilter('all'); setHistoryCategoryFilter('all'); setHistoryPage(1) }} type="button" variant="outline">Limpar filtros</Button>}
-            description="Historico dos disparos criados manualmente no painel admin."
-            title="Notificacoes manuais enviadas"
+            description="Histórico dos disparos criados manualmente no painel admin."
+            title="Notificações manuais enviadas"
           >
             <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_170px_170px_180px]">
-              <Input onChange={(event) => { setHistoryPage(1); setHistoryQuery(event.target.value) }} placeholder="Buscar por titulo, mensagem ou categoria" value={historyQuery} />
+              <Input onChange={(event) => { setHistoryPage(1); setHistoryQuery(event.target.value) }} placeholder="Buscar por título, mensagem ou categoria" value={historyQuery} />
               <Select onChange={(event) => { setHistoryPage(1); setHistoryChannelFilter(event.target.value as typeof historyChannelFilter) }} value={historyChannelFilter}>
                 <option value="all">Todos canais</option><option value="in-app">Widget (in-app)</option><option value="email">Email</option><option value="push">Push</option><option value="whatsapp">WhatsApp</option>
               </Select>
@@ -232,7 +232,7 @@ export function AdminNotificationsPage() {
               { header: 'Criado em', cell: (row) => <span className="text-xs text-muted-foreground">{formatNotificationDateTime(row.createdAt)}</span> },
               { header: 'Origem', cell: (row) => { const meta = getHistoryOriginMeta(row.origin); return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${meta.tone}`}>{meta.label}</span> } },
               { header: 'Canais', cell: (row) => <div className="flex flex-wrap gap-1.5">{row.channels.map((channel) => <span className="inline-flex rounded-full border border-border bg-background px-2 py-0.5 text-[11px] font-semibold" key={channel}>{getNotificationChannelMeta(channel).label}</span>)}</div> },
-              { header: 'Conteudo', cell: (row) => <div className="space-y-1"><p className="font-medium text-foreground line-clamp-1">{row.title}</p><p className="text-xs text-muted-foreground line-clamp-2">{row.body}</p><p className="text-xs text-muted-foreground">Categoria: {row.category}</p><p className="text-xs font-medium text-foreground">Destinatário(s): <span className="font-normal text-muted-foreground">{row.recipientSummary}</span></p></div> },
+              { header: 'Conteúdo', cell: (row) => <div className="space-y-1"><p className="font-medium text-foreground line-clamp-1">{row.title}</p><p className="text-xs text-muted-foreground line-clamp-2">{row.body}</p><p className="text-xs text-muted-foreground">Categoria: {row.category}</p><p className="text-xs font-medium text-foreground">Destinatário(s): <span className="font-normal text-muted-foreground">{row.recipientSummary}</span></p></div> },
               { header: 'Prioridade', cell: (row) => { const meta = getNotificationPriorityMeta(row.priority); return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${meta.tone}`}>{meta.label}</span> } },
               { header: 'Status consolidado', cell: (row) => { const meta = getHistoryStatusMeta(row.status); return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${meta.tone}`}>{meta.label}</span> } },
               { header: 'Itens fila', className: 'text-right', cell: (row) => <span className="text-sm font-semibold text-foreground">{row.queueItems}</span> },
@@ -240,7 +240,7 @@ export function AdminNotificationsPage() {
             data={historyRows}
             emptyDescription="Nenhum envio encontrado para os filtros atuais."
             emptyTitle="Registro vazio"
-            errorMessage="Nao foi possivel carregar o historico de notificacoes."
+            errorMessage="Não foi possível carregar o histórico de notificações."
             getRowKey={(row) => row.id}
             isError={historyListQuery.isError || statsQuery.isError}
             isLoading={historyListQuery.isLoading || statsQuery.isLoading}
@@ -259,14 +259,14 @@ export function AdminNotificationsPage() {
 
           <AdminFilterCard
             actions={<Button onClick={() => { setHistoryQuery(''); setHistoryChannelFilter('all'); setHistoryStatusFilter('all'); setHistoryOriginFilter('automatic'); setHistoryCategoryFilter('all'); setHistoryPage(1) }} type="button" variant="outline">Limpar filtros</Button>}
-            description="Registro consolidado das notificacoes automaticas/transacionais da plataforma."
-            title="Historico transacional"
+            description="Registro consolidado das notificações automáticas/transacionais da plataforma."
+            title="Histórico transacional"
           >
             <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_170px_170px_170px_180px]">
-              <Input onChange={(event) => { setHistoryPage(1); setHistoryQuery(event.target.value) }} placeholder="Buscar por titulo, mensagem ou categoria" value={historyQuery} />
+              <Input onChange={(event) => { setHistoryPage(1); setHistoryQuery(event.target.value) }} placeholder="Buscar por título, mensagem ou categoria" value={historyQuery} />
               <Select onChange={(event) => { setHistoryPage(1); setHistoryChannelFilter(event.target.value as typeof historyChannelFilter) }} value={historyChannelFilter}><option value="all">Todos canais</option><option value="in-app">Widget (in-app)</option><option value="email">Email</option><option value="push">Push</option><option value="whatsapp">WhatsApp</option></Select>
               <Select onChange={(event) => { setHistoryPage(1); setHistoryStatusFilter(event.target.value as typeof historyStatusFilter) }} value={historyStatusFilter}><option value="all">Todos status</option><option value="pending">Pending</option><option value="retry">Retry</option><option value="sent">Sent</option><option value="delivered">Delivered</option><option value="failed">Failed</option><option value="bounced">Bounced</option></Select>
-              <Select onChange={(event) => { setHistoryPage(1); setHistoryOriginFilter(event.target.value as typeof historyOriginFilter) }} value={historyOriginFilter}><option value="all">Todas origens</option><option value="automatic">Automatica</option><option value="unknown">Indefinida</option></Select>
+              <Select onChange={(event) => { setHistoryPage(1); setHistoryOriginFilter(event.target.value as typeof historyOriginFilter) }} value={historyOriginFilter}><option value="all">Todas origens</option><option value="automatic">Automática</option><option value="unknown">Indefinida</option></Select>
               <Select onChange={(event) => { setHistoryPage(1); setHistoryCategoryFilter(event.target.value) }} value={historyCategoryFilter}><option value="all">Todas categorias</option>{historyCategories.filter((value) => value !== 'all').map((value) => <option key={value} value={value}>{value}</option>)}</Select>
             </div>
           </AdminFilterCard>
@@ -276,7 +276,7 @@ export function AdminNotificationsPage() {
               { header: 'Criado em', cell: (row) => <span className="text-xs text-muted-foreground">{formatNotificationDateTime(row.createdAt)}</span> },
               { header: 'Origem', cell: (row) => { const meta = getHistoryOriginMeta(row.origin); return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${meta.tone}`}>{meta.label}</span> } },
               { header: 'Canais', cell: (row) => <div className="flex flex-wrap gap-1.5">{row.channels.map((channel) => <span className="inline-flex rounded-full border border-border bg-background px-2 py-0.5 text-[11px] font-semibold" key={channel}>{getNotificationChannelMeta(channel).label}</span>)}</div> },
-              { header: 'Conteudo', cell: (row) => <div className="space-y-1"><p className="font-medium text-foreground line-clamp-1">{row.title}</p><p className="text-xs text-muted-foreground line-clamp-2">{row.body}</p><p className="text-xs text-muted-foreground">Categoria: {row.category}</p><p className="text-xs font-medium text-foreground">Destinatário(s): <span className="font-normal text-muted-foreground">{row.recipientSummary}</span></p></div> },
+              { header: 'Conteúdo', cell: (row) => <div className="space-y-1"><p className="font-medium text-foreground line-clamp-1">{row.title}</p><p className="text-xs text-muted-foreground line-clamp-2">{row.body}</p><p className="text-xs text-muted-foreground">Categoria: {row.category}</p><p className="text-xs font-medium text-foreground">Destinatário(s): <span className="font-normal text-muted-foreground">{row.recipientSummary}</span></p></div> },
               { header: 'Prioridade', cell: (row) => { const meta = getNotificationPriorityMeta(row.priority); return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${meta.tone}`}>{meta.label}</span> } },
               { header: 'Status consolidado', cell: (row) => { const meta = getHistoryStatusMeta(row.status); return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${meta.tone}`}>{meta.label}</span> } },
               { header: 'Itens fila', className: 'text-right', cell: (row) => <span className="text-sm font-semibold text-foreground">{row.queueItems}</span> },
@@ -284,7 +284,7 @@ export function AdminNotificationsPage() {
             data={historyRows}
             emptyDescription="Nenhum envio encontrado para os filtros atuais."
             emptyTitle="Registro vazio"
-            errorMessage="Nao foi possivel carregar o historico de notificacoes."
+            errorMessage="Não foi possível carregar o histórico de notificações."
             getRowKey={(row) => row.id}
             isError={historyListQuery.isError || statsQuery.isError}
             isLoading={historyListQuery.isLoading || statsQuery.isLoading}

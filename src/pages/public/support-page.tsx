@@ -41,7 +41,7 @@ export function SupportPage() {
           <div className="space-y-3">
             <h1 className="font-display text-4xl leading-[0.95] tracking-[-0.05em] text-foreground sm:text-[3.7rem]">Como podemos ajudar?</h1>
             <p className="mx-auto max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">
-              Consulte o SLA publico, filtre as perguntas frequentes e abra um chamado quando precisar de apoio operacional da equipe da Zap Sucatas.
+              Consulte o SLA público, filtre as perguntas frequentes e abra um chamado quando precisar de apoio operacional da equipe da Zap Sucatas.
             </p>
           </div>
           <div className="relative mx-auto max-w-2xl">
@@ -87,11 +87,11 @@ export function SupportPage() {
           <div className="hidden rounded-full bg-primary md:block" />
           <div>
             <h2 className="font-display text-3xl tracking-tight text-foreground">Ainda precisa de ajuda?</h2>
-            <p className="mt-2 text-sm leading-7 text-muted-foreground">Abra um chamado com contexto, urgencia e anexos. O historico fica disponivel na area autenticada.</p>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">Abra um chamado com contexto, urgência e anexos. O histórico fica disponível na area autenticada.</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Button onClick={() => setIsModalOpen(true)} type="button">Abrir um chamado</Button>
-            {user?.profileId ? <Button asChild type="button" variant="outline"><Link to={paths.app.support}>Ver historico de chamados</Link></Button> : null}
+            {user?.profileId ? <Button asChild type="button" variant="outline"><Link to={paths.app.support}>Ver histórico de chamados</Link></Button> : null}
           </div>
         </CardContent>
       </Card>

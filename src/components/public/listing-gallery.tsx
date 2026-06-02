@@ -127,7 +127,7 @@ export function ListingGallery({ images, listingTitle }: ListingGalleryProps) {
         </div>
       ) : (
         <div className="flex min-h-40 items-center justify-center rounded-[1.15rem] bg-[linear-gradient(160deg,#f0f8ed_0%,#d6ebd1_100%)] text-sm text-muted-foreground">
-          Sem imagens disponiveis
+          Sem imagens disponíveis
         </div>
       )}
     </div>

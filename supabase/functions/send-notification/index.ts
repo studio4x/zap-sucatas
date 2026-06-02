@@ -32,11 +32,11 @@ function validatePayload(payload: RequestBody) {
   const body = typeof payload.body === 'string' ? payload.body.trim() : ''
 
   if (!title || !body) {
-    throw new Error('title e body sao obrigatorios.')
+    throw new Error('title e body são obrigatórios.')
   }
 
   if (title.length > 200) {
-    throw new Error('title deve ter no maximo 200 caracteres.')
+    throw new Error('title deve ter no máximo 200 caracteres.')
   }
 
   const category = typeof payload.category === 'string' && payload.category.trim().length > 0
@@ -187,7 +187,7 @@ Deno.serve(async (request) => {
         .single()
 
       if (notificationError || !notificationRow) {
-        throw notificationError ?? new Error('Nao foi possivel inserir notificacao.')
+        throw notificationError ?? new Error('Não foi possível inserir notificação.')
       }
 
       notificationCount += 1

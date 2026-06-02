@@ -71,7 +71,7 @@ Deno.serve(async (request) => {
       .single()
 
     if (notificationError || !notification) {
-      throw notificationError ?? new Error('Notificacao nao encontrada.')
+      throw notificationError ?? new Error('Notificação não encontrada.')
     }
 
     const nextReadByChannels = addChannelToReadList(notification.read_by_channels, payload.channel)

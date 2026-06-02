@@ -188,7 +188,7 @@ Deno.serve(async (request) => {
       body: JSON.stringify({
         billingType,
         customer: customer.id,
-        description: `Destaque premium do anuncio "${listing.title}"`,
+        description: `Destaque premium do anúncio "${listing.title}"`,
         dueDate,
         externalReference: listingId,
         value: amount,
@@ -256,7 +256,7 @@ Deno.serve(async (request) => {
     })
     await enqueueTransactionalNotification({
       actionUrl: '/app/anuncios',
-      body: `A cobranca de destaque do anuncio "${listing.title}" foi criada no valor de R$ ${amount.toFixed(2)}.`,
+      body: `A cobrança de destaque do anúncio "${listing.title}" foi criada no valor de R$ ${amount.toFixed(2)}.`,
       category: 'featured_payment',
       title: 'Cobranca de destaque criada',
       userId: listing.user_id,

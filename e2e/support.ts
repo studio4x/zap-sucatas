@@ -49,12 +49,12 @@ export async function signOut(page: Page) {
 const REAL_IMAGE_PATH = path.resolve(process.cwd(), 'src/assets/hero.png')
 
 export async function fillListingEditor(page: Page, title: string) {
-  await page.getByLabel('Titulo').fill(title)
+  await page.getByLabel('Título').fill(title)
   await selectFirstRealOption(page, '#listing-category')
   await selectFirstRealOption(page, '#listing-material')
   await page.getByLabel('Resumo comercial').fill(`${title} com leitura comercial para fluxo E2E.`)
   await page.locator('.ql-editor').first().fill(
-    `${title} criado automaticamente para validar criacao, moderacao e publicacao do marketplace.`,
+    `${title} criado automaticamente para validar criação, moderação e publicação do marketplace.`,
   )
   await page.getByLabel('Estado').selectOption('SP')
   await page.waitForTimeout(500)
