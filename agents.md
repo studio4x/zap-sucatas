@@ -7,9 +7,9 @@ Este arquivo orienta o Codex dentro do repositório.
 Ele NÃO deve repetir o blueprint do projeto.  
 A fonte de verdade do MVP está em:
 
-- `docs/architecture/zapsucatas-blueprint-mvp.md`
+- `docs/architecture/zapsucatas_blueprint_execucao_mvp.md`
 - `docs/architecture/admin-spec.md`
-- `docs/mvp-execution-plan.md`
+- `docs/architecture/mvp-execution-plan.md`
 
 Antes de implementar qualquer tarefa relevante, consulte esses documentos.
 
@@ -190,7 +190,7 @@ Antes de concluir qualquer tarefa visual, revisar textos, acentuação, ortograf
 
 ## Ordem preferencial de implementação
 
-Seguir o `mvp-execution-plan.md`.
+Seguir o `docs/architecture/mvp-execution-plan.md`.
 
 Resumo:
 

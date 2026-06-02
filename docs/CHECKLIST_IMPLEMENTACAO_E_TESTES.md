@@ -422,5 +422,5 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ## 10) Higiene documental (fonte de verdade)
 
-- [ ] `CHK-148` Confirmar que os caminhos dos documentos-base referenciados no AGENTS.md existem e estao atualizados.
-- [ ] `CHK-149` Em caso de renomeação/movimentação de arquivos de arquitetura, atualizar referências internas antes da release.
+- [x] `CHK-148` Confirmar que os caminhos dos documentos-base referenciados no AGENTS.md existem e estão atualizados.
+- [x] `CHK-149` Em caso de renomeação/movimentação de arquivos de arquitetura, atualizar referências internas antes da release.
