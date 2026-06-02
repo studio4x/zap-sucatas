@@ -293,12 +293,14 @@ Objetivo: servir como checklist unico para validar o que ja foi implementado, ex
 
 ### 4.12.2 Testes sugeridos - BLK-PAGAMENTOS-DESTAQUE
 
-1. [ ] `PAY-01` Abrir `/preco-dos-metais-lme` e validar dados, loading, erro e atualização da página.
-2. [ ] `PAY-02` Criar, editar e remover item em `/admin/preco-das-sucatas` e validar reflexo público.
-3. [ ] `PAY-03` Abrir `/admin/pagamentos` e validar listagem, filtros e toggle de ativação.
+1. [x] `PAY-01` Abrir `/preco-dos-metais-lme` e validar dados, loading, erro e atualização da página.
+2. [x] `PAY-02` Criar, editar e remover item em `/admin/preco-das-sucatas` e validar reflexo público.
+3. [x] `PAY-03` Abrir `/admin/pagamentos` e validar listagem, filtros e toggle de ativação.
 4. [ ] `PAY-04` Criar cobrança de destaque e validar URLs de pagamento geradas pelo Asaas.
 5. [ ] `PAY-05` Disparar webhook Asaas e validar transição de status para `paid`, `expired`, `canceled` ou `failed`.
-6. [ ] `PAY-06` Validar ambiente Asaas, URL do webhook e token configurados na checagem de integração.
+6. [x] `PAY-06` Validar ambiente Asaas, URL do webhook e token configurados na checagem de integração.
+
+> Bloqueio atual em produção: `PAY-04` e `PAY-05` ficaram impedidos porque a Edge Function de destaque retornou `Missing required environment variable: ASAAS_API_KEY`. O painel de integração expõe a ausência dessa configuração.
 
 ## 5) Banco de dados, migrations e seguranca
 
