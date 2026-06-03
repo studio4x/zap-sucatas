@@ -1,4 +1,4 @@
-export const BUILD_VERSION = '2026.06.03-201'
+export const BUILD_VERSION = '2026.06.03-202'
 const BUILD_COMMIT = import.meta.env.VITE_COMMIT_SHA?.trim()
 export const BUILD_VERSION_DISPLAY = BUILD_COMMIT ? `${BUILD_VERSION}-${BUILD_COMMIT}` : BUILD_VERSION
 

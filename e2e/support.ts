@@ -48,7 +48,7 @@ export async function signOut(page: Page) {
 
 const REAL_IMAGE_PATH = path.resolve(process.cwd(), 'src/assets/hero.png')
 
-export async function fillListingEditor(page: Page, title: string) {
+export async function fillListingEditor(page: Page, title: string, submitButtonPattern = /salvar e enviar para revis/i) {
   await page.getByLabel('Título').fill(title)
   await selectFirstRealOption(page, '#listing-category')
   await selectFirstRealOption(page, '#listing-material')
@@ -63,7 +63,7 @@ export async function fillListingEditor(page: Page, title: string) {
   await page.getByLabel('Telefone de contato').fill('(11) 99999-0000')
 
   await page.locator('input[type="file"]').setInputFiles(REAL_IMAGE_PATH)
-  await expect(page.getByRole('button', { name: /salvar e enviar para revis/i })).toBeEnabled()
+  await expect(page.getByRole('button', { name: submitButtonPattern })).toBeEnabled()
 }
 
 export async function searchForText(page: Page, placeholderPattern: RegExp, value: string) {
