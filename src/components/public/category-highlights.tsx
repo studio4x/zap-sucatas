@@ -2,6 +2,7 @@ import { ArrowUpRight, Layers3 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { PublicListingCategory } from '@/domains/categories/types'
 import { PublicSectionHeading } from '@/components/public/public-section-heading'
@@ -14,6 +15,11 @@ export function CategoryHighlights({ categories }: CategoryHighlightsProps) {
   return (
     <section className="space-y-6">
       <PublicSectionHeading
+        actions={
+          <Button asChild variant="outline">
+            <Link to={paths.public.listings}>Abrir catálogo completo</Link>
+          </Button>
+        }
         description="Descubra rápido os principais segmentos do portal e entre em páginas com recorte comercial e SEO próprio."
         eyebrow="Categorias"
         title="Setores que movem o catálogo"
