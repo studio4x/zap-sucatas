@@ -52,6 +52,22 @@ const VALIDATION_ERRORS = [
   'profileId is required.',
 ]
 
+function translateUserManagementError(message: string) {
+  const normalized = message.trim().toLowerCase()
+
+  if (
+    normalized.includes('already been registered') ||
+    normalized.includes('already registered') ||
+    normalized.includes('email already exists') ||
+    normalized.includes('duplicate key value violates unique constraint') ||
+    normalized.includes('users_email_key')
+  ) {
+    return 'Um usuário com este endereço de e-mail já foi cadastrado.'
+  }
+
+  return message
+}
+
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase()
 }
@@ -262,7 +278,8 @@ Deno.serve(async (request) => {
       })
 
       if (createUserError || !createdUser.user) {
-        throw createUserError ?? new Error('Unable to create auth user.')
+        const message = createUserError?.message ?? 'Unable to create auth user.'
+        throw new Error(translateUserManagementError(message))
       }
 
       const authUserId = createdUser.user.id
@@ -546,7 +563,7 @@ Deno.serve(async (request) => {
   } catch (error) {
     const message =
       error instanceof Error
-        ? error.message
+        ? translateUserManagementError(error.message)
         : typeof error === 'object' && error !== null && 'message' in error
           ? String((error as { message?: unknown }).message ?? 'Unexpected error.')
           : 'Unexpected error.'

@@ -84,6 +84,22 @@ async function unwrapFunctionError(error: unknown) {
   throw error
 }
 
+function translateUserManagementError(message: string) {
+  const normalized = message.trim().toLowerCase()
+
+  if (
+    normalized.includes('already been registered') ||
+    normalized.includes('already registered') ||
+    normalized.includes('email already exists') ||
+    normalized.includes('duplicate key value violates unique constraint') ||
+    normalized.includes('users_email_key')
+  ) {
+    return 'Um usuário com este endereço de e-mail já foi cadastrado.'
+  }
+
+  return message
+}
+
 function mapProfile(row: ProfileRow): Profile {
   return {
     authUserId: row.auth_user_id,
@@ -344,11 +360,11 @@ async function invokeUserManagementFunction(body: Record<string, unknown>) {
       const payload = (await response.json()) as { error?: string }
 
       if (payload.error) {
-        throw new Error(payload.error)
+        throw new Error(translateUserManagementError(payload.error))
       }
     } catch (parseError) {
       if (parseError instanceof Error && parseError.message) {
-        throw parseError
+        throw new Error(translateUserManagementError(parseError.message))
       }
     }
 
