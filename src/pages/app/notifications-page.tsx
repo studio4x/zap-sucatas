@@ -9,6 +9,7 @@ import { DashboardStatCard } from '@/components/dashboard/dashboard-stat-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
+import { NotificationMessageDialog } from '@/components/shared/notification-message-dialog'
 import {
   fetchNotificationCenter,
   fetchNotificationPreferences,
@@ -22,6 +23,7 @@ import {
   formatRelativeNotificationDate,
   getNotificationPriorityMeta,
 } from '@/lib/notifications'
+import type { NotificationItem } from '@/domains/notifications/types'
 
 export function AppNotificationsPage() {
   const queryClient = useQueryClient()
@@ -29,6 +31,7 @@ export function AppNotificationsPage() {
   const [onlyUnread, setOnlyUnread] = useState(false)
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [query, setQuery] = useState('')
+  const [selectedNotification, setSelectedNotification] = useState<NotificationItem | null>(null)
 
   const notificationsQuery = useQuery({
     queryKey: ['notifications', 'center', { categoryFilter, onlyUnread }],
@@ -206,7 +209,6 @@ export function AppNotificationsPage() {
                           <span className="inline-flex rounded-full border border-[#b5d3f1] bg-[#e8f2fc] px-2.5 py-0.5 text-xs font-semibold text-[#17508f]">Não lida</span>
                         ) : null}
                       </div>
-                      <p className="text-sm leading-6 text-muted-foreground">{notification.body}</p>
                       <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                         <span>Categoria: {notification.category}</span>
                         <span>{formatRelativeNotificationDate(notification.createdAt)}</span>
@@ -215,6 +217,13 @@ export function AppNotificationsPage() {
                     </div>
 
                     <div className="flex flex-wrap gap-2">
+                      <Button
+                        onClick={() => setSelectedNotification(notification)}
+                        type="button"
+                        variant="outline"
+                      >
+                        Ver mensagem
+                      </Button>
                       {notification.actionUrl ? (
                         <Button asChild type="button" variant="outline">
                           <Link to={notification.actionUrl}>
@@ -280,6 +289,26 @@ export function AppNotificationsPage() {
           </div>
         )}
       </section>
+
+      <NotificationMessageDialog
+        badgeLabel={selectedNotification?.readAt ? 'Lida' : 'Não lida'}
+        badgeTone={selectedNotification?.readAt ? 'border-[#b8d8c7] bg-[#eaf5ef] text-[#1f6d4b]' : 'border-[#b5d3f1] bg-[#e8f2fc] text-[#17508f]'}
+        body={selectedNotification?.body ?? ''}
+        createdAt={selectedNotification?.createdAt ?? new Date().toISOString()}
+        details={[
+          { label: 'Categoria', value: selectedNotification?.category ?? 'Não informada' },
+          { label: 'Prioridade', value: selectedNotification ? getNotificationPriorityMeta(selectedNotification.priority).label : 'Normal' },
+          { label: 'Ação', value: selectedNotification?.actionUrl ?? 'Sem ação vinculada' },
+          { label: 'ID', value: selectedNotification?.id ?? '—' },
+        ]}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedNotification(null)
+          }
+        }}
+        open={Boolean(selectedNotification)}
+        title={selectedNotification?.title ?? 'Mensagem'}
+      />
     </section>
   )
 }

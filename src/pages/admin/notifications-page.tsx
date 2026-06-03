@@ -11,6 +11,7 @@ import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
+import { NotificationMessageDialog } from '@/components/shared/notification-message-dialog'
 import {
   fetchAdminNotificationHistoryPage,
   fetchAdminNotificationQueueStats,
@@ -59,6 +60,7 @@ function getHistoryStatusMeta(status: NotificationHistoryItem['status']) {
 export function AdminNotificationsPage() {
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<NotificationsTab>('manual')
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<NotificationHistoryItem | null>(null)
 
   const [historyQuery, setHistoryQuery] = useState('')
   const [historyChannelFilter, setHistoryChannelFilter] = useState<'all' | NotificationQueueItem['channel']>('all')
@@ -232,7 +234,7 @@ export function AdminNotificationsPage() {
               { header: 'Criado em', cell: (row) => <span className="text-xs text-muted-foreground">{formatNotificationDateTime(row.createdAt)}</span> },
               { header: 'Origem', cell: (row) => { const meta = getHistoryOriginMeta(row.origin); return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${meta.tone}`}>{meta.label}</span> } },
               { header: 'Canais', cell: (row) => <div className="flex flex-wrap gap-1.5">{row.channels.map((channel) => <span className="inline-flex rounded-full border border-border bg-background px-2 py-0.5 text-[11px] font-semibold" key={channel}>{getNotificationChannelMeta(channel).label}</span>)}</div> },
-              { header: 'Conteúdo', cell: (row) => <div className="space-y-1"><p className="font-medium text-foreground line-clamp-1">{row.title}</p><p className="text-xs text-muted-foreground line-clamp-2">{row.body}</p><p className="text-xs text-muted-foreground">Categoria: {row.category}</p><p className="text-xs font-medium text-foreground">Destinatário(s): <span className="font-normal text-muted-foreground">{row.recipientSummary}</span></p></div> },
+              { header: 'Conteúdo', cell: (row) => <div className="space-y-2"><p className="font-medium text-foreground line-clamp-1">{row.title}</p><p className="text-xs text-muted-foreground">Categoria: {row.category}</p><p className="text-xs font-medium text-foreground">Destinatário(s): <span className="font-normal text-muted-foreground">{row.recipientSummary}</span></p><Button onClick={() => setSelectedHistoryItem(row)} type="button" variant="outline">Ver mensagem</Button></div> },
               { header: 'Prioridade', cell: (row) => { const meta = getNotificationPriorityMeta(row.priority); return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${meta.tone}`}>{meta.label}</span> } },
               { header: 'Status consolidado', cell: (row) => { const meta = getHistoryStatusMeta(row.status); return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${meta.tone}`}>{meta.label}</span> } },
               { header: 'Itens fila', className: 'text-right', cell: (row) => <span className="text-sm font-semibold text-foreground">{row.queueItems}</span> },
@@ -276,7 +278,7 @@ export function AdminNotificationsPage() {
               { header: 'Criado em', cell: (row) => <span className="text-xs text-muted-foreground">{formatNotificationDateTime(row.createdAt)}</span> },
               { header: 'Origem', cell: (row) => { const meta = getHistoryOriginMeta(row.origin); return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${meta.tone}`}>{meta.label}</span> } },
               { header: 'Canais', cell: (row) => <div className="flex flex-wrap gap-1.5">{row.channels.map((channel) => <span className="inline-flex rounded-full border border-border bg-background px-2 py-0.5 text-[11px] font-semibold" key={channel}>{getNotificationChannelMeta(channel).label}</span>)}</div> },
-              { header: 'Conteúdo', cell: (row) => <div className="space-y-1"><p className="font-medium text-foreground line-clamp-1">{row.title}</p><p className="text-xs text-muted-foreground line-clamp-2">{row.body}</p><p className="text-xs text-muted-foreground">Categoria: {row.category}</p><p className="text-xs font-medium text-foreground">Destinatário(s): <span className="font-normal text-muted-foreground">{row.recipientSummary}</span></p></div> },
+              { header: 'Conteúdo', cell: (row) => <div className="space-y-2"><p className="font-medium text-foreground line-clamp-1">{row.title}</p><p className="text-xs text-muted-foreground">Categoria: {row.category}</p><p className="text-xs font-medium text-foreground">Destinatário(s): <span className="font-normal text-muted-foreground">{row.recipientSummary}</span></p><Button onClick={() => setSelectedHistoryItem(row)} type="button" variant="outline">Ver mensagem</Button></div> },
               { header: 'Prioridade', cell: (row) => { const meta = getNotificationPriorityMeta(row.priority); return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${meta.tone}`}>{meta.label}</span> } },
               { header: 'Status consolidado', cell: (row) => { const meta = getHistoryStatusMeta(row.status); return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${meta.tone}`}>{meta.label}</span> } },
               { header: 'Itens fila', className: 'text-right', cell: (row) => <span className="text-sm font-semibold text-foreground">{row.queueItems}</span> },
@@ -292,6 +294,31 @@ export function AdminNotificationsPage() {
           <AdminPagination currentPage={historyPage} onPageChange={setHistoryPage} pageSize={HISTORY_PAGE_SIZE} totalItems={historyTotalCount} />
         </>
       )}
+
+      <NotificationMessageDialog
+        badgeLabel={selectedHistoryItem ? getHistoryStatusMeta(selectedHistoryItem.status).label : undefined}
+        badgeTone={selectedHistoryItem ? getHistoryStatusMeta(selectedHistoryItem.status).tone : undefined}
+        body={selectedHistoryItem?.body ?? ''}
+        createdAt={selectedHistoryItem?.createdAt ?? new Date().toISOString()}
+        details={[
+          { label: 'Categoria', value: selectedHistoryItem?.category ?? 'Não informada' },
+          { label: 'Origem', value: selectedHistoryItem ? getHistoryOriginMeta(selectedHistoryItem.origin).label : 'Não informada' },
+          {
+            label: 'Canais',
+            value: selectedHistoryItem ? selectedHistoryItem.channels.map((channel) => getNotificationChannelMeta(channel).label).join(', ') : 'Não informados',
+          },
+          { label: 'Prioridade', value: selectedHistoryItem ? getNotificationPriorityMeta(selectedHistoryItem.priority).label : 'Normal' },
+          { label: 'Destinatário(s)', value: selectedHistoryItem?.recipientSummary ?? 'Não informado' },
+          { label: 'Itens na fila', value: selectedHistoryItem?.queueItems ?? '0' },
+        ]}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedHistoryItem(null)
+          }
+        }}
+        open={Boolean(selectedHistoryItem)}
+        title={selectedHistoryItem?.title ?? 'Mensagem'}
+      />
     </section>
   )
 }
