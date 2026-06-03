@@ -9,6 +9,7 @@ import { PublicAuthShell } from '@/components/public/public-auth-shell'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { sendMagicLink, signInWithPassword } from '@/domains/auth/api'
+import { getAuthErrorMessage } from '@/domains/auth/error-messages'
 import {
   loginSchema,
   magicLinkSchema,
@@ -56,7 +57,7 @@ export function LoginPage() {
         replace: true,
       })
     } catch (error) {
-      setPasswordMessage(error instanceof Error ? error.message : 'Falha ao autenticar.')
+      setPasswordMessage(getAuthErrorMessage(error, 'Falha ao autenticar.'))
     }
   }
 
@@ -68,7 +69,7 @@ export function LoginPage() {
       setMagicMessage('Link de acesso enviado. Verifique seu e-mail para concluir o login.')
       magicLinkForm.reset({ email: values.email })
     } catch (error) {
-      setMagicMessage(error instanceof Error ? error.message : 'Falha ao enviar magic link.')
+      setMagicMessage(getAuthErrorMessage(error, 'Falha ao enviar link de acesso.'))
     }
   }
 

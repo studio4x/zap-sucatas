@@ -11,7 +11,7 @@ Objetivo: concentrar testes manuais de alto impacto que afetam a usabilidade da 
 
 ## 2) Fluxos críticos do usuário
 
-1. [ ] `MAN-01` Login com e-mail e senha e redirecionamento correto para `/app`.
+1. [OK] `MAN-01` Login com e-mail e senha e redirecionamento correto para `/app`.
 2. [ ] `MAN-02` Criação de anúncio em rascunho sem erro de validação e salvamento bem-sucedido.
 3. [ ] `MAN-03` Edição de anúncio existente com persistência correta dos dados alterados.
 4. [ ] `MAN-04` Envio de anúncio para revisão e atualização visual clara do status.

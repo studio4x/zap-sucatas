@@ -8,6 +8,7 @@ import { PublicAuthShell } from '@/components/public/public-auth-shell'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { signUp } from '@/domains/auth/api'
+import { getAuthErrorMessage } from '@/domains/auth/error-messages'
 import { registerSchema, type RegisterFormValues } from '@/domains/auth/schemas'
 import { useAuth } from '@/hooks/use-auth'
 
@@ -47,7 +48,7 @@ export function RegisterPage() {
       setIsConfirmationModalOpen(true)
       form.reset()
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Falha ao criar conta.')
+      setErrorMessage(getAuthErrorMessage(error, 'Falha ao criar conta.'))
     }
   }
 
