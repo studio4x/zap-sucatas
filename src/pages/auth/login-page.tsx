@@ -194,7 +194,6 @@ export function LoginPage() {
                 <Button
                   disabled={!isSupabaseConfigured || magicLinkForm.formState.isSubmitting}
                   type="submit"
-                  variant="secondary"
                 >
                   {magicLinkForm.formState.isSubmitting ? 'Enviando...' : 'Enviar Link de acesso'}
                 </Button>
