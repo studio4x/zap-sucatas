@@ -217,13 +217,22 @@ export function AppNotificationsPage() {
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      <Button
+                      <div
+                        aria-label={`Abrir mensagem da notificação ${notification.title}`}
+                        className="cursor-pointer rounded-xl border border-transparent px-1 py-1 transition hover:border-border hover:bg-muted/30"
                         onClick={() => setSelectedNotification(notification)}
-                        type="button"
-                        variant="outline"
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault()
+                            setSelectedNotification(notification)
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
                       >
-                        Ver mensagem
-                      </Button>
+                        <p className="text-sm font-medium text-foreground">Ver mensagem</p>
+                        <p className="text-xs text-muted-foreground">Abrir conteúdo completo em modal</p>
+                      </div>
                       {notification.actionUrl ? (
                         <Button asChild type="button" variant="outline">
                           <Link to={notification.actionUrl}>
