@@ -35,7 +35,7 @@ function resolveNextStatus(input: {
 
   if (input.currentStatus === 'archived') {
     return {
-      error: 'Listing is already archived.',
+      error: 'O anúncio já está arquivado.',
       nextStatus: null,
       statusCode: 409,
     }
@@ -58,7 +58,7 @@ Deno.serve(async (request) => {
     const { action, listingId } = (await request.json()) as RequestBody
 
     if (!listingId || (action !== 'pause' && action !== 'archive')) {
-      return jsonResponse({ error: 'listingId and action are required.' }, 400)
+      return jsonResponse({ error: 'listingId e action são obrigatórios.' }, 400)
     }
 
     const admin = createAdminClient()
@@ -69,11 +69,11 @@ Deno.serve(async (request) => {
       .single()
 
     if (listingError || !listing) {
-      return jsonResponse({ error: 'Listing not found.' }, 404)
+      return jsonResponse({ error: 'Anúncio não encontrado.' }, 404)
     }
 
     if (actor.role !== 'admin' && listing.user_id !== actor.id) {
-      return jsonResponse({ error: 'You cannot manage this listing.' }, 403)
+      return jsonResponse({ error: 'Você não pode gerenciar este anúncio.' }, 403)
     }
 
     const transition = resolveNextStatus({
@@ -124,7 +124,8 @@ Deno.serve(async (request) => {
       success: true,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     return jsonResponse({ error: message }, resolveHttpErrorStatus(error))
   }
 })
+

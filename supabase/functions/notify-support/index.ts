@@ -40,7 +40,7 @@ async function requireActor(request: Request) {
   } = await admin.auth.getUser(token)
 
   if (userError || !user) {
-    throw new HttpError('Invalid or expired session.', 401)
+    throw new HttpError('Sessão inválida ou expirada.', 401)
   }
 
   const { data: profile, error: profileError } = await admin
@@ -50,7 +50,7 @@ async function requireActor(request: Request) {
     .single()
 
   if (profileError || !profile || profile.status !== 'active') {
-    throw new HttpError('Active profile not found.', 403)
+    throw new HttpError('Nenhum perfil ativo foi encontrado.', 403)
   }
 
   return profile
@@ -61,11 +61,11 @@ function validatePayload(payload: RequestBody) {
   const type = payload.type
 
   if (!ticketId) {
-    throw new Error('ticketId e obrigatório.')
+    throw new Error('ticketId é obrigatório.')
   }
 
   if (type !== 'new_ticket' && type !== 'new_message' && type !== 'ticket_closed') {
-    throw new Error('Tipo de notificação invalido.')
+    throw new Error('Tipo de notificação inválido.')
   }
 
   return {
@@ -279,7 +279,7 @@ Deno.serve(async (request) => {
 
     return jsonResponse({ success: true, ...enqueueResult })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     const status = resolveHttpErrorStatus(error)
     await insertIntegrationLog({
       integrationName: 'support_notifications',
@@ -293,3 +293,4 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: message }, status === 500 ? 400 : status)
   }
 })
+

@@ -70,7 +70,7 @@ Deno.serve(async (request) => {
   }
 
   if (!isWebhookTokenValid(request)) {
-    return jsonResponse({ error: 'Invalid webhook token.' }, 401)
+    return jsonResponse({ error: 'Token de webhook inválido.' }, 401)
   }
 
   try {
@@ -79,7 +79,7 @@ Deno.serve(async (request) => {
     const asaasStatus = payload.payment?.status?.trim().toUpperCase()
 
     if (!asaasPaymentId || !asaasStatus) {
-      return jsonResponse({ error: 'Invalid payload.' }, 400)
+      return jsonResponse({ error: 'Payload inválido.' }, 400)
     }
 
     const admin = createAdminClient()
@@ -174,7 +174,9 @@ Deno.serve(async (request) => {
       status: 'error',
     })
 
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     return jsonResponse({ error: message }, 500)
   }
 })
+
+

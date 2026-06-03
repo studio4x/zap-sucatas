@@ -22,7 +22,7 @@ Deno.serve(async (request) => {
     const { listingId } = (await request.json()) as RequestBody
 
     if (!listingId) {
-      return jsonResponse({ error: 'listingId is required.' }, 400)
+      return jsonResponse({ error: 'listingId é obrigatório.' }, 400)
     }
 
     const admin = createAdminClient()
@@ -33,7 +33,7 @@ Deno.serve(async (request) => {
       .single()
 
     if (listingError || !listing) {
-      return jsonResponse({ error: 'Listing not found.' }, 404)
+      return jsonResponse({ error: 'Anúncio não encontrado.' }, 404)
     }
 
     const slug = listing.slug ?? (await generateUniqueListingSlug(listing.title, listing.id))
@@ -81,7 +81,8 @@ Deno.serve(async (request) => {
       success: true,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     return jsonResponse({ error: message }, resolveHttpErrorStatus(error))
   }
 })
+

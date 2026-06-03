@@ -49,7 +49,7 @@ Deno.serve(async (request) => {
     const { listingId } = (await request.json()) as RequestBody
 
     if (!listingId) {
-      return jsonResponse({ error: 'listingId is required.' }, 400)
+      return jsonResponse({ error: 'listingId é obrigatório.' }, 400)
     }
 
     const admin = createAdminClient()
@@ -60,7 +60,7 @@ Deno.serve(async (request) => {
       .single()
 
     if (listingError || !listing) {
-      return jsonResponse({ error: 'Listing not found.' }, 404)
+      return jsonResponse({ error: 'Anúncio não encontrado.' }, 404)
     }
 
     if (listing.user_id !== profile.id && profile.role !== 'admin') {
@@ -113,7 +113,7 @@ Acesse o painel para moderar: /admin/anuncios/${listing.id}`,
     }
 
     if (!['draft', 'rejected', 'paused', 'approved'].includes(listing.status)) {
-      return jsonResponse({ error: 'Listing cannot be submitted from the current status.' }, 409)
+      return jsonResponse({ error: 'O anúncio não pode ser enviado a partir do status atual.' }, 409)
     }
 
     const { data: images, error: imageError } = await admin
@@ -201,7 +201,8 @@ Acesse o painel para moderar: /admin/anuncios/${listing.id}`,
       success: true,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     return jsonResponse({ error: message }, resolveHttpErrorStatus(error))
   }
 })
+

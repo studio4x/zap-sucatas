@@ -25,11 +25,11 @@ Deno.serve(async (request) => {
     const { questionId, questionStatus } = (await request.json()) as RequestBody
 
     if (!questionId || !questionStatus) {
-      return jsonResponse({ error: 'questionId and questionStatus are required.' }, 400)
+      return jsonResponse({ error: 'questionId e questionStatus são obrigatórios.' }, 400)
     }
 
     if (!allowedStatuses.has(questionStatus)) {
-      return jsonResponse({ error: 'Invalid questionStatus.' }, 400)
+      return jsonResponse({ error: 'questionStatus inválido.' }, 400)
     }
 
     const admin = createAdminClient()
@@ -40,7 +40,7 @@ Deno.serve(async (request) => {
       .single()
 
     if (questionError || !question) {
-      return jsonResponse({ error: 'Question not found.' }, 404)
+      return jsonResponse({ error: 'Pergunta não encontrada.' }, 404)
     }
 
     if (question.status === questionStatus) {
@@ -97,7 +97,8 @@ Deno.serve(async (request) => {
       success: true,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     return jsonResponse({ error: message }, resolveHttpErrorStatus(error))
   }
 })
+

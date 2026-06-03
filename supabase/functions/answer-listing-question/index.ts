@@ -22,7 +22,7 @@ Deno.serve(async (request) => {
     const { answerText, questionId, questionStatus } = (await request.json()) as RequestBody
 
     if (!questionId || !answerText?.trim()) {
-      return jsonResponse({ error: 'questionId and answerText are required.' }, 400)
+      return jsonResponse({ error: 'questionId e answerText são obrigatórios.' }, 400)
     }
 
     const admin = createAdminClient()
@@ -33,7 +33,7 @@ Deno.serve(async (request) => {
       .single()
 
     if (questionError || !question) {
-      return jsonResponse({ error: 'Question not found.' }, 404)
+      return jsonResponse({ error: 'Pergunta não encontrada.' }, 404)
     }
 
     const { data: listing, error: listingError } = await admin
@@ -43,11 +43,11 @@ Deno.serve(async (request) => {
       .single()
 
     if (listingError || !listing) {
-      return jsonResponse({ error: 'Listing not found.' }, 404)
+      return jsonResponse({ error: 'Anúncio não encontrado.' }, 404)
     }
 
     if (actor.role !== 'admin' && listing.user_id !== actor.id) {
-      return jsonResponse({ error: 'You cannot answer this question.' }, 403)
+      return jsonResponse({ error: 'Você não pode responder a esta pergunta.' }, 403)
     }
 
     const nextQuestionStatus =
@@ -112,7 +112,8 @@ Deno.serve(async (request) => {
       success: true,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     return jsonResponse({ error: message }, resolveHttpErrorStatus(error))
   }
 })
+

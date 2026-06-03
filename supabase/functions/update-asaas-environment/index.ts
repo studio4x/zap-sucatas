@@ -29,7 +29,7 @@ Deno.serve(async (request) => {
       .single()
 
     if (selectError || !settings) {
-      throw selectError ?? new Error('System settings not found.')
+      throw selectError ?? new Error('Configurações do sistema não encontradas.')
     }
 
     const { error: updateError } = await admin
@@ -48,7 +48,9 @@ Deno.serve(async (request) => {
       success: true,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     return jsonResponse({ error: message }, resolveHttpErrorStatus(error))
   }
 })
+
+

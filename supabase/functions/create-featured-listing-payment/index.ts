@@ -84,7 +84,7 @@ Deno.serve(async (request) => {
     const { listingId } = (await request.json()) as RequestBody
 
     if (!listingId) {
-      return jsonResponse({ error: 'listingId is required.' }, 400)
+      return jsonResponse({ error: 'listingId é obrigatório.' }, 400)
     }
 
     const admin = createAdminClient()
@@ -95,11 +95,11 @@ Deno.serve(async (request) => {
       .single()
 
     if (settingsError || !systemSettings) {
-      throw settingsError ?? new Error('System settings not found.')
+      throw settingsError ?? new Error('Configurações do sistema não encontradas.')
     }
 
     if (!systemSettings.featured_payments_enabled) {
-      return jsonResponse({ error: 'Featured payments are currently disabled.' }, 409)
+      return jsonResponse({ error: 'Os pagamentos de destaque estão desativados no momento.' }, 409)
     }
 
     const { data: listing, error: listingError } = await admin
@@ -109,19 +109,19 @@ Deno.serve(async (request) => {
       .single()
 
     if (listingError || !listing) {
-      return jsonResponse({ error: 'Listing not found.' }, 404)
+      return jsonResponse({ error: 'Anúncio não encontrado.' }, 404)
     }
 
     if (listing.user_id !== actor.id && actor.role !== 'admin') {
-      return jsonResponse({ error: 'You cannot request featured payment for this listing.' }, 403)
+      return jsonResponse({ error: 'Você não pode solicitar pagamento de destaque para este anúncio.' }, 403)
     }
 
     if (listing.status !== 'approved') {
-      return jsonResponse({ error: 'Only approved listings can be featured.' }, 409)
+      return jsonResponse({ error: 'Apenas anúncios aprovados podem receber destaque.' }, 409)
     }
 
     if (listing.is_featured) {
-      return jsonResponse({ error: 'Listing is already featured.' }, 409)
+      return jsonResponse({ error: 'O anúncio já está em destaque.' }, 409)
     }
 
     const { data: existingPending, error: existingPendingError } = await admin
@@ -153,13 +153,13 @@ Deno.serve(async (request) => {
       .single()
 
     if (ownerProfileError || !ownerProfile) {
-      throw ownerProfileError ?? new Error('Listing owner profile not found.')
+      throw ownerProfileError ?? new Error('Perfil do proprietário do anúncio não encontrado.')
     }
 
     const { data: ownerAuthData, error: ownerAuthError } = await admin.auth.admin.getUserById(ownerProfile.auth_user_id)
 
     if (ownerAuthError || !ownerAuthData.user) {
-      throw ownerAuthError ?? new Error('Listing owner auth user not found.')
+      throw ownerAuthError ?? new Error('Usuário de autenticação do proprietário do anúncio não encontrado.')
     }
 
     const customerName =
@@ -227,7 +227,7 @@ Deno.serve(async (request) => {
       .single()
 
     if (saveError || !savedPayment) {
-      throw saveError ?? new Error('Unable to store featured payment.')
+      throw saveError ?? new Error('Não foi possível salvar o pagamento de destaque.')
     }
 
     await insertAdminAuditLog({
@@ -246,7 +246,7 @@ Deno.serve(async (request) => {
 
     await insertIntegrationLog({
       integrationName: 'asaas',
-      message: 'Featured listing payment created.',
+      message: 'Pagamento de destaque do anúncio criado.',
       payload: {
         asaasPaymentId,
         billingType,
@@ -258,7 +258,7 @@ Deno.serve(async (request) => {
       actionUrl: '/app/anuncios',
       body: `A cobrança de destaque do anúncio "${listing.title}" foi criada no valor de R$ ${amount.toFixed(2)}.`,
       category: 'featured_payment',
-      title: 'Cobranca de destaque criada',
+      title: 'Cobrança de destaque criada',
       userId: listing.user_id,
     })
 
@@ -271,11 +271,12 @@ Deno.serve(async (request) => {
   } catch (error) {
     await insertIntegrationLog({
       integrationName: 'asaas',
-      message: error instanceof Error ? error.message : 'Unexpected featured payment error.',
+      message: error instanceof Error ? error.message : 'Erro inesperado no pagamento de destaque.',
       payload: null,
       status: 'error',
     })
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     return jsonResponse({ error: message }, resolveHttpErrorStatus(error))
   }
 })
+

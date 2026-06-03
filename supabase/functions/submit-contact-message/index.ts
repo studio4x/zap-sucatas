@@ -227,7 +227,7 @@ Deno.serve(async (request) => {
 
     return jsonResponse({ success: true })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     await insertIntegrationLog({
       integrationName: 'contact_form',
       message,
@@ -240,3 +240,4 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: message }, 400)
   }
 })
+

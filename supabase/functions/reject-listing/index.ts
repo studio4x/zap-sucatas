@@ -22,7 +22,7 @@ Deno.serve(async (request) => {
     const { listingId, reason } = (await request.json()) as RequestBody
 
     if (!listingId || !reason?.trim()) {
-      return jsonResponse({ error: 'listingId and reason are required.' }, 400)
+      return jsonResponse({ error: 'listingId e reason são obrigatórios.' }, 400)
     }
 
     const admin = createAdminClient()
@@ -33,7 +33,7 @@ Deno.serve(async (request) => {
       .single()
 
     if (listingError || !listing) {
-      return jsonResponse({ error: 'Listing not found.' }, 404)
+      return jsonResponse({ error: 'Anúncio não encontrado.' }, 404)
     }
 
     const { error: updateError } = await admin
@@ -77,7 +77,8 @@ Deno.serve(async (request) => {
       success: true,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     return jsonResponse({ error: message }, resolveHttpErrorStatus(error))
   }
 })
+

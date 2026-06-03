@@ -318,7 +318,7 @@ Deno.serve(async (request) => {
       ? error.message
       : typeof error === 'object' && error !== null
         ? JSON.stringify(error)
-        : 'Unexpected error.'
+        : 'Erro inesperado.'
     const status = resolveHttpErrorStatus(error)
 
     await insertIntegrationLog({
@@ -333,3 +333,4 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: message }, status)
   }
 })
+

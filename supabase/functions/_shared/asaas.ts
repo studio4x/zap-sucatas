@@ -68,7 +68,7 @@ export function resolveFeaturedPriceValue() {
   const parsed = Number(raw.replace(',', '.'))
 
   if (!Number.isFinite(parsed) || parsed <= 0) {
-    throw new Error('Invalid ASAAS_FEATURED_PRICE value.')
+    throw new Error('Valor inválido para ASAAS_FEATURED_PRICE.')
   }
 
   return Number(parsed.toFixed(2))
@@ -84,8 +84,10 @@ export function resolveFeaturedDueDays() {
   const parsed = Number(raw)
 
   if (!Number.isFinite(parsed) || parsed < 0 || parsed > 30) {
-    throw new Error('Invalid ASAAS_FEATURED_DUE_DAYS value.')
+    throw new Error('Valor inválido para ASAAS_FEATURED_DUE_DAYS.')
   }
 
   return Math.floor(parsed)
 }
+
+

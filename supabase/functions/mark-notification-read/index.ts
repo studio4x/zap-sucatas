@@ -90,7 +90,7 @@ Deno.serve(async (request) => {
 
     return jsonResponse({ success: true })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     const status = resolveHttpErrorStatus(error)
     return jsonResponse({ error: message }, status === 500 ? 400 : status)
   }

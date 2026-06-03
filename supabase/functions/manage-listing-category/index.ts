@@ -59,7 +59,7 @@ async function buildCategoryPayload(input: {
   const name = normalizeName(input.name)
 
   if (name.length < 2) {
-    throw new Error('Category name is required.')
+    throw new Error('Nome da categoria é obrigatório.')
   }
 
   return {
@@ -110,7 +110,7 @@ Deno.serve(async (request) => {
         .single()
 
       if (createError || !category) {
-        throw createError ?? new Error('Unable to create category.')
+        throw createError ?? new Error('Não foi possível criar a categoria.')
       }
 
       await insertAdminAuditLog({
@@ -132,7 +132,7 @@ Deno.serve(async (request) => {
       const id = typeof payload.id === 'string' ? payload.id.trim() : ''
 
       if (!id) {
-        return jsonResponse({ error: 'Category id is required.' }, 400)
+        return jsonResponse({ error: 'ID da categoria é obrigatório.' }, 400)
       }
 
       const { data: existing, error: existingError } = await admin
@@ -142,7 +142,7 @@ Deno.serve(async (request) => {
         .single()
 
       if (existingError || !existing) {
-        return jsonResponse({ error: 'Category not found.' }, 404)
+        return jsonResponse({ error: 'Categoria não encontrada.' }, 404)
       }
 
       const normalized = await buildCategoryPayload({
@@ -190,7 +190,7 @@ Deno.serve(async (request) => {
       const orderedIds = Array.isArray(payload.orderedIds) ? payload.orderedIds : []
 
       if (orderedIds.length === 0) {
-        return jsonResponse({ error: 'orderedIds is required.' }, 400)
+        return jsonResponse({ error: 'orderedIds é obrigatório.' }, 400)
       }
 
       const { data: categories, error: categoriesError } = await admin
@@ -208,7 +208,7 @@ Deno.serve(async (request) => {
         currentIds.length !== orderedIds.length ||
         currentIds.some((categoryId) => !orderedIds.includes(categoryId))
       ) {
-        return jsonResponse({ error: 'orderedIds must match the current categories.' }, 422)
+        return jsonResponse({ error: 'orderedIds deve corresponder às categorias atuais.' }, 422)
       }
 
       for (const [index, id] of orderedIds.entries()) {
@@ -237,7 +237,7 @@ Deno.serve(async (request) => {
     const id = typeof payload.id === 'string' ? payload.id.trim() : ''
 
     if (!id) {
-      return jsonResponse({ error: 'Category id is required.' }, 400)
+      return jsonResponse({ error: 'ID da categoria é obrigatório.' }, 400)
     }
 
     const { data: existing, error: existingError } = await admin
@@ -247,7 +247,7 @@ Deno.serve(async (request) => {
       .single()
 
     if (existingError || !existing) {
-      return jsonResponse({ error: 'Category not found.' }, 404)
+      return jsonResponse({ error: 'Categoria não encontrada.' }, 404)
     }
 
     const { count, error: linkedError } = await admin
@@ -262,7 +262,7 @@ Deno.serve(async (request) => {
     if ((count ?? 0) > 0) {
       return jsonResponse(
         {
-          error: 'This category has linked listings. Inactivate it instead of deleting.',
+          error: 'Esta categoria possui anúncios vinculados. Desative-a em vez de excluir.',
         },
         409,
       )
@@ -287,7 +287,9 @@ Deno.serve(async (request) => {
 
     return jsonResponse({ categoryId: id, success: true })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     return jsonResponse({ error: message }, resolveHttpErrorStatus(error))
   }
 })
+
+

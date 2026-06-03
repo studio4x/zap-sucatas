@@ -34,7 +34,7 @@ Deno.serve(async (request) => {
       .single()
 
     if (settingsError || !settings) {
-      throw settingsError ?? new Error('System settings not found.')
+      throw settingsError ?? new Error('Configurações do sistema não encontradas.')
     }
 
     const asaasEnvironment = settings.asaas_environment === 'production' ? 'production' : 'sandbox'
@@ -77,7 +77,7 @@ Deno.serve(async (request) => {
       success: true,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     return jsonResponse(
       {
         config: {
@@ -101,3 +101,4 @@ Deno.serve(async (request) => {
     )
   }
 })
+

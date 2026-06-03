@@ -98,7 +98,7 @@ function parseWestmetallDate(input: string) {
   const match = cleaned.match(/^(\d{1,2})\.\s+([A-Za-z]+)\s+(\d{4})$/)
 
   if (!match) {
-    throw new Error(`Unable to parse Westmetall date: ${input}`)
+    throw new Error(`Não foi possível interpretar a data da Westmetall: ${input}`)
   }
 
   const [, day, monthName, year] = match
@@ -171,7 +171,7 @@ async function fetchLatestWestmetallSnapshots() {
   )
 
   if (!dateMatch) {
-    throw new Error('Unable to find the official LME section in Westmetall.')
+    throw new Error('Não foi possível localizar a seção oficial da LME na Westmetall.')
   }
 
   const quotedDate = parseWestmetallDate(dateMatch[1])
@@ -180,7 +180,7 @@ async function fetchLatestWestmetallSnapshots() {
   )
 
   if (!sectionMatch) {
-    throw new Error('Unable to parse the Westmetall LME table body.')
+    throw new Error('Não foi possível interpretar o corpo da tabela da LME na Westmetall.')
   }
 
   const entries: RawSnapshot[] = []
@@ -328,7 +328,7 @@ async function fetchLatestUsdSnapshot() {
   )[0]
 
   if (!latest) {
-    throw new Error('Unable to resolve the latest USD/BRL PTAX snapshot.')
+    throw new Error('Não foi possível resolver o último snapshot da PTAX USD/BRL.')
   }
 
   return latest
@@ -577,3 +577,4 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: message }, resolveHttpErrorStatus(error))
   }
 })
+

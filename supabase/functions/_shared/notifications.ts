@@ -82,3 +82,4 @@ export function isQuietHoursActive(input: {
 
   return now >= start || now < end
 }
+

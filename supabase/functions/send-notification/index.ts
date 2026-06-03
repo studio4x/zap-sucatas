@@ -242,7 +242,7 @@ Deno.serve(async (request) => {
 
     await insertIntegrationLog({
       integrationName: 'notifications',
-      message: `Notifications queued for ${targetUsers.length} users`,
+      message: `Notificações enfileiradas para ${targetUsers.length} users`,
       payload: {
         channels: payload.channels,
         notificationCount,
@@ -258,7 +258,7 @@ Deno.serve(async (request) => {
       target_users: targetUsers.length,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     const status = resolveHttpErrorStatus(error)
 
     await insertIntegrationLog({

@@ -47,7 +47,7 @@ Deno.serve(async (request) => {
 
     return jsonResponse({ city, state, success: true })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     return jsonResponse({ error: message }, resolveHttpErrorStatus(error))
   }
 })

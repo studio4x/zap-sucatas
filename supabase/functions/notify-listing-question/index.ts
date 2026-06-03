@@ -190,7 +190,7 @@ Deno.serve(async (request) => {
 
     return jsonResponse({ queuedCount: result.queuedCount, success: true })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
 
     await insertIntegrationLog({
       integrationName: 'listing_questions',

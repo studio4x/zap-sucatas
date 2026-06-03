@@ -82,7 +82,7 @@ async function resolveListingOwnerEmail(listingId: string) {
     .single()
 
   if (listingError || !listing) {
-    throw new Error('Listing not found for notification.')
+    throw new Error('Anúncio não encontrado para notificação.')
   }
 
   const { data: profile, error: profileError } = await admin
@@ -92,13 +92,13 @@ async function resolveListingOwnerEmail(listingId: string) {
     .single()
 
   if (profileError || !profile) {
-    throw new Error('Listing owner profile not found.')
+    throw new Error('Perfil do proprietário do anúncio não encontrado.')
   }
 
   const { data: authUser, error: authError } = await admin.auth.admin.getUserById(profile.auth_user_id)
 
   if (authError || !authUser.user?.email) {
-    throw new Error('Listing owner email not found.')
+    throw new Error('E-mail do proprietário do anúncio não encontrado.')
   }
 
   return {
@@ -307,3 +307,4 @@ export async function notifyListingStatus(input: {
 
   return { delivered: true, provider: 'smtp' }
 }
+

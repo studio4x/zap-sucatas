@@ -47,7 +47,7 @@ async function buildMaterialPayload(input: {
   const name = normalizeName(input.name)
 
   if (name.length < 2) {
-    throw new Error('Material name is required.')
+    throw new Error('Nome do material é obrigatório.')
   }
 
   return {
@@ -84,7 +84,7 @@ Deno.serve(async (request) => {
         .single()
 
       if (createError || !material) {
-        throw createError ?? new Error('Unable to create material.')
+        throw createError ?? new Error('Não foi possível criar o material.')
       }
 
       await insertAdminAuditLog({
@@ -105,7 +105,7 @@ Deno.serve(async (request) => {
       const id = typeof payload.id === 'string' ? payload.id.trim() : ''
 
       if (!id) {
-        return jsonResponse({ error: 'Material id is required.' }, 400)
+        return jsonResponse({ error: 'ID do material é obrigatório.' }, 400)
       }
 
       const { data: existing, error: existingError } = await admin
@@ -115,7 +115,7 @@ Deno.serve(async (request) => {
         .single()
 
       if (existingError || !existing) {
-        return jsonResponse({ error: 'Material not found.' }, 404)
+        return jsonResponse({ error: 'Material não encontrado.' }, 404)
       }
 
       const normalized = await buildMaterialPayload({
@@ -159,7 +159,7 @@ Deno.serve(async (request) => {
     const id = typeof payload.id === 'string' ? payload.id.trim() : ''
 
     if (!id) {
-      return jsonResponse({ error: 'Material id is required.' }, 400)
+      return jsonResponse({ error: 'ID do material é obrigatório.' }, 400)
     }
 
     const { data: existing, error: existingError } = await admin
@@ -169,7 +169,7 @@ Deno.serve(async (request) => {
       .single()
 
     if (existingError || !existing) {
-      return jsonResponse({ error: 'Material not found.' }, 404)
+      return jsonResponse({ error: 'Material não encontrado.' }, 404)
     }
 
     const { count, error: linkedError } = await admin
@@ -209,7 +209,9 @@ Deno.serve(async (request) => {
 
     return jsonResponse({ materialId: id, success: true })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unexpected error.'
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
     return jsonResponse({ error: message }, resolveHttpErrorStatus(error))
   }
 })
+
+

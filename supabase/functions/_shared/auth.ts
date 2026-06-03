@@ -45,7 +45,7 @@ export async function getBearerToken(request: Request) {
     return bodyToken
   }
 
-  throw new HttpError('Missing bearer token.', 401)
+  throw new HttpError('Token de autenticação ausente.', 401)
 }
 
 export async function getAuthUserId(request: Request) {
@@ -54,7 +54,7 @@ export async function getAuthUserId(request: Request) {
   const { data, error } = await admin.auth.getUser(token)
 
   if (error || !data.user?.id) {
-    throw new HttpError('Invalid or expired session.', 401)
+    throw new HttpError('Sessão inválida ou expirada.', 401)
   }
 
   return data.user.id
@@ -70,11 +70,11 @@ export async function requireActiveProfile(request: Request) {
     .single()
 
   if (error || !data) {
-    throw new HttpError('Active profile not found.', 403)
+    throw new HttpError('Nenhum perfil ativo foi encontrado.', 403)
   }
 
   if (data.status !== 'active') {
-    throw new HttpError('Profile is not active.', 403)
+    throw new HttpError('O perfil não está ativo.', 403)
   }
 
   return data as ActorProfile
@@ -84,7 +84,7 @@ export async function requireAdminProfile(request: Request) {
   const profile = await requireActiveProfile(request)
 
   if (profile.role !== 'admin') {
-    throw new HttpError('Admin access required.', 403)
+    throw new HttpError('Acesso de administrador obrigatório.', 403)
   }
 
   return profile
@@ -93,3 +93,5 @@ export async function requireAdminProfile(request: Request) {
 export function resolveHttpErrorStatus(error: unknown) {
   return error instanceof HttpError ? error.status : 500
 }
+
+
