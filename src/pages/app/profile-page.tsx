@@ -7,7 +7,9 @@ import { DashboardFormSection } from '@/components/dashboard/dashboard-form-sect
 import { DashboardSectionHeader } from '@/components/dashboard/dashboard-section-header'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { updatePassword } from '@/domains/auth/api'
 import { fetchCurrentProfile, updateCurrentProfile } from '@/domains/profiles/api'
+import { passwordSettingsSchema, type PasswordSettingsValues } from '@/domains/settings/schemas'
 import { profileFormSchema, type ProfileFormValues } from '@/domains/profiles/schemas'
 import { useAuth } from '@/hooks/use-auth'
 
@@ -25,7 +27,8 @@ function getStatusLabel(status: 'active' | 'suspended' | 'under_review') {
 
 export function AppProfilePage() {
   const { refreshUser, user } = useAuth()
-  const [feedback, setFeedback] = useState<string | null>(null)
+  const [profileFeedback, setProfileFeedback] = useState<string | null>(null)
+  const [passwordFeedback, setPasswordFeedback] = useState<string | null>(null)
 
   const profileQuery = useQuery({
     queryKey: ['profile', user?.profileId],
@@ -64,10 +67,31 @@ export function AppProfilePage() {
       return nextProfile
     },
     onError: (error) => {
-      setFeedback(error instanceof Error ? error.message : 'Não foi possível atualizar seus dados.')
+      setProfileFeedback(error instanceof Error ? error.message : 'Não foi possível atualizar seus dados.')
     },
     onSuccess: () => {
-      setFeedback('Seus dados foram atualizados com sucesso.')
+      setProfileFeedback('Seus dados foram atualizados com sucesso.')
+    },
+  })
+
+  const passwordForm = useForm<PasswordSettingsValues>({
+    resolver: zodResolver(passwordSettingsSchema),
+    defaultValues: {
+      confirmPassword: '',
+      password: '',
+    },
+  })
+
+  const passwordMutation = useMutation({
+    mutationFn: async (values: PasswordSettingsValues) => {
+      await updatePassword(values.password)
+    },
+    onError: (error) => {
+      setPasswordFeedback(error instanceof Error ? error.message : 'Não foi possível atualizar sua senha.')
+    },
+    onSuccess: () => {
+      passwordForm.reset()
+      setPasswordFeedback('Sua senha foi atualizada com sucesso.')
     },
   })
 
@@ -110,7 +134,7 @@ export function AppProfilePage() {
           <form
             className="space-y-4"
             onSubmit={form.handleSubmit((values) => {
-              setFeedback(null)
+              setProfileFeedback(null)
               updateMutation.mutate(values)
             })}
           >
@@ -137,9 +161,9 @@ export function AppProfilePage() {
               </div>
             </div>
 
-            {feedback ? (
+            {profileFeedback ? (
               <DashboardAlertCard
-                description={feedback}
+                description={profileFeedback}
                 title="Perfil atualizado"
                 tone="success"
               />
@@ -152,6 +176,59 @@ export function AppProfilePage() {
         </DashboardFormSection>
 
         <div className="space-y-6">
+          <DashboardFormSection
+            description="Altere a senha de acesso sempre que quiser reforçar a segurança da conta."
+            title="Segurança"
+          >
+            <form
+              className="space-y-4"
+              onSubmit={passwordForm.handleSubmit((values) => {
+                setPasswordFeedback(null)
+                passwordMutation.mutate(values)
+              })}
+            >
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground" htmlFor="profile-password">
+                    Nova senha
+                  </label>
+                  <Input id="profile-password" type="password" {...passwordForm.register('password')} />
+                  {passwordForm.formState.errors.password ? (
+                    <p className="text-sm text-destructive">{passwordForm.formState.errors.password.message}</p>
+                  ) : null}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground" htmlFor="profile-confirm-password">
+                    Confirmar nova senha
+                  </label>
+                  <Input
+                    id="profile-confirm-password"
+                    type="password"
+                    {...passwordForm.register('confirmPassword')}
+                  />
+                  {passwordForm.formState.errors.confirmPassword ? (
+                    <p className="text-sm text-destructive">
+                      {passwordForm.formState.errors.confirmPassword.message}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+
+              {passwordFeedback ? (
+                <DashboardAlertCard
+                  description={passwordFeedback}
+                  title="Senha atualizada"
+                  tone="success"
+                />
+              ) : null}
+
+              <Button disabled={passwordMutation.isPending} type="submit">
+                {passwordMutation.isPending ? 'Atualizando...' : 'Atualizar senha'}
+              </Button>
+            </form>
+          </DashboardFormSection>
+
           <DashboardFormSection
             description="Os controles sensíveis de papel e liberação da conta continuam protegidos no backend e no admin."
             title="Contexto da conta"
