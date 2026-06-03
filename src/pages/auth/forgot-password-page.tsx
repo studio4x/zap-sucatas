@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
-import { paths } from '@/app/paths'
+import { Link, useNavigate } from 'react-router-dom'
+import { getDefaultPathByRole, paths } from '@/app/paths'
 import { PublicAuthShell } from '@/components/public/public-auth-shell'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { requestPasswordReset, updatePassword } from '@/domains/auth/api'
+import { loadCurrentSessionUser, requestPasswordReset, updatePassword } from '@/domains/auth/api'
 import {
   forgotPasswordSchema,
   updatePasswordSchema,
@@ -14,10 +14,14 @@ import {
   type UpdatePasswordFormValues,
 } from '@/domains/auth/schemas'
 import { useAuth } from '@/hooks/use-auth'
+import { SuccessNoticeDialog } from '@/components/shared/success-notice-dialog'
 
 export function ForgotPasswordPage() {
-  const { isAuthenticated, isSupabaseConfigured } = useAuth()
+  const navigate = useNavigate()
+  const { isAuthenticated, isSupabaseConfigured, status, user } = useAuth()
   const [message, setMessage] = useState<string | null>(null)
+  const [successOpen, setSuccessOpen] = useState(false)
+  const [redirectPath, setRedirectPath] = useState(getDefaultPathByRole(user?.role ?? 'user'))
 
   const emailForm = useForm<ForgotPasswordFormValues>({
     defaultValues: {
@@ -51,6 +55,9 @@ export function ForgotPasswordPage() {
 
     try {
       await updatePassword(values.password)
+      const currentUser = await loadCurrentSessionUser()
+      setRedirectPath(getDefaultPathByRole(currentUser?.role ?? user?.role ?? 'user'))
+      setSuccessOpen(true)
       setMessage('Senha atualizada com sucesso.')
       passwordForm.reset()
     } catch (error) {
@@ -58,10 +65,43 @@ export function ForgotPasswordPage() {
     }
   }
 
+  useEffect(() => {
+    if (!successOpen) {
+      return undefined
+    }
+
+    const timeout = window.setTimeout(() => {
+      navigate(redirectPath, { replace: true })
+    }, 2600)
+
+    return () => {
+      window.clearTimeout(timeout)
+    }
+  }, [navigate, redirectPath, successOpen])
+
+  if (status === 'loading') {
+    return (
+      <PublicAuthShell
+        badge="Recuperar acesso"
+        description="Solicite o link de redefinição ou aguarde a sessão de recuperação ser confirmada pelo sistema."
+        highlights={[
+          'Fluxo seguro de recuperação via e-mail.',
+          'Atualização imediata da senha ao retornar pelo link.',
+          'Acesso pensado para não interromper a operação da sua conta no marketplace.',
+        ]}
+        title="Recuperar senha"
+      >
+        <div className="rounded-[1.4rem] border border-border bg-card px-4 py-4 text-sm text-muted-foreground">
+          Carregando sua sessão de recuperação...
+        </div>
+      </PublicAuthShell>
+    )
+  }
+
   return (
     <PublicAuthShell
       badge="Recuperar acesso"
-      description="Solicite o link de redefinicao ou, se você ja voltou pelo e-mail, defina uma nova senha para acessar sua conta."
+      description="Solicite o link de redefinição ou, se você já voltou pelo e-mail, defina uma nova senha para acessar sua conta."
       highlights={[
         'Fluxo seguro de recuperação via e-mail.',
         'Atualização imediata da senha ao retornar pelo link.',
@@ -140,6 +180,14 @@ export function ForgotPasswordPage() {
           </form>
         )}
       </div>
+
+      <SuccessNoticeDialog
+        actionLabel="Ir para o painel"
+        description="Sua nova senha foi salva com sucesso. Você será redirecionado para o painel em instantes."
+        onAction={() => navigate(redirectPath, { replace: true })}
+        open={successOpen}
+        title="Senha atualizada"
+      />
     </PublicAuthShell>
   )
 }

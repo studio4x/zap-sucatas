@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { KeyRound, Trash2 } from 'lucide-react'
+import { Mail, PencilLine, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
@@ -7,7 +7,6 @@ import { AdminDataTable } from '@/components/admin/admin-data-table'
 import { AdminFilterCard } from '@/components/admin/admin-filter-card'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminPagination } from '@/components/admin/admin-pagination'
-import { AdminResetUserPasswordDialog } from '@/components/admin/admin-reset-user-password-dialog'
 import { AdminRowActions } from '@/components/admin/admin-row-actions'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
@@ -17,17 +16,16 @@ import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
+import { requestPasswordReset } from '@/domains/auth/api'
 import {
   createAdminUser,
   deleteAdminUser,
   fetchAdminProfileStats,
   fetchAdminProfilesPage,
-  resetAdminUserPassword,
   updateAdminUser,
 } from '@/domains/profiles/api'
 import type {
   AdminCreateUserValues,
-  AdminResetUserPasswordValues,
   AdminUpdateUserValues,
 } from '@/domains/profiles/schemas'
 import type { AdminProfileSummary } from '@/domains/profiles/types'
@@ -63,8 +61,6 @@ export function AdminUsersPage() {
   const { clearFeedback, feedback, setErrorFeedback, setSuccessFeedback } = useOperationFeedback()
   const [editingProfile, setEditingProfile] = useState<AdminProfileSummary | null>(null)
   const [profilePendingRemoval, setProfilePendingRemoval] = useState<AdminProfileSummary | null>(null)
-  const [profilePendingPasswordReset, setProfilePendingPasswordReset] =
-    useState<AdminProfileSummary | null>(null)
   const [query, setQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<'admin' | 'all' | 'user'>('all')
   const [statusFilter, setStatusFilter] = useState<'active' | 'all' | 'suspended' | 'under_review'>('all')
@@ -133,14 +129,13 @@ export function AdminUsersPage() {
     },
   })
 
-  const resetPasswordMutation = useMutation({
-    mutationFn: resetAdminUserPassword,
+  const resetPasswordEmailMutation = useMutation({
+    mutationFn: requestPasswordReset,
     onError: (error) => {
-      setErrorFeedback(error, 'Não foi possível redefinir a senha deste usuário.')
+      setErrorFeedback(error, 'Não foi possível enviar o e-mail de redefinição.')
     },
-    onSuccess: async () => {
-      setSuccessFeedback('Senha redefinida com sucesso.')
-      setProfilePendingPasswordReset(null)
+    onSuccess: async (_data, email) => {
+      setSuccessFeedback(`E-mail de redefinição enviado para ${email}.`)
       await queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] })
     },
   })
@@ -287,7 +282,7 @@ export function AdminUsersPage() {
 
         <AdminUserForm
           defaultValues={editDefaults}
-          isPending={updateMutation.isPending || deleteMutation.isPending || resetPasswordMutation.isPending}
+          isPending={updateMutation.isPending || deleteMutation.isPending}
           mode="edit"
           onCancel={() => setEditingProfile(null)}
           onSubmit={(values) => {
@@ -362,8 +357,10 @@ export function AdminUsersPage() {
             className: 'w-[240px] text-right',
             cell: (profile) => (
               <AdminRowActions
+                compact
                 actions={[
                   {
+                    icon: PencilLine,
                     label: 'Editar',
                     onClick: () => {
                       clearFeedback()
@@ -371,14 +368,23 @@ export function AdminUsersPage() {
                     },
                   },
                   {
-                    icon: KeyRound,
-                    label: 'Senha',
-                    onClick: () => setProfilePendingPasswordReset(profile),
+                    disabled: !profile.email || resetPasswordEmailMutation.isPending,
+                    icon: Mail,
+                    label: 'Redefinir e-mail',
+                    onClick: () => {
+                      if (!profile.email) {
+                        setErrorFeedback(new Error('Usuário sem e-mail cadastrado.'), 'Não foi possível enviar o e-mail de redefinição.')
+                        return
+                      }
+
+                      clearFeedback()
+                      resetPasswordEmailMutation.mutate(profile.email)
+                    },
                     variant: 'outline',
                   },
                   {
-                    disabled: deleteMutation.isPending,
                     icon: Trash2,
+                    disabled: deleteMutation.isPending,
                     label: 'Excluir',
                     onClick: () => setProfilePendingRemoval(profile),
                     variant: 'destructive',
@@ -428,27 +434,6 @@ export function AdminUsersPage() {
         tone="danger"
       />
 
-      <AdminResetUserPasswordDialog
-        isPending={resetPasswordMutation.isPending}
-        onOpenChange={(open) => {
-          if (!open) {
-            setProfilePendingPasswordReset(null)
-          }
-        }}
-        onSubmit={(values: AdminResetUserPasswordValues) => {
-          if (!profilePendingPasswordReset) {
-            return
-          }
-
-          clearFeedback()
-          resetPasswordMutation.mutate({
-            password: values.password,
-            profileId: profilePendingPasswordReset.id,
-          })
-        }}
-        open={Boolean(profilePendingPasswordReset)}
-        userLabel={profilePendingPasswordReset?.fullName ?? 'usuário'}
-      />
     </section>
   )
 }
