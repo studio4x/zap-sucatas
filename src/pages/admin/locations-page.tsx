@@ -114,7 +114,7 @@ export function AdminLocationsPage() {
           </>
         }
         description="Visão operacional das localidades derivadas do próprio catálogo do MVP, sem normalização extra fora de escopo."
-        eyebrow="Admin / localidades"
+        eyebrow="Administração / localidades"
         title="Mapa operacional de localidades"
       />
 

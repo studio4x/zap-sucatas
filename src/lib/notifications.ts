@@ -46,13 +46,13 @@ export function getNotificationQueueStatusMeta(status: NotificationQueueStatus) 
     case 'pending':
       return { label: 'Pendente', tone: 'border-border bg-background text-foreground' }
     case 'retry':
-      return { label: 'Retry', tone: 'border-[#ead4a4] bg-[#fff7e8] text-[#8f6512]' }
+      return { label: 'Tentar novamente', tone: 'border-[#ead4a4] bg-[#fff7e8] text-[#8f6512]' }
     case 'sent':
       return { label: 'Enviado', tone: 'border-[#b5d3f1] bg-[#e8f2fc] text-[#17508f]' }
     case 'delivered':
       return { label: 'Entregue', tone: 'border-[#b8d8c7] bg-[#eaf5ef] text-[#1f6d4b]' }
     case 'bounced':
-      return { label: 'Bounce', tone: 'border-[#e7c1b9] bg-[#fff5f2] text-[#8f3326]' }
+      return { label: 'Devolvido', tone: 'border-[#e7c1b9] bg-[#fff5f2] text-[#8f3326]' }
     default:
       return { label: 'Falhou', tone: 'border-[#f0c4bd] bg-[#fff1ee] text-[#a53c2f]' }
   }
@@ -61,12 +61,13 @@ export function getNotificationQueueStatusMeta(status: NotificationQueueStatus) 
 export function getNotificationChannelMeta(channel: NotificationChannel) {
   switch (channel) {
     case 'in-app':
-      return { label: 'In-app' }
+      return { label: 'No app' }
     case 'push':
       return { label: 'Push' }
     case 'email':
-      return { label: 'Email' }
+      return { label: 'E-mail' }
     default:
       return { label: 'WhatsApp' }
   }
 }
+

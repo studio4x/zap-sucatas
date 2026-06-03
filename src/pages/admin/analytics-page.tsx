@@ -84,7 +84,7 @@ export function AdminAnalyticsPage() {
           </Button>
         }
         description="Painel completo de desempenho com acessos, cliques, conversão, recorrência e leitura de localidade operacional."
-        eyebrow="Admin / estatísticas"
+        eyebrow="Administração / estatísticas"
         title="Estatísticas da plataforma"
       />
 

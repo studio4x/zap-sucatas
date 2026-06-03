@@ -124,7 +124,7 @@ export function AdminContactMessageDialog({
               </p>
               <p className="text-sm text-muted-foreground">{message.source}</p>
               <p className="text-sm text-muted-foreground">
-                Perfil vinculado: {message.profileId ?? 'visitante anonimo'}
+                Perfil vinculado: {message.profileId ?? 'visitante anônimo'}
               </p>
             </div>
 
@@ -134,7 +134,7 @@ export function AdminContactMessageDialog({
               </p>
               <p className="text-sm text-muted-foreground">IP: {message.requestIp ?? 'não registrado'}</p>
               <p className="break-all text-sm text-muted-foreground">
-                User-Agent: {message.userAgent ?? 'não registrado'}
+                Agente do usuário: {message.userAgent ?? 'não registrado'}
               </p>
             </div>
 

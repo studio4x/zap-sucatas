@@ -256,7 +256,7 @@ export function AdminBlogPage() {
           </>
         }
         description="Painel editorial do MVP com foco em criação, edição, categorias, status e publicação."
-        eyebrow="Admin / blog"
+        eyebrow="Administração / blog"
         title="Gestão do blog"
       />
 

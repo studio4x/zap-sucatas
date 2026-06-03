@@ -283,7 +283,7 @@ export function AdminSettingsPage() {
           </>
         }
         description="Parâmetros globais do produto, contatos institucionais e gestão visual da identidade da plataforma."
-        eyebrow="Admin / configurações"
+        eyebrow="Administração / configurações"
         title="Configurações globais"
       />
 
@@ -617,3 +617,4 @@ export function AdminSettingsPage() {
     </section>
   )
 }
+

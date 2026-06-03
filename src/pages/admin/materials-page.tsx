@@ -198,7 +198,7 @@ export function AdminMaterialsPage() {
           </>
         }
         description="Materiais centrais do domínio, usados em anúncios, filtros e referências comerciais."
-        eyebrow="Admin / materiais"
+        eyebrow="Administração / materiais"
         title="Gestão de materiais"
       />
 
@@ -385,3 +385,4 @@ export function AdminMaterialsPage() {
     </section>
   )
 }
+

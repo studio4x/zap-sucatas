@@ -128,7 +128,7 @@ export function AdminLogsPage() {
           </>
         }
         description="Trilha administrativa com severidade, origem do evento e sinais operacionais para leitura rápida."
-        eyebrow="Admin / logs"
+        eyebrow="Administração / logs"
         title="Logs e auditoria"
       />
 

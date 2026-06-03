@@ -220,7 +220,7 @@ export function AdminNewListingPage() {
     <section className="space-y-6">
       <AdminPageHeader
         description="Cadastre um anúncio institucional da Zap Sucatas usando o mesmo fluxo operacional do marketplace."
-        eyebrow="Admin / anúncios"
+        eyebrow="Administração / anúncios"
         title="Novo anúncio da Zap Sucatas"
       />
 
@@ -331,3 +331,4 @@ export function AdminNewListingPage() {
     </section>
   )
 }
+

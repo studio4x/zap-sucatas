@@ -110,7 +110,7 @@ export function AdminContactMessagesPage() {
           </>
         }
         description="Triagem operacional das mensagens recebidas pelo formulário público, com status de atendimento e detalhe do contexto."
-        eyebrow="Admin / contato"
+        eyebrow="Administração / contato"
         title="Inbox comercial"
       />
 

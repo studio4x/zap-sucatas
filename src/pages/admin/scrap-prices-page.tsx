@@ -90,7 +90,7 @@ export function AdminScrapPricesPage() {
           </Button>
         }
         description="CRUD operacional para os produtos e preços exibidos na página pública de Preço das Sucatas."
-        eyebrow="Admin / preço das sucatas"
+        eyebrow="Administração / preço das sucatas"
         title="Preço das Sucatas"
       />
 
@@ -172,3 +172,4 @@ export function AdminScrapPricesPage() {
     </section>
   )
 }
+

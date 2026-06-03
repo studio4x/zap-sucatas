@@ -201,7 +201,7 @@ export function AdminUsersPage() {
           </>
         }
         description="Base autenticada do marketplace, com foco em papel, status e atividade operacional."
-        eyebrow="Admin / usuários"
+        eyebrow="Administração / usuários"
         title="Gestão de usuários"
       />
 
@@ -452,3 +452,4 @@ export function AdminUsersPage() {
     </section>
   )
 }
+

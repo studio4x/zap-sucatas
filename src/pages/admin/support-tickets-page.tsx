@@ -118,7 +118,7 @@ export function AdminSupportTicketsPage() {
       <AdminPageHeader
         actions={<Button onClick={() => queryClient.invalidateQueries({ queryKey: ['support', 'admin'] })} type="button" variant="outline">Atualizar lista</Button>}
         description="Fila operacional de tickets com busca, filtros de triagem e acesso ao detalhe compartilhado do chamado."
-        eyebrow="Admin / suporte"
+        eyebrow="Administração / suporte"
         title="Central de atendimento"
       />
 

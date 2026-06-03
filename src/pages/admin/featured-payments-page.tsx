@@ -142,7 +142,7 @@ export function AdminFeaturedPaymentsPage() {
           </Button>
         }
         description="Controle operacional dos pagamentos de destaque e validação de conectividade da integração Asaas."
-        eyebrow="Admin / pagamentos"
+        eyebrow="Administração / pagamentos"
         title="Pagamentos de destaque"
       />
 

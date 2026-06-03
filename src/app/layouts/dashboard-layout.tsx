@@ -80,7 +80,7 @@ export function DashboardLayout() {
     return (
       <MaintenanceScreen
         description="Seu painel está temporariamente indisponível enquanto finalizamos um ajuste operacional na plataforma. Assim que a manutenção terminar, o acesso será restabelecido automaticamente."
-        title="Dashboard temporariamente indisponível"
+        title="Painel temporariamente indisponível"
         tone="dashboard"
       />
     )

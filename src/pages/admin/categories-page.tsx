@@ -244,7 +244,7 @@ export function AdminCategoriesPage() {
           </>
         }
         description="Base taxonômica que sustenta o catálogo, filtros públicos e organização editorial do marketplace."
-        eyebrow="Admin / categorias"
+        eyebrow="Administração / categorias"
         title="Gestão de categorias"
       />
 
@@ -466,3 +466,4 @@ export function AdminCategoriesPage() {
     </section>
   )
 }
+

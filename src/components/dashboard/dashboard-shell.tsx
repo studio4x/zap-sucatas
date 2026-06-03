@@ -24,7 +24,7 @@ function resolveCurrentLabel(items: DashboardNavItem[], pathname: string) {
     .sort((left, right) => right.to.length - left.to.length)
     .find((item) => pathname.startsWith(item.to))
 
-  return nestedMatch?.label ?? 'Dashboard'
+  return nestedMatch?.label ?? 'Painel'
 }
 
 export function DashboardShell({
@@ -89,3 +89,4 @@ export function DashboardShell({
     </div>
   )
 }
+

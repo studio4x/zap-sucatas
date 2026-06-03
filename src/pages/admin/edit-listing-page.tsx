@@ -167,7 +167,7 @@ export function AdminEditListingPage() {
           ) : undefined
         }
         description="Atualize o conteúdo, as imagens e os dados comerciais do anúncio criado pela operação."
-        eyebrow="Admin / anúncios"
+        eyebrow="Administração / anúncios"
         title="Editar anúncio"
       />
 
@@ -214,3 +214,4 @@ export function AdminEditListingPage() {
     </section>
   )
 }
+

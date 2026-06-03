@@ -239,7 +239,7 @@ export function AdminPricingPage() {
           </>
         }
         description="Gerencie referências públicas, snapshots diários, sincronização e fallback manual sem depender de plugins externos."
-        eyebrow="Admin / preços"
+        eyebrow="Administração / preços"
         title="Operação da tabela de preços"
       />
 

@@ -137,7 +137,7 @@ export function AdminNotificationsPage() {
           </Button>
         ) : undefined}
         description="Gestão de disparos manuais e acompanhamento operacional das notificações transacionais."
-        eyebrow="Admin / notificações"
+        eyebrow="Administração / notificações"
         title="Central de notificações"
       />
 
@@ -182,13 +182,13 @@ export function AdminNotificationsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor="notification-action-url">Action URL (opcional)</label>
+                  <label className="text-sm font-medium text-foreground" htmlFor="notification-action-url">URL de ação (opcional)</label>
                   <Input id="notification-action-url" placeholder="/app/suporte" {...form.register('actionUrl')} />
                 </div>
               </div>
               {form.watch('target') === 'users' ? (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor="notification-users">User IDs (separados por vírgula)</label>
+                  <label className="text-sm font-medium text-foreground" htmlFor="notification-users">IDs dos usuários (separados por vírgula)</label>
                   <Input id="notification-users" placeholder="uuid1, uuid2" {...form.register('userIds')} />
                 </div>
               ) : null}
@@ -216,10 +216,10 @@ export function AdminNotificationsPage() {
             <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_170px_170px_180px]">
               <Input onChange={(event) => { setHistoryPage(1); setHistoryQuery(event.target.value) }} placeholder="Buscar por título, mensagem ou categoria" value={historyQuery} />
               <Select onChange={(event) => { setHistoryPage(1); setHistoryChannelFilter(event.target.value as typeof historyChannelFilter) }} value={historyChannelFilter}>
-                <option value="all">Todos canais</option><option value="in-app">Widget (in-app)</option><option value="email">Email</option><option value="push">Push</option><option value="whatsapp">WhatsApp</option>
+                <option value="all">Todos os canais</option><option value="in-app">No app</option><option value="email">E-mail</option><option value="push">Push</option><option value="whatsapp">WhatsApp</option>
               </Select>
               <Select onChange={(event) => { setHistoryPage(1); setHistoryStatusFilter(event.target.value as typeof historyStatusFilter) }} value={historyStatusFilter}>
-                <option value="all">Todos status</option><option value="pending">Pending</option><option value="retry">Retry</option><option value="sent">Sent</option><option value="delivered">Delivered</option><option value="failed">Failed</option><option value="bounced">Bounced</option>
+                <option value="all">Todos os status</option><option value="pending">Pendente</option><option value="retry">Tentar novamente</option><option value="sent">Enviado</option><option value="delivered">Entregue</option><option value="failed">Falhou</option><option value="bounced">Devolvido</option>
               </Select>
               <Select onChange={(event) => { setHistoryPage(1); setHistoryCategoryFilter(event.target.value) }} value={historyCategoryFilter}>
                 <option value="all">Todas categorias</option>{historyCategories.filter((value) => value !== 'all').map((value) => <option key={value} value={value}>{value}</option>)}
@@ -252,7 +252,7 @@ export function AdminNotificationsPage() {
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <AdminStatCard label="Total" value={stats.total} />
             <AdminStatCard label="Pendentes" value={stats.pending} />
-            <AdminStatCard label="Retry" value={stats.retrying} />
+            <AdminStatCard label="Tentar novamente" value={stats.retrying} />
             <AdminStatCard label="Enviadas" value={stats.sent} />
             <AdminStatCard label="Taxa de entrega" value={`${stats.deliveryRate.toFixed(2)}%`} />
           </div>
@@ -264,8 +264,8 @@ export function AdminNotificationsPage() {
           >
             <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_170px_170px_170px_180px]">
               <Input onChange={(event) => { setHistoryPage(1); setHistoryQuery(event.target.value) }} placeholder="Buscar por título, mensagem ou categoria" value={historyQuery} />
-              <Select onChange={(event) => { setHistoryPage(1); setHistoryChannelFilter(event.target.value as typeof historyChannelFilter) }} value={historyChannelFilter}><option value="all">Todos canais</option><option value="in-app">Widget (in-app)</option><option value="email">Email</option><option value="push">Push</option><option value="whatsapp">WhatsApp</option></Select>
-              <Select onChange={(event) => { setHistoryPage(1); setHistoryStatusFilter(event.target.value as typeof historyStatusFilter) }} value={historyStatusFilter}><option value="all">Todos status</option><option value="pending">Pending</option><option value="retry">Retry</option><option value="sent">Sent</option><option value="delivered">Delivered</option><option value="failed">Failed</option><option value="bounced">Bounced</option></Select>
+              <Select onChange={(event) => { setHistoryPage(1); setHistoryChannelFilter(event.target.value as typeof historyChannelFilter) }} value={historyChannelFilter}><option value="all">Todos os canais</option><option value="in-app">No app</option><option value="email">E-mail</option><option value="push">Push</option><option value="whatsapp">WhatsApp</option></Select>
+              <Select onChange={(event) => { setHistoryPage(1); setHistoryStatusFilter(event.target.value as typeof historyStatusFilter) }} value={historyStatusFilter}><option value="all">Todos os status</option><option value="pending">Pendente</option><option value="retry">Tentar novamente</option><option value="sent">Enviado</option><option value="delivered">Entregue</option><option value="failed">Falhou</option><option value="bounced">Devolvido</option></Select>
               <Select onChange={(event) => { setHistoryPage(1); setHistoryOriginFilter(event.target.value as typeof historyOriginFilter) }} value={historyOriginFilter}><option value="all">Todas origens</option><option value="automatic">Automática</option><option value="unknown">Indefinida</option></Select>
               <Select onChange={(event) => { setHistoryPage(1); setHistoryCategoryFilter(event.target.value) }} value={historyCategoryFilter}><option value="all">Todas categorias</option>{historyCategories.filter((value) => value !== 'all').map((value) => <option key={value} value={value}>{value}</option>)}</Select>
             </div>
@@ -295,3 +295,4 @@ export function AdminNotificationsPage() {
     </section>
   )
 }
+

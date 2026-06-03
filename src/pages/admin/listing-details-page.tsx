@@ -209,7 +209,7 @@ export function AdminListingDetailsPage() {
           listing.summary ||
           'Detalhe operacional do anúncio para moderação, validação e decisão editorial.'
         }
-        eyebrow="Admin / anúncios / detalhe"
+        eyebrow="Administração / anúncios / detalhe"
         title={listing.title}
       />
 
@@ -488,3 +488,4 @@ export function AdminListingDetailsPage() {
     </section>
   )
 }
+

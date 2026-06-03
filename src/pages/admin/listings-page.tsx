@@ -207,7 +207,7 @@ export function AdminListingsPage() {
           </>
         }
         description="Revise a fila, acompanhe status editoriais e remova da operação os anúncios que precisarem sair do catálogo."
-        eyebrow="Admin / anúncios"
+        eyebrow="Administração / anúncios"
         title="Gestão de anúncios"
       />
 

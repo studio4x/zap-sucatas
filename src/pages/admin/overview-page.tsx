@@ -63,7 +63,7 @@ export function AdminOverviewPage() {
           </>
         }
         description="Acompanhe a fila prioritária do MVP e entre rápido nos módulos de moderação e operação."
-        eyebrow="Admin / visão geral"
+        eyebrow="Administração / visão geral"
         title="Operação administrativa"
       />
 

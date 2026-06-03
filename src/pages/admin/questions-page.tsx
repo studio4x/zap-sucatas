@@ -132,7 +132,7 @@ export function AdminQuestionsPage() {
           </>
         }
         description="Publique, oculte ou bloqueie threads e registre respostas de apoio quando necessário."
-        eyebrow="Admin / perguntas"
+        eyebrow="Administração / perguntas"
         title="Moderação de perguntas"
       />
 
@@ -409,3 +409,4 @@ export function AdminQuestionsPage() {
     </section>
   )
 }
+

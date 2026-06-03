@@ -13,7 +13,7 @@ export function AdminPageHeader({
   actions,
   className,
   description,
-  eyebrow = 'Admin',
+  eyebrow = 'Administração',
   title,
 }: AdminPageHeaderProps) {
   return (
@@ -34,3 +34,4 @@ export function AdminPageHeader({
     </header>
   )
 }
+
