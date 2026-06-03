@@ -94,10 +94,6 @@ export function LoginPage() {
                   Acesso seguro para quem anuncia, negocia e acompanha a operação do portal.
                 </p>
               </div>
-              <div className="hidden rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-right backdrop-blur sm:block">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-white/70">Marketplace</p>
-                <p className="mt-1 text-sm font-semibold">Sucatas e maquinários</p>
-              </div>
             </div>
           </div>
         </div>
