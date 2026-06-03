@@ -40,20 +40,60 @@ type ResetPasswordPayload = {
 type RequestBody = CreatePayload | DeletePayload | ResetPasswordPayload | UpdatePayload
 
 const VALIDATION_ERRORS = [
-  'Invalid mode for create.',
-  'Invalid mode for update.',
-  'Invalid mode for delete.',
-  'Invalid mode for reset password.',
-  'Invalid role.',
-  'Invalid status.',
-  'Valid email is required.',
-  'Full name is required.',
-  'Password must be at least 8 characters long.',
-  'profileId is required.',
+  'Modo inválido para criação.',
+  'Modo inválido para atualização.',
+  'Modo inválido para exclusão.',
+  'Modo inválido para redefinição de senha.',
+  'Papel inválido.',
+  'Status inválido.',
+  'E-mail válido é obrigatório.',
+  'Nome completo é obrigatório.',
+  'A senha deve ter pelo menos 8 caracteres.',
+  'profileId é obrigatório.',
 ]
 
 function translateUserManagementError(message: string) {
   const normalized = message.trim().toLowerCase()
+
+  if (normalized === 'invalid mode for create.') {
+    return 'Modo inválido para criação.'
+  }
+
+  if (normalized === 'invalid mode for update.') {
+    return 'Modo inválido para atualização.'
+  }
+
+  if (normalized === 'invalid mode for delete.') {
+    return 'Modo inválido para exclusão.'
+  }
+
+  if (normalized === 'invalid mode for reset password.') {
+    return 'Modo inválido para redefinição de senha.'
+  }
+
+  if (normalized === 'invalid role.') {
+    return 'Papel inválido.'
+  }
+
+  if (normalized === 'invalid status.') {
+    return 'Status inválido.'
+  }
+
+  if (normalized === 'valid email is required.') {
+    return 'E-mail válido é obrigatório.'
+  }
+
+  if (normalized === 'full name is required.') {
+    return 'Nome completo é obrigatório.'
+  }
+
+  if (normalized === 'password must be at least 8 characters long.') {
+    return 'A senha deve ter pelo menos 8 caracteres.'
+  }
+
+  if (normalized === 'profileid is required.') {
+    return 'profileId é obrigatório.'
+  }
 
   if (
     normalized.includes('already been registered') ||
@@ -63,6 +103,54 @@ function translateUserManagementError(message: string) {
     normalized.includes('users_email_key')
   ) {
     return 'Um usuário com este endereço de e-mail já foi cadastrado.'
+  }
+
+  if (normalized === 'missing bearer token.') {
+    return 'Token de autenticação ausente.'
+  }
+
+  if (normalized === 'invalid or expired session.') {
+    return 'Sessão inválida ou expirada.'
+  }
+
+  if (normalized === 'active profile not found.') {
+    return 'Nenhum perfil ativo foi encontrado.'
+  }
+
+  if (normalized === 'admin access required.') {
+    return 'Acesso de administrador obrigatório.'
+  }
+
+  if (normalized === 'unauthorized.') {
+    return 'Não autorizado.'
+  }
+
+  if (normalized === 'unable to create auth user.') {
+    return 'Não foi possível criar o usuário de autenticação.'
+  }
+
+  if (normalized === 'unable to persist profile.') {
+    return 'Não foi possível salvar o perfil.'
+  }
+
+  if (normalized === 'profile not found.') {
+    return 'Perfil não encontrado.'
+  }
+
+  if (normalized === 'you cannot delete your own admin account.') {
+    return 'Você não pode excluir sua própria conta de administrador.'
+  }
+
+  if (normalized === 'you cannot remove your own admin access or suspend your own profile.') {
+    return 'Você não pode remover seu próprio acesso de administrador nem suspender seu próprio perfil.'
+  }
+
+  if (normalized === 'unable to update profile.') {
+    return 'Não foi possível atualizar o perfil.'
+  }
+
+  if (normalized === 'unexpected error.') {
+    return 'Erro inesperado.'
   }
 
   return message
@@ -86,7 +174,7 @@ function ensureRole(value: unknown): UserRole {
     return value
   }
 
-  throw new Error('Invalid role.')
+  throw new Error('Papel inválido.')
 }
 
 function ensureStatus(value: unknown): UserStatus {
@@ -94,12 +182,12 @@ function ensureStatus(value: unknown): UserStatus {
     return value
   }
 
-  throw new Error('Invalid status.')
+  throw new Error('Status inválido.')
 }
 
 function validateCreatePayload(payload: RequestBody) {
   if (payload.mode !== 'create') {
-    throw new Error('Invalid mode for create.')
+    throw new Error('Modo inválido para criação.')
   }
 
   const email = typeof payload.email === 'string' ? normalizeEmail(payload.email) : ''
@@ -109,15 +197,15 @@ function validateCreatePayload(payload: RequestBody) {
   const status = ensureStatus(payload.status)
 
   if (!email.includes('@')) {
-    throw new Error('Valid email is required.')
+    throw new Error('E-mail válido é obrigatório.')
   }
 
   if (fullName.length < 3) {
-    throw new Error('Full name is required.')
+    throw new Error('Nome completo é obrigatório.')
   }
 
   if (password.length < 8) {
-    throw new Error('Password must be at least 8 characters long.')
+    throw new Error('A senha deve ter pelo menos 8 caracteres.')
   }
 
   return {
@@ -132,7 +220,7 @@ function validateCreatePayload(payload: RequestBody) {
 
 function validateUpdatePayload(payload: RequestBody) {
   if (payload.mode !== 'update') {
-    throw new Error('Invalid mode for update.')
+    throw new Error('Modo inválido para atualização.')
   }
 
   const profileId = typeof payload.profileId === 'string' ? payload.profileId.trim() : ''
@@ -142,15 +230,15 @@ function validateUpdatePayload(payload: RequestBody) {
   const status = ensureStatus(payload.status)
 
   if (profileId.length === 0) {
-    throw new Error('profileId is required.')
+    throw new Error('profileId é obrigatório.')
   }
 
   if (!email.includes('@')) {
-    throw new Error('Valid email is required.')
+    throw new Error('E-mail válido é obrigatório.')
   }
 
   if (fullName.length < 3) {
-    throw new Error('Full name is required.')
+    throw new Error('Nome completo é obrigatório.')
   }
 
   return {
@@ -165,13 +253,13 @@ function validateUpdatePayload(payload: RequestBody) {
 
 function validateDeletePayload(payload: RequestBody) {
   if (payload.mode !== 'delete') {
-    throw new Error('Invalid mode for delete.')
+    throw new Error('Modo inválido para exclusão.')
   }
 
   const profileId = typeof payload.profileId === 'string' ? payload.profileId.trim() : ''
 
   if (profileId.length === 0) {
-    throw new Error('profileId is required.')
+    throw new Error('profileId é obrigatório.')
   }
 
   return { profileId }
@@ -179,18 +267,18 @@ function validateDeletePayload(payload: RequestBody) {
 
 function validateResetPasswordPayload(payload: RequestBody) {
   if (payload.mode !== 'reset_password') {
-    throw new Error('Invalid mode for reset password.')
+    throw new Error('Modo inválido para redefinição de senha.')
   }
 
   const profileId = typeof payload.profileId === 'string' ? payload.profileId.trim() : ''
   const password = typeof payload.password === 'string' ? payload.password.trim() : ''
 
   if (profileId.length === 0) {
-    throw new Error('profileId is required.')
+    throw new Error('profileId é obrigatório.')
   }
 
   if (password.length < 8) {
-    throw new Error('Password must be at least 8 characters long.')
+    throw new Error('A senha deve ter pelo menos 8 caracteres.')
   }
 
   return {
@@ -206,7 +294,7 @@ async function requireVerifiedAdminProfile(request: Request) {
     token = await getBearerToken(request)
   } catch {
     return {
-      error: jsonResponse({ error: 'Missing bearer token.' }, 401),
+      error: jsonResponse({ error: 'Token de autenticação ausente.' }, 401),
       profile: null,
     }
   }
@@ -219,7 +307,7 @@ async function requireVerifiedAdminProfile(request: Request) {
 
   if (userError || !user) {
     return {
-      error: jsonResponse({ error: 'Invalid or expired session.' }, 401),
+      error: jsonResponse({ error: 'Sessão inválida ou expirada.' }, 401),
       profile: null,
     }
   }
@@ -232,14 +320,14 @@ async function requireVerifiedAdminProfile(request: Request) {
 
   if (profileError || !profile || profile.status !== 'active') {
     return {
-      error: jsonResponse({ error: 'Active profile not found.' }, 403),
+      error: jsonResponse({ error: 'Nenhum perfil ativo foi encontrado.' }, 403),
       profile: null,
     }
   }
 
   if (profile.role !== 'admin') {
     return {
-      error: jsonResponse({ error: 'Admin access required.' }, 403),
+      error: jsonResponse({ error: 'Acesso de administrador obrigatório.' }, 403),
       profile: null,
     }
   }
@@ -259,7 +347,7 @@ Deno.serve(async (request) => {
     const auth = await requireVerifiedAdminProfile(request)
 
     if (auth.error || !auth.profile) {
-      return auth.error ?? jsonResponse({ error: 'Unauthorized.' }, 401)
+      return auth.error ?? jsonResponse({ error: 'Não autorizado.' }, 401)
     }
 
     const actor = auth.profile
@@ -278,7 +366,7 @@ Deno.serve(async (request) => {
       })
 
       if (createUserError || !createdUser.user) {
-        const message = createUserError?.message ?? 'Unable to create auth user.'
+        const message = createUserError?.message ?? 'Não foi possível criar o usuário de autenticação.'
         throw new Error(translateUserManagementError(message))
       }
 
@@ -302,7 +390,7 @@ Deno.serve(async (request) => {
         .single()
 
       if (profileError || !profile) {
-        throw profileError ?? new Error('Unable to persist profile.')
+        throw profileError ?? new Error('Não foi possível salvar o perfil.')
       }
 
       await insertAdminAuditLog({
@@ -333,11 +421,11 @@ Deno.serve(async (request) => {
         .single()
 
       if (existingProfileError || !existingProfile) {
-        return jsonResponse({ error: 'Profile not found.' }, 404)
+        return jsonResponse({ error: 'Perfil não encontrado.' }, 404)
       }
 
       if (existingProfile.auth_user_id === actor.auth_user_id) {
-        return jsonResponse({ error: 'You cannot delete your own admin account.' }, 409)
+        return jsonResponse({ error: 'Você não pode excluir sua própria conta de administrador.' }, 409)
       }
 
       const { data: ownedListings, error: ownedListingsError } = await admin
@@ -451,7 +539,7 @@ Deno.serve(async (request) => {
         .single()
 
       if (existingProfileError || !existingProfile) {
-        return jsonResponse({ error: 'Profile not found.' }, 404)
+        return jsonResponse({ error: 'Perfil não encontrado.' }, 404)
       }
 
       const { error: updatePasswordError } = await admin.auth.admin.updateUserById(
@@ -490,16 +578,16 @@ Deno.serve(async (request) => {
       .eq('id', input.profileId)
       .single()
 
-    if (existingProfileError || !existingProfile) {
-      return jsonResponse({ error: 'Profile not found.' }, 404)
-    }
+      if (existingProfileError || !existingProfile) {
+        return jsonResponse({ error: 'Perfil não encontrado.' }, 404)
+      }
 
     if (
       existingProfile.auth_user_id === actor.auth_user_id &&
       (input.role !== 'admin' || input.status !== 'active')
     ) {
       return jsonResponse(
-        { error: 'You cannot remove your own admin access or suspend your own profile.' },
+        { error: 'Você não pode remover seu próprio acesso de administrador nem suspender seu próprio perfil.' },
         409,
       )
     }
@@ -532,7 +620,7 @@ Deno.serve(async (request) => {
       .single()
 
     if (updatedProfileError || !updatedProfile) {
-      throw updatedProfileError ?? new Error('Unable to update profile.')
+      throw updatedProfileError ?? new Error('Não foi possível atualizar o perfil.')
     }
 
     await insertAdminAuditLog({
@@ -565,8 +653,10 @@ Deno.serve(async (request) => {
       error instanceof Error
         ? translateUserManagementError(error.message)
         : typeof error === 'object' && error !== null && 'message' in error
-          ? String((error as { message?: unknown }).message ?? 'Unexpected error.')
-          : 'Unexpected error.'
+          ? translateUserManagementError(
+              String((error as { message?: unknown }).message ?? 'Erro inesperado.'),
+            )
+          : 'Erro inesperado.'
 
     const isValidationError = VALIDATION_ERRORS.includes(message)
     return jsonResponse({ error: message }, isValidationError ? 400 : 500)

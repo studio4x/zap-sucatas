@@ -87,6 +87,46 @@ async function unwrapFunctionError(error: unknown) {
 function translateUserManagementError(message: string) {
   const normalized = message.trim().toLowerCase()
 
+  if (normalized === 'modo inválido para criação.') {
+    return 'Modo inválido para criação.'
+  }
+
+  if (normalized === 'modo inválido para atualização.') {
+    return 'Modo inválido para atualização.'
+  }
+
+  if (normalized === 'modo inválido para exclusão.') {
+    return 'Modo inválido para exclusão.'
+  }
+
+  if (normalized === 'modo inválido para redefinição de senha.') {
+    return 'Modo inválido para redefinição de senha.'
+  }
+
+  if (normalized === 'papel inválido.') {
+    return 'Papel inválido.'
+  }
+
+  if (normalized === 'status inválido.') {
+    return 'Status inválido.'
+  }
+
+  if (normalized === 'e-mail válido é obrigatório.') {
+    return 'E-mail válido é obrigatório.'
+  }
+
+  if (normalized === 'nome completo é obrigatório.') {
+    return 'Nome completo é obrigatório.'
+  }
+
+  if (normalized === 'a senha deve ter pelo menos 8 caracteres.') {
+    return 'A senha deve ter pelo menos 8 caracteres.'
+  }
+
+  if (normalized === 'profileid é obrigatório.') {
+    return 'profileId é obrigatório.'
+  }
+
   if (
     normalized.includes('already been registered') ||
     normalized.includes('already registered') ||
@@ -95,6 +135,57 @@ function translateUserManagementError(message: string) {
     normalized.includes('users_email_key')
   ) {
     return 'Um usuário com este endereço de e-mail já foi cadastrado.'
+  }
+
+  if (normalized === 'token de autenticação ausente.') {
+    return 'Token de autenticação ausente.'
+  }
+
+  if (normalized === 'sessão inválida ou expirada.') {
+    return 'Sessão inválida ou expirada.'
+  }
+
+  if (normalized === 'nenhum perfil ativo foi encontrado.') {
+    return 'Nenhum perfil ativo foi encontrado.'
+  }
+
+  if (normalized === 'acesso de administrador obrigatório.') {
+    return 'Acesso de administrador obrigatório.'
+  }
+
+  if (normalized === 'não autorizado.') {
+    return 'Não autorizado.'
+  }
+
+  if (normalized === 'não foi possível criar o usuário de autenticação.') {
+    return 'Não foi possível criar o usuário de autenticação.'
+  }
+
+  if (normalized === 'não foi possível salvar o perfil.') {
+    return 'Não foi possível salvar o perfil.'
+  }
+
+  if (normalized === 'perfil não encontrado.') {
+    return 'Perfil não encontrado.'
+  }
+
+  if (normalized === 'você não pode excluir sua própria conta de administrador.') {
+    return 'Você não pode excluir sua própria conta de administrador.'
+  }
+
+  if (
+    normalized ===
+    'você não pode remover seu próprio acesso de administrador nem suspender seu próprio perfil.'
+  ) {
+    return 'Você não pode remover seu próprio acesso de administrador nem suspender seu próprio perfil.'
+  }
+
+  if (normalized === 'não foi possível atualizar o perfil.') {
+    return 'Não foi possível atualizar o perfil.'
+  }
+
+  if (normalized === 'erro inesperado.') {
+    return 'Erro inesperado.'
   }
 
   return message
@@ -368,7 +459,7 @@ async function invokeUserManagementFunction(body: Record<string, unknown>) {
       }
     }
 
-    throw new Error('Edge Function returned a non-2xx status code')
+    throw new Error('Não foi possível concluir a operação. Tente novamente.')
   }
 
   return (await response.json()) as { profileId: string; success: boolean }
