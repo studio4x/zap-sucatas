@@ -3,6 +3,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
+import handshakeBg from '@/assets/home-bg/cta-handshake-bg.png'
 import { paths } from '@/app/paths'
 import { PublicAuthShell } from '@/components/public/public-auth-shell'
 import { Button } from '@/components/ui/button'
@@ -56,11 +57,33 @@ export function RegisterPage() {
     <PublicAuthShell
       badge="Cadastro"
       description="Crie sua conta para anunciar, comprar, enviar perguntas e acompanhar suas negociações no portal."
-      highlights={[
-        'Cadastro aberto para compradores e anunciantes do marketplace.',
-        'Fluxo administrativo segue separado e controlado.',
-        'Conta pensada para anunciar, comprar, responder perguntas e acompanhar moderação.',
-      ]}
+      media={
+        <div className="overflow-hidden rounded-[1.8rem] border border-border/70 bg-slate-950 shadow-[0_22px_48px_-34px_rgba(15,23,42,0.55)]">
+          <div className="relative aspect-[16/8]">
+            <img
+              alt="Equipe comercial e operação de sucatas da Zap Sucatas"
+              className="absolute inset-0 h-full w-full object-cover"
+              src={handshakeBg}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/82 via-slate-950/28 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 text-white">
+              <div className="max-w-sm space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-200/90">
+                  Cadastro aberto
+                </p>
+                <p className="text-lg font-semibold leading-tight">
+                  Abra sua conta para anunciar, negociar e acompanhar suas oportunidades no portal.
+                </p>
+              </div>
+              <div className="hidden rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-right backdrop-blur sm:block">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-white/70">Operação</p>
+                <p className="mt-1 text-sm font-semibold">Conta pronta para uso</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+      highlights={[]}
       title="Abra sua conta"
     >
       <div className="space-y-5">
@@ -146,7 +169,7 @@ export function RegisterPage() {
               {form.formState.isSubmitting ? 'Criando conta...' : 'Criar conta'}
             </Button>
             <Button asChild type="button" variant="outline">
-              <Link to={paths.auth.login}>Ja tenho conta</Link>
+              <Link to={paths.auth.login}>Já tenho conta</Link>
             </Button>
           </div>
         </form>
