@@ -199,7 +199,7 @@ async function renderListingStatusEmail(input: {
         input.context.recipientName,
       )},</p><p style="margin:0 0 16px 0;font-size:15px;line-height:1.7;color:#334155;">${escapeHtml(
         selected.body,
-      )}</p><p style="margin:0 0 12px 0;font-size:13px;font-weight:700;color:#0f172a;letter-spacing:0.02em;text-transform:uppercase;">Dados do anúncio</p><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #e2e8f0;border-radius:10px;border-collapse:separate;border-spacing:0;overflow:hidden;margin:0 0 12px 0;">${listingRowsHtml}</table>${descriptionHtml}`,
+      )}</p><p style="margin:0 0 12px 0;font-size:13px;font-weight:700;color:#0f172a;letter-spacing:0.02em;text-transform:uppercase;">Dados do anúncio</p><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #e2e8f0;border-collapse:separate;border-spacing:0;margin:0 0 12px 0;">${listingRowsHtml}</table>${descriptionHtml}`,
     })
   ).html
 
