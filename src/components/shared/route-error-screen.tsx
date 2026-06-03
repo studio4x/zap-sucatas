@@ -1,9 +1,12 @@
+import { useEffect } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { useRouteError, useLocation, Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { BuildVersionBadge } from '@/components/shared/build-version-badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { RouteLoadingScreen } from '@/components/shared/route-loading-screen'
+import { isChunkLoadError, shouldRetryChunkLoad } from '@/lib/lazy-with-retry'
 
 function getFallbackPath(pathname: string) {
   if (pathname.startsWith('/admin')) {
@@ -22,6 +25,19 @@ export function RouteErrorScreen() {
   const location = useLocation()
   const fallbackPath = getFallbackPath(location.pathname)
   const message = error instanceof Error ? error.message : 'Ocorreu um erro ao carregar a página.'
+  const isChunkError = isChunkLoadError(error)
+
+  useEffect(() => {
+    if (!isChunkError || typeof window === 'undefined' || !shouldRetryChunkLoad()) {
+      return
+    }
+
+    window.location.reload()
+  }, [isChunkError])
+
+  if (isChunkError) {
+    return <RouteLoadingScreen />
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
