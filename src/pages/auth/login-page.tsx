@@ -3,6 +3,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import heroIndustrialBg from '@/assets/home-bg/hero-industrial-bg.png'
 import { getDefaultPathByRole, paths } from '@/app/paths'
 import { PublicAuthShell } from '@/components/public/public-auth-shell'
 import { Button } from '@/components/ui/button'
@@ -74,6 +75,32 @@ export function LoginPage() {
   return (
     <PublicAuthShell
       badge="Entrar"
+      media={
+        <div className="overflow-hidden rounded-[1.8rem] border border-border/70 bg-slate-950 shadow-[0_22px_48px_-34px_rgba(15,23,42,0.55)]">
+          <div className="relative aspect-[16/8]">
+            <img
+              alt="Sucata industrial e operação comercial da Zap Sucatas"
+              className="absolute inset-0 h-full w-full object-cover"
+              src={heroIndustrialBg}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/82 via-slate-950/28 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 text-white">
+              <div className="max-w-sm space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-200/90">
+                  Portal comercial
+                </p>
+                <p className="text-lg font-semibold leading-tight">
+                  Acesso seguro para quem anuncia, negocia e acompanha a operação do portal.
+                </p>
+              </div>
+              <div className="hidden rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-right backdrop-blur sm:block">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-white/70">Marketplace</p>
+                <p className="mt-1 text-sm font-semibold">Sucatas e maquinários</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
       description="Acesse sua conta para anunciar, comprar, enviar perguntas em outros anúncios e acompanhar sua operação no portal."
       highlights={[]}
       title="Login da conta"

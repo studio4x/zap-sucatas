@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 type PublicAuthShellProps = {
   badge: string
   children: ReactNode
+  media?: ReactNode
   description: string
   highlights: string[]
   title: string
@@ -13,6 +14,7 @@ type PublicAuthShellProps = {
 export function PublicAuthShell({
   badge,
   children,
+  media,
   description,
   highlights,
   title,
@@ -21,6 +23,8 @@ export function PublicAuthShell({
     <section className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] xl:items-start">
       <div className="overflow-hidden rounded-[2.2rem] border border-border bg-white">
         <div className="space-y-6 px-6 py-7 md:px-7 md:py-8">
+          {media ? <div>{media}</div> : null}
+
           <Badge className="border-primary/15 bg-primary/5 text-primary" variant="outline">
             {badge}
           </Badge>
