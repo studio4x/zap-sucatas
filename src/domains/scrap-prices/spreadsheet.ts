@@ -61,10 +61,65 @@ function parseNumberLike(value: unknown) {
     return value
   }
 
-  const normalized = normalizeStringValue(value).replace(/\./g, '').replace(',', '.')
-  if (!normalized) return Number.NaN
+  const raw = normalizeStringValue(value)
+  if (!raw) return Number.NaN
 
-  return Number(normalized)
+  const cleaned = raw.replace(/[^\d.,-]/g, '')
+  if (!cleaned) return Number.NaN
+
+  const lastComma = cleaned.lastIndexOf(',')
+  const lastDot = cleaned.lastIndexOf('.')
+
+  if (lastComma === -1 && lastDot === -1) {
+    return Number(cleaned)
+  }
+
+  if (lastComma > -1 && lastDot > -1) {
+    const decimalSeparator = lastComma > lastDot ? ',' : '.'
+    const thousandsSeparator = decimalSeparator === ',' ? '.' : ','
+    const normalized = cleaned.replaceAll(thousandsSeparator, '').replace(decimalSeparator, '.')
+    return Number(normalized)
+  }
+
+  if (lastComma > -1) {
+    return Number(cleaned.replace(/\./g, '').replace(',', '.'))
+  }
+
+  const dotCount = (cleaned.match(/\./g) ?? []).length
+  if (dotCount > 1) {
+    return Number(cleaned.replace(/\./g, ''))
+  }
+
+  return Number(cleaned)
+}
+
+const BRL_FORMATTER = new Intl.NumberFormat('pt-BR', {
+  currency: 'BRL',
+  style: 'currency',
+})
+
+function normalizePriceLabel(value: unknown) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return BRL_FORMATTER.format(value)
+  }
+
+  const raw = normalizeStringValue(value)
+  if (!raw) return ''
+
+  const parsedNumber = parseNumberLike(raw)
+  if (Number.isFinite(parsedNumber)) {
+    return BRL_FORMATTER.format(parsedNumber)
+  }
+
+  const currencyMatch = raw.match(/(?:r\$\s*)?(\d[\d.,]*)/i)
+  if (currencyMatch?.[1]) {
+    const numeric = parseNumberLike(currencyMatch[1])
+    if (Number.isFinite(numeric)) {
+      return BRL_FORMATTER.format(numeric)
+    }
+  }
+
+  return raw
 }
 
 function findRowValue(row: Record<string, unknown>, aliases: string[]) {
@@ -82,7 +137,7 @@ function findRowValue(row: Record<string, unknown>, aliases: string[]) {
 function parseRow(row: Record<string, unknown>, index: number) {
   const id = normalizeStringValue(findRowValue(row, ['id', 'identificador']))
   const productName = normalizeStringValue(findRowValue(row, ['produto', 'productname']))
-  const priceLabel = normalizeStringValue(findRowValue(row, ['preco', 'price', 'pricelabel']))
+  const priceLabel = normalizePriceLabel(findRowValue(row, ['preco', 'price', 'pricelabel']))
   const quantityLabel = normalizeStringValue(findRowValue(row, ['quantidade', 'quantity', 'quantitylabel']))
   const sortOrderRaw = findRowValue(row, ['ordem', 'order', 'sortorder'])
   const isActiveRaw = findRowValue(row, ['ativo', 'active', 'isactive', 'status'])
