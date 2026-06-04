@@ -18,14 +18,14 @@ set
 insert into public.listing_materials (name, slug)
 values
   ('Ferro', 'ferro'),
-  ('Aco', 'aco'),
-  ('Aluminio', 'aluminio'),
+  ('Aço', 'aco'),
+  ('Alumínio', 'aluminio'),
   ('Cobre', 'cobre'),
-  ('Latao', 'latao'),
-  ('Plastico misto', 'plastico-misto'),
+  ('Latão', 'latao'),
+  ('Plástico misto', 'plastico-misto'),
   ('Papel', 'papel'),
-  ('Papelao', 'papelao'),
-  ('Eletronicos', 'eletronicos'),
+  ('Papelão', 'papelao'),
+  ('Eletrônicos', 'eletronicos'),
   ('Chumbo', 'chumbo')
 on conflict (slug) do update
 set
