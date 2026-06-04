@@ -27,9 +27,12 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
 
   return (
     <Card className="group relative h-full overflow-hidden rounded-[1.85rem] border-0 bg-white transition duration-200 hover:-translate-y-1 hover:shadow-[0_26px_60px_-36px_rgba(19,33,23,0.35)]">
-      <Link aria-label={`Ver anúncio ${listing.title}`} className="absolute inset-0 z-10 rounded-[1.85rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30" to={targetPath} />
       <div className="relative z-20 flex h-full flex-col">
-        <div className="relative aspect-[4/3] overflow-hidden bg-[linear-gradient(160deg,#f0f8ed_0%,#d6ebd1_100%)]">
+        <Link
+          aria-label={`Ver anúncio ${listing.title}`}
+          className="relative block aspect-[4/3] overflow-hidden bg-[linear-gradient(160deg,#f0f8ed_0%,#d6ebd1_100%)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+          to={targetPath}
+        >
           {coverImage ? (
             <img
               alt={listing.title}
@@ -58,7 +61,7 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
               <ArrowUpRight className="size-4" />
             </div>
           </div>
-        </div>
+        </Link>
 
         <CardContent className="flex h-full flex-col gap-4 p-6 pb-4">
           <div className="space-y-2.5">
@@ -67,9 +70,14 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
               {listing.materialName ? <span className="text-muted-foreground">• {listing.materialName}</span> : null}
             </div>
 
-            <h3 className="line-clamp-2 font-display text-[1.85rem] leading-[1.02] tracking-[-0.04em] text-foreground">
-              {listing.title}
-            </h3>
+            <Link
+              className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+              to={targetPath}
+            >
+              <h3 className="line-clamp-2 font-display text-[1.85rem] leading-[1.02] tracking-[-0.04em] text-foreground transition group-hover:text-primary">
+                {listing.title}
+              </h3>
+            </Link>
 
             <p className="line-clamp-3 text-sm leading-7 text-muted-foreground">
               {listing.summary || listing.description}
