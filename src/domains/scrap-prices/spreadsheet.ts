@@ -122,6 +122,24 @@ function normalizePriceLabel(value: unknown) {
   return raw
 }
 
+function getPriceExportCell(value: unknown) {
+  const rawValue = normalizeStringValue(value)
+  if (!rawValue) {
+    return { t: 's' as const, v: '' }
+  }
+
+  const parsedNumber = parseNumberLike(rawValue)
+  if (!Number.isFinite(parsedNumber)) {
+    return { t: 's' as const, v: rawValue }
+  }
+
+  return {
+    t: 'n' as const,
+    v: parsedNumber,
+    z: '[$R$-pt-BR] #,##0.00',
+  }
+}
+
 function findRowValue(row: Record<string, unknown>, aliases: string[]) {
   const entries = Object.entries(row)
   for (const [key, value] of entries) {
@@ -168,16 +186,31 @@ export async function downloadScrapPricesWorkbook(items: ScrapPriceItem[]) {
   const XLSX = await import('xlsx')
   const workbook = XLSX.utils.book_new()
 
-  const rows = items.map((item) => ({
-    ID: item.id,
-    Ordem: item.sortOrder,
-    Produto: item.productName,
-    Preço: item.priceLabel,
-    Quantidade: item.quantityLabel,
-    Ativo: item.isActive ? 'Sim' : 'Não',
-  }))
+  const rows = items.map((item) => [
+    item.id,
+    item.sortOrder,
+    item.productName,
+    item.priceLabel,
+    item.quantityLabel,
+    item.isActive ? 'Sim' : 'Não',
+  ])
 
-  const worksheet = XLSX.utils.json_to_sheet(rows, { header: [...HEADER_LABELS] as string[] })
+  const worksheet = XLSX.utils.aoa_to_sheet([HEADER_LABELS as unknown as string[], ...rows])
+
+  rows.forEach((row, rowIndex) => {
+    const cellAddress = XLSX.utils.encode_cell({ c: 3, r: rowIndex + 1 })
+    worksheet[cellAddress] = getPriceExportCell(row[3])
+  })
+
+  worksheet['!cols'] = [
+    { wch: 36 },
+    { wch: 10 },
+    { wch: 28 },
+    { wch: 18 },
+    { wch: 18 },
+    { wch: 10 },
+  ]
+
   XLSX.utils.book_append_sheet(workbook, worksheet, SHEET_NAME)
   XLSX.writeFile(workbook, `preco-das-sucatas-${new Date().toISOString().slice(0, 10)}.xlsx`)
 }
