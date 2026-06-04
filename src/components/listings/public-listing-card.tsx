@@ -60,7 +60,7 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
           </div>
         </div>
 
-        <CardContent className="flex flex-col gap-4 p-6 pb-4">
+        <CardContent className="flex h-full flex-col gap-4 p-6 pb-4">
           <div className="space-y-2.5">
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">
               {listing.categoryName ? <span>{listing.categoryName}</span> : null}
@@ -99,7 +99,7 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
             </p>
           </div>
 
-          <div className="flex items-end justify-start pt-2">
+          <div className="mt-auto flex items-end justify-start pt-2">
             <Link
               className="relative z-20 inline-flex items-center gap-2 text-sm font-semibold text-primary transition group-hover:gap-3"
               to={targetPath}
