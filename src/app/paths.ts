@@ -32,7 +32,6 @@ export const paths = {
     support: '/app/suporte',
     supportDetail: (id: string) => `/app/suporte/${id}`,
     profile: '/app/perfil',
-    settings: '/app/configuracoes',
   },
   admin: {
     root: '/admin',
