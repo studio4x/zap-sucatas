@@ -5,7 +5,6 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { DashboardFormSection } from '@/components/dashboard/dashboard-form-section'
 import { DashboardSectionHeader } from '@/components/dashboard/dashboard-section-header'
-import { DashboardStatCard } from '@/components/dashboard/dashboard-stat-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { fetchSystemSettings } from '@/domains/settings/api'
@@ -53,25 +52,6 @@ export function AppSettingsPage() {
         title="Configurações essenciais da conta"
         tone="info"
       />
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <DashboardStatCard
-          label="Marketplace"
-          value={settingsQuery.data?.siteName ?? 'Carregando'}
-        />
-        <DashboardStatCard
-          label="Suporte"
-          value={settingsQuery.data?.supportEmail ?? 'Não informado'}
-        />
-        <DashboardStatCard
-          label="Perguntas anônimas"
-          value={settingsQuery.data?.allowGuestQuestions ? 'Ativas' : 'Desativadas'}
-        />
-        <DashboardStatCard
-          label="Manutenção"
-          value={settingsQuery.data?.maintenanceMode ? 'Ativa' : 'Desativada'}
-        />
-      </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
         <DashboardFormSection
