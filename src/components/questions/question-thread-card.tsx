@@ -53,7 +53,7 @@ export function QuestionThreadCard({
           <div className="rounded-3xl border border-emerald-200/70 bg-emerald-50 p-4">
             <div className="mb-3 flex items-center gap-2 text-sm font-medium text-emerald-900">
               <Reply className="size-4" />
-              Resposta
+              Resposta do Anunciante
             </div>
             <p className="whitespace-pre-line text-sm leading-6 text-emerald-950">
               {question.answer.answerText}
