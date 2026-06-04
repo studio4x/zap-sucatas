@@ -10,7 +10,7 @@ import { AdminPagination } from '@/components/admin/admin-pagination'
 import { AdminRowActions } from '@/components/admin/admin-row-actions'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
-import { AdminUserForm } from '@/components/admin/admin-user-form'
+import { AdminUserFormModal } from '@/components/admin/admin-user-form-modal'
 import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
 import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
@@ -59,6 +59,7 @@ function formatDate(value: string) {
 export function AdminUsersPage() {
   const queryClient = useQueryClient()
   const { clearFeedback, feedback, setErrorFeedback, setSuccessFeedback } = useOperationFeedback()
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editingProfile, setEditingProfile] = useState<AdminProfileSummary | null>(null)
   const [profilePendingRemoval, setProfilePendingRemoval] = useState<AdminProfileSummary | null>(null)
   const [query, setQuery] = useState('')
@@ -91,6 +92,7 @@ export function AdminUsersPage() {
     },
     onSuccess: async () => {
       setSuccessFeedback('Usuário criado com sucesso.')
+      setCreateDialogOpen(false)
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] }),
         queryClient.invalidateQueries({ queryKey: ['profiles', 'admin', 'stats'] }),
@@ -182,11 +184,12 @@ export function AdminUsersPage() {
               onClick={() => {
                 clearFeedback()
                 setEditingProfile(null)
+                setCreateDialogOpen(true)
               }}
               type="button"
             >
-              Novo usuário
-            </Button>
+            Adicionar novo usuário
+          </Button>
             <Button asChild type="button">
               <Link to={paths.admin.listings}>Anúncios</Link>
             </Button>
@@ -261,50 +264,6 @@ export function AdminUsersPage() {
         </div>
       </AdminFilterCard>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <AdminUserForm
-          defaultValues={createDefaults}
-          isPending={createMutation.isPending}
-          mode="create"
-          onSubmit={(values) => {
-            clearFeedback()
-            createMutation.mutate({
-              email: values.email,
-              fullName: values.fullName,
-              password: values.password,
-              phone: values.phone,
-              role: values.role,
-              status: values.status,
-            })
-          }}
-          submitLabel="Criar usuário"
-        />
-
-        <AdminUserForm
-          defaultValues={editDefaults}
-          isPending={updateMutation.isPending || deleteMutation.isPending}
-          mode="edit"
-          onCancel={() => setEditingProfile(null)}
-          onSubmit={(values) => {
-            if (!editingProfile) {
-              return
-            }
-
-            clearFeedback()
-            updateMutation.mutate({
-              email: values.email,
-              fullName: values.fullName,
-              phone: values.phone,
-              profileId: editingProfile.id,
-              role: values.role,
-              status: values.status,
-            })
-          }}
-          submitDisabled={!editingProfile}
-          submitLabel={editingProfile ? 'Salvar ajustes' : 'Selecione um usuário'}
-        />
-      </div>
-
       <AdminDataTable
         columns={[
           {
@@ -364,6 +323,7 @@ export function AdminUsersPage() {
                     label: 'Editar',
                     onClick: () => {
                       clearFeedback()
+                      setCreateDialogOpen(false)
                       setEditingProfile(profile)
                     },
                   },
@@ -432,6 +392,55 @@ export function AdminUsersPage() {
         open={Boolean(profilePendingRemoval)}
         title="Confirmar exclusão"
         tone="danger"
+      />
+
+      <AdminUserFormModal
+        defaultValues={createDefaults}
+        isPending={createMutation.isPending}
+        mode="create"
+        onOpenChange={setCreateDialogOpen}
+        onSubmit={(values) => {
+          clearFeedback()
+          createMutation.mutate({
+            email: values.email,
+            fullName: values.fullName,
+            password: values.password,
+            phone: values.phone,
+            role: values.role,
+            status: values.status,
+          })
+        }}
+        open={createDialogOpen}
+        submitLabel="Criar usuário"
+      />
+
+      <AdminUserFormModal
+        defaultValues={editDefaults}
+        isPending={updateMutation.isPending || deleteMutation.isPending}
+        mode="edit"
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingProfile(null)
+          }
+        }}
+        onSubmit={(values) => {
+          if (!editingProfile) {
+            return
+          }
+
+          clearFeedback()
+          updateMutation.mutate({
+            email: values.email,
+            fullName: values.fullName,
+            phone: values.phone,
+            profileId: editingProfile.id,
+            role: values.role,
+            status: values.status,
+          })
+        }}
+        open={Boolean(editingProfile)}
+        submitDisabled={!editingProfile}
+        submitLabel={editingProfile ? 'Salvar ajustes' : 'Selecione um usuário'}
       />
 
     </section>
