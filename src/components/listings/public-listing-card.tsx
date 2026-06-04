@@ -1,4 +1,4 @@
-import { ArrowUpRight, Clock3, MapPin, Package, Phone } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Clock3, MapPin, Package, Phone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { ListingStatusBadge } from '@/components/listings/listing-status-badge'
@@ -26,8 +26,9 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
   const targetPath = listing.slug ? paths.public.listingDetails(listing.slug) : paths.public.listings
 
   return (
-    <Link className="group block h-full focus-visible:outline-none" to={targetPath}>
-      <Card className="h-full overflow-hidden rounded-[1.85rem] border-0 bg-white transition duration-200 hover:-translate-y-1 hover:shadow-[0_26px_60px_-36px_rgba(19,33,23,0.35)] group-focus-visible:ring-2 group-focus-visible:ring-primary/30">
+    <Card className="group relative h-full overflow-hidden rounded-[1.85rem] border-0 bg-white transition duration-200 hover:-translate-y-1 hover:shadow-[0_26px_60px_-36px_rgba(19,33,23,0.35)]">
+      <Link aria-label={`Ver anúncio ${listing.title}`} className="absolute inset-0 z-10 rounded-[1.85rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30" to={targetPath} />
+      <div className="relative z-20 flex h-full flex-col">
         <div className="relative aspect-[4/3] overflow-hidden bg-[linear-gradient(160deg,#f0f8ed_0%,#d6ebd1_100%)]">
           {coverImage ? (
             <img
@@ -104,17 +105,20 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
                 Faixa comercial
               </p>
               <p className="truncate text-lg font-semibold text-foreground">
-                {listing.priceLabel ?? 'Sob consulta'}
+              {listing.priceLabel ?? 'Sob consulta'}
               </p>
             </div>
 
-            <span className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition group-hover:gap-3">
+            <Link
+              className="relative z-20 inline-flex items-center gap-2 text-sm font-semibold text-primary transition group-hover:gap-3"
+              to={targetPath}
+            >
               Ver anúncio
-              <ArrowUpRight className="size-4" />
-            </span>
+              <ArrowRight className="size-4" />
+            </Link>
           </div>
         </CardContent>
-      </Card>
-    </Link>
+      </div>
+    </Card>
   )
 }
