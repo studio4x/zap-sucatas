@@ -13,7 +13,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { signInWithPassword, signUp } from '@/domains/auth/api'
+import { sendMagicLink, signInWithPassword, signUp } from '@/domains/auth/api'
+import { getAuthErrorMessage } from '@/domains/auth/error-messages'
 import { blogContentHasHtml } from '@/domains/blog/utils'
 import {
   fetchPublicListingPreviewById,
@@ -239,7 +240,25 @@ export function ListingDetailsPage() {
       setIsAuthModalOpen(false)
       window.location.reload()
     } catch (error) {
-      setAuthMessage(error instanceof Error ? error.message : 'Falha ao autenticar.')
+      setAuthMessage(getAuthErrorMessage(error, 'Falha ao autenticar.'))
+    } finally {
+      setIsAuthSubmitting(false)
+    }
+  }
+
+  async function handleInlineMagicLink() {
+    if (!authEmail.trim()) {
+      setAuthMessage('Informe seu e-mail para receber o link de acesso.')
+      return
+    }
+
+    setAuthMessage(null)
+    setIsAuthSubmitting(true)
+    try {
+      await sendMagicLink(authEmail.trim(), authRedirectPath)
+      setAuthMessage('Link de acesso enviado. Verifique seu e-mail para concluir o login.')
+    } catch (error) {
+      setAuthMessage(getAuthErrorMessage(error, 'Falha ao enviar link de acesso.'))
     } finally {
       setIsAuthSubmitting(false)
     }
@@ -278,7 +297,7 @@ export function ListingDetailsPage() {
         'Conta criada. Enviamos um e-mail para ativação. Ao ativar a conta, você será redirecionado para este anúncio com perguntas liberadas.',
       )
     } catch (error) {
-      setAuthMessage(error instanceof Error ? error.message : 'Falha ao criar conta.')
+      setAuthMessage(getAuthErrorMessage(error, 'Falha ao criar conta.'))
     } finally {
       setIsAuthSubmitting(false)
     }
@@ -654,9 +673,33 @@ export function ListingDetailsPage() {
                 <h3 className="text-lg font-semibold text-foreground">Entrar para perguntar ao vendedor</h3>
                 <Input onChange={(event) => setAuthEmail(event.target.value)} placeholder="Seu e-mail" type="email" value={authEmail} />
                 <Input onChange={(event) => setAuthPassword(event.target.value)} placeholder="Sua senha" type="password" value={authPassword} />
-                <Button className="w-full" disabled={isAuthSubmitting} onClick={() => void handleInlineLogin()} type="button">
-                  {isAuthSubmitting ? 'Entrando...' : 'Entrar'}
-                </Button>
+                <div className="flex flex-wrap gap-3">
+                  <Button className="flex-1" disabled={isAuthSubmitting} onClick={() => void handleInlineLogin()} type="button">
+                    {isAuthSubmitting ? 'Entrando...' : 'Entrar'}
+                  </Button>
+                  <Button asChild className="flex-1" type="button" variant="outline">
+                    <Link to={paths.auth.forgotPassword}>Recuperar senha</Link>
+                  </Button>
+                </div>
+
+                <div className="rounded-[1.25rem] border border-border bg-background/70 p-4">
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-semibold text-foreground">Entrar com login sem senha</h4>
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      Enviamos um link seguro para o seu e-mail e você volta direto para a pergunta.
+                    </p>
+                  </div>
+                  <div className="mt-3">
+                    <Button
+                      className="w-full"
+                      disabled={isAuthSubmitting}
+                      onClick={() => void handleInlineMagicLink()}
+                      type="button"
+                    >
+                      {isAuthSubmitting ? 'Enviando...' : 'Enviar link de acesso'}
+                    </Button>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="space-y-3">
