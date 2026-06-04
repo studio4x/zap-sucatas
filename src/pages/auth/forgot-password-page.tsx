@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
+import heroIndustrialBg from '@/assets/home-bg/hero-industrial-bg.png'
 import { getDefaultPathByRole, paths } from '@/app/paths'
 import { PublicAuthShell } from '@/components/public/public-auth-shell'
 import { Button } from '@/components/ui/button'
@@ -102,11 +103,29 @@ export function ForgotPasswordPage() {
     <PublicAuthShell
       badge="Recuperar acesso"
       description="Solicite o link de redefinição ou, se você já voltou pelo e-mail, defina uma nova senha para acessar sua conta."
-      highlights={[
-        'Fluxo seguro de recuperação via e-mail.',
-        'Atualização imediata da senha ao retornar pelo link.',
-        'Acesso pensado para não interromper a operação da sua conta no marketplace.',
-      ]}
+      media={
+        <div className="overflow-hidden rounded-[1.8rem] border border-border/70 bg-slate-950 shadow-[0_22px_48px_-34px_rgba(15,23,42,0.55)]">
+          <div className="relative aspect-[16/8]">
+            <img
+              alt="Operação comercial e ambiente industrial da Zap Sucatas"
+              className="absolute inset-0 h-full w-full object-cover"
+              src={heroIndustrialBg}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/82 via-slate-950/28 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 text-white">
+              <div className="max-w-sm space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-200/90">
+                  Recuperação segura
+                </p>
+                <p className="text-lg font-semibold leading-tight">
+                  Redefina sua senha com um link enviado para o e-mail cadastrado.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+      highlights={[]}
       title="Recuperar senha"
     >
       <div className="space-y-5">

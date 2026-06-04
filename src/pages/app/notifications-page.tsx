@@ -25,6 +25,18 @@ import {
 } from '@/lib/notifications'
 import type { NotificationItem } from '@/domains/notifications/types'
 
+const notificationCategoryLabels: Record<string, string> = {
+  contact: 'Contato',
+  digest: 'Resumo da conta',
+  listing_questions: 'Perguntas sobre anúncio',
+  listing_status: 'Status do anúncio',
+  support: 'Suporte',
+}
+
+function formatNotificationCategoryLabel(category: string) {
+  return notificationCategoryLabels[category] ?? category.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
+
 export function AppNotificationsPage() {
   const queryClient = useQueryClient()
   const { user } = useAuth()
@@ -130,40 +142,40 @@ export function AppNotificationsPage() {
   return (
     <section className="space-y-6">
       <DashboardSectionHeader
-        description="Acompanhe alertas operacionais, marque leitura e ajuste os canais de comunicação da sua conta."
+        description="Veja as mensagens da sua conta, abra os detalhes quando precisar e marque como lidas as que já foram vistas."
         title="Notificações"
       />
 
       <div className="grid gap-4 md:grid-cols-3">
         <DashboardStatCard label="Não lidas" value={unreadCount} />
-        <DashboardStatCard label="Total" value={totalCount} />
-        <DashboardStatCard label="Filtro ativo" value={onlyUnread ? 'Somente não lidas' : 'Todas'} />
+        <DashboardStatCard label="Total recebidas" value={totalCount} />
+        <DashboardStatCard label="Filtro atual" value={onlyUnread ? 'Só não lidas' : 'Todas as mensagens'} />
       </div>
 
       <DashboardFilterCard
         actions={
           <div className="flex flex-wrap gap-2">
             <Button onClick={() => setOnlyUnread((value) => !value)} type="button" variant={onlyUnread ? 'default' : 'outline'}>
-              {onlyUnread ? 'Mostrando não lidas' : 'Somente não lidas'}
+              {onlyUnread ? 'Mostrando só não lidas' : 'Mostrar só não lidas'}
             </Button>
             <Button disabled={unreadCount === 0 || markAllMutation.isPending} onClick={() => markAllMutation.mutate()} type="button" variant="outline">
               <CheckCheck className="size-4" />
-              Marcar tudo como lido
+              Marcar todas como lidas
             </Button>
           </div>
         }
-        description="Filtre por categoria, busque por palavra-chave e abra diretamente o contexto da notificação."
-        title="Central de notificações"
+        description="Use a busca e os filtros para encontrar a mensagem certa e abrir o conteúdo completo."
+        title="Suas mensagens"
       >
         <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
-          <Input onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por título, categoria ou mensagem" value={query} />
+          <Input onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por título ou palavra da mensagem" value={query} />
           <Select onChange={(event) => setCategoryFilter(event.target.value)} value={categoryFilter}>
-            <option value="all">Todas as categorias</option>
+            <option value="all">Todas as mensagens</option>
             {categoryOptions
               .filter((value) => value !== 'all')
               .map((value) => (
                 <option key={value} value={value}>
-                  {value}
+                  {formatNotificationCategoryLabel(value)}
                 </option>
               ))}
           </Select>
@@ -210,34 +222,27 @@ export function AppNotificationsPage() {
                         ) : null}
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                        <span>Categoria: {notification.category}</span>
-                        <span>{formatRelativeNotificationDate(notification.createdAt)}</span>
+                        <span>Categoria: {formatNotificationCategoryLabel(notification.category)}</span>
+                        <span>Recebida {formatRelativeNotificationDate(notification.createdAt)}</span>
                         <span>{formatNotificationDateTime(notification.createdAt)}</span>
                       </div>
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      <div
-                        aria-label={`Abrir mensagem da notificação ${notification.title}`}
-                        className="cursor-pointer rounded-xl border border-transparent px-1 py-1 transition hover:border-border hover:bg-muted/30"
+                      <Button
                         onClick={() => setSelectedNotification(notification)}
-                        onKeyDown={(event) => {
-                          if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault()
-                            setSelectedNotification(notification)
-                          }
-                        }}
-                        role="button"
-                        tabIndex={0}
+                        type="button"
+                        variant="outline"
+                        className="h-auto flex-col items-start gap-0 px-4 py-3 text-left"
                       >
-                        <p className="text-sm font-medium text-foreground">Ver mensagem</p>
-                        <p className="text-xs text-muted-foreground">Abrir conteúdo completo em modal</p>
-                      </div>
+                        <span className="text-sm font-medium text-foreground">Ler mensagem</span>
+                        <span className="text-xs font-normal text-muted-foreground">Abrir o texto completo</span>
+                      </Button>
                       {notification.actionUrl ? (
                         <Button asChild type="button" variant="outline">
                           <Link to={notification.actionUrl}>
                             <ExternalLink className="size-4" />
-                            Abrir
+                            Abrir página
                           </Link>
                         </Button>
                       ) : null}
@@ -300,15 +305,15 @@ export function AppNotificationsPage() {
       </section>
 
       <NotificationMessageDialog
-        badgeLabel={selectedNotification?.readAt ? 'Lida' : 'Não lida'}
+        badgeLabel={selectedNotification?.readAt ? 'Mensagem já lida' : 'Mensagem nova'}
         badgeTone={selectedNotification?.readAt ? 'border-[#b8d8c7] bg-[#eaf5ef] text-[#1f6d4b]' : 'border-[#b5d3f1] bg-[#e8f2fc] text-[#17508f]'}
         body={selectedNotification?.body ?? ''}
         createdAt={selectedNotification?.createdAt ?? new Date().toISOString()}
         details={[
-          { label: 'Categoria', value: selectedNotification?.category ?? 'Não informada' },
-          { label: 'Prioridade', value: selectedNotification ? getNotificationPriorityMeta(selectedNotification.priority).label : 'Normal' },
-          { label: 'Ação', value: selectedNotification?.actionUrl ?? 'Sem ação vinculada' },
-          { label: 'ID', value: selectedNotification?.id ?? '—' },
+          { label: 'Tipo de mensagem', value: selectedNotification ? formatNotificationCategoryLabel(selectedNotification.category) : 'Não informada' },
+          { label: 'Importância', value: selectedNotification ? getNotificationPriorityMeta(selectedNotification.priority).label : 'Normal' },
+          { label: 'Próximo passo', value: selectedNotification?.actionUrl ? 'Você pode abrir a página relacionada' : 'Não há outra ação para fazer agora' },
+          { label: 'Registro', value: selectedNotification?.id ?? '—' },
         ]}
         onOpenChange={(open) => {
           if (!open) {

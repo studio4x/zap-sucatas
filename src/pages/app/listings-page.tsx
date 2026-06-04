@@ -80,13 +80,13 @@ export function AppListingsPage() {
     mutationFn: submitListingForReview,
     onError: (error) => {
       setFeedback({
-        message: error instanceof Error ? error.message : 'Não foi possível enviar para revisão.',
+        message: error instanceof Error ? error.message : 'Não foi possível enviar o anúncio para análise.',
         tone: 'error',
       })
     },
     onSuccess: async () => {
       setFeedback({
-        message: 'Anúncio enviado para revisão com sucesso.',
+        message: 'Anúncio enviado para análise com sucesso.',
         tone: 'success',
       })
       await invalidateListings()
@@ -97,7 +97,7 @@ export function AppListingsPage() {
     mutationFn: pauseListing,
     onError: (error) => {
       setFeedback({
-        message: error instanceof Error ? error.message : 'Não foi possível pausar o anúncio.',
+        message: error instanceof Error ? error.message : 'Não foi possível pausar o anúncio agora.',
         tone: 'error',
       })
     },
@@ -114,7 +114,7 @@ export function AppListingsPage() {
     mutationFn: archiveListing,
     onError: (error) => {
       setFeedback({
-        message: error instanceof Error ? error.message : 'Não foi possível arquivar o anúncio.',
+        message: error instanceof Error ? error.message : 'Não foi possível arquivar o anúncio agora.',
         tone: 'error',
       })
     },
@@ -205,7 +205,7 @@ export function AppListingsPage() {
             </Link>
           </Button>
         }
-        description="Gerencie seus anúncios em um único lugar, acompanhe os status e controle quando pausar ou arquivar itens."
+        description="Gerencie seus anúncios em um único lugar, veja o que está em rascunho, em análise ou já publicado."
         title="Meus anúncios"
       />
 
@@ -218,13 +218,13 @@ export function AppListingsPage() {
           }
           description={
             requiresAttention.status === 'rejected'
-              ? 'Existe um anúncio rejeitado aguardando ajuste. Revise o motivo, corrija o conteúdo e reenvie.'
-              : 'Você ainda tem rascunhos sem envio para revisão. Complete o que faltar e publique quando estiver pronto.'
+              ? 'Existe um anúncio que precisa de correção. Revise o motivo, ajuste o conteúdo e envie novamente.'
+              : 'Você ainda tem rascunhos para concluir. Complete o que faltar e envie quando estiver pronto.'
           }
           title={
             requiresAttention.status === 'rejected'
-              ? 'Existe um anúncio com correção pendente'
-              : 'Você tem rascunhos para concluir'
+              ? 'Existe um anúncio para ajustar'
+              : 'Você ainda tem rascunhos para finalizar'
           }
           tone="warning"
         />
@@ -257,7 +257,7 @@ export function AppListingsPage() {
             Limpar filtros
           </Button>
         }
-        description="Use os filtros para localizar rápido um lote específico ou acompanhar um status."
+        description="Use a busca e os filtros para encontrar um anúncio pelo título, cidade ou resumo."
       >
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
           <Input
@@ -280,14 +280,14 @@ export function AppListingsPage() {
 
       {listingsQuery.isLoading ? (
         <div className="rounded-2xl border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
-          Carregando anúncios do dashboard...
+          Carregando seus anúncios...
         </div>
       ) : null}
 
       {listingsQuery.isError ? (
         <DashboardAlertCard
-          description="Não foi possível carregar seus anúncios nesta tentativa."
-          title="Falha ao carregar anúncios"
+          description="Não conseguimos carregar seus anúncios agora."
+          title="Não foi possível abrir a lista"
           tone="error"
         />
       ) : null}
@@ -299,7 +299,7 @@ export function AppListingsPage() {
               <Link to={paths.app.newListing}>Criar anúncio</Link>
             </Button>
           }
-          description="Ajuste os filtros ou crie seu primeiro anúncio para começar a publicar no marketplace."
+          description="Ajuste os filtros ou crie seu primeiro anúncio para começar."
           title="Nenhum anúncio encontrado"
         />
       ) : null}
@@ -367,7 +367,7 @@ export function AppListingsPage() {
                       <Button asChild size="sm" type="button" variant="ghost">
                         <Link to={paths.public.listingDetails(listing.slug)}>
                           <Eye className="size-4" />
-                          Público
+                          Ver página pública
                         </Link>
                       </Button>
                     ) : null}
@@ -383,7 +383,7 @@ export function AppListingsPage() {
                         type="button"
                       >
                         <SendHorizontal className="size-4" />
-                        {submitMutation.isPending ? 'Enviando...' : 'Revisão'}
+                        {submitMutation.isPending ? 'Enviando...' : 'Enviar para análise'}
                       </Button>
                     ) : null}
 
@@ -399,7 +399,7 @@ export function AppListingsPage() {
                         variant="outline"
                       >
                         <PauseCircle className="size-4" />
-                        {pauseMutation.isPending ? 'Pausando...' : 'Pausar'}
+                        {pauseMutation.isPending ? 'Pausando...' : 'Pausar anúncio'}
                       </Button>
                     ) : null}
 
@@ -412,7 +412,7 @@ export function AppListingsPage() {
                         variant="outline"
                       >
                         <Archive className="size-4" />
-                        {archiveMutation.isPending ? 'Arquivando...' : 'Arquivar'}
+                        {archiveMutation.isPending ? 'Arquivando...' : 'Arquivar anúncio'}
                       </Button>
                     ) : null}
 
@@ -429,10 +429,10 @@ export function AppListingsPage() {
                       >
                         <Star className="size-4" />
                         {hasPendingFeaturedPayment
-                          ? 'Ver cobrança'
+                          ? 'Abrir cobrança'
                           : createFeaturedPaymentMutation.isPending
                             ? 'Gerando...'
-                            : 'Destacar'}
+                            : 'Destacar anúncio'}
                       </Button>
                     ) : null}
                   </div>
@@ -441,7 +441,7 @@ export function AppListingsPage() {
             },
           ]}
           data={filteredListings}
-          description="Tabela operacional com seus anúncios, status atuais e atalhos de edição."
+          description="Lista dos seus anúncios com o status atual e atalhos rápidos de edição."
           emptyDescription="Nenhum anúncio encontrado."
           emptyTitle="Sem anúncios"
           getRowKey={(listing) => listing.id}
@@ -454,7 +454,7 @@ export function AppListingsPage() {
         confirmLabel="Arquivar anúncio"
         description={
           listingPendingArchive
-            ? `Arquivar o anúncio "${listingPendingArchive.title}"? Ele sairá da operação pública e continuará apenas no histórico interno.`
+            ? `Arquivar o anúncio "${listingPendingArchive.title}"? Ele deixará de aparecer para o público, mas continuará salvo no seu histórico.`
             : ''
         }
         isPending={archiveMutation.isPending}
@@ -479,19 +479,19 @@ export function AppListingsPage() {
       {reviewSubmissionModal ? (
         <div className="fixed inset-0 z-[90] flex items-center justify-center px-4">
           <button
-            aria-label="Fechar confirmação de envio para revisão"
+            aria-label="Fechar confirmação de envio"
             className="absolute inset-0 bg-slate-950/45"
             onClick={() => setReviewSubmissionModal(null)}
             type="button"
           />
           <div className="relative w-full max-w-md rounded-[1.75rem] border border-border bg-card p-6 shadow-2xl">
-            <p className="text-base font-semibold text-foreground">Anúncio enviado para revisão</p>
+            <p className="text-base font-semibold text-foreground">Anúncio enviado para análise</p>
             <p className="mt-3 text-sm leading-6 text-muted-foreground">
               Seu anúncio
               {' '}
               <span className="font-medium text-foreground">"{reviewSubmissionModal.listingTitle || reviewSubmissionModal.listingId}"</span>
               {' '}
-              foi enviado para moderação com sucesso. Você pode acompanhar o status nesta página.
+              foi enviado com sucesso. Você pode acompanhar o andamento nesta página.
             </p>
             <div className="mt-6 flex justify-end">
               <Button onClick={() => setReviewSubmissionModal(null)} type="button">

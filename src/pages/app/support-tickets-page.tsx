@@ -43,25 +43,25 @@ export function AppSupportTicketsPage() {
             <Button onClick={() => setIsModalOpen(true)} type="button"><PlusCircle className="size-4" /> Novo chamado</Button>
           </>
         }
-        description="Acompanhe os chamados abertos, o prazo da primeira resposta e o histórico de conversas com a equipe."
+        description="Acompanhe os chamados abertos, veja o prazo da primeira resposta e acompanhe o histórico com a equipe."
         title="Meus chamados"
       />
 
       <Card className="rounded-[1.8rem] !border-none bg-primary/5 shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
         <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-semibold text-foreground">SLA público de primeira resposta</p>
-            <p className="mt-2 text-sm leading-7 text-muted-foreground">Pagamentos em ate 2 horas uteis. Demais categorias em ate 24 horas uteis.</p>
+            <p className="text-sm font-semibold text-foreground">Tempo estimado para a primeira resposta</p>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">Pagamentos: até 2 horas úteis. Outros assuntos: até 24 horas úteis.</p>
             <p className="mt-2 text-xs uppercase tracking-[0.12em] text-muted-foreground">{formatBusinessHours(config.businessHours)}</p>
           </div>
-          <div className="inline-flex rounded-full border border-primary/20 bg-background px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-primary">Não e prazo de resolucao final</div>
+          <div className="inline-flex rounded-full border border-primary/20 bg-background px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-primary">Isso vale só para a primeira resposta</div>
         </CardContent>
       </Card>
 
       <Card className="rounded-[1.8rem] !border-none shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
         <CardContent className="p-0">
           {ticketsQuery.isLoading ? <div className="px-6 py-8 text-sm text-muted-foreground">Carregando chamados...</div> : null}
-          {ticketsQuery.isError ? <div className="px-6 py-8 text-sm text-destructive">Não foi possível carregar os chamados.</div> : null}
+          {ticketsQuery.isError ? <div className="px-6 py-8 text-sm text-destructive">Não conseguimos carregar seus chamados agora.</div> : null}
           {!ticketsQuery.isLoading && !ticketsQuery.isError && tickets.length === 0 ? (
             <div className="p-6">
               <DashboardEmptyState
@@ -77,7 +77,7 @@ export function AppSupportTicketsPage() {
               <table className="min-w-[860px] w-full text-sm">
                 <thead className="bg-muted/60 text-left">
                   <tr>
-                    {['Assunto', 'Categoria', 'Status', 'SLA', 'Prazo', 'Ações'].map((header) => <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground" key={header}>{header}</th>)}
+                    {['Assunto', 'Categoria', 'Situação', 'Tempo de resposta', 'Prazo', 'Ações'].map((header) => <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground" key={header}>{header}</th>)}
                   </tr>
                 </thead>
                 <tbody>
@@ -95,8 +95,8 @@ export function AppSupportTicketsPage() {
                         </td>
                         <td className="px-4 py-4"><TicketStatusBadge status={ticket.status} /></td>
                         <td className="px-4 py-4"><TicketSlaBadge status={ticket.slaStatus} /></td>
-                        <td className="px-4 py-4 text-sm text-muted-foreground">{ticket.firstResponseAt ? `Respondido em ${formatSupportDateTime(ticket.firstResponseAt)}` : ticket.firstResponseDueAt ? formatSupportDateTime(ticket.firstResponseDueAt) : 'Em calculo'}</td>
-                        <td className="px-4 py-4"><Button asChild type="button" variant="ghost"><Link to={paths.app.supportDetail(ticket.id)}>Ver detalhes</Link></Button></td>
+                        <td className="px-4 py-4 text-sm text-muted-foreground">{ticket.firstResponseAt ? `Respondido em ${formatSupportDateTime(ticket.firstResponseAt)}` : ticket.firstResponseDueAt ? formatSupportDateTime(ticket.firstResponseDueAt) : 'Em cálculo'}</td>
+                        <td className="px-4 py-4"><Button asChild type="button" variant="ghost"><Link to={paths.app.supportDetail(ticket.id)}>Ver conversa</Link></Button></td>
                       </tr>
                     )
                   })}

@@ -80,13 +80,13 @@ export function AppQuestionsPage() {
             <Link to={paths.app.listings}>Ver anúncios</Link>
           </Button>
         }
-        description="Responda rápido aos interessados e acompanhe o status público de cada thread."
+        description="Responda às perguntas dos interessados e acompanhe o andamento de cada conversa."
         title="Perguntas recebidas"
       />
 
       <DashboardAlertCard
-        description="Responder com clareza ajuda a reduzir fricção comercial e aumenta a confiança no seu anúncio."
-        title="Mantenha sua inbox em dia"
+        description="Responder com clareza ajuda a tirar dúvidas e deixar seu anúncio mais confiável."
+        title="Mantenha suas perguntas em dia"
         tone={stats.open > 0 ? 'warning' : 'info'}
       />
 
@@ -97,9 +97,9 @@ export function AppQuestionsPage() {
           tone={stats.open > 0 ? 'warning' : 'default'}
           value={stats.open}
         />
-        <DashboardStatCard label="Publicadas" value={stats.published} />
+        <DashboardStatCard label="Visíveis no anúncio" value={stats.published} />
         <DashboardStatCard
-          label="Bloqueadas"
+          label="Ocultas"
           tone={stats.blocked > 0 ? 'warning' : 'default'}
           value={stats.blocked}
         />
@@ -118,7 +118,7 @@ export function AppQuestionsPage() {
             Limpar filtros
           </Button>
         }
-        description="Filtre por status ou busque por texto para encontrar a thread certa."
+        description="Filtre por status ou busque por texto para encontrar a pergunta certa."
       >
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
           <div className="relative">
@@ -149,14 +149,14 @@ export function AppQuestionsPage() {
 
       {questionsQuery.isLoading ? (
         <div className="rounded-2xl border border-border bg-card px-6 py-8 text-sm text-muted-foreground shadow-[0_18px_34px_-28px_rgba(0,0,0,0.34),0_10px_18px_-18px_rgba(39,153,31,0.2)]">
-          Carregando perguntas recebidas...
+          Carregando perguntas...
         </div>
       ) : null}
 
       {questionsQuery.isError ? (
         <DashboardAlertCard
-          description="Não foi possível carregar as perguntas neste momento."
-          title="Falha ao carregar inbox"
+          description="Não conseguimos carregar as perguntas agora."
+          title="Não foi possível abrir a lista"
           tone="error"
         />
       ) : null}
@@ -193,7 +193,7 @@ export function AppQuestionsPage() {
               <CardContent className="space-y-5">
                 {question.answer ? (
                   <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
-                    <p className="text-sm font-semibold text-emerald-900">Resposta atual</p>
+                    <p className="text-sm font-semibold text-emerald-900">Resposta enviada</p>
                     <p className="mt-2 text-sm leading-6 text-emerald-950">
                       {question.answer.answerText}
                     </p>
@@ -202,8 +202,8 @@ export function AppQuestionsPage() {
 
                 {isBlocked ? (
                   <DashboardAlertCard
-                    description="Threads bloqueadas so podem ser tratadas pelo painel administrativo."
-                    title="Pergunta bloqueada"
+                    description="Esta pergunta foi ocultada pelo admin e só pode ser tratada no painel administrativo."
+                    title="Pergunta oculta"
                     tone="warning"
                   />
                 ) : null}
@@ -220,8 +220,8 @@ export function AppQuestionsPage() {
                     }
                     placeholder={
                       isBlocked
-                        ? 'Thread bloqueada pelo admin.'
-                        : 'Escreva uma resposta objetiva para o interessado.'
+                        ? 'Pergunta oculta pelo admin.'
+                        : 'Escreva uma resposta clara para o interessado.'
                     }
                     value={draft}
                   />
@@ -233,7 +233,7 @@ export function AppQuestionsPage() {
                       className="text-sm font-medium text-primary hover:underline"
                       to={paths.public.listingDetails(question.listingSlug)}
                     >
-                      Abrir anúncio público
+                      Ver anúncio
                     </Link>
                   ) : (
                     <span />

@@ -54,7 +54,7 @@ export function AppOverviewPage() {
             </Link>
           </Button>
         }
-        description="Acompanhe seus anúncios, veja o que exige atenção agora e entre rápido nas ações principais da conta."
+        description="Veja o resumo da sua conta, acompanhe o que precisa de atenção e entre nas ações mais importantes."
         title="Visão geral"
       />
 
@@ -65,8 +65,8 @@ export function AppOverviewPage() {
           value={stats.drafts}
         />
         <DashboardStatCard
-          description="Anúncios aguardando moderação da plataforma."
-          label="Em revisão"
+          description="Anúncios aguardando análise da equipe."
+          label="Em análise"
           tone={stats.pending > 0 ? 'warning' : 'default'}
           value={stats.pending}
         />
@@ -134,14 +134,14 @@ export function AppOverviewPage() {
         <div className="grid gap-4">
           <DashboardActionCard
             action={
-              <Button asChild className="w-full" type="button">
-                <Link to={paths.app.newListing}>
-                  <FilePlus2 className="size-4" />
-                  Criar novo anúncio
-                </Link>
-              </Button>
-            }
-            description="Comece um novo anúncio com descrição, localidade, fotos e dados comerciais."
+          <Button asChild className="w-full" type="button">
+            <Link to={paths.app.newListing}>
+              <FilePlus2 className="size-4" />
+              Criar novo anúncio
+            </Link>
+          </Button>
+        }
+            description="Comece um novo anúncio com fotos, descrição e dados comerciais."
             icon={<FilePlus2 className="size-5" />}
             title="Publicar novo lote"
             tone="primary"
@@ -149,28 +149,28 @@ export function AppOverviewPage() {
 
           <DashboardActionCard
             action={
-              <Button asChild className="w-full" type="button" variant="outline">
-                <Link to={paths.app.questions}>
-                  <MessageSquareMore className="size-4" />
-                  Ver perguntas
-                </Link>
-              </Button>
-            }
-            description="Acompanhe as perguntas recebidas e mantenha sua resposta em dia."
+          <Button asChild className="w-full" type="button" variant="outline">
+            <Link to={paths.app.questions}>
+              <MessageSquareMore className="size-4" />
+                  Ver perguntas recebidas
+            </Link>
+          </Button>
+        }
+            description="Acompanhe as perguntas dos interessados e responda sem perder o ritmo."
             icon={<MessageSquareMore className="size-5" />}
             title="Responder interessados"
           />
 
           <DashboardActionCard
             action={
-              <Button asChild className="w-full" type="button" variant="outline">
-                <Link to={paths.app.listings}>
-                  <Rows4 className="size-4" />
-                  Gerenciar anúncios
-                </Link>
-              </Button>
-            }
-            description="Revise rascunhos, corrija rejeições e acompanhe a fila de revisão."
+          <Button asChild className="w-full" type="button" variant="outline">
+            <Link to={paths.app.listings}>
+              <Rows4 className="size-4" />
+              Gerenciar anúncios
+            </Link>
+          </Button>
+        }
+            description="Revise rascunhos, ajuste anúncios com problema e acompanhe o andamento da aprovação."
             icon={<FileClock className="size-5" />}
             title="Organizar publicações"
             tone={stats.rejected > 0 || stats.pending > 0 ? 'warning' : 'default'}
