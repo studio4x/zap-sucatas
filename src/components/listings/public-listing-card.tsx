@@ -99,16 +99,7 @@ export function PublicListingCard({ listing }: PublicListingCardProps) {
             </p>
           </div>
 
-          <div className="mt-auto flex items-end justify-between gap-4 pt-5">
-            <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                Faixa comercial
-              </p>
-              <p className="truncate text-lg font-semibold text-foreground">
-              {listing.priceLabel ?? 'Sob consulta'}
-              </p>
-            </div>
-
+          <div className="mt-auto flex items-end justify-start pt-5">
             <Link
               className="relative z-20 inline-flex items-center gap-2 text-sm font-semibold text-primary transition group-hover:gap-3"
               to={targetPath}
