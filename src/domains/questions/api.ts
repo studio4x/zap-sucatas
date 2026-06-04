@@ -21,7 +21,7 @@ type QuestionRow = {
   question_text: string
   status: QuestionStatus
   updated_at: string
-  listing_answers?: AnswerRow[] | null
+  listing_answers?: AnswerRow | AnswerRow[] | null
   listings?: {
     slug: string | null
     status:
@@ -148,8 +148,12 @@ function mapAnswer(row: AnswerRow): ListingAnswer {
 }
 
 function mapQuestion(row: QuestionRow): ListingQuestion {
+  const answerRow = Array.isArray(row.listing_answers)
+    ? row.listing_answers[0] ?? null
+    : row.listing_answers ?? null
+
   return {
-    answer: row.listing_answers?.[0] ? mapAnswer(row.listing_answers[0]) : null,
+    answer: answerRow ? mapAnswer(answerRow) : null,
     authorUserId: row.author_user_id,
     createdAt: row.created_at,
     guestEmail: row.guest_email,
