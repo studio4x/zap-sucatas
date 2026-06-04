@@ -213,7 +213,11 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'configuracoes',
-        element: withSuspense(<AppSettingsPage />),
+        element: (
+          <RoleGuard allowedRoles={['admin']}>
+            {withSuspense(<AppSettingsPage />)}
+          </RoleGuard>
+        ),
       },
     ],
   },

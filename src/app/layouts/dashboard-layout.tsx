@@ -5,7 +5,6 @@ import {
   LifeBuoy,
   MessageSquareMore,
   Rows4,
-  Settings2,
 } from 'lucide-react'
 import { Outlet } from 'react-router-dom'
 import { paths } from '@/app/paths'
@@ -48,11 +47,6 @@ const dashboardNavItems = [
     to: paths.app.profile,
     label: 'Perfil',
     icon: CircleUserRound,
-  },
-  {
-    to: paths.app.settings,
-    label: 'Configurações',
-    icon: Settings2,
   },
 ]
 
