@@ -96,3 +96,16 @@ export async function upsertScrapPrice(input: {
 export async function deleteScrapPrice(id: string) {
   return invokeFn<{ id: string }, { success: boolean }>('delete-scrap-price', { id })
 }
+
+export async function upsertScrapPrices(input: {
+  items: Array<{
+    id?: string
+    isActive: boolean
+    priceLabel: string
+    productName: string
+    quantityLabel: string
+    sortOrder: number
+  }>
+}) {
+  return invokeFn<typeof input, { count: number; success: boolean }>('upsert-scrap-price-items', input)
+}
