@@ -28,7 +28,7 @@ Deno.serve(async (request) => {
 
     const url = new URL(request.url)
     const limitParam = Number(url.searchParams.get('limit') ?? '20')
-    const limit = Number.isFinite(limitParam) ? Math.max(1, Math.min(limitParam, 100)) : 20
+    const limit = Number.isFinite(limitParam) ? Math.max(1, Math.min(limitParam, 1000)) : 20
     const unreadOnly = parseBoolean(url.searchParams.get('unread_only'), false)
     const category = url.searchParams.get('category')?.trim().toLowerCase() ?? ''
 

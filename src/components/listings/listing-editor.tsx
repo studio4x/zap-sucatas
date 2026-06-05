@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ImagePlus, Star, Trash2 } from 'lucide-react'
+import { GripVertical, ImagePlus, Star, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ChangeEvent, DragEvent, ReactNode } from 'react'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
@@ -484,14 +484,14 @@ export function ListingEditor({
     setRemovedImageIds((current) => current.filter((id) => id !== imageId))
   }
 
-  function handleImageDragStart(event: DragEvent<HTMLDivElement>, itemKey: string) {
+  function handleImageDragStart(event: DragEvent<HTMLElement>, itemKey: string) {
     event.dataTransfer.effectAllowed = 'move'
     event.dataTransfer.setData('text/plain', itemKey)
     draggingImageKeyRef.current = itemKey
     setDraggingImageKey(itemKey)
   }
 
-  function handleImageDragOver(event: DragEvent<HTMLDivElement>, itemKey: string) {
+  function handleImageDragOver(event: DragEvent<HTMLElement>, itemKey: string) {
     event.preventDefault()
 
     const draggedKey = draggingImageKeyRef.current
@@ -503,7 +503,7 @@ export function ListingEditor({
     setImageOrderKeys((current) => moveImageKey(current, draggedKey, itemKey))
   }
 
-  function handleImageDrop(event: DragEvent<HTMLDivElement>) {
+  function handleImageDrop(event: DragEvent<HTMLElement>) {
     event.preventDefault()
     draggingImageKeyRef.current = null
     setDraggingImageKey(null)
@@ -946,19 +946,23 @@ export function ListingEditor({
                     return (
                       <div
                         key={item.key}
-                        draggable
-                        onDragEnd={handleImageDragEnd}
-                        onDragEnter={(event) => handleImageDragOver(event, item.key)}
-                        onDragOver={(event) => handleImageDragOver(event, item.key)}
-                        onDragStart={(event) => handleImageDragStart(event, item.key)}
                         onDrop={handleImageDrop}
                         className={cn(
                           'overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm transition',
                           isCover ? 'border-primary/60 ring-2 ring-primary/35' : undefined,
-                          isDragging ? 'scale-[0.99] opacity-60 ring-2 ring-dashed ring-primary/50' : 'cursor-grab',
+                          isDragging ? 'scale-[0.99] opacity-60 ring-2 ring-dashed ring-primary/50' : undefined,
                         )}
                       >
                         <div className="p-3">
+                          <div className="mb-2 flex items-center justify-between gap-2">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
+                              <GripVertical className="size-3" />
+                              Arraste
+                            </span>
+                            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                              Reordenar
+                            </span>
+                          </div>
                           <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
                             <img
                               alt={
@@ -982,6 +986,19 @@ export function ListingEditor({
                               {item.kind === 'existing' ? `Imagem ${index + 1}` : item.item.file.name}
                             </p>
                             <div className="flex flex-wrap gap-2">
+                              <button
+                                aria-label="Arrastar para reordenar"
+                                className="inline-flex h-7 items-center gap-1 rounded-full border border-border px-2.5 text-[11px] font-medium text-foreground transition hover:bg-secondary active:cursor-grabbing"
+                                draggable
+                                onDragEnd={handleImageDragEnd}
+                                onDragEnter={(event) => handleImageDragOver(event, item.key)}
+                                onDragOver={(event) => handleImageDragOver(event, item.key)}
+                                onDragStart={(event) => handleImageDragStart(event, item.key)}
+                                type="button"
+                              >
+                                <GripVertical className="size-3" />
+                                Segurar e arrastar
+                              </button>
                               <Button
                                 className="h-auto max-w-full rounded-full px-2.5 py-1 text-center text-[11px] font-medium leading-tight whitespace-normal"
                                 onClick={() => setCoverImageKey(item.key)}

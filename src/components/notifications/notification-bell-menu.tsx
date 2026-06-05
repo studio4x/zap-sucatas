@@ -189,7 +189,7 @@ function NotificationBellMenuContent({
 
   const notificationsQuery = useQuery({
     queryKey: ['notifications', 'widget', queryKeyScope, profileId],
-    queryFn: () => fetchNotificationCenter({ limit: 8 }),
+    queryFn: () => fetchNotificationCenter({ limit: 1000 }),
     enabled: Boolean(profileId),
     refetchInterval: 60_000,
   })
