@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Archive, Eye, FilePlus2, PauseCircle, SendHorizontal, Star } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -8,6 +8,7 @@ import { DashboardEmptyState } from '@/components/dashboard/dashboard-empty-stat
 import { DashboardFilterCard } from '@/components/dashboard/dashboard-filter-card'
 import { DashboardSectionHeader } from '@/components/dashboard/dashboard-section-header'
 import { DashboardTableCard } from '@/components/dashboard/dashboard-table-card'
+import { ListingContentPreview } from '@/components/listings/listing-content-preview'
 import { ListingStatusBadge } from '@/components/listings/listing-status-badge'
 import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
 import { Button } from '@/components/ui/button'
@@ -49,10 +50,6 @@ export function AppListingsPage() {
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<AppListingsStatusFilter>('all')
   const [feedback, setFeedback] = useState<FeedbackState | null>(null)
-  const [reviewSubmissionModal, setReviewSubmissionModal] = useState<{
-    listingId: string
-    listingTitle: string
-  } | null>(null)
   const [listingPendingArchive, setListingPendingArchive] = useState<{ id: string; title: string } | null>(
     null,
   )
@@ -177,22 +174,12 @@ export function AppListingsPage() {
   const requiresAttention = listings.find(
     (listing) => listing.status === 'rejected' || listing.status === 'draft',
   )
+  const reviewSubmission = (location.state as ReviewSubmissionState | null)?.reviewSubmission ?? null
   const isBusy =
     submitMutation.isPending ||
     pauseMutation.isPending ||
     archiveMutation.isPending ||
     createFeaturedPaymentMutation.isPending
-
-  useEffect(() => {
-    const routeState = location.state as ReviewSubmissionState | null
-    const reviewSubmission = routeState?.reviewSubmission
-    if (!reviewSubmission) {
-      return
-    }
-
-    setReviewSubmissionModal(reviewSubmission)
-    navigate(location.pathname + location.search, { replace: true, state: null })
-  }, [location.pathname, location.search, location.state, navigate])
 
   return (
     <section className="space-y-6">
@@ -310,9 +297,9 @@ export function AppListingsPage() {
             {
               header: 'Anúncio',
               cell: (listing) => (
-                <div className="space-y-1">
+                <div className="max-w-full min-w-0 space-y-1 overflow-hidden">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-foreground">{listing.title}</p>
+                    <p className="min-w-0 break-words font-medium text-foreground [overflow-wrap:anywhere]">{listing.title}</p>
                     {listing.isFeatured ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
                         <Star className="size-3.5" />
@@ -320,7 +307,7 @@ export function AppListingsPage() {
                       </span>
                     ) : null}
                   </div>
-                  <p className="text-xs text-muted-foreground">{listing.summary || listing.description}</p>
+                  <ListingContentPreview value={listing.summary || listing.description} />
                 </div>
               ),
             },
@@ -476,12 +463,12 @@ export function AppListingsPage() {
         tone="default"
       />
 
-      {reviewSubmissionModal ? (
+      {reviewSubmission ? (
         <div className="fixed inset-0 z-[90] flex items-center justify-center px-4">
           <button
             aria-label="Fechar confirmação de envio"
             className="absolute inset-0 bg-slate-950/45"
-            onClick={() => setReviewSubmissionModal(null)}
+            onClick={() => navigate(location.pathname + location.search, { replace: true, state: null })}
             type="button"
           />
           <div className="relative w-full max-w-md rounded-[1.75rem] border border-border bg-card p-6 shadow-2xl">
@@ -489,12 +476,12 @@ export function AppListingsPage() {
             <p className="mt-3 text-sm leading-6 text-muted-foreground">
               Seu anúncio
               {' '}
-              <span className="font-medium text-foreground">"{reviewSubmissionModal.listingTitle || reviewSubmissionModal.listingId}"</span>
+              <span className="font-medium text-foreground">"{reviewSubmission.listingTitle || reviewSubmission.listingId}"</span>
               {' '}
               foi enviado com sucesso. Você pode acompanhar o andamento nesta página.
             </p>
             <div className="mt-6 flex justify-end">
-              <Button onClick={() => setReviewSubmissionModal(null)} type="button">
+              <Button onClick={() => navigate(location.pathname + location.search, { replace: true, state: null })} type="button">
                 Entendi
               </Button>
             </div>

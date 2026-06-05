@@ -10,6 +10,7 @@ import { AdminPagination } from '@/components/admin/admin-pagination'
 import { AdminRowActions } from '@/components/admin/admin-row-actions'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
+import { ListingContentPreview } from '@/components/listings/listing-content-preview'
 import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
 import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
@@ -326,9 +327,9 @@ export function AdminListingsPage() {
             header: 'Anúncio',
             className: 'w-[280px]',
             cell: (listing) => (
-              <div className="max-w-[280px] space-y-1">
-                <p className="line-clamp-2 font-medium text-foreground">{listing.title}</p>
-                <p className="line-clamp-2 text-xs text-muted-foreground">{listing.summary || listing.description}</p>
+              <div className="max-w-[280px] min-w-0 space-y-1 overflow-hidden">
+                <p className="line-clamp-2 break-words font-medium text-foreground [overflow-wrap:anywhere]">{listing.title}</p>
+                <ListingContentPreview value={listing.summary || listing.description} />
               </div>
             ),
           },
