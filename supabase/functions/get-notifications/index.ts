@@ -28,7 +28,7 @@ Deno.serve(async (request) => {
 
     const url = new URL(request.url)
     const limitParam = Number(url.searchParams.get('limit') ?? '20')
-    const limit = Number.isFinite(limitParam) ? Math.max(1, Math.min(limitParam, 1000)) : 20
+    const limit = Number.isFinite(limitParam) ? Math.max(0, Math.min(limitParam, 5000)) : 20
     const unreadOnly = parseBoolean(url.searchParams.get('unread_only'), false)
     const category = url.searchParams.get('category')?.trim().toLowerCase() ?? ''
 
@@ -37,7 +37,10 @@ Deno.serve(async (request) => {
       .select('*')
       .eq('user_id', profile.id)
       .order('created_at', { ascending: false })
-      .limit(limit)
+
+    if (limit > 0) {
+      notificationsQuery = notificationsQuery.limit(limit)
+    }
 
     if (unreadOnly) {
       notificationsQuery = notificationsQuery.is('read_at', null)

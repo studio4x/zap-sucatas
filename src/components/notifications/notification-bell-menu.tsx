@@ -221,7 +221,7 @@ function NotificationBellMenuContent({
 
   const notificationsQuery = useQuery({
     queryKey: ['notifications', 'widget', queryKeyScope, profileId],
-    queryFn: () => fetchNotificationCenter({ limit: 1000 }),
+    queryFn: () => fetchNotificationCenter({ limit: 0 }),
     enabled: Boolean(profileId),
     refetchInterval: 60_000,
   })
@@ -243,7 +243,7 @@ function NotificationBellMenuContent({
   const categorySummary = useMemo(() => {
     const counts = new Map<string, { total: number; unread: number }>()
 
-    for (const notification of visibleNotifications) {
+    for (const notification of notifications) {
       const key = notification.category.trim() || 'geral'
       const current = counts.get(key) ?? { total: 0, unread: 0 }
 
@@ -263,7 +263,7 @@ function NotificationBellMenuContent({
         unread: value.unread,
       }))
       .sort((left, right) => right.unread - left.unread || right.total - left.total || left.label.localeCompare(right.label))
-  }, [visibleNotifications])
+  }, [notifications])
   const showCategorySummary = queryKeyScope === 'admin'
 
   const widgetQueryKey = useMemo(() => ['notifications', 'widget', queryKeyScope, profileId] as const, [profileId, queryKeyScope])
