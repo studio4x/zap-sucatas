@@ -27,6 +27,32 @@ type SupportMessageRealtimeRow = {
   ticket_id: string
 }
 
+function buildLocalSupportMessage(input: {
+  attachmentName: string | null
+  attachmentUrl: string | null
+  createdAt: string
+  id: string
+  isAdmin: boolean
+  message: string
+  senderDisplayName: string | null
+  senderId: string
+  ticketId: string
+  viewerFullName: string | null
+}) : SupportMessage {
+  return {
+    attachmentName: input.attachmentName,
+    attachmentUrl: input.attachmentUrl,
+    createdAt: input.createdAt,
+    id: input.id,
+    message: input.message,
+    senderEmail: null,
+    senderId: input.senderId,
+    senderName: input.isAdmin ? input.senderDisplayName ?? input.viewerFullName ?? 'Equipe de suporte' : input.viewerFullName ?? 'Usuário',
+    senderRole: input.isAdmin ? 'admin' : 'user',
+    ticketId: input.ticketId,
+  }
+}
+
 function buildRealtimeSupportMessage(input: {
   isAdmin: boolean
   row: SupportMessageRealtimeRow
@@ -76,6 +102,7 @@ export function SupportTicketDetailPage() {
 
     return window.localStorage.getItem('support-admin-attendant-name') ?? ''
   })
+  const [attendantSaved, setAttendantSaved] = useState(true)
   const [liveMessages, setLiveMessages] = useState<SupportMessage[] | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const viewerFullName = user?.fullName ?? null
@@ -161,7 +188,7 @@ export function SupportTicketDetailPage() {
         throw new Error('Escreva uma mensagem ou envie um anexo.')
       }
 
-      const senderDisplayName = isAdmin ? (ticket?.responderName ?? effectiveAttendantName) : null
+      const senderDisplayName = isAdmin ? (ticket?.responderName ?? normalizedAttendantName ?? effectiveAttendantName) : null
       let attachmentName: string | null = null
       let attachmentUrl: string | null = null
       if (selectedFile && user.id) {
@@ -170,7 +197,7 @@ export function SupportTicketDetailPage() {
         attachmentUrl = uploaded.attachmentUrl
       }
 
-      return sendSupportMessage({
+      const sentMessage = await sendSupportMessage({
         attachmentName,
         attachmentUrl,
         message: message.trim() || 'Anexo enviado.',
@@ -178,10 +205,39 @@ export function SupportTicketDetailPage() {
         senderDisplayName,
         ticketId: detailQuery.data.ticket.id,
       })
+
+      const optimisticMessage = buildLocalSupportMessage({
+        attachmentName: sentMessage.attachment_name,
+        attachmentUrl: sentMessage.attachment_url,
+        createdAt: sentMessage.created_at,
+        id: sentMessage.id,
+        isAdmin,
+        message: sentMessage.message,
+        senderDisplayName,
+        senderId: sentMessage.sender_id,
+        ticketId: sentMessage.ticket_id,
+        viewerFullName,
+      })
+
+      setLiveMessages((current) => {
+        const baseMessages = current ?? detailQuery.data?.messages ?? []
+        if (baseMessages.some((entry) => entry.id === optimisticMessage.id)) {
+          return baseMessages
+        }
+
+        return [...baseMessages, optimisticMessage]
+      })
+
+      if (isAdmin && senderDisplayName) {
+        setAttendantSaved(true)
+      }
+
+      return sentMessage
     },
     onSuccess: async () => {
       if (isAdmin && !ticket?.responderName) {
         window.localStorage.setItem(attendantStorageKey, effectiveAttendantName)
+        setAttendantSaved(true)
         queryClient.setQueryData<SupportTicketDetail | undefined>(['support', 'detail', id], (current) => current ? {
           ...current,
           ticket: {
@@ -219,18 +275,20 @@ export function SupportTicketDetailPage() {
   const backPath = isAdmin ? paths.admin.support : paths.app.support
   const sortedMessages = useMemo(() => liveMessages ?? detail?.messages ?? [], [detail?.messages, liveMessages])
 
-  useEffect(() => {
+  function persistAttendantName() {
     if (!isAdmin || isAttendantNameLocked) {
       return
     }
 
     const nextName = normalizedAttendantName
     if (!nextName) {
+      setAttendantSaved(false)
       return
     }
 
     window.localStorage.setItem(attendantStorageKey, nextName)
-  }, [attendantStorageKey, isAdmin, isAttendantNameLocked, normalizedAttendantName])
+    setAttendantSaved(true)
+  }
 
   if (detailQuery.isLoading || !ticket) {
     return <div className="rounded-[1.8rem] border border-border bg-card px-6 py-8 text-sm text-muted-foreground">Carregando ticket...</div>
@@ -284,7 +342,7 @@ export function SupportTicketDetailPage() {
                   return (
                     <div className={`flex ${ownMessage ? 'justify-end' : 'justify-start'}`} key={entry.id}>
                       <div className={`max-w-[85%] rounded-[1.4rem] px-4 py-4 ${ownMessage ? 'rounded-tr-md bg-primary text-primary-foreground' : 'rounded-tl-md border border-border bg-card text-foreground'}`}>
-                        {!ownMessage ? <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{entry.senderRole === 'admin' ? entry.senderName ?? 'Equipe de suporte' : entry.senderName ?? 'Usuário'}</p> : null}
+                        {entry.senderRole === 'admin' ? <p className={`text-xs font-semibold uppercase tracking-[0.12em] ${ownMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>{entry.senderName ?? 'Equipe de suporte'}</p> : !ownMessage ? <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{entry.senderName ?? 'Usuário'}</p> : null}
                         <p className="mt-2 whitespace-pre-wrap text-sm leading-7">{entry.message}</p>
                         <div className={`mt-3 flex flex-wrap items-center gap-3 text-xs ${ownMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                           <TicketAttachment attachmentName={entry.attachmentName} attachmentUrl={entry.attachmentUrl} />
@@ -312,15 +370,24 @@ export function SupportTicketDetailPage() {
                     <label className="text-sm font-medium text-foreground" htmlFor="support-attendant-name">
                       Nome do atendente
                     </label>
-                    <Input
-                      disabled={isAttendantNameLocked || sendMutation.isPending}
-                      id="support-attendant-name"
-                      onChange={(event) => setAttendantName(event.target.value)}
-                      placeholder="Ex: Atendimento Zap Sucatas"
-                      value={ticket?.responderName ?? attendantName}
-                    />
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Input
+                        disabled={isAttendantNameLocked || sendMutation.isPending}
+                        id="support-attendant-name"
+                        onChange={(event) => {
+                          setAttendantSaved(false)
+                          setAttendantName(event.target.value)
+                        }}
+                        placeholder="Ex: Atendimento Zap Sucatas"
+                        value={ticket?.responderName ?? attendantName}
+                      />
+                      <Button disabled={isAttendantNameLocked || sendMutation.isPending} onClick={persistAttendantName} type="button" variant="outline">
+                        Salvar nome
+                      </Button>
+                    </div>
                     <p className="text-xs leading-6 text-muted-foreground">
                       Este nome fica salvo para próximos tickets. Depois da primeira resposta deste chamado, ele permanece fixo.
+                      {attendantSaved ? ' Nome salvo.' : ' Clique em salvar para garantir a persistência.'}
                     </p>
                   </div>
                 ) : null}

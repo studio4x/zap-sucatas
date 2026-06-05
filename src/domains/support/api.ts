@@ -381,7 +381,7 @@ export async function sendSupportMessage(input: {
 
   const message = data as SupportMessageRow
   await notifySupportEvent({ messageId: message.id, ticketId: message.ticket_id, type: 'new_message' })
-  return message.id
+  return message
 }
 
 export async function updateSupportTicketStatus(input: { status: SupportTicketStatus; ticketId: string }) {
