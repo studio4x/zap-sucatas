@@ -901,14 +901,14 @@ export function ListingEditor({
                             </p>
                             <div className="flex flex-wrap gap-2">
                               <Button
-                                className="h-7 rounded-full px-2.5 text-[11px] font-medium"
+                                className="h-auto max-w-full rounded-full px-2.5 py-1 text-center text-[11px] font-medium leading-tight whitespace-normal"
                                 onClick={() => setCoverImageKey(item.key)}
                                 size="sm"
                                 type="button"
                                 variant={isCover ? 'default' : 'outline'}
                               >
-                                <Star className="size-3" />
-                                {isCover ? 'Capa selecionada' : 'Definir capa'}
+                                <Star className="size-3 shrink-0" />
+                                <span className="min-w-0">{isCover ? 'Capa selecionada' : 'Definir capa'}</span>
                               </Button>
                               <Button
                                 className="h-7 rounded-full px-2.5 text-[11px] font-medium"
