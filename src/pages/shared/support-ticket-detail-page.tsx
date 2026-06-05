@@ -11,9 +11,50 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { fetchSupportConfig, fetchSupportTicketDetail, sendSupportMessage, updateSupportTicketStatus, uploadSupportAttachment } from '@/domains/support/api'
+import type { SupportMessage, SupportTicketDetail } from '@/domains/support/types'
 import { useAuth } from '@/hooks/use-auth'
 import { defaultSupportConfig, formatBusinessHours, formatSupportDate, formatSupportDateTime, getSupportCategoryMeta, supportStatusOptions } from '@/lib/support-sla'
 import { supabase } from '@/integrations/supabase/client'
+
+type SupportMessageRealtimeRow = {
+  attachment_name: string | null
+  attachment_url: string | null
+  created_at: string
+  id: string
+  message: string
+  sender_id: string
+  ticket_id: string
+}
+
+function buildRealtimeSupportMessage(input: {
+  isAdmin: boolean
+  row: SupportMessageRealtimeRow
+  ticketUserEmail: string | null
+  ticketUserFullName: string | null
+  viewerEmail: string
+  viewerFullName: string | null
+  viewerProfileId: string | null
+}): SupportMessage {
+  const isOwnMessage = input.row.sender_id === input.viewerProfileId
+  const senderRole = isOwnMessage ? (input.isAdmin ? 'admin' : 'user') : input.isAdmin ? 'user' : 'admin'
+
+  return {
+    attachmentName: input.row.attachment_name,
+    attachmentUrl: input.row.attachment_url,
+    createdAt: input.row.created_at,
+    id: input.row.id,
+    message: input.row.message,
+    senderEmail: isOwnMessage ? input.viewerEmail : input.isAdmin ? input.ticketUserEmail : null,
+    senderId: input.row.sender_id,
+    senderName: isOwnMessage
+      ? input.viewerFullName ?? (input.isAdmin ? 'Equipe de suporte' : 'Usuário')
+      : input.isAdmin
+        ? input.ticketUserFullName ?? 'Usuário'
+        : 'Equipe de suporte',
+    senderRole,
+    ticketId: input.row.ticket_id,
+  }
+}
 
 export function SupportTicketDetailPage() {
   const queryClient = useQueryClient()
@@ -23,8 +64,10 @@ export function SupportTicketDetailPage() {
   const isAdmin = pathname.startsWith('/admin/') || user?.role === 'admin'
   const [message, setMessage] = useState('')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [detailState, setDetailState] = useState<Awaited<ReturnType<typeof fetchSupportTicketDetail>> | null>(null)
+  const [liveMessages, setLiveMessages] = useState<SupportMessage[] | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
+  const viewerFullName = user?.fullName ?? null
+  const viewerEmail = user?.email ?? ''
 
   const detailQuery = useQuery({
     queryKey: ['support', 'detail', id],
@@ -34,17 +77,11 @@ export function SupportTicketDetailPage() {
   const configQuery = useQuery({ queryKey: ['support', 'config', 'detail'], queryFn: fetchSupportConfig })
 
   useEffect(() => {
-    if (detailQuery.data) {
-      setDetailState(detailQuery.data)
-    }
-  }, [detailQuery.data])
-
-  useEffect(() => {
     if (!scrollRef.current) {
       return
     }
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-  }, [detailState?.messages])
+  }, [liveMessages, detailQuery.data?.messages])
 
   useEffect(() => {
     const client = supabase
@@ -54,37 +91,35 @@ export function SupportTicketDetailPage() {
 
     const channel = client
       .channel(`support-chat-${id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `ticket_id=eq.${id}` }, async (payload) => {
-        const row = payload.new as { attachment_name: string | null; attachment_url: string | null; created_at: string; id: string; message: string; sender_id: string; ticket_id: string }
-        const { data: sender } = await client.from('profiles').select('id, full_name, email, role').eq('id', row.sender_id).maybeSingle()
-        setDetailState((current) => {
-          if (!current || current.messages.some((messageEntry) => messageEntry.id === row.id)) {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `ticket_id=eq.${id}` }, (payload) => {
+        const row = payload.new as SupportMessageRealtimeRow
+        setLiveMessages((current) => {
+          const baseMessages = current ?? detailQuery.data?.messages ?? []
+          if (baseMessages.some((messageEntry) => messageEntry.id === row.id)) {
             return current
           }
 
-          return {
-            ...current,
-            messages: [
-              ...current.messages,
-              {
-                attachmentName: row.attachment_name,
-                attachmentUrl: row.attachment_url,
-                createdAt: row.created_at,
-                id: row.id,
-                message: row.message,
-                senderEmail: sender?.email ?? null,
-                senderId: row.sender_id,
-                senderName: sender?.full_name ?? null,
-                senderRole: sender?.role === 'admin' ? 'admin' : 'user',
-                ticketId: row.ticket_id,
-              },
-            ],
+          const currentTicket = detailQuery.data?.ticket ?? null
+          if (!currentTicket) {
+            return current
           }
+
+          const nextMessage = buildRealtimeSupportMessage({
+            isAdmin,
+            row,
+            ticketUserEmail: currentTicket.userEmail,
+            ticketUserFullName: currentTicket.userFullName,
+            viewerEmail,
+            viewerFullName,
+            viewerProfileId: user?.profileId ?? null,
+          })
+
+          return [...baseMessages, nextMessage]
         })
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'support_tickets', filter: `id=eq.${id}` }, (payload) => {
         const row = payload.new as { first_response_at: string | null; first_response_due_at: string | null; sla_status: 'answered' | 'at_risk' | 'on_time' | 'overdue'; status: 'closed' | 'in_progress' | 'open'; updated_at: string }
-        setDetailState((current) => current ? {
+        void queryClient.setQueryData<SupportTicketDetail | undefined>(['support', 'detail', id], (current) => current ? {
           ...current,
           ticket: {
             ...current.ticket,
@@ -101,11 +136,11 @@ export function SupportTicketDetailPage() {
     return () => {
       void client.removeChannel(channel)
     }
-  }, [id])
+  }, [detailQuery.data?.messages, detailQuery.data?.ticket, id, isAdmin, queryClient, user?.profileId, viewerEmail, viewerFullName])
 
   const sendMutation = useMutation({
     mutationFn: async () => {
-      if (!detailState?.ticket || !user?.profileId) {
+      if (!detailQuery.data?.ticket || !user?.profileId) {
         throw new Error('Ticket indisponivel para envio de mensagem.')
       }
       if (!message.trim() && !selectedFile) {
@@ -125,7 +160,7 @@ export function SupportTicketDetailPage() {
         attachmentUrl,
         message: message.trim() || 'Anexo enviado.',
         senderId: user.profileId,
-        ticketId: detailState.ticket.id,
+        ticketId: detailQuery.data.ticket.id,
       })
     },
     onSuccess: async () => {
@@ -147,12 +182,12 @@ export function SupportTicketDetailPage() {
   })
 
   const config = configQuery.data ?? defaultSupportConfig
-  const detail = detailState
+  const detail = detailQuery.data ?? null
   const ticket = detail?.ticket ?? null
   const category = ticket ? getSupportCategoryMeta(config, ticket.category) : null
   const isClosedForUser = !isAdmin && ticket?.status === 'closed'
   const backPath = isAdmin ? paths.admin.support : paths.app.support
-  const sortedMessages = useMemo(() => detail?.messages ?? [], [detail?.messages])
+  const sortedMessages = useMemo(() => liveMessages ?? detail?.messages ?? [], [detail?.messages, liveMessages])
 
   if (detailQuery.isLoading || !ticket) {
     return <div className="rounded-[1.8rem] border border-border bg-card px-6 py-8 text-sm text-muted-foreground">Carregando ticket...</div>
