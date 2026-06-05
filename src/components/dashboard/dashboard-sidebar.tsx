@@ -39,7 +39,7 @@ export function DashboardSidebar({
   const unreadCount = unreadQuery.data ?? 0
 
   return (
-    <aside className="flex min-h-full flex-col bg-card px-4 py-5">
+    <aside className="flex h-full min-h-full flex-1 flex-col bg-card px-4 py-5">
       <div className="border-b border-border pb-4">
         <Brand layout="stacked" subtitle="Área da conta" />
       </div>

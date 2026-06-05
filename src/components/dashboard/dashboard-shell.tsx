@@ -47,8 +47,8 @@ export function DashboardShell({
     <div className="dashboard-theme min-h-screen overflow-x-hidden bg-background text-foreground">
       <div className="flex min-h-screen flex-col bg-background">
         <div className="flex flex-1 items-stretch bg-secondary/10">
-          <div className="hidden w-64 shrink-0 lg:block">
-            <div className="border-r border-border bg-card">
+          <div className="hidden w-64 shrink-0 self-stretch lg:block">
+            <div className="flex h-full min-h-full flex-col border-r border-border bg-card">
               <DashboardSidebar items={navItems} user={user} />
             </div>
           </div>
