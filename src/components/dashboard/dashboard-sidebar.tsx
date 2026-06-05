@@ -1,18 +1,15 @@
-import { LogOut } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { NavLink } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import type { DashboardNavItem } from '@/components/dashboard/dashboard-quick-nav'
 import { Brand } from '@/components/navigation/brand'
 import type { SessionUser } from '@/domains/auth/types'
-import { Button } from '@/components/ui/button'
 import { fetchUnreadNotificationsCount } from '@/domains/notifications/api'
 import { cn } from '@/lib/utils'
 
 type DashboardSidebarProps = {
   items: DashboardNavItem[]
   onNavigate?: () => void
-  onSignOut: () => Promise<void> | void
   user: SessionUser | null
 }
 
@@ -31,7 +28,6 @@ function getStatusText(status: 'active' | 'suspended' | 'under_review') {
 export function DashboardSidebar({
   items,
   onNavigate,
-  onSignOut,
   user,
 }: DashboardSidebarProps) {
   const unreadQuery = useQuery({
@@ -43,7 +39,7 @@ export function DashboardSidebar({
   const unreadCount = unreadQuery.data ?? 0
 
   return (
-    <aside className="flex h-full flex-col bg-card px-4 py-5">
+    <aside className="flex min-h-full flex-col bg-card px-4 py-5">
       <div className="border-b border-border pb-4">
         <Brand layout="stacked" subtitle="Área da conta" />
       </div>
@@ -87,12 +83,6 @@ export function DashboardSidebar({
         ))}
       </nav>
 
-      <div className="mt-5 px-0 py-0">
-        <Button className="w-full" onClick={() => void onSignOut()} type="button" variant="secondary">
-          <LogOut className="size-4" />
-          Sair
-        </Button>
-      </div>
     </aside>
   )
 }

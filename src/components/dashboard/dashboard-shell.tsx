@@ -7,7 +7,9 @@ import { DashboardQuickNav } from '@/components/dashboard/dashboard-quick-nav'
 import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar'
 import { AppNotificationBell } from '@/components/notifications/app-notification-bell'
 import { BuildVersionBadge } from '@/components/shared/build-version-badge'
+import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/use-auth'
+import { LogOut } from 'lucide-react'
 
 type DashboardShellProps = PropsWithChildren<{
   navItems: DashboardNavItem[]
@@ -44,10 +46,10 @@ export function DashboardShell({
   return (
     <div className="dashboard-theme min-h-screen overflow-x-hidden bg-background text-foreground">
       <div className="flex min-h-screen flex-col bg-background">
-        <div className="flex flex-1 bg-secondary/10">
+        <div className="flex flex-1 items-stretch bg-secondary/10">
           <div className="hidden w-64 shrink-0 lg:block">
-            <div className="sticky top-0 h-screen border-r border-border bg-card">
-              <DashboardSidebar items={navItems} onSignOut={signOut} user={user} />
+            <div className="border-r border-border bg-card">
+              <DashboardSidebar items={navItems} user={user} />
             </div>
           </div>
 
@@ -60,12 +62,7 @@ export function DashboardShell({
                 type="button"
               />
               <div className="relative h-full w-[min(20rem,88vw)] border-r border-border bg-card shadow-lg">
-                <DashboardSidebar
-                  items={navItems}
-                  onNavigate={() => setMobileOpen(false)}
-                  onSignOut={signOut}
-                  user={user}
-                />
+                <DashboardSidebar items={navItems} onNavigate={() => setMobileOpen(false)} user={user} />
               </div>
             </div>
           ) : null}
@@ -84,11 +81,16 @@ export function DashboardShell({
                     {user?.email || 'Sessão autenticada'}
                   </span>
                 </div>
+                <Button onClick={signOut} variant="outline">
+                  <LogOut className="size-4" />
+                  Sair
+                </Button>
               </div>
             </div>
             <DashboardMobileHeader
               currentLabel={currentLabel}
               onMenuOpen={() => setMobileOpen(true)}
+              onSignOut={signOut}
               user={user}
             />
             <div className="mx-auto flex w-[90%] max-w-none min-w-0 flex-1 flex-col p-3 pb-28 pt-4 md:p-6 md:pb-28 lg:p-8 lg:pb-8">

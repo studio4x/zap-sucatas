@@ -1,4 +1,4 @@
-import { Menu } from 'lucide-react'
+import { LogOut, Menu } from 'lucide-react'
 import type { SessionUser } from '@/domains/auth/types'
 import { AppNotificationBell } from '@/components/notifications/app-notification-bell'
 import { Button } from '@/components/ui/button'
@@ -6,12 +6,14 @@ import { Button } from '@/components/ui/button'
 type DashboardMobileHeaderProps = {
   currentLabel: string
   onMenuOpen: () => void
+  onSignOut: () => Promise<void> | void
   user: SessionUser | null
 }
 
 export function DashboardMobileHeader({
   currentLabel,
   onMenuOpen,
+  onSignOut,
   user,
 }: DashboardMobileHeaderProps) {
   return (
@@ -25,6 +27,9 @@ export function DashboardMobileHeader({
         </div>
         <div className="flex items-center gap-2">
           <AppNotificationBell />
+          <Button onClick={() => void onSignOut()} size="icon" type="button" variant="outline">
+            <LogOut className="size-4" />
+          </Button>
           <Button onClick={onMenuOpen} size="icon" type="button" variant="outline">
             <Menu className="size-4" />
           </Button>
