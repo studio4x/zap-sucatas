@@ -250,7 +250,7 @@ function NotificationBellMenuContent({
       </button>
 
       {open ? (
-        <div className="absolute right-0 top-[calc(100%+0.75rem)] z-50 w-[min(26rem,calc(100vw-1rem))] overflow-hidden rounded-[1.5rem] border border-border bg-card shadow-2xl">
+        <div className="absolute right-0 top-[calc(100%+0.75rem)] z-50 w-[min(32rem,calc(100vw-1rem))] overflow-hidden rounded-[1.5rem] border border-border bg-card shadow-2xl">
           <div className="flex items-start justify-between gap-4 border-b border-border/70 px-4 py-4">
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{title}</p>
@@ -363,23 +363,23 @@ function NotificationBellMenuContent({
           <div className="border-t border-border/70 px-4 py-3">
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button
-                className="w-full"
+                className="w-full px-3 py-2 text-sm"
                 disabled={visibleNotifications.length === 0}
                 onClick={clearWidget}
                 type="button"
                 variant="outline"
               >
-                <Trash2 className="size-4" />
-                Limpar widget
+                <Trash2 className="size-3.5" />
+                Limpar todas
               </Button>
               <Button
-                className="w-full"
+                className="w-full px-3 py-2 text-sm"
                 disabled={visibleUnreadCount === 0 || markAllMutation.isPending}
                 onClick={handleMarkAll}
                 type="button"
                 variant="outline"
               >
-                <CheckCheck className="size-4" />
+                <CheckCheck className="size-3.5" />
                 Marcar todas como lidas
               </Button>
             </div>
