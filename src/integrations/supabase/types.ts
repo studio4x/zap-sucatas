@@ -1001,6 +1001,7 @@ export type Database = {
           id: string
           message: string
           sender_id: string
+          sender_display_name: string | null
           ticket_id: string
         }
         Insert: {
@@ -1010,6 +1011,7 @@ export type Database = {
           id?: string
           message: string
           sender_id: string
+          sender_display_name?: string | null
           ticket_id: string
         }
         Update: {
@@ -1019,6 +1021,7 @@ export type Database = {
           id?: string
           message?: string
           sender_id?: string
+          sender_display_name?: string | null
           ticket_id?: string
         }
         Relationships: [
@@ -1049,6 +1052,7 @@ export type Database = {
           first_response_due_at: string | null
           id: string
           priority: string
+          responder_name: string | null
           sla_policy_key: string
           sla_status: string
           status: string
@@ -1066,6 +1070,7 @@ export type Database = {
           first_response_due_at?: string | null
           id?: string
           priority?: string
+          responder_name?: string | null
           sla_policy_key?: string
           sla_status?: string
           status?: string
@@ -1083,6 +1088,7 @@ export type Database = {
           first_response_due_at?: string | null
           id?: string
           priority?: string
+          responder_name?: string | null
           sla_policy_key?: string
           sla_status?: string
           status?: string

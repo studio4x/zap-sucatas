@@ -58,6 +58,7 @@ function mapSupportTicket(row: SupportTicketRow): SupportTicket {
     firstResponseDueAt: row.first_response_due_at,
     id: row.id,
     priority: row.priority as SupportTicketPriority,
+    responderName: row.responder_name,
     slaPolicyKey: row.sla_policy_key,
     slaStatus: row.sla_status as SupportTicket['slaStatus'],
     status: row.status as SupportTicketStatus,
@@ -67,8 +68,13 @@ function mapSupportTicket(row: SupportTicketRow): SupportTicket {
   }
 }
 
-function mapSupportMessage(row: SupportMessageRow, profileMap: Map<string, ProfileLookupRow>): SupportMessage {
+function mapSupportMessage(
+  row: SupportMessageRow,
+  profileMap: Map<string, ProfileLookupRow>,
+  ticketResponderName: string | null,
+): SupportMessage {
   const sender = profileMap.get(row.sender_id)
+  const senderRole = sender?.role === 'admin' ? 'admin' : 'user'
 
   return {
     attachmentName: row.attachment_name,
@@ -78,8 +84,11 @@ function mapSupportMessage(row: SupportMessageRow, profileMap: Map<string, Profi
     message: row.message,
     senderEmail: sender?.email ?? null,
     senderId: row.sender_id,
-    senderName: sender?.full_name ?? null,
-    senderRole: (sender?.role === 'admin' ? 'admin' : 'user'),
+    senderName:
+      senderRole === 'admin'
+        ? row.sender_display_name ?? ticketResponderName ?? sender?.full_name ?? 'Equipe de suporte'
+        : sender?.full_name ?? null,
+    senderRole,
     ticketId: row.ticket_id,
   }
 }
@@ -284,7 +293,7 @@ export async function fetchSupportTicketDetail(ticketId: string): Promise<Suppor
       userEmail: owner?.email ?? null,
       userFullName: owner?.full_name ?? null,
     },
-    messages: ((messages ?? []) as SupportMessageRow[]).map((row) => mapSupportMessage(row, profileMap)),
+    messages: ((messages ?? []) as SupportMessageRow[]).map((row) => mapSupportMessage(row, profileMap, ticket.responderName)),
   }
 }
 
@@ -349,6 +358,7 @@ export async function sendSupportMessage(input: {
   attachmentUrl?: string | null
   message: string
   senderId: string
+  senderDisplayName?: string | null
   ticketId: string
 }) {
   const client = ensureSupabase()
@@ -359,6 +369,7 @@ export async function sendSupportMessage(input: {
       attachment_url: input.attachmentUrl ?? null,
       message: input.message.trim(),
       sender_id: input.senderId,
+      sender_display_name: input.senderDisplayName ?? null,
       ticket_id: input.ticketId,
     })
     .select('*')

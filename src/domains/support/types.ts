@@ -35,6 +35,7 @@ export type SupportTicket = {
   firstResponseDueAt: string | null
   id: string
   priority: SupportTicketPriority
+  responderName: string | null
   slaPolicyKey: string
   slaStatus: SupportSlaStatus
   status: SupportTicketStatus

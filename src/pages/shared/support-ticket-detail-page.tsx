@@ -22,6 +22,7 @@ type SupportMessageRealtimeRow = {
   created_at: string
   id: string
   message: string
+  sender_display_name: string | null
   sender_id: string
   ticket_id: string
 }
@@ -31,12 +32,14 @@ function buildRealtimeSupportMessage(input: {
   row: SupportMessageRealtimeRow
   ticketUserEmail: string | null
   ticketUserFullName: string | null
+  ticketResponderName: string | null
   viewerEmail: string
   viewerFullName: string | null
   viewerProfileId: string | null
 }): SupportMessage {
   const isOwnMessage = input.row.sender_id === input.viewerProfileId
   const senderRole = isOwnMessage ? (input.isAdmin ? 'admin' : 'user') : input.isAdmin ? 'user' : 'admin'
+  const adminDisplayName = input.row.sender_display_name ?? input.ticketResponderName ?? input.viewerFullName ?? 'Equipe de suporte'
 
   return {
     attachmentName: input.row.attachment_name,
@@ -47,10 +50,12 @@ function buildRealtimeSupportMessage(input: {
     senderEmail: isOwnMessage ? input.viewerEmail : input.isAdmin ? input.ticketUserEmail : null,
     senderId: input.row.sender_id,
     senderName: isOwnMessage
-      ? input.viewerFullName ?? (input.isAdmin ? 'Equipe de suporte' : 'Usuário')
+      ? input.isAdmin
+        ? adminDisplayName
+        : input.viewerFullName ?? 'Usuário'
       : input.isAdmin
         ? input.ticketUserFullName ?? 'Usuário'
-        : 'Equipe de suporte',
+        : adminDisplayName,
     senderRole,
     ticketId: input.row.ticket_id,
   }
@@ -64,10 +69,18 @@ export function SupportTicketDetailPage() {
   const isAdmin = pathname.startsWith('/admin/') || user?.role === 'admin'
   const [message, setMessage] = useState('')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [attendantName, setAttendantName] = useState(() => {
+    if (typeof window === 'undefined') {
+      return ''
+    }
+
+    return window.localStorage.getItem('support-admin-attendant-name') ?? ''
+  })
   const [liveMessages, setLiveMessages] = useState<SupportMessage[] | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const viewerFullName = user?.fullName ?? null
   const viewerEmail = user?.email ?? ''
+  const attendantStorageKey = 'support-admin-attendant-name'
 
   const detailQuery = useQuery({
     queryKey: ['support', 'detail', id],
@@ -109,6 +122,7 @@ export function SupportTicketDetailPage() {
             row,
             ticketUserEmail: currentTicket.userEmail,
             ticketUserFullName: currentTicket.userFullName,
+            ticketResponderName: currentTicket.responderName,
             viewerEmail,
             viewerFullName,
             viewerProfileId: user?.profileId ?? null,
@@ -147,6 +161,7 @@ export function SupportTicketDetailPage() {
         throw new Error('Escreva uma mensagem ou envie um anexo.')
       }
 
+      const senderDisplayName = isAdmin ? (ticket?.responderName ?? effectiveAttendantName) : null
       let attachmentName: string | null = null
       let attachmentUrl: string | null = null
       if (selectedFile && user.id) {
@@ -160,10 +175,22 @@ export function SupportTicketDetailPage() {
         attachmentUrl,
         message: message.trim() || 'Anexo enviado.',
         senderId: user.profileId,
+        senderDisplayName,
         ticketId: detailQuery.data.ticket.id,
       })
     },
     onSuccess: async () => {
+      if (isAdmin && !ticket?.responderName) {
+        window.localStorage.setItem(attendantStorageKey, effectiveAttendantName)
+        queryClient.setQueryData<SupportTicketDetail | undefined>(['support', 'detail', id], (current) => current ? {
+          ...current,
+          ticket: {
+            ...current.ticket,
+            responderName: effectiveAttendantName,
+          },
+        } : current)
+      }
+
       setMessage('')
       setSelectedFile(null)
       await queryClient.invalidateQueries({ queryKey: ['support', 'detail', id] })
@@ -186,8 +213,24 @@ export function SupportTicketDetailPage() {
   const ticket = detail?.ticket ?? null
   const category = ticket ? getSupportCategoryMeta(config, ticket.category) : null
   const isClosedForUser = !isAdmin && ticket?.status === 'closed'
+  const isAttendantNameLocked = Boolean(ticket?.responderName)
+  const normalizedAttendantName = attendantName.trim()
+  const effectiveAttendantName = normalizedAttendantName || viewerFullName || 'Equipe de suporte'
   const backPath = isAdmin ? paths.admin.support : paths.app.support
   const sortedMessages = useMemo(() => liveMessages ?? detail?.messages ?? [], [detail?.messages, liveMessages])
+
+  useEffect(() => {
+    if (!isAdmin || isAttendantNameLocked) {
+      return
+    }
+
+    const nextName = normalizedAttendantName
+    if (!nextName) {
+      return
+    }
+
+    window.localStorage.setItem(attendantStorageKey, nextName)
+  }, [attendantStorageKey, isAdmin, isAttendantNameLocked, normalizedAttendantName])
 
   if (detailQuery.isLoading || !ticket) {
     return <div className="rounded-[1.8rem] border border-border bg-card px-6 py-8 text-sm text-muted-foreground">Carregando ticket...</div>
@@ -241,7 +284,7 @@ export function SupportTicketDetailPage() {
                   return (
                     <div className={`flex ${ownMessage ? 'justify-end' : 'justify-start'}`} key={entry.id}>
                       <div className={`max-w-[85%] rounded-[1.4rem] px-4 py-4 ${ownMessage ? 'rounded-tr-md bg-primary text-primary-foreground' : 'rounded-tl-md border border-border bg-card text-foreground'}`}>
-                        {!ownMessage ? <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{entry.senderRole === 'admin' ? 'Equipe de suporte' : entry.senderName ?? 'Usuário'}</p> : null}
+                        {!ownMessage ? <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{entry.senderRole === 'admin' ? entry.senderName ?? 'Equipe de suporte' : entry.senderName ?? 'Usuário'}</p> : null}
                         <p className="mt-2 whitespace-pre-wrap text-sm leading-7">{entry.message}</p>
                         <div className={`mt-3 flex flex-wrap items-center gap-3 text-xs ${ownMessage ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                           <TicketAttachment attachmentName={entry.attachmentName} attachmentUrl={entry.attachmentUrl} />
@@ -264,6 +307,23 @@ export function SupportTicketDetailPage() {
                   <Input disabled={isClosedForUser || sendMutation.isPending} onChange={(event) => setMessage(event.target.value)} placeholder={isClosedForUser ? 'Chamado encerrado pelo suporte.' : 'Escreva sua mensagem'} value={message} />
                   <Button disabled={(isClosedForUser || sendMutation.isPending) || (!message.trim() && !selectedFile)} onClick={() => sendMutation.mutate()} type="button"><Send className="size-4" /> Enviar</Button>
                 </div>
+                {isAdmin ? (
+                  <div className="mt-3 space-y-2">
+                    <label className="text-sm font-medium text-foreground" htmlFor="support-attendant-name">
+                      Nome do atendente
+                    </label>
+                    <Input
+                      disabled={isAttendantNameLocked || sendMutation.isPending}
+                      id="support-attendant-name"
+                      onChange={(event) => setAttendantName(event.target.value)}
+                      placeholder="Ex: Atendimento Zap Sucatas"
+                      value={ticket?.responderName ?? attendantName}
+                    />
+                    <p className="text-xs leading-6 text-muted-foreground">
+                      Este nome fica salvo para próximos tickets. Depois da primeira resposta deste chamado, ele permanece fixo.
+                    </p>
+                  </div>
+                ) : null}
                 {sendMutation.isError ? <p className="mt-3 text-sm text-destructive">{sendMutation.error instanceof Error ? sendMutation.error.message : 'Não foi possível enviar a mensagem.'}</p> : null}
               </div>
             </CardContent>
