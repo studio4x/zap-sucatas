@@ -34,6 +34,20 @@ function isExternalUrl(value: string) {
   return /^https?:\/\//i.test(value)
 }
 
+function formatNotificationCategoryLabel(category: string) {
+  const trimmed = category.trim()
+
+  if (!trimmed) {
+    return 'Geral'
+  }
+
+  return trimmed
+    .replace(/_/g, ' ')
+    .split(' ')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
+}
+
 function readWidgetClearedAt(widgetStorageKey: string | null) {
   if (!widgetStorageKey || typeof window === 'undefined') {
     return null
@@ -208,6 +222,31 @@ function NotificationBellMenuContent({
   )
   const visibleTotalCount = visibleNotifications.length
   const hasHiddenNotifications = notifications.length > visibleNotifications.length
+  const categorySummary = useMemo(() => {
+    const counts = new Map<string, { total: number; unread: number }>()
+
+    for (const notification of visibleNotifications) {
+      const key = notification.category.trim() || 'geral'
+      const current = counts.get(key) ?? { total: 0, unread: 0 }
+
+      current.total += 1
+      if (!notification.readAt) {
+        current.unread += 1
+      }
+
+      counts.set(key, current)
+    }
+
+    return Array.from(counts.entries())
+      .map(([category, value]) => ({
+        category,
+        label: formatNotificationCategoryLabel(category),
+        total: value.total,
+        unread: value.unread,
+      }))
+      .sort((left, right) => right.unread - left.unread || right.total - left.total || left.label.localeCompare(right.label))
+  }, [visibleNotifications])
+  const showCategorySummary = queryKeyScope === 'admin'
 
   const widgetQueryKey = useMemo(() => ['notifications', 'widget', queryKeyScope, profileId] as const, [profileId, queryKeyScope])
 
@@ -376,6 +415,21 @@ function NotificationBellMenuContent({
                     : 'Nenhuma nova no momento'}
                 {visibleTotalCount > 0 ? ` de ${visibleTotalCount}` : ''}
               </p>
+              {showCategorySummary && categorySummary.length > 0 ? (
+                <div className="flex max-w-[20rem] flex-wrap gap-2 pt-2">
+                  {categorySummary.map((entry) => (
+                    <span
+                      className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-2.5 py-1 text-[11px] font-medium text-foreground"
+                      key={entry.category}
+                    >
+                      <span className="text-muted-foreground">{entry.label}</span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-background px-2 py-0.5 text-[10px] font-semibold text-foreground">
+                        {entry.unread}/{entry.total}
+                      </span>
+                    </span>
+                  ))}
+                </div>
+              ) : null}
             </div>
 
             <div className="flex items-center gap-2">
