@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { fetchNotificationCenter, markAllNotificationsAsRead, markNotificationAsRead } from '@/domains/notifications/api'
 import { useAuth } from '@/hooks/use-auth'
 import { supabase } from '@/integrations/supabase/client'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 import { formatRelativeNotificationDate, getNotificationPriorityMeta } from '@/lib/notifications'
 import { cn } from '@/lib/utils'
 
@@ -16,8 +17,59 @@ type NotificationBellMenuProps = {
   title?: string
 }
 
+type NotificationRealtimeEntry = {
+  channel: RealtimeChannel
+  listeners: Set<() => void>
+}
+
+const notificationRealtimeRegistry = new Map<string, NotificationRealtimeEntry>()
+
 function isExternalUrl(value: string) {
   return /^https?:\/\//i.test(value)
+}
+
+function bindNotificationRealtime(channelKey: string, profileId: string, onChange: () => void) {
+  const client = supabase
+  if (!client) {
+    return () => {}
+  }
+
+  let entry = notificationRealtimeRegistry.get(channelKey)
+
+  if (!entry) {
+    const listeners = new Set<() => void>()
+    const notify = () => {
+      for (const listener of listeners) {
+        listener()
+      }
+    }
+
+    const channel = client
+      .channel(channelKey)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${profileId}` }, notify)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${profileId}` }, notify)
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'notifications', filter: `user_id=eq.${profileId}` }, notify)
+      .subscribe()
+
+    entry = { channel, listeners }
+    notificationRealtimeRegistry.set(channelKey, entry)
+  }
+
+  entry.listeners.add(onChange)
+
+  return () => {
+    const currentEntry = notificationRealtimeRegistry.get(channelKey)
+    if (!currentEntry) {
+      return
+    }
+
+    currentEntry.listeners.delete(onChange)
+
+    if (currentEntry.listeners.size === 0) {
+      notificationRealtimeRegistry.delete(channelKey)
+      void client.removeChannel(currentEntry.channel)
+    }
+  }
 }
 
 export function NotificationBellMenu({
@@ -60,26 +112,17 @@ export function NotificationBellMenu({
   })
 
   useEffect(() => {
-    const client = supabase
-    if (!client || !user?.profileId) {
+    if (!user?.profileId) {
       return
     }
 
-    const channel = client
-      .channel(`notifications-widget-${queryKeyScope}-${user.profileId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.profileId}` }, () => {
-        void invalidateNotifications()
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.profileId}` }, () => {
-        void invalidateNotifications()
-      })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.profileId}` }, () => {
-        void invalidateNotifications()
-      })
-      .subscribe()
+    const channelKey = `notifications-widget-${queryKeyScope}-${user.profileId}`
+    const unsubscribe = bindNotificationRealtime(channelKey, user.profileId, () => {
+      void invalidateNotifications()
+    })
 
     return () => {
-      void client.removeChannel(channel)
+      unsubscribe()
     }
   }, [invalidateNotifications, queryKeyScope, user?.profileId])
 
