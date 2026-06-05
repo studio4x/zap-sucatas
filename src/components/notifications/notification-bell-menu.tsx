@@ -41,6 +41,24 @@ function formatNotificationCategoryLabel(category: string) {
     return 'Geral'
   }
 
+  const translated: Record<string, string> = {
+    account: 'Conta',
+    contact: 'Contato',
+    digest: 'Resumo',
+    featured_payment: 'Pagamento de destaque',
+    general: 'Geral',
+    listing_questions: 'Perguntas do anúncio',
+    listing_status: 'Status do anúncio',
+    payment: 'Pagamento',
+    support: 'Suporte',
+    system: 'Sistema',
+    technical: 'Técnico',
+  }
+
+  if (translated[trimmed]) {
+    return translated[trimmed]
+  }
+
   return trimmed
     .replace(/_/g, ' ')
     .split(' ')
