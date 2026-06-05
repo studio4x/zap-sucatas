@@ -1,4 +1,4 @@
-import { Bell, CheckCheck, ExternalLink, X } from 'lucide-react'
+import { Bell, CheckCheck, ExternalLink, Trash2, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
@@ -17,6 +17,11 @@ type NotificationBellMenuProps = {
   title?: string
 }
 
+type NotificationBellMenuContentProps = NotificationBellMenuProps & {
+  profileId: string | null
+  widgetStorageKey: string | null
+}
+
 type NotificationRealtimeEntry = {
   channel: RealtimeChannel
   listeners: Set<() => void>
@@ -26,6 +31,17 @@ const notificationRealtimeRegistry = new Map<string, NotificationRealtimeEntry>(
 
 function isExternalUrl(value: string) {
   return /^https?:\/\//i.test(value)
+}
+
+function readWidgetClearedAt(widgetStorageKey: string | null) {
+  if (!widgetStorageKey || typeof window === 'undefined') {
+    return null
+  }
+
+  const storedValue = window.localStorage.getItem(widgetStorageKey)
+  const parsedValue = storedValue ? Number(storedValue) : Number.NaN
+
+  return Number.isFinite(parsedValue) ? parsedValue : null
 }
 
 function bindNotificationRealtime(channelKey: string, profileId: string, onChange: () => void) {
@@ -78,28 +94,70 @@ export function NotificationBellMenu({
   queryKeyScope,
   title = 'Notificações',
 }: NotificationBellMenuProps) {
-  const queryClient = useQueryClient()
   const { user } = useAuth()
+  const profileId = user?.profileId ?? null
+  const widgetStorageKey = useMemo(() => {
+    if (!profileId) {
+      return null
+    }
+
+    return `notifications-widget-cleared-at:${queryKeyScope}:${profileId}`
+  }, [queryKeyScope, profileId])
+
+  return (
+    <NotificationBellMenuContent
+      key={widgetStorageKey ?? profileId ?? 'notifications-widget-guest'}
+      className={className}
+      notificationsPath={notificationsPath}
+      profileId={profileId}
+      queryKeyScope={queryKeyScope}
+      title={title}
+      widgetStorageKey={widgetStorageKey}
+    />
+  )
+}
+
+function NotificationBellMenuContent({
+  className,
+  notificationsPath,
+  profileId,
+  queryKeyScope,
+  title = 'Notificações',
+  widgetStorageKey,
+}: NotificationBellMenuContentProps) {
+  const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
+  const [widgetClearedAt, setWidgetClearedAt] = useState<number | null>(() => readWidgetClearedAt(widgetStorageKey))
   const rootRef = useRef<HTMLDivElement | null>(null)
 
   const notificationsQuery = useQuery({
-    queryKey: ['notifications', 'widget', queryKeyScope, user?.profileId],
+    queryKey: ['notifications', 'widget', queryKeyScope, profileId],
     queryFn: () => fetchNotificationCenter({ limit: 8 }),
-    enabled: Boolean(user?.profileId),
+    enabled: Boolean(profileId),
     refetchInterval: 60_000,
   })
 
   const notifications = useMemo(() => notificationsQuery.data?.notifications ?? [], [notificationsQuery.data?.notifications])
-  const unreadCount = notificationsQuery.data?.unreadCount ?? 0
-  const totalCount = notificationsQuery.data?.total ?? 0
+  const visibleNotifications = useMemo(() => {
+    if (widgetClearedAt === null) {
+      return notifications
+    }
+
+    return notifications.filter((notification) => new Date(notification.createdAt).getTime() > widgetClearedAt)
+  }, [notifications, widgetClearedAt])
+  const visibleUnreadCount = useMemo(
+    () => visibleNotifications.filter((notification) => !notification.readAt).length,
+    [visibleNotifications],
+  )
+  const visibleTotalCount = visibleNotifications.length
+  const hasHiddenNotifications = notifications.length > visibleNotifications.length
 
   const invalidateNotifications = useCallback(async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ['notifications'] }),
-      queryClient.invalidateQueries({ queryKey: ['notifications', 'widget', queryKeyScope, user?.profileId] }),
+      queryClient.invalidateQueries({ queryKey: ['notifications', 'widget', queryKeyScope, profileId] }),
     ])
-  }, [queryClient, queryKeyScope, user?.profileId])
+  }, [profileId, queryClient, queryKeyScope])
 
   const markOneMutation = useMutation({
     mutationFn: (notificationId: string) => markNotificationAsRead(notificationId, 'in-app'),
@@ -112,19 +170,19 @@ export function NotificationBellMenu({
   })
 
   useEffect(() => {
-    if (!user?.profileId) {
+    if (!profileId) {
       return
     }
 
-    const channelKey = `notifications-widget-${queryKeyScope}-${user.profileId}`
-    const unsubscribe = bindNotificationRealtime(channelKey, user.profileId, () => {
+    const channelKey = `notifications-widget-${queryKeyScope}-${profileId}`
+    const unsubscribe = bindNotificationRealtime(channelKey, profileId, () => {
       void invalidateNotifications()
     })
 
     return () => {
       unsubscribe()
     }
-  }, [invalidateNotifications, queryKeyScope, user?.profileId])
+  }, [invalidateNotifications, profileId, queryKeyScope])
 
   useEffect(() => {
     if (!open) {
@@ -154,6 +212,15 @@ export function NotificationBellMenu({
 
   const closePanel = () => setOpen(false)
 
+  const clearWidget = () => {
+    const clearedAt = Date.now()
+    setWidgetClearedAt(clearedAt)
+
+    if (widgetStorageKey) {
+      window.localStorage.setItem(widgetStorageKey, String(clearedAt))
+    }
+  }
+
   const handleMarkAll = () => {
     markAllMutation.mutate(undefined, {
       onSuccess: closePanel,
@@ -175,9 +242,9 @@ export function NotificationBellMenu({
         type="button"
       >
         <Bell className="size-4" />
-        {unreadCount > 0 ? (
+        {visibleUnreadCount > 0 ? (
           <span className="absolute -right-1 -top-1 inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
-            {unreadCount > 99 ? '99+' : unreadCount}
+            {visibleUnreadCount > 99 ? '99+' : visibleUnreadCount}
           </span>
         ) : null}
       </button>
@@ -188,8 +255,12 @@ export function NotificationBellMenu({
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{title}</p>
               <p className="text-sm text-foreground">
-                {unreadCount > 0 ? `${unreadCount} novas` : 'Nenhuma nova no momento'}
-                {totalCount > 0 ? ` de ${totalCount}` : ''}
+                {visibleUnreadCount > 0
+                  ? `${visibleUnreadCount} novas`
+                  : hasHiddenNotifications
+                    ? 'Widget limpo'
+                    : 'Nenhuma nova no momento'}
+                {visibleTotalCount > 0 ? ` de ${visibleTotalCount}` : ''}
               </p>
             </div>
 
@@ -216,11 +287,11 @@ export function NotificationBellMenu({
               <div className="px-4 py-6 text-sm text-muted-foreground">Carregando notificações...</div>
             ) : notificationsQuery.isError ? (
               <div className="px-4 py-6 text-sm text-muted-foreground">Não foi possível carregar as notificações.</div>
-            ) : notifications.length === 0 ? (
+            ) : visibleNotifications.length === 0 ? (
               <div className="px-4 py-6 text-sm text-muted-foreground">Nenhuma notificação encontrada.</div>
             ) : (
               <ul className="divide-y divide-border/70">
-                {notifications.map((notification) => {
+                {visibleNotifications.map((notification) => {
                   const priorityMeta = getNotificationPriorityMeta(notification.priority)
                   const preview = notification.body.length > 120 ? `${notification.body.slice(0, 117)}...` : notification.body
 
@@ -290,16 +361,28 @@ export function NotificationBellMenu({
           </div>
 
           <div className="border-t border-border/70 px-4 py-3">
-            <Button
-              className="w-full"
-              disabled={unreadCount === 0 || markAllMutation.isPending}
-              onClick={handleMarkAll}
-              type="button"
-              variant="outline"
-            >
-              <CheckCheck className="size-4" />
-              Marcar todas como lidas
-            </Button>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button
+                className="w-full"
+                disabled={visibleNotifications.length === 0}
+                onClick={clearWidget}
+                type="button"
+                variant="outline"
+              >
+                <Trash2 className="size-4" />
+                Limpar widget
+              </Button>
+              <Button
+                className="w-full"
+                disabled={visibleUnreadCount === 0 || markAllMutation.isPending}
+                onClick={handleMarkAll}
+                type="button"
+                variant="outline"
+              >
+                <CheckCheck className="size-4" />
+                Marcar todas como lidas
+              </Button>
+            </div>
           </div>
         </div>
       ) : null}
