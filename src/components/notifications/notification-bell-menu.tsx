@@ -4,9 +4,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { fetchNotificationCenter, markAllNotificationsAsRead, markNotificationAsRead } from '@/domains/notifications/api'
+import type { NotificationCenterResponse, NotificationItem } from '@/domains/notifications/types'
 import { useAuth } from '@/hooks/use-auth'
 import { supabase } from '@/integrations/supabase/client'
-import type { RealtimeChannel } from '@supabase/supabase-js'
+import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { formatRelativeNotificationDate, getNotificationPriorityMeta } from '@/lib/notifications'
 import { cn } from '@/lib/utils'
 
@@ -24,7 +25,7 @@ type NotificationBellMenuContentProps = NotificationBellMenuProps & {
 
 type NotificationRealtimeEntry = {
   channel: RealtimeChannel
-  listeners: Set<() => void>
+  listeners: Set<(payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => void>
 }
 
 const notificationRealtimeRegistry = new Map<string, NotificationRealtimeEntry>()
@@ -44,7 +45,51 @@ function readWidgetClearedAt(widgetStorageKey: string | null) {
   return Number.isFinite(parsedValue) ? parsedValue : null
 }
 
-function bindNotificationRealtime(channelKey: string, profileId: string, onChange: () => void) {
+function mapRealtimeNotification(row: Record<string, unknown>): NotificationItem | null {
+  const id = typeof row.id === 'string' ? row.id : null
+  const title = typeof row.title === 'string' ? row.title : null
+  const body = typeof row.body === 'string' ? row.body : null
+  const category = typeof row.category === 'string' ? row.category : ''
+  const createdAt = typeof row.created_at === 'string' ? row.created_at : null
+  const priority = row.priority === 'high' || row.priority === 'low' || row.priority === 'normal' || row.priority === 'urgent'
+    ? row.priority
+    : 'normal'
+
+  if (!id || !title || !body || !createdAt) {
+    return null
+  }
+
+  return {
+    actionUrl: typeof row.action_url === 'string' ? row.action_url : null,
+    body,
+    category,
+    createdAt,
+    id,
+    isActionable: Boolean(row.is_actionable),
+    priority,
+    readAt: typeof row.read_at === 'string' ? row.read_at : null,
+    readByChannels: Array.isArray(row.read_by_channels)
+      ? row.read_by_channels.filter((value): value is string => typeof value === 'string')
+      : [],
+    title,
+    userId: typeof row.user_id === 'string' ? row.user_id : '',
+  }
+}
+
+function getRealtimeRowId(row: unknown) {
+  if (!row || typeof row !== 'object') {
+    return null
+  }
+
+  const value = (row as Record<string, unknown>).id
+  return typeof value === 'string' ? value : null
+}
+
+function bindNotificationRealtime(
+  channelKey: string,
+  profileId: string,
+  onChange: (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => void,
+) {
   const client = supabase
   if (!client) {
     return () => {}
@@ -53,18 +98,30 @@ function bindNotificationRealtime(channelKey: string, profileId: string, onChang
   let entry = notificationRealtimeRegistry.get(channelKey)
 
   if (!entry) {
-    const listeners = new Set<() => void>()
-    const notify = () => {
+    const listeners = new Set<(payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => void>()
+    const notify = (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
       for (const listener of listeners) {
-        listener()
+        listener(payload)
       }
     }
 
     const channel = client
       .channel(channelKey)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${profileId}` }, notify)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${profileId}` }, notify)
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'notifications', filter: `user_id=eq.${profileId}` }, notify)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${profileId}` },
+        notify,
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${profileId}` },
+        notify,
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'notifications', filter: `user_id=eq.${profileId}` },
+        notify,
+      )
       .subscribe()
 
     entry = { channel, listeners }
@@ -152,12 +209,71 @@ function NotificationBellMenuContent({
   const visibleTotalCount = visibleNotifications.length
   const hasHiddenNotifications = notifications.length > visibleNotifications.length
 
+  const widgetQueryKey = useMemo(() => ['notifications', 'widget', queryKeyScope, profileId] as const, [profileId, queryKeyScope])
+
   const invalidateNotifications = useCallback(async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ['notifications'] }),
-      queryClient.invalidateQueries({ queryKey: ['notifications', 'widget', queryKeyScope, profileId] }),
+      queryClient.invalidateQueries({ queryKey: widgetQueryKey }),
     ])
-  }, [profileId, queryClient, queryKeyScope])
+  }, [queryClient, widgetQueryKey])
+
+  const applyRealtimeNotification = useCallback(
+    (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
+      const row = payload.new as Record<string, unknown> | null
+      const notificationId = typeof row?.id === 'string' ? row.id : getRealtimeRowId(payload.old)
+
+      queryClient.setQueryData<NotificationCenterResponse>(widgetQueryKey, (current) => {
+        const currentNotifications = current?.notifications ?? []
+        const currentTotal = current?.total ?? currentNotifications.length
+        const currentUnread = current?.unreadCount ?? currentNotifications.filter((notification) => !notification.readAt).length
+
+        if (payload.eventType === 'DELETE') {
+          if (!notificationId) {
+            return current ?? { notifications: [], total: 0, unreadCount: 0 }
+          }
+
+          const nextNotifications = currentNotifications.filter((notification) => notification.id !== notificationId)
+          const removed = currentNotifications.length - nextNotifications.length
+          const removedUnread = currentNotifications.reduce(
+            (count, notification) => count + (notification.id === notificationId && !notification.readAt ? 1 : 0),
+            0,
+          )
+
+          return {
+            notifications: nextNotifications,
+            total: Math.max(0, currentTotal - removed),
+            unreadCount: Math.max(0, currentUnread - removedUnread),
+          }
+        }
+
+        if (!row) {
+          return current ?? { notifications: [], total: 0, unreadCount: 0 }
+        }
+
+        const mapped = mapRealtimeNotification(row)
+        if (!mapped || mapped.userId !== profileId) {
+          return current ?? { notifications: [], total: 0, unreadCount: 0 }
+        }
+
+        const nextNotifications = [
+          mapped,
+          ...currentNotifications.filter((notification) => notification.id !== mapped.id),
+        ].sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+
+        const nextUnreadCount = nextNotifications.filter((notification) => !notification.readAt).length
+
+        return {
+          notifications: nextNotifications,
+          total: Math.max(currentTotal, nextNotifications.length),
+          unreadCount: nextUnreadCount,
+        }
+      })
+
+      void invalidateNotifications()
+    },
+    [invalidateNotifications, profileId, queryClient, widgetQueryKey],
+  )
 
   const markOneMutation = useMutation({
     mutationFn: (notificationId: string) => markNotificationAsRead(notificationId, 'in-app'),
@@ -175,14 +291,12 @@ function NotificationBellMenuContent({
     }
 
     const channelKey = `notifications-widget-${queryKeyScope}-${profileId}`
-    const unsubscribe = bindNotificationRealtime(channelKey, profileId, () => {
-      void invalidateNotifications()
-    })
+    const unsubscribe = bindNotificationRealtime(channelKey, profileId, applyRealtimeNotification)
 
     return () => {
       unsubscribe()
     }
-  }, [invalidateNotifications, profileId, queryKeyScope])
+  }, [applyRealtimeNotification, profileId, queryKeyScope])
 
   useEffect(() => {
     if (!open) {
