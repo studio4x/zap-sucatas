@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ImagePlus, Star, Trash2 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
-import type { ChangeEvent, ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { ChangeEvent, DragEvent, ReactNode } from 'react'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import ReactQuill from 'react-quill-new'
 import 'react-quill-new/dist/quill.snow.css'
@@ -93,6 +93,27 @@ function resolveInitialCoverImageKey(images: ListingImage[]) {
   }
 
   return images[0] ? buildExistingImageKey(images[0].id) : null
+}
+
+function moveImageKey(keys: string[], draggedKey: string, targetKey: string) {
+  if (draggedKey === targetKey) {
+    return keys
+  }
+
+  const draggedIndex = keys.indexOf(draggedKey)
+  const targetIndex = keys.indexOf(targetKey)
+
+  if (draggedIndex === -1 || targetIndex === -1) {
+    return keys
+  }
+
+  const next = keys.slice()
+  next.splice(draggedIndex, 1)
+
+  const normalizedTargetIndex = draggedIndex < targetIndex ? targetIndex - 1 : targetIndex
+  next.splice(normalizedTargetIndex, 0, draggedKey)
+
+  return next
 }
 
 function formatContactPhone(value: string) {
@@ -242,6 +263,11 @@ export function ListingEditor({
   const [coverImageKey, setCoverImageKey] = useState<string | null>(
     resolveInitialCoverImageKey(resolvedExistingImages),
   )
+  const [imageOrderKeys, setImageOrderKeys] = useState<string[]>(() =>
+    resolvedExistingImages.map((image) => buildExistingImageKey(image.id)),
+  )
+  const [draggingImageKey, setDraggingImageKey] = useState<string | null>(null)
+  const draggingImageKeyRef = useRef<string | null>(null)
   const [feedback, setFeedback] = useState<{ message: string; tone: 'error' | 'success' } | null>(
     null,
   )
@@ -291,19 +317,37 @@ export function ListingEditor({
     ],
     [activeExistingImages, pendingFiles],
   )
-  const normalizedImageOrderKeys = useMemo(() => availableImageKeys, [availableImageKeys])
+  useEffect(() => {
+    setImageOrderKeys((current) => {
+      const availableKeySet = new Set(availableImageKeys)
+      const next = current.filter((key) => availableKeySet.has(key))
+
+      for (const key of availableImageKeys) {
+        if (!next.includes(key)) {
+          next.push(key)
+        }
+      }
+
+      if (next.length === current.length && next.every((key, index) => key === current[index])) {
+        return current
+      }
+
+      return next
+    })
+  }, [availableImageKeys])
+
   const resolvedCoverImageKey = useMemo(() => {
-    if (coverImageKey && availableImageKeys.includes(coverImageKey)) {
+    if (coverImageKey && imageOrderKeys.includes(coverImageKey)) {
       return coverImageKey
     }
 
-    return normalizedImageOrderKeys[0] ?? null
-  }, [availableImageKeys, coverImageKey, normalizedImageOrderKeys])
+    return imageOrderKeys[0] ?? null
+  }, [coverImageKey, imageOrderKeys])
 
   const orderedImageItems = useMemo<OrderedImageItem[]>(() => {
     const existingMap = new Map(activeExistingImages.map((image) => [image.id, image]))
 
-    return normalizedImageOrderKeys
+    return imageOrderKeys
       .map((key) => {
         if (key.startsWith('existing:')) {
           const imageId = key.slice('existing:'.length)
@@ -340,7 +384,7 @@ export function ListingEditor({
         return null
       })
       .filter((item): item is OrderedImageItem => item !== null)
-  }, [activeExistingImages, normalizedImageOrderKeys, pendingFileMap])
+  }, [activeExistingImages, imageOrderKeys, pendingFileMap])
 
   useEffect(() => {
     return () => {
@@ -367,7 +411,7 @@ export function ListingEditor({
 
       await onSubmit({
         coverImageKey: resolvedCoverImageKey,
-        imageOrderKeys: normalizedImageOrderKeys,
+        imageOrderKeys,
         newUploads: orderedImageItems
           .filter((item) => item.kind === 'pending')
           .map((item) => ({
@@ -438,6 +482,36 @@ export function ListingEditor({
 
   function restoreExistingImage(imageId: string) {
     setRemovedImageIds((current) => current.filter((id) => id !== imageId))
+  }
+
+  function handleImageDragStart(event: DragEvent<HTMLDivElement>, itemKey: string) {
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('text/plain', itemKey)
+    draggingImageKeyRef.current = itemKey
+    setDraggingImageKey(itemKey)
+  }
+
+  function handleImageDragOver(event: DragEvent<HTMLDivElement>, itemKey: string) {
+    event.preventDefault()
+
+    const draggedKey = draggingImageKeyRef.current
+
+    if (!draggedKey || draggedKey === itemKey) {
+      return
+    }
+
+    setImageOrderKeys((current) => moveImageKey(current, draggedKey, itemKey))
+  }
+
+  function handleImageDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault()
+    draggingImageKeyRef.current = null
+    setDraggingImageKey(null)
+  }
+
+  function handleImageDragEnd() {
+    draggingImageKeyRef.current = null
+    setDraggingImageKey(null)
   }
 
   const canSubmitForReview = orderedImageItems.length > 0
@@ -867,13 +941,21 @@ export function ListingEditor({
                 <div className="grid grid-cols-2 gap-3">
                   {orderedImageItems.map((item, index) => {
                     const isCover = resolvedCoverImageKey === item.key
+                    const isDragging = draggingImageKey === item.key
 
                     return (
                       <div
                         key={item.key}
+                        draggable
+                        onDragEnd={handleImageDragEnd}
+                        onDragEnter={(event) => handleImageDragOver(event, item.key)}
+                        onDragOver={(event) => handleImageDragOver(event, item.key)}
+                        onDragStart={(event) => handleImageDragStart(event, item.key)}
+                        onDrop={handleImageDrop}
                         className={cn(
-                          'overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm',
+                          'overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm transition',
                           isCover ? 'border-primary/60 ring-2 ring-primary/35' : undefined,
+                          isDragging ? 'scale-[0.99] opacity-60 ring-2 ring-dashed ring-primary/50' : 'cursor-grab',
                         )}
                       >
                         <div className="p-3">
