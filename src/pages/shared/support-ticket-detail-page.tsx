@@ -198,7 +198,7 @@ export function SupportTicketDetailPage() {
   }
 
   return (
-    <section className="mx-auto max-w-4xl space-y-6">
+    <section className="mx-auto w-[90%] max-w-none space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-2">
           <Button asChild type="button" variant="ghost"><Link to={backPath}><ArrowLeft className="size-4" /> Voltar para a lista</Link></Button>
@@ -210,8 +210,8 @@ export function SupportTicketDetailPage() {
         <TicketStatusBadge status={ticket.status} />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-4">
-        <div className="space-y-6 md:col-span-3">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_19rem]">
+        <div className="space-y-6">
           <Card className="rounded-[1.8rem] border-border/80">
             <CardContent className="space-y-0 p-0">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">

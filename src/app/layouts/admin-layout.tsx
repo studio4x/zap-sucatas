@@ -178,7 +178,7 @@ export function AdminLayout() {
           </header>
 
           <main className="min-h-screen overflow-x-hidden p-4 md:p-6 lg:p-8">
-            <div className="mx-auto flex w-full max-w-none min-w-0 flex-col gap-6">
+            <div className="mx-auto flex w-[90%] max-w-none min-w-0 flex-col gap-6">
               <Outlet />
               <div className="border-t border-border/70 pt-4">
                 <BuildVersionBadge />

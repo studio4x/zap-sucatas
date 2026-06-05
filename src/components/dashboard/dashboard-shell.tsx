@@ -91,7 +91,7 @@ export function DashboardShell({
               onMenuOpen={() => setMobileOpen(true)}
               user={user}
             />
-            <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-1 flex-col p-3 pb-28 pt-4 md:p-6 md:pb-28 lg:p-8 lg:pb-8">
+            <div className="mx-auto flex w-[90%] max-w-none min-w-0 flex-1 flex-col p-3 pb-28 pt-4 md:p-6 md:pb-28 lg:p-8 lg:pb-8">
               {children}
               <div className="mt-8 border-t border-border/70 pt-4">
                 <BuildVersionBadge />
