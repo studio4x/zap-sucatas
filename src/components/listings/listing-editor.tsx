@@ -908,7 +908,7 @@ export function ListingEditor({
                                 variant={isCover ? 'default' : 'outline'}
                               >
                                 <Star className="size-3 shrink-0" />
-                                <span className="min-w-0">{isCover ? 'Capa selecionada' : 'Definir capa'}</span>
+                                <span className="min-w-0">{isCover ? 'Capa' : 'Definir capa'}</span>
                               </Button>
                               <Button
                                 className="h-7 rounded-full px-2.5 text-[11px] font-medium"
