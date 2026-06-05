@@ -5,6 +5,7 @@ import type { DashboardNavItem } from '@/components/dashboard/dashboard-quick-na
 import { DashboardMobileHeader } from '@/components/dashboard/dashboard-mobile-header'
 import { DashboardQuickNav } from '@/components/dashboard/dashboard-quick-nav'
 import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar'
+import { AppNotificationBell } from '@/components/notifications/app-notification-bell'
 import { BuildVersionBadge } from '@/components/shared/build-version-badge'
 import { useAuth } from '@/hooks/use-auth'
 
@@ -70,6 +71,21 @@ export function DashboardShell({
           ) : null}
 
           <main className="flex min-w-0 flex-1 flex-col">
+            <div className="sticky top-0 z-30 hidden items-center justify-between border-b border-border bg-card/95 px-6 py-4 backdrop-blur lg:flex">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Painel do anunciante</p>
+                <p className="truncate text-base font-semibold text-foreground">{currentLabel}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <AppNotificationBell />
+                <div className="max-w-[280px] rounded-full border border-border bg-background px-4 py-2 text-sm text-muted-foreground">
+                  <span className="font-medium uppercase tracking-[0.12em]">Conta</span>
+                  <span className="ml-2 truncate font-semibold text-foreground">
+                    {user?.email || 'Sessão autenticada'}
+                  </span>
+                </div>
+              </div>
+            </div>
             <DashboardMobileHeader
               currentLabel={currentLabel}
               onMenuOpen={() => setMobileOpen(true)}

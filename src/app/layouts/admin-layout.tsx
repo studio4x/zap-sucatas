@@ -23,6 +23,7 @@ import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
+import { AdminNotificationBell } from '@/components/notifications/admin-notification-bell'
 import { BuildVersionBadge } from '@/components/shared/build-version-badge'
 import { ScrollToTopOnRouteChange } from '@/components/shared/scroll-to-top-on-route-change'
 import { Button } from '@/components/ui/button'
@@ -145,6 +146,7 @@ export function AdminLayout() {
         <div className="min-w-0">
           <header className="sticky top-0 z-30 hidden h-16 items-center justify-end border-b border-border bg-card/95 px-6 shadow-sm backdrop-blur lg:flex">
             <div className="flex items-center gap-3">
+              <AdminNotificationBell />
               <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm text-foreground">
                 <CircleUserRound className="size-4 text-primary" />
                 <span className="font-medium uppercase tracking-[0.12em] text-muted-foreground">Conta</span>
@@ -167,9 +169,12 @@ export function AdminLayout() {
                 <p className="text-xs text-muted-foreground">Backoffice Zap Sucatas</p>
               </div>
             </div>
-            <Button onClick={() => setMobileOpen(true)} size="icon" type="button" variant="outline">
-              <Menu className="size-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <AdminNotificationBell />
+              <Button onClick={() => setMobileOpen(true)} size="icon" type="button" variant="outline">
+                <Menu className="size-4" />
+              </Button>
+            </div>
           </header>
 
           <main className="min-h-screen overflow-x-hidden p-4 md:p-6 lg:p-8">
