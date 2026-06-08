@@ -20,6 +20,7 @@ type NotificationBellMenuProps = {
 
 type NotificationBellMenuContentProps = NotificationBellMenuProps & {
   profileId: string | null
+  isAdminScope: boolean
   widgetStorageKey: string | null
 }
 
@@ -120,6 +121,7 @@ function getRealtimeRowId(row: unknown) {
 function bindNotificationRealtime(
   channelKey: string,
   profileId: string,
+  isAdminScope: boolean,
   onChange: (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => void,
 ) {
   const client = supabase
@@ -141,17 +143,23 @@ function bindNotificationRealtime(
       .channel(channelKey)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${profileId}` },
+        isAdminScope
+          ? { event: 'INSERT', schema: 'public', table: 'notifications' }
+          : { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${profileId}` },
         notify,
       )
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${profileId}` },
+        isAdminScope
+          ? { event: 'UPDATE', schema: 'public', table: 'notifications' }
+          : { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${profileId}` },
         notify,
       )
       .on(
         'postgres_changes',
-        { event: 'DELETE', schema: 'public', table: 'notifications', filter: `user_id=eq.${profileId}` },
+        isAdminScope
+          ? { event: 'DELETE', schema: 'public', table: 'notifications' }
+          : { event: 'DELETE', schema: 'public', table: 'notifications', filter: `user_id=eq.${profileId}` },
         notify,
       )
       .subscribe()
@@ -185,6 +193,7 @@ export function NotificationBellMenu({
 }: NotificationBellMenuProps) {
   const { user } = useAuth()
   const profileId = user?.profileId ?? null
+  const isAdminScope = user?.role === 'admin'
   const widgetStorageKey = useMemo(() => {
     if (!profileId) {
       return null
@@ -198,6 +207,7 @@ export function NotificationBellMenu({
       key={widgetStorageKey ?? profileId ?? 'notifications-widget-guest'}
       className={className}
       notificationsPath={notificationsPath}
+      isAdminScope={Boolean(isAdminScope)}
       profileId={profileId}
       queryKeyScope={queryKeyScope}
       title={title}
@@ -208,6 +218,7 @@ export function NotificationBellMenu({
 
 function NotificationBellMenuContent({
   className,
+  isAdminScope,
   notificationsPath,
   profileId,
   queryKeyScope,
@@ -264,7 +275,7 @@ function NotificationBellMenuContent({
       }))
       .sort((left, right) => right.unread - left.unread || right.total - left.total || left.label.localeCompare(right.label))
   }, [notifications])
-  const showCategorySummary = queryKeyScope === 'admin'
+  const showCategorySummary = isAdminScope
 
   const widgetQueryKey = useMemo(() => ['notifications', 'widget', queryKeyScope, profileId] as const, [profileId, queryKeyScope])
 
@@ -309,7 +320,7 @@ function NotificationBellMenuContent({
         }
 
         const mapped = mapRealtimeNotification(row)
-        if (!mapped || mapped.userId !== profileId) {
+        if (!mapped || (!isAdminScope && mapped.userId !== profileId)) {
           return current ?? { notifications: [], total: 0, unreadCount: 0 }
         }
 
@@ -329,7 +340,7 @@ function NotificationBellMenuContent({
 
       void invalidateNotifications()
     },
-    [invalidateNotifications, profileId, queryClient, widgetQueryKey],
+    [invalidateNotifications, isAdminScope, profileId, queryClient, widgetQueryKey],
   )
 
   const markOneMutation = useMutation({
@@ -348,12 +359,12 @@ function NotificationBellMenuContent({
     }
 
     const channelKey = `notifications-widget-${queryKeyScope}-${profileId}`
-    const unsubscribe = bindNotificationRealtime(channelKey, profileId, applyRealtimeNotification)
+    const unsubscribe = bindNotificationRealtime(channelKey, profileId, isAdminScope, applyRealtimeNotification)
 
     return () => {
       unsubscribe()
     }
-  }, [applyRealtimeNotification, profileId, queryKeyScope])
+  }, [applyRealtimeNotification, isAdminScope, profileId, queryKeyScope])
 
   useEffect(() => {
     if (!open) {
@@ -526,7 +537,7 @@ function NotificationBellMenuContent({
                             )
                           ) : null}
 
-                          {!notification.readAt ? (
+                          {!notification.readAt && (!isAdminScope || notification.userId === profileId) ? (
                             <button
                               className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-60"
                               disabled={markOneMutation.isPending}
@@ -558,16 +569,18 @@ function NotificationBellMenuContent({
                 <Trash2 className="size-3.5" />
                 Limpar todas
               </Button>
-              <Button
-                className="w-full px-3 py-2 text-sm"
-                disabled={visibleUnreadCount === 0 || markAllMutation.isPending}
-                onClick={handleMarkAll}
-                type="button"
-                variant="outline"
-              >
-                <CheckCheck className="size-3.5" />
-                Marcar todas como lidas
-              </Button>
+              {!isAdminScope ? (
+                <Button
+                  className="w-full px-3 py-2 text-sm"
+                  disabled={visibleUnreadCount === 0 || markAllMutation.isPending}
+                  onClick={handleMarkAll}
+                  type="button"
+                  variant="outline"
+                >
+                  <CheckCheck className="size-3.5" />
+                  Marcar todas como lidas
+                </Button>
+              ) : null}
             </div>
           </div>
         </div>

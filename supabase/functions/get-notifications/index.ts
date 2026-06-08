@@ -35,8 +35,22 @@ Deno.serve(async (request) => {
     let notificationsQuery = admin
       .from('notifications')
       .select('*')
-      .eq('user_id', profile.id)
       .order('created_at', { ascending: false })
+
+    let totalQuery = admin
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+
+    let unreadQuery = admin
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .is('read_at', null)
+
+    if (profile.role !== 'admin') {
+      notificationsQuery = notificationsQuery.eq('user_id', profile.id)
+      totalQuery = totalQuery.eq('user_id', profile.id)
+      unreadQuery = unreadQuery.eq('user_id', profile.id)
+    }
 
     if (limit > 0) {
       notificationsQuery = notificationsQuery.limit(limit)
@@ -48,21 +62,12 @@ Deno.serve(async (request) => {
 
     if (category) {
       notificationsQuery = notificationsQuery.eq('category', category)
+      totalQuery = totalQuery.eq('category', category)
+      unreadQuery = unreadQuery.eq('category', category)
     }
 
     const [{ data: notifications, error: notificationsError }, { count: total, error: totalError }, { count: unreadCount, error: unreadError }] =
-      await Promise.all([
-        notificationsQuery,
-        admin
-          .from('notifications')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', profile.id),
-        admin
-          .from('notifications')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', profile.id)
-          .is('read_at', null),
-      ])
+      await Promise.all([notificationsQuery, totalQuery, unreadQuery])
 
     if (notificationsError || totalError || unreadError) {
       throw notificationsError ?? totalError ?? unreadError
