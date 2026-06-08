@@ -88,3 +88,11 @@ export type NotificationHistoryPage = {
   items: NotificationHistoryItem[]
   totalCount: number
 }
+
+export type NotificationPurgeResult = {
+  deletedCount: number
+  mode: 'delete_all' | 'purge_old'
+  retentionDays: number | null
+  success: boolean
+  skipped?: boolean
+}

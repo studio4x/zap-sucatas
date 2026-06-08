@@ -8,6 +8,8 @@ export type SystemSettings = {
   headerLogoScalePercent: number
   id: string
   maintenanceMode: boolean
+  notificationAutoDeleteEnabled: boolean
+  notificationRetentionDays: number
   seoDescriptionDefault: string | null
   seoTitleDefault: string | null
   siteName: string
@@ -50,6 +52,12 @@ export type UpdateSystemSettingsInput = {
   siteName: string
   supportEmail: string
   supportPhone: string
+}
+
+export type UpdateNotificationRetentionSettingsInput = {
+  enabled: boolean
+  id: string
+  retentionDays: number
 }
 
 export type VisualAssetKind = 'favicon' | 'logoDark' | 'logoLight'

@@ -3,6 +3,7 @@ import type {
   AdminVisualSettings,
   SystemSettings,
   UpdateSystemSettingsInput,
+  UpdateNotificationRetentionSettingsInput,
   VisualAssetItem,
   VisualAssetKind,
 } from '@/domains/settings/types'
@@ -17,6 +18,8 @@ type SystemSettingsRow = {
   header_logo_scale_percent: number
   id: string
   maintenance_mode: boolean
+  notification_auto_delete_enabled: boolean
+  notification_retention_days: number
   seo_description_default: string | null
   seo_title_default: string | null
   site_name: string
@@ -165,6 +168,8 @@ function mapSystemSettings(row: SystemSettingsRow): SystemSettings {
     headerLogoScalePercent: row.header_logo_scale_percent,
     id: row.id,
     maintenanceMode: row.maintenance_mode,
+    notificationAutoDeleteEnabled: row.notification_auto_delete_enabled,
+    notificationRetentionDays: row.notification_retention_days,
     seoDescriptionDefault: row.seo_description_default,
     seoTitleDefault: row.seo_title_default,
     siteName: row.site_name,
@@ -178,7 +183,7 @@ export async function fetchSystemSettings() {
   const { data, error } = await ensureSupabase()
     .from('system_settings')
     .select(
-      'id, site_name, support_email, support_phone, admin_notification_email, seo_title_default, seo_description_default, allow_guest_questions, blog_enabled, featured_payments_enabled, footer_logo_scale_percent, header_logo_scale_percent, maintenance_mode, created_at, updated_at',
+      'id, site_name, support_email, support_phone, admin_notification_email, seo_title_default, seo_description_default, allow_guest_questions, blog_enabled, featured_payments_enabled, footer_logo_scale_percent, header_logo_scale_percent, maintenance_mode, notification_auto_delete_enabled, notification_retention_days, created_at, updated_at',
     )
     .limit(1)
     .single()
@@ -222,6 +227,22 @@ export async function updateFeaturedPaymentsEnabled(input: { enabled: boolean; i
   const { error } = await ensureSupabase()
     .from('system_settings')
     .update({ featured_payments_enabled: input.enabled })
+    .eq('id', input.id)
+
+  if (error) {
+    throw error
+  }
+
+  return fetchSystemSettings()
+}
+
+export async function updateNotificationRetentionSettings(input: UpdateNotificationRetentionSettingsInput) {
+  const { error } = await ensureSupabase()
+    .from('system_settings')
+    .update({
+      notification_auto_delete_enabled: input.enabled,
+      notification_retention_days: Math.max(1, Math.min(3650, Math.round(input.retentionDays))),
+    })
     .eq('id', input.id)
 
   if (error) {

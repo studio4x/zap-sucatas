@@ -1118,6 +1118,8 @@ export type Database = {
           header_logo_scale_percent: number
           id: string
           maintenance_mode: boolean
+          notification_auto_delete_enabled: boolean
+          notification_retention_days: number
           seo_description_default: string | null
           seo_title_default: string | null
           site_name: string
@@ -1138,6 +1140,8 @@ export type Database = {
           header_logo_scale_percent?: number
           id?: string
           maintenance_mode?: boolean
+          notification_auto_delete_enabled?: boolean
+          notification_retention_days?: number
           seo_description_default?: string | null
           seo_title_default?: string | null
           site_name: string
@@ -1158,6 +1162,8 @@ export type Database = {
           header_logo_scale_percent?: number
           id?: string
           maintenance_mode?: boolean
+          notification_auto_delete_enabled?: boolean
+          notification_retention_days?: number
           seo_description_default?: string | null
           seo_title_default?: string | null
           site_name?: string

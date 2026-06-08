@@ -1,18 +1,21 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { RefreshCw, Send } from 'lucide-react'
+import { RefreshCw, Send, Trash2 } from 'lucide-react'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
 import { AdminFilterCard } from '@/components/admin/admin-filter-card'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminPagination } from '@/components/admin/admin-pagination'
 import { AdminStatCard } from '@/components/admin/admin-stat-card'
+import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
+import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { NotificationMessageDialog } from '@/components/shared/notification-message-dialog'
 import {
+  deleteAllNotifications,
   fetchAdminNotificationHistoryPage,
   fetchAdminNotificationQueueStats,
   processNotificationQueue,
@@ -29,6 +32,8 @@ import {
   getNotificationPriorityMeta,
   getNotificationQueueStatusMeta,
 } from '@/lib/notifications'
+import { fetchSystemSettings, updateNotificationRetentionSettings } from '@/domains/settings/api'
+import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 
 const HISTORY_PAGE_SIZE = 12
 
@@ -59,8 +64,12 @@ function getHistoryStatusMeta(status: NotificationHistoryItem['status']) {
 
 export function AdminNotificationsPage() {
   const queryClient = useQueryClient()
+  const { clearFeedback, feedback, setErrorFeedback, setSuccessFeedback } = useOperationFeedback()
   const [activeTab, setActiveTab] = useState<NotificationsTab>('manual')
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<NotificationHistoryItem | null>(null)
+  const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false)
+  const [retentionEnabled, setRetentionEnabled] = useState(false)
+  const [retentionDays, setRetentionDays] = useState('30')
 
   const [historyQuery, setHistoryQuery] = useState('')
   const [historyChannelFilter, setHistoryChannelFilter] = useState<'all' | NotificationQueueItem['channel']>('all')
@@ -87,6 +96,19 @@ export function AdminNotificationsPage() {
   })
 
   const statsQuery = useQuery({ queryKey: ['notifications', 'admin', 'stats'], queryFn: fetchAdminNotificationQueueStats })
+  const settingsQuery = useQuery({
+    queryKey: ['system-settings', 'notifications-retention'],
+    queryFn: fetchSystemSettings,
+  })
+
+  useEffect(() => {
+    if (!settingsQuery.data) {
+      return
+    }
+
+    setRetentionEnabled(settingsQuery.data.notificationAutoDeleteEnabled)
+    setRetentionDays(String(settingsQuery.data.notificationRetentionDays))
+  }, [settingsQuery.data])
 
   const form = useForm<NotificationBroadcastValues>({
     resolver: zodResolver(notificationBroadcastSchema),
@@ -95,8 +117,10 @@ export function AdminNotificationsPage() {
 
   const invalidateAll = async () =>
     Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['notifications'] }),
       queryClient.invalidateQueries({ queryKey: ['notifications', 'admin', 'stats'] }),
       queryClient.invalidateQueries({ queryKey: ['notifications', 'admin', 'history'] }),
+      queryClient.invalidateQueries({ queryKey: ['system-settings'] }),
     ])
 
   const broadcastMutation = useMutation({
@@ -117,8 +141,44 @@ export function AdminNotificationsPage() {
     },
   })
   const processMutation = useMutation({ mutationFn: processNotificationQueue, onSuccess: invalidateAll })
+  const deleteAllMutation = useMutation({
+    mutationFn: deleteAllNotifications,
+    onSuccess: async () => {
+      setDeleteAllDialogOpen(false)
+      setSuccessFeedback('Todas as notificações foram excluídas com sucesso.')
+      await invalidateAll()
+    },
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível excluir todas as notificações.')
+    },
+  })
+  const updateRetentionMutation = useMutation({
+    mutationFn: () => {
+      if (!settingsQuery.data) {
+        throw new Error('Configurações do sistema indisponíveis.')
+      }
 
-  const historyRows = historyListQuery.data?.items ?? []
+      const parsedDays = Number.parseInt(retentionDays, 10)
+      if (!Number.isFinite(parsedDays) || parsedDays < 1) {
+        throw new Error('Informe um número de dias válido.')
+      }
+
+      return updateNotificationRetentionSettings({
+        enabled: retentionEnabled,
+        id: settingsQuery.data.id,
+        retentionDays: parsedDays,
+      })
+    },
+    onSuccess: async () => {
+      setSuccessFeedback('Configuração de retenção atualizada com sucesso.')
+      await invalidateAll()
+    },
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível salvar a retenção automática.')
+    },
+  })
+
+  const historyRows = useMemo(() => historyListQuery.data?.items ?? [], [historyListQuery.data?.items])
   const historyTotalCount = historyListQuery.data?.totalCount ?? 0
   const stats = statsQuery.data ?? { deliveryRate: 0, failed: 0, pending: 0, retrying: 0, sent: 0, total: 0 }
   const historyCategories = useMemo(() => ['all', ...Array.from(new Set(historyRows.map((row) => row.category)))], [historyRows])
@@ -132,16 +192,85 @@ export function AdminNotificationsPage() {
   return (
     <section className="space-y-6">
       <AdminPageHeader
-        actions={activeTab === 'transactional' ? (
-          <Button disabled={processMutation.isPending} onClick={() => processMutation.mutate()} type="button" variant="outline">
-            <RefreshCw className="size-4" />
-            Processar fila
-          </Button>
-        ) : undefined}
+        actions={
+          <>
+            <Button
+              disabled={deleteAllMutation.isPending}
+              onClick={() => setDeleteAllDialogOpen(true)}
+              type="button"
+              variant="destructive"
+            >
+              <Trash2 className="size-4" />
+              Excluir todas
+            </Button>
+            {activeTab === 'transactional' ? (
+              <Button
+                disabled={processMutation.isPending}
+                onClick={() => processMutation.mutate()}
+                type="button"
+                variant="outline"
+              >
+                <RefreshCw className="size-4" />
+                Processar fila
+              </Button>
+            ) : null}
+          </>
+        }
         description="Gestão de disparos manuais e acompanhamento operacional das notificações transacionais."
         eyebrow="Administração / notificações"
         title="Central de notificações"
       />
+
+      <OperationFeedback feedback={feedback} />
+
+      <AdminFilterCard
+        description="Define retenção automática e exclusão em massa do histórico de notificações."
+        title="Retenção e limpeza"
+      >
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
+          <label className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-background px-4 py-4">
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-foreground">Excluir automaticamente notificações antigas</p>
+              <p className="text-sm text-muted-foreground">
+                Quando ativado, um job diário remove notificações com mais de X dias.
+              </p>
+            </div>
+            <input
+              checked={retentionEnabled}
+              onChange={(event) => {
+                clearFeedback()
+                setRetentionEnabled(event.target.checked)
+              }}
+              type="checkbox"
+            />
+          </label>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground" htmlFor="notification-retention-days">
+              Limite em dias
+            </label>
+            <Input
+              id="notification-retention-days"
+              min={1}
+              onChange={(event) => {
+                clearFeedback()
+                setRetentionDays(event.target.value)
+              }}
+              type="number"
+              value={retentionDays}
+            />
+            <p className="text-xs text-muted-foreground">
+              O job automático remove notificações criadas há mais de esse número de dias.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Button disabled={!settingsQuery.data || updateRetentionMutation.isPending} onClick={() => updateRetentionMutation.mutate()} type="button">
+            {updateRetentionMutation.isPending ? 'Salvando...' : 'Salvar retenção'}
+          </Button>
+        </div>
+      </AdminFilterCard>
 
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-2 shadow-sm">
         <button className={activeTab === 'manual' ? 'rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground' : 'rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted'} onClick={() => setActiveTab('manual')} type="button">Notificações manuais</button>
@@ -318,6 +447,17 @@ export function AdminNotificationsPage() {
         }}
         open={Boolean(selectedHistoryItem)}
         title={selectedHistoryItem?.title ?? 'Mensagem'}
+      />
+
+      <ConfirmActionDialog
+        confirmLabel="Excluir todas"
+        description="Isso removerá todas as notificações da plataforma, incluindo o feed do sino, a central e os registros associados. A ação não pode ser desfeita."
+        isPending={deleteAllMutation.isPending}
+        onConfirm={() => deleteAllMutation.mutate()}
+        onOpenChange={setDeleteAllDialogOpen}
+        open={deleteAllDialogOpen}
+        title="Excluir todas as notificações?"
+        tone="danger"
       />
     </section>
   )

@@ -9,6 +9,7 @@ import type {
   NotificationQueueItem,
   NotificationQueuePage,
   NotificationQueueStats,
+  NotificationPurgeResult,
 } from '@/domains/notifications/types'
 
 type NotificationRow = Database['public']['Tables']['notifications']['Row']
@@ -257,6 +258,31 @@ export async function markNotificationAsRead(notificationId: string, channel: No
     method: 'POST',
     name: 'mark-notification-read',
   })
+}
+
+export async function deleteAllNotifications(): Promise<NotificationPurgeResult> {
+  const result = await callEdgeFunction<{
+    deleted_count?: number
+    mode?: 'delete_all' | 'purge_old'
+    retention_days?: number | null
+    skipped?: boolean
+    success?: boolean
+  }>({
+    body: {
+      mode: 'delete_all',
+      trigger: 'manual',
+    },
+    method: 'POST',
+    name: 'purge-notifications',
+  })
+
+  return {
+    deletedCount: result.deleted_count ?? 0,
+    mode: result.mode ?? 'delete_all',
+    retentionDays: result.retention_days ?? null,
+    skipped: result.skipped,
+    success: Boolean(result.success),
+  }
 }
 
 export async function markAllNotificationsAsRead() {
