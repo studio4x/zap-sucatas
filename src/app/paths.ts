@@ -49,6 +49,7 @@ export const paths = {
     categories: '/admin/categorias',
     materials: '/admin/materiais',
     locations: '/admin/localidades',
+    pages: '/admin/paginas',
     blog: '/admin/blog',
     featuredPayments: '/admin/pagamentos',
     pricing: '/admin/precos',

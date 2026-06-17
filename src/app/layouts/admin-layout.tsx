@@ -3,6 +3,7 @@ import {
   ChartNoAxesColumn,
   Bell,
   Boxes,
+  LayoutGrid,
   LayoutDashboard,
   Logs,
   Mailbox,
@@ -52,6 +53,11 @@ const adminNavItems = [
     to: paths.admin.users,
     label: 'Usuários',
     icon: UsersRound,
+  },
+  {
+    to: paths.admin.pages,
+    label: 'Páginas',
+    icon: LayoutGrid,
   },
   {
     to: paths.admin.analytics,

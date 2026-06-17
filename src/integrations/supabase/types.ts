@@ -1106,6 +1106,45 @@ export type Database = {
           },
         ]
       }
+      site_pages: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          is_online: boolean
+          page_key: string
+          path: string
+          section: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_online?: boolean
+          page_key: string
+          path: string
+          section: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_online?: boolean
+          page_key?: string
+          path?: string
+          section?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       system_settings: {
         Row: {
           admin_notification_email: string | null

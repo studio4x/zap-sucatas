@@ -236,6 +236,19 @@ export async function updateFeaturedPaymentsEnabled(input: { enabled: boolean; i
   return fetchSystemSettings()
 }
 
+export async function updateBlogVisibilityEnabled(input: { enabled: boolean; id: string }) {
+  const { error } = await ensureSupabase()
+    .from('system_settings')
+    .update({ blog_enabled: input.enabled })
+    .eq('id', input.id)
+
+  if (error) {
+    throw error
+  }
+
+  return fetchSystemSettings()
+}
+
 export async function updateNotificationRetentionSettings(input: UpdateNotificationRetentionSettingsInput) {
   const { error } = await ensureSupabase()
     .from('system_settings')

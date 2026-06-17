@@ -31,7 +31,7 @@ import {
 } from '@/domains/blog/api'
 import type { BlogCategoryFormValues, BlogPostFormValues } from '@/domains/blog/schemas'
 import type { AdminBlogCategory, AdminBlogPost, BlogPostStatus } from '@/domains/blog/types'
-import { fetchSystemSettings, updateSystemSettings } from '@/domains/settings/api'
+import { fetchSystemSettings, updateBlogVisibilityEnabled } from '@/domains/settings/api'
 import { useAuth } from '@/hooks/use-auth'
 import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 
@@ -185,20 +185,9 @@ export function AdminBlogPage() {
         throw new Error('Configurações do sistema indisponíveis para atualizar o status do blog.')
       }
 
-      return updateSystemSettings({
-        adminNotificationEmail: current.adminNotificationEmail ?? '',
+      return updateBlogVisibilityEnabled({
+        enabled,
         id: current.id,
-        allowGuestQuestions: current.allowGuestQuestions,
-        blogEnabled: enabled,
-        featuredPaymentsEnabled: current.featuredPaymentsEnabled,
-        footerLogoScalePercent: current.footerLogoScalePercent,
-        headerLogoScalePercent: current.headerLogoScalePercent,
-        maintenanceMode: current.maintenanceMode,
-        seoDescriptionDefault: current.seoDescriptionDefault ?? '',
-        seoTitleDefault: current.seoTitleDefault ?? '',
-        siteName: current.siteName,
-        supportEmail: current.supportEmail ?? '',
-        supportPhone: current.supportPhone ?? '',
       })
     },
     onError: (error) => {

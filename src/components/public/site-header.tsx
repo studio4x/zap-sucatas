@@ -5,7 +5,7 @@ import { getDefaultPathByRole, paths } from '@/app/paths'
 import { Brand } from '@/components/navigation/brand'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/use-auth'
-import { useSystemSettings } from '@/hooks/use-system-settings'
+import { usePublicSitePages } from '@/hooks/use-public-site-pages'
 import { cn } from '@/lib/utils'
 
 const baseNavItems = [
@@ -21,16 +21,22 @@ export function SiteHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isCompact, setIsCompact] = useState(false)
   const isCompactRef = useRef(false)
-  const { blogEnabled, settings } = useSystemSettings()
+  const { isPageOnline, settings } = usePublicSitePages()
   const { isAuthenticated, user } = useAuth()
   const baseLogoScale = settings?.headerLogoScalePercent ?? 100
   const compactLogoScale = useMemo(
     () => Math.max(60, Math.round(baseLogoScale * 0.72)),
     [baseLogoScale],
   )
-  const navItems = blogEnabled
-    ? [...baseNavItems.slice(0, 3), { label: 'Blog', to: paths.public.blog }, ...baseNavItems.slice(3)]
-    : baseNavItems
+  const navItems = useMemo(() => {
+    const items = [
+      ...baseNavItems.slice(0, 3),
+      { label: 'Blog', to: paths.public.blog },
+      ...baseNavItems.slice(3),
+    ]
+
+    return items.filter((item) => isPageOnline(item.to))
+  }, [isPageOnline])
   const dashboardPath = user ? getDefaultPathByRole(user.role) : paths.auth.login
 
   useEffect(() => {

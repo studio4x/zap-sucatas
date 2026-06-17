@@ -1,6 +1,5 @@
 import { Suspense, type ReactNode } from 'react'
 import type { RouteObject } from 'react-router-dom'
-import { Navigate } from 'react-router-dom'
 import { AuthGuard } from '@/app/guards/auth-guard'
 import { GuestGuard } from '@/app/guards/guest-guard'
 import { RoleGuard } from '@/app/guards/role-guard'
@@ -8,10 +7,10 @@ import { AdminLayout } from '@/app/layouts/admin-layout'
 import { DashboardLayout } from '@/app/layouts/dashboard-layout'
 import { PublicLayout } from '@/app/layouts/public-layout'
 import { paths } from '@/app/paths'
+import { PublicPageGuard } from '@/app/guards/public-page-guard'
 import { RouteErrorScreen } from '@/components/shared/route-error-screen'
 import { RouteLoadingScreen } from '@/components/shared/route-loading-screen'
 import { lazyWithRetry } from '@/lib/lazy-with-retry'
-import { useSystemSettings } from '@/hooks/use-system-settings'
 
 const ForgotPasswordPage = lazyWithRetry(() => import('@/pages/auth/forgot-password-page').then((module) => ({ default: module.ForgotPasswordPage })))
 const LoginPage = lazyWithRetry(() => import('@/pages/auth/login-page').then((module) => ({ default: module.LoginPage })))
@@ -41,6 +40,7 @@ const AdminScrapPricesPage = lazyWithRetry(() => import('@/pages/admin/scrap-pri
 const AdminFeaturedPaymentsPage = lazyWithRetry(() => import('@/pages/admin/featured-payments-page').then((module) => ({ default: module.AdminFeaturedPaymentsPage })))
 const AdminQuestionsPage = lazyWithRetry(() => import('@/pages/admin/questions-page').then((module) => ({ default: module.AdminQuestionsPage })))
 const AdminNotificationsPage = lazyWithRetry(() => import('@/pages/admin/notifications-page').then((module) => ({ default: module.AdminNotificationsPage })))
+const AdminSitePagesPage = lazyWithRetry(() => import('@/pages/admin/site-pages-page').then((module) => ({ default: module.AdminSitePagesPage })))
 const AdminSettingsPage = lazyWithRetry(() => import('@/pages/admin/settings-page').then((module) => ({ default: module.AdminSettingsPage })))
 const AdminSupportTicketsPage = lazyWithRetry(() => import('@/pages/admin/support-tickets-page').then((module) => ({ default: module.AdminSupportTicketsPage })))
 const AdminUsersPage = lazyWithRetry(() => import('@/pages/admin/users-page').then((module) => ({ default: module.AdminUsersPage })))
@@ -63,13 +63,6 @@ function withSuspense(element: ReactNode) {
   return <Suspense fallback={<RouteLoadingScreen />}>{element}</Suspense>
 }
 
-function BlogPublicGuard({ children }: { children: ReactNode }) {
-  const { blogEnabled, isLoading } = useSystemSettings()
-  if (isLoading) return <RouteLoadingScreen />
-  if (!blogEnabled) return <Navigate replace to={paths.public.home} />
-  return <>{children}</>
-}
-
 export const routes: RouteObject[] = [
   {
     path: paths.public.home,
@@ -78,11 +71,19 @@ export const routes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: withSuspense(<HomePage />),
+        element: (
+          <PublicPageGuard pagePath={paths.public.home} pageTitle="Home">
+            {withSuspense(<HomePage />)}
+          </PublicPageGuard>
+        ),
       },
       {
         path: 'anuncios',
-        element: withSuspense(<ListingsPage />),
+        element: (
+          <PublicPageGuard pagePath={paths.public.listings} pageTitle="Anúncios">
+            {withSuspense(<ListingsPage />)}
+          </PublicPageGuard>
+        ),
       },
       {
         path: 'anuncios/:slug',
@@ -94,7 +95,11 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'categorias',
-        element: withSuspense(<CategoriesPage />),
+        element: (
+          <PublicPageGuard pagePath={paths.public.categories} pageTitle="Categorias">
+            {withSuspense(<CategoriesPage />)}
+          </PublicPageGuard>
+        ),
       },
       {
         path: 'categorias/:slug',
@@ -102,47 +107,67 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'preco-dos-metais-lme',
-        element: withSuspense(<PricingPage />),
+        element: (
+          <PublicPageGuard pagePath={paths.public.pricing} pageTitle="Cotação LME">
+            {withSuspense(<PricingPage />)}
+          </PublicPageGuard>
+        ),
       },
       {
         path: 'tabela-de-precos',
-        element: withSuspense(<ScrapPricesPage />),
+        element: (
+          <PublicPageGuard pagePath={paths.public.scrapPrices} pageTitle="Preços dos Metais">
+            {withSuspense(<ScrapPricesPage />)}
+          </PublicPageGuard>
+        ),
       },
       {
         path: 'blog',
         element: (
-          <BlogPublicGuard>
+          <PublicPageGuard pagePath={paths.public.blog} pageTitle="Blog">
             {withSuspense(<BlogPage />)}
-          </BlogPublicGuard>
+          </PublicPageGuard>
         ),
       },
       {
         path: 'blog/:slug',
         element: (
-          <BlogPublicGuard>
+          <PublicPageGuard pagePath={paths.public.blog} pageTitle="Blog">
             {withSuspense(<BlogPostPage />)}
-          </BlogPublicGuard>
+          </PublicPageGuard>
         ),
       },
       {
         path: 'blog/preview/:id',
         element: (
-          <BlogPublicGuard>
+          <PublicPageGuard pagePath={paths.public.blog} pageTitle="Blog">
             {withSuspense(<BlogPostPage />)}
-          </BlogPublicGuard>
+          </PublicPageGuard>
         ),
       },
       {
         path: 'sobre',
-        element: withSuspense(<AboutPage />),
+        element: (
+          <PublicPageGuard pagePath={paths.public.about} pageTitle="Sobre">
+            {withSuspense(<AboutPage />)}
+          </PublicPageGuard>
+        ),
       },
       {
         path: 'contato',
-        element: withSuspense(<ContactPage />),
+        element: (
+          <PublicPageGuard pagePath={paths.public.contact} pageTitle="Contato">
+            {withSuspense(<ContactPage />)}
+          </PublicPageGuard>
+        ),
       },
       {
         path: 'suporte',
-        element: withSuspense(<SupportPage />),
+        element: (
+          <PublicPageGuard pagePath={paths.public.support} pageTitle="Suporte">
+            {withSuspense(<SupportPage />)}
+          </PublicPageGuard>
+        ),
       },
       {
         path: 'login',
@@ -259,6 +284,10 @@ export const routes: RouteObject[] = [
       {
         path: 'usuarios',
         element: withSuspense(<AdminUsersPage />),
+      },
+      {
+        path: 'paginas',
+        element: withSuspense(<AdminSitePagesPage />),
       },
       {
         path: 'estatisticas',

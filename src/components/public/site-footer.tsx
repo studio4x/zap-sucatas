@@ -3,10 +3,10 @@ import { paths } from '@/app/paths'
 import { Brand } from '@/components/navigation/brand'
 import { BuildVersionBadge } from '@/components/shared/build-version-badge'
 import { Button } from '@/components/ui/button'
-import { useSystemSettings } from '@/hooks/use-system-settings'
+import { usePublicSitePages } from '@/hooks/use-public-site-pages'
 
 export function SiteFooter() {
-  const { blogEnabled, settings } = useSystemSettings()
+  const { isPageOnline, settings } = usePublicSitePages()
 
   return (
     <footer className="border-t border-border/80 bg-[#163a2d] text-white">
@@ -29,11 +29,11 @@ export function SiteFooter() {
             Explorar
           </h3>
           <div className="grid gap-3 text-sm text-white/78">
-            <Link to={paths.public.listings}>Anúncios</Link>
-            <Link to={paths.public.categories}>Categorias</Link>
-            <Link to={paths.public.pricing}>Cotação LME</Link>
-            <Link to={paths.public.scrapPrices}>Preços dos Metais</Link>
-            {blogEnabled ? <Link to={paths.public.blog}>Blog</Link> : null}
+            {isPageOnline(paths.public.listings) ? <Link to={paths.public.listings}>Anúncios</Link> : null}
+            {isPageOnline(paths.public.categories) ? <Link to={paths.public.categories}>Categorias</Link> : null}
+            {isPageOnline(paths.public.pricing) ? <Link to={paths.public.pricing}>Cotação LME</Link> : null}
+            {isPageOnline(paths.public.scrapPrices) ? <Link to={paths.public.scrapPrices}>Preços dos Metais</Link> : null}
+            {isPageOnline(paths.public.blog) ? <Link to={paths.public.blog}>Blog</Link> : null}
           </div>
         </div>
 
@@ -42,9 +42,9 @@ export function SiteFooter() {
             Empresa
           </h3>
           <div className="grid gap-3 text-sm text-white/78">
-            <Link to={paths.public.about}>Sobre a Zap Sucatas</Link>
-            <Link to={paths.public.support}>Suporte</Link>
-            <Link to={paths.public.contact}>Contato</Link>
+            {isPageOnline(paths.public.about) ? <Link to={paths.public.about}>Sobre a Zap Sucatas</Link> : null}
+            {isPageOnline(paths.public.support) ? <Link to={paths.public.support}>Suporte</Link> : null}
+            {isPageOnline(paths.public.contact) ? <Link to={paths.public.contact}>Contato</Link> : null}
             <Link to={paths.auth.login}>Entrar</Link>
             <Link to={paths.auth.register}>Criar conta</Link>
           </div>
