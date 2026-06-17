@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Mail, PencilLine, Trash2 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
@@ -16,6 +16,7 @@ import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
+import { useAuth } from '@/hooks/use-auth'
 import { requestPasswordReset } from '@/domains/auth/api'
 import {
   createAdminUser,
@@ -24,10 +25,7 @@ import {
   fetchAdminProfilesPage,
   updateAdminUser,
 } from '@/domains/profiles/api'
-import type {
-  AdminCreateUserValues,
-  AdminUpdateUserValues,
-} from '@/domains/profiles/schemas'
+import type { AdminCreateUserValues, AdminUpdateUserValues } from '@/domains/profiles/schemas'
 import type { AdminProfileSummary } from '@/domains/profiles/types'
 import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 
@@ -58,14 +56,24 @@ function formatDate(value: string) {
 
 export function AdminUsersPage() {
   const queryClient = useQueryClient()
-  const { clearFeedback, feedback, setErrorFeedback, setSuccessFeedback } = useOperationFeedback()
+  const { user } = useAuth()
+  const {
+    clearFeedback,
+    feedback,
+    setErrorFeedback,
+    setSuccessFeedback,
+    setWarningFeedback,
+  } = useOperationFeedback()
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editingProfile, setEditingProfile] = useState<AdminProfileSummary | null>(null)
   const [profilePendingRemoval, setProfilePendingRemoval] = useState<AdminProfileSummary | null>(null)
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
+  const [selectedProfileIds, setSelectedProfileIds] = useState<string[]>([])
   const [query, setQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<'admin' | 'all' | 'user'>('all')
   const [statusFilter, setStatusFilter] = useState<'active' | 'all' | 'suspended' | 'under_review'>('all')
   const [page, setPage] = useState(1)
+  const selectAllRef = useRef<HTMLInputElement | null>(null)
 
   const profilesQuery = useQuery({
     placeholderData: (previousData) => previousData,
@@ -144,6 +152,30 @@ export function AdminUsersPage() {
 
   const profiles = profilesQuery.data?.items ?? []
   const totalCount = profilesQuery.data?.totalCount ?? 0
+  const currentProfileId = user?.profileId ?? null
+
+  const selectableProfiles = useMemo(
+    () => profiles.filter((profile) => profile.id !== currentProfileId),
+    [currentProfileId, profiles],
+  )
+
+  const selectableProfileIds = useMemo(
+    () => selectableProfiles.map((profile) => profile.id),
+    [selectableProfiles],
+  )
+
+  const selectedProfiles = useMemo(
+    () => profiles.filter((profile) => selectedProfileIds.includes(profile.id)),
+    [profiles, selectedProfileIds],
+  )
+
+  const allSelectableSelected =
+    selectableProfileIds.length > 0 &&
+    selectableProfileIds.every((profileId) => selectedProfileIds.includes(profileId))
+  const someSelectableSelected = selectableProfileIds.some((profileId) =>
+    selectedProfileIds.includes(profileId),
+  )
+
   const stats = statsQuery.data ?? {
     admins: 0,
     suspended: 0,
@@ -175,6 +207,92 @@ export function AdminUsersPage() {
     [editingProfile],
   )
 
+  useEffect(() => {
+    setSelectedProfileIds((current) =>
+      current.filter(
+        (profileId) =>
+          profiles.some((profile) => profile.id === profileId && profile.id !== currentProfileId),
+      ),
+    )
+  }, [currentProfileId, profiles])
+
+  useEffect(() => {
+    if (!selectAllRef.current) {
+      return
+    }
+
+    selectAllRef.current.indeterminate = someSelectableSelected && !allSelectableSelected
+  }, [allSelectableSelected, someSelectableSelected])
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (profileIds: string[]) => {
+      const profileMap = new Map(profiles.map((profile) => [profile.id, profile]))
+      const deletedProfiles: AdminProfileSummary[] = []
+      const failedProfiles: Array<{ message: string; profile: AdminProfileSummary | null }> = []
+
+      for (const profileId of profileIds) {
+        const profile = profileMap.get(profileId) ?? null
+
+        try {
+          await deleteAdminUser(profileId)
+          if (profile) {
+            deletedProfiles.push(profile)
+          }
+        } catch (error) {
+          failedProfiles.push({
+            message:
+              error instanceof Error && error.message.trim().length > 0
+                ? error.message
+                : 'Não foi possível excluir o usuário.',
+            profile,
+          })
+        }
+      }
+
+      return {
+        deletedProfiles,
+        failedProfiles,
+      }
+    },
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível excluir os usuários selecionados.')
+    },
+    onSuccess: async ({ deletedProfiles, failedProfiles }) => {
+      setBulkDeleteDialogOpen(false)
+      setProfilePendingRemoval(null)
+      setSelectedProfileIds([])
+
+      if (failedProfiles.length > 0) {
+        setWarningFeedback(
+          `${deletedProfiles.length} usuário(s) excluído(s). ${failedProfiles.length} falha(s) na exclusão em massa.`,
+        )
+      } else {
+        setSuccessFeedback(`${deletedProfiles.length} usuário(s) excluído(s) com sucesso.`)
+      }
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] }),
+        queryClient.invalidateQueries({ queryKey: ['profiles', 'admin', 'stats'] }),
+      ])
+    },
+  })
+
+  function toggleProfileSelection(profileId: string, checked: boolean) {
+    if (profileId === currentProfileId) {
+      return
+    }
+
+    setSelectedProfileIds((current) =>
+      checked
+        ? Array.from(new Set([...current, profileId]))
+        : current.filter((currentProfileIdItem) => currentProfileIdItem !== profileId),
+    )
+  }
+
+  function toggleAllProfiles(checked: boolean) {
+    setSelectedProfileIds(checked ? selectableProfileIds : [])
+  }
+
   return (
     <section className="space-y-6">
       <AdminPageHeader
@@ -188,8 +306,8 @@ export function AdminUsersPage() {
               }}
               type="button"
             >
-            Adicionar novo usuário
-          </Button>
+              Adicionar novo usuário
+            </Button>
             <Button asChild type="button">
               <Link to={paths.admin.listings}>Anúncios</Link>
             </Button>
@@ -264,10 +382,83 @@ export function AdminUsersPage() {
         </div>
       </AdminFilterCard>
 
+      {selectedProfiles.length > 0 ? (
+        <div className="flex flex-col gap-3 rounded-lg border border-border bg-card px-4 py-3 shadow-sm md:flex-row md:items-center md:justify-between">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-foreground">
+              {selectedProfiles.length} usuário(s) selecionado(s)
+            </p>
+            <p className="text-xs text-muted-foreground">
+              A seleção vale apenas para a página atual e ignora sua própria conta.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button onClick={() => setSelectedProfileIds([])} type="button" variant="outline">
+              Limpar seleção
+            </Button>
+            <Button
+              disabled={bulkDeleteMutation.isPending}
+              onClick={() => {
+                clearFeedback()
+                setBulkDeleteDialogOpen(true)
+              }}
+              type="button"
+              variant="destructive"
+            >
+              Excluir selecionados
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
       <AdminDataTable
         columns={[
           {
+            header: (
+              <div className="flex items-center justify-center">
+                <input
+                  aria-label="Selecionar todos os usuários da página"
+                  checked={allSelectableSelected}
+                  className="size-4 rounded border-border accent-[#27991f]"
+                  disabled={selectableProfileIds.length === 0}
+                  onChange={(event) => {
+                    toggleAllProfiles(event.target.checked)
+                  }}
+                  ref={selectAllRef}
+                  type="checkbox"
+                />
+              </div>
+            ),
+            className: 'w-12 text-center',
+            id: 'selection',
+            cell: (profile) => {
+              const isCurrentUser = profile.id === currentProfileId
+              const isSelected = selectedProfileIds.includes(profile.id)
+
+              return (
+                <div className="flex items-center justify-center">
+                  <input
+                    aria-label={`Selecionar ${profile.fullName}`}
+                    checked={isSelected}
+                    className="size-4 rounded border-border accent-[#27991f]"
+                    disabled={isCurrentUser}
+                    onChange={(event) => {
+                      toggleProfileSelection(profile.id, event.target.checked)
+                    }}
+                    title={
+                      isCurrentUser
+                        ? 'Não é possível excluir sua própria conta.'
+                        : 'Selecionar usuário para exclusão'
+                    }
+                    type="checkbox"
+                  />
+                </div>
+              )
+            },
+          },
+          {
             header: 'Usuário',
+            id: 'user',
             cell: (profile) => (
               <div className="space-y-1">
                 <p className="font-medium text-foreground">{profile.fullName}</p>
@@ -277,6 +468,7 @@ export function AdminUsersPage() {
           },
           {
             header: 'Contato',
+            id: 'contact',
             cell: (profile) => (
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>{profile.email ?? 'Sem e-mail'}</p>
@@ -287,6 +479,7 @@ export function AdminUsersPage() {
           },
           {
             header: 'Papel',
+            id: 'role',
             cell: (profile) => (
               <AdminStatusBadge tone={getRoleMeta(profile.role).tone}>
                 {getRoleMeta(profile.role).label}
@@ -295,6 +488,7 @@ export function AdminUsersPage() {
           },
           {
             header: 'Status',
+            id: 'status',
             cell: (profile) => (
               <AdminStatusBadge tone={getProfileStatusMeta(profile.status).tone}>
                 {getProfileStatusMeta(profile.status).label}
@@ -303,6 +497,7 @@ export function AdminUsersPage() {
           },
           {
             header: 'Atividade',
+            id: 'activity',
             cell: (profile) => (
               <div className="space-y-1 text-xs text-muted-foreground">
                 <p>{profile.totalListings} anúncios</p>
@@ -314,6 +509,7 @@ export function AdminUsersPage() {
           {
             header: 'Ações',
             className: 'w-[240px] text-right',
+            id: 'actions',
             cell: (profile) => (
               <AdminRowActions
                 compact
@@ -333,7 +529,10 @@ export function AdminUsersPage() {
                     label: 'Redefinir e-mail',
                     onClick: () => {
                       if (!profile.email) {
-                        setErrorFeedback(new Error('Usuário sem e-mail cadastrado.'), 'Não foi possível enviar o e-mail de redefinição.')
+                        setErrorFeedback(
+                          new Error('Usuário sem e-mail cadastrado.'),
+                          'Não foi possível enviar o e-mail de redefinição.',
+                        )
                         return
                       }
 
@@ -361,6 +560,10 @@ export function AdminUsersPage() {
         getRowKey={(profile) => profile.id}
         isError={profilesQuery.isError || statsQuery.isError}
         isLoading={profilesQuery.isLoading || statsQuery.isLoading}
+        minWidth="min-w-[1060px]"
+        rowClassName={(profile) =>
+          selectedProfileIds.includes(profile.id) ? 'bg-emerald-50/70 hover:bg-emerald-50' : undefined
+        }
       />
 
       <AdminPagination
@@ -371,14 +574,22 @@ export function AdminUsersPage() {
       />
 
       <ConfirmActionDialog
-        confirmLabel="Excluir usuário"
+        confirmLabel={bulkDeleteDialogOpen ? 'Excluir selecionados' : 'Excluir usuário'}
         description={
-          profilePendingRemoval
-            ? `Excluir o usuário ${profilePendingRemoval.fullName}? A ação só será concluída se não houver dados vinculados.`
-            : ''
+          bulkDeleteDialogOpen
+            ? `Excluir ${selectedProfiles.length} usuário(s) selecionado(s)? A ação só será concluída se não houver dados vinculados.`
+            : profilePendingRemoval
+              ? `Excluir o usuário ${profilePendingRemoval.fullName}? A ação só será concluída se não houver dados vinculados.`
+              : ''
         }
-        isPending={deleteMutation.isPending}
+        isPending={deleteMutation.isPending || bulkDeleteMutation.isPending}
         onConfirm={() => {
+          if (bulkDeleteDialogOpen && selectedProfiles.length > 0) {
+            clearFeedback()
+            bulkDeleteMutation.mutate(selectedProfiles.map((profile) => profile.id))
+            return
+          }
+
           if (profilePendingRemoval) {
             clearFeedback()
             deleteMutation.mutate(profilePendingRemoval.id)
@@ -387,10 +598,11 @@ export function AdminUsersPage() {
         onOpenChange={(open) => {
           if (!open) {
             setProfilePendingRemoval(null)
+            setBulkDeleteDialogOpen(false)
           }
         }}
-        open={Boolean(profilePendingRemoval)}
-        title="Confirmar exclusão"
+        open={Boolean(profilePendingRemoval) || bulkDeleteDialogOpen}
+        title={bulkDeleteDialogOpen ? 'Confirmar exclusão em massa' : 'Confirmar exclusão'}
         tone="danger"
       />
 
@@ -442,8 +654,6 @@ export function AdminUsersPage() {
         submitDisabled={!editingProfile}
         submitLabel={editingProfile ? 'Salvar ajustes' : 'Selecione um usuário'}
       />
-
     </section>
   )
 }
-

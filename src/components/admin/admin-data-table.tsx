@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils'
 type AdminDataTableColumn<T> = {
   cell: (row: T) => ReactNode
   className?: string
-  header: string
+  header: ReactNode
+  id?: string
 }
 
 type AdminDataTableProps<T> = {
@@ -59,13 +60,13 @@ export function AdminDataTable<T>({
         <table className={cn('w-full border-collapse text-sm', minWidth)}>
           <thead className="bg-muted/65 text-left">
             <tr>
-              {columns.map((column) => (
+              {columns.map((column, index) => (
                 <th
                   className={cn(
                     'px-4 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground',
                     column.className,
                   )}
-                  key={column.header}
+                  key={column.id ?? index}
                 >
                   {column.header}
                 </th>
@@ -81,8 +82,8 @@ export function AdminDataTable<T>({
                 )}
                 key={getRowKey(row)}
               >
-                {columns.map((column) => (
-                  <td className={cn('px-4 py-3 text-sm text-foreground', column.className)} key={column.header}>
+                {columns.map((column, index) => (
+                  <td className={cn('px-4 py-3 text-sm text-foreground', column.className)} key={column.id ?? index}>
                     {column.cell(row)}
                   </td>
                 ))}
