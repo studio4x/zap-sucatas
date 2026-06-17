@@ -68,7 +68,10 @@ export function AdminUsersPage() {
   const [editingProfile, setEditingProfile] = useState<AdminProfileSummary | null>(null)
   const [profilePendingRemoval, setProfilePendingRemoval] = useState<AdminProfileSummary | null>(null)
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
-  const [selectedProfileIds, setSelectedProfileIds] = useState<string[]>([])
+  const [selectedProfileSnapshots, setSelectedProfileSnapshots] = useState<Record<string, AdminProfileSummary>>({})
+  const [selectionRangeStart, setSelectionRangeStart] = useState(1)
+  const [selectionRangeEnd, setSelectionRangeEnd] = useState(1)
+  const [selectionOperation, setSelectionOperation] = useState<'filtered' | 'range' | null>(null)
   const [query, setQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<'admin' | 'all' | 'user'>('all')
   const [statusFilter, setStatusFilter] = useState<'active' | 'all' | 'suspended' | 'under_review'>('all')
@@ -153,6 +156,7 @@ export function AdminUsersPage() {
   const profiles = profilesQuery.data?.items ?? []
   const totalCount = profilesQuery.data?.totalCount ?? 0
   const currentProfileId = user?.profileId ?? null
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
 
   const selectableProfiles = useMemo(
     () => profiles.filter((profile) => profile.id !== currentProfileId),
@@ -165,15 +169,32 @@ export function AdminUsersPage() {
   )
 
   const selectedProfiles = useMemo(
-    () => profiles.filter((profile) => selectedProfileIds.includes(profile.id)),
-    [profiles, selectedProfileIds],
+    () => Object.values(selectedProfileSnapshots),
+    [selectedProfileSnapshots],
   )
+
+  const selectedProfileIds = useMemo(
+    () => selectedProfiles.map((profile) => profile.id),
+    [selectedProfiles],
+  )
+
+  const selectedProfileIdSet = useMemo(
+    () => new Set(selectedProfileIds),
+    [selectedProfileIds],
+  )
+
+  const selectedAdminCount = useMemo(
+    () => selectedProfiles.filter((profile) => profile.role === 'admin').length,
+    [selectedProfiles],
+  )
+
+  const selectedUserCount = selectedProfiles.length - selectedAdminCount
 
   const allSelectableSelected =
     selectableProfileIds.length > 0 &&
-    selectableProfileIds.every((profileId) => selectedProfileIds.includes(profileId))
+    selectableProfileIds.every((profileId) => selectedProfileIdSet.has(profileId))
   const someSelectableSelected = selectableProfileIds.some((profileId) =>
-    selectedProfileIds.includes(profileId),
+    selectedProfileIdSet.has(profileId),
   )
 
   const stats = statsQuery.data ?? {
@@ -208,13 +229,33 @@ export function AdminUsersPage() {
   )
 
   useEffect(() => {
-    setSelectedProfileIds((current) =>
-      current.filter(
-        (profileId) =>
-          profiles.some((profile) => profile.id === profileId && profile.id !== currentProfileId),
-      ),
-    )
-  }, [currentProfileId, profiles])
+    if (!currentProfileId) {
+      return
+    }
+
+    setSelectedProfileSnapshots((current) => {
+      if (!current[currentProfileId]) {
+        return current
+      }
+
+      const next = { ...current }
+      delete next[currentProfileId]
+      return next
+    })
+  }, [currentProfileId])
+
+  useEffect(() => {
+    const nextStart = Math.min(Math.max(selectionRangeStart, 1), totalPages)
+    const nextEnd = Math.min(Math.max(selectionRangeEnd, 1), totalPages)
+
+    if (nextStart !== selectionRangeStart) {
+      setSelectionRangeStart(nextStart)
+    }
+
+    if (nextEnd !== selectionRangeEnd) {
+      setSelectionRangeEnd(nextEnd)
+    }
+  }, [selectionRangeEnd, selectionRangeStart, totalPages])
 
   useEffect(() => {
     if (!selectAllRef.current) {
@@ -226,12 +267,11 @@ export function AdminUsersPage() {
 
   const bulkDeleteMutation = useMutation({
     mutationFn: async (profileIds: string[]) => {
-      const profileMap = new Map(profiles.map((profile) => [profile.id, profile]))
       const deletedProfiles: AdminProfileSummary[] = []
       const failedProfiles: Array<{ message: string; profile: AdminProfileSummary | null }> = []
 
       for (const profileId of profileIds) {
-        const profile = profileMap.get(profileId) ?? null
+        const profile = selectedProfileSnapshots[profileId] ?? profiles.find((item) => item.id === profileId) ?? null
 
         try {
           await deleteAdminUser(profileId)
@@ -260,7 +300,7 @@ export function AdminUsersPage() {
     onSuccess: async ({ deletedProfiles, failedProfiles }) => {
       setBulkDeleteDialogOpen(false)
       setProfilePendingRemoval(null)
-      setSelectedProfileIds([])
+      setSelectedProfileSnapshots({})
 
       if (failedProfiles.length > 0) {
         setWarningFeedback(
@@ -277,20 +317,122 @@ export function AdminUsersPage() {
     },
   })
 
+  function replaceSelectedProfiles(profilesToSelect: AdminProfileSummary[]) {
+    setSelectedProfileSnapshots(
+      Object.fromEntries(
+        profilesToSelect
+          .filter((profile) => profile.id !== currentProfileId)
+          .map((profile) => [profile.id, profile] as const),
+      ),
+    )
+  }
+
   function toggleProfileSelection(profileId: string, checked: boolean) {
     if (profileId === currentProfileId) {
       return
     }
 
-    setSelectedProfileIds((current) =>
-      checked
-        ? Array.from(new Set([...current, profileId]))
-        : current.filter((currentProfileIdItem) => currentProfileIdItem !== profileId),
-    )
+    setSelectedProfileSnapshots((current) => {
+      const next = { ...current }
+
+      if (checked) {
+        const profile = profiles.find((item) => item.id === profileId) ?? current[profileId]
+        if (profile) {
+          next[profileId] = profile
+        }
+      } else {
+        delete next[profileId]
+      }
+
+      return next
+    })
   }
 
   function toggleAllProfiles(checked: boolean) {
-    setSelectedProfileIds(checked ? selectableProfileIds : [])
+    if (checked) {
+      replaceSelectedProfiles(selectableProfiles)
+      return
+    }
+
+    setSelectedProfileSnapshots({})
+  }
+
+  async function fetchProfilesForPages(pageNumbers: number[]) {
+    const uniquePages = Array.from(new Set(pageNumbers.filter((value) => Number.isFinite(value)))).sort(
+      (left, right) => left - right,
+    )
+
+    const responses = await Promise.all(
+      uniquePages.map((targetPage) =>
+        fetchAdminProfilesPage({
+          page: targetPage,
+          pageSize: PAGE_SIZE,
+          query,
+          role: roleFilter,
+          status: statusFilter,
+        }),
+      ),
+    )
+
+    return responses.flatMap((response) => response.items)
+  }
+
+  async function handleSelectFilteredUsers() {
+    if (totalCount === 0) {
+      setWarningFeedback('Nenhum usuário encontrado para seleção filtrada.')
+      return
+    }
+
+    setSelectionOperation('filtered')
+    clearFeedback()
+
+    try {
+      const pages = Array.from({ length: totalPages }, (_value, index) => index + 1)
+      const filteredProfiles = await fetchProfilesForPages(pages)
+      replaceSelectedProfiles(filteredProfiles)
+      setSuccessFeedback(`${filteredProfiles.length} usuário(s) filtrado(s) selecionado(s).`)
+    } catch (error) {
+      setErrorFeedback(error, 'Não foi possível selecionar os usuários filtrados.')
+    } finally {
+      setSelectionOperation(null)
+    }
+  }
+
+  async function handleSelectPageRange() {
+    const start = Math.min(Math.max(Math.trunc(selectionRangeStart), 1), totalPages)
+    const end = Math.min(Math.max(Math.trunc(selectionRangeEnd), 1), totalPages)
+    const normalizedStart = Math.min(start, end)
+    const normalizedEnd = Math.max(start, end)
+
+    if (totalCount === 0) {
+      setWarningFeedback('Nenhum usuário encontrado para seleção por faixa.')
+      return
+    }
+
+    setSelectionOperation('range')
+    clearFeedback()
+
+    try {
+      const pages = Array.from(
+        { length: normalizedEnd - normalizedStart + 1 },
+        (_value, index) => normalizedStart + index,
+      )
+      const rangeProfiles = await fetchProfilesForPages(pages)
+      replaceSelectedProfiles(rangeProfiles)
+      setSelectionRangeStart(normalizedStart)
+      setSelectionRangeEnd(normalizedEnd)
+      setSuccessFeedback(
+        `${rangeProfiles.length} usuário(s) selecionado(s) da faixa de páginas ${normalizedStart}-${normalizedEnd}.`,
+      )
+    } catch (error) {
+      setErrorFeedback(error, 'Não foi possível selecionar a faixa de páginas.')
+    } finally {
+      setSelectionOperation(null)
+    }
+  }
+
+  function clearSelectedProfiles() {
+    setSelectedProfileSnapshots({})
   }
 
   return (
@@ -382,22 +524,28 @@ export function AdminUsersPage() {
         </div>
       </AdminFilterCard>
 
-      {selectedProfiles.length > 0 ? (
-        <div className="flex flex-col gap-3 rounded-lg border border-border bg-card px-4 py-3 shadow-sm md:flex-row md:items-center md:justify-between">
+      <div className="space-y-4 rounded-lg border border-border bg-card px-4 py-4 shadow-sm">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">
-              {selectedProfiles.length} usuário(s) selecionado(s)
-            </p>
+            <p className="text-sm font-medium text-foreground">Seleção em lote</p>
             <p className="text-xs text-muted-foreground">
-              A seleção vale apenas para a página atual e ignora sua própria conta.
+              A seleção manual vale para a página atual. Os atalhos abaixo substituem a seleção atual com
+              usuários filtrados ou com uma faixa de páginas.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <Button onClick={() => setSelectedProfileIds([])} type="button" variant="outline">
-              Limpar seleção
+            <Button
+              disabled={selectionOperation !== null || totalCount === 0}
+              onClick={() => {
+                void handleSelectFilteredUsers()
+              }}
+              type="button"
+              variant="outline"
+            >
+              {selectionOperation === 'filtered' ? 'Selecionando...' : 'Selecionar usuários filtrados'}
             </Button>
             <Button
-              disabled={bulkDeleteMutation.isPending}
+              disabled={selectedProfileIds.length === 0 || bulkDeleteMutation.isPending}
               onClick={() => {
                 clearFeedback()
                 setBulkDeleteDialogOpen(true)
@@ -407,9 +555,72 @@ export function AdminUsersPage() {
             >
               Excluir selecionados
             </Button>
+            <Button
+              disabled={selectedProfileIds.length === 0}
+              onClick={clearSelectedProfiles}
+              type="button"
+              variant="outline"
+            >
+              Limpar seleção
+            </Button>
           </div>
         </div>
-      ) : null}
+
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,160px)_minmax(0,160px)_auto]">
+          <div className="space-y-2">
+            <label className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              Página inicial
+            </label>
+            <Input
+              disabled={selectionOperation !== null || totalCount === 0}
+              max={totalPages}
+              min={1}
+              onChange={(event) => {
+                const value = Number(event.target.value)
+                setSelectionRangeStart(Number.isFinite(value) ? value : 1)
+              }}
+              type="number"
+              value={selectionRangeStart}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              Página final
+            </label>
+            <Input
+              disabled={selectionOperation !== null || totalCount === 0}
+              max={totalPages}
+              min={1}
+              onChange={(event) => {
+                const value = Number(event.target.value)
+                setSelectionRangeEnd(Number.isFinite(value) ? value : 1)
+              }}
+              type="number"
+              value={selectionRangeEnd}
+            />
+          </div>
+          <div className="flex items-end">
+            <Button
+              disabled={selectionOperation !== null || totalCount === 0}
+              onClick={() => {
+                void handleSelectPageRange()
+              }}
+              type="button"
+              variant="outline"
+            >
+              {selectionOperation === 'range' ? 'Selecionando faixa...' : 'Selecionar faixa'}
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+          <span>{selectedProfiles.length} selecionados</span>
+          <span>{selectedAdminCount} admins</span>
+          <span>{selectedUserCount} usuários</span>
+          <span>{totalCount} no filtro atual</span>
+          <span>Páginas 1-{totalPages}</span>
+        </div>
+      </div>
 
       <AdminDataTable
         columns={[
@@ -433,7 +644,7 @@ export function AdminUsersPage() {
             id: 'selection',
             cell: (profile) => {
               const isCurrentUser = profile.id === currentProfileId
-              const isSelected = selectedProfileIds.includes(profile.id)
+              const isSelected = selectedProfileIdSet.has(profile.id)
 
               return (
                 <div className="flex items-center justify-center">
@@ -562,7 +773,7 @@ export function AdminUsersPage() {
         isLoading={profilesQuery.isLoading || statsQuery.isLoading}
         minWidth="min-w-[1060px]"
         rowClassName={(profile) =>
-          selectedProfileIds.includes(profile.id) ? 'bg-emerald-50/70 hover:bg-emerald-50' : undefined
+          selectedProfileIdSet.has(profile.id) ? 'bg-emerald-50/70 hover:bg-emerald-50' : undefined
         }
       />
 
@@ -577,7 +788,7 @@ export function AdminUsersPage() {
         confirmLabel={bulkDeleteDialogOpen ? 'Excluir selecionados' : 'Excluir usuário'}
         description={
           bulkDeleteDialogOpen
-            ? `Excluir ${selectedProfiles.length} usuário(s) selecionado(s)? A ação só será concluída se não houver dados vinculados.`
+            ? `Excluir ${selectedProfiles.length} usuário(s) selecionado(s)? ${selectedAdminCount} admin(s) e ${selectedUserCount} usuário(s) serão removidos se não houver dados vinculados.`
             : profilePendingRemoval
               ? `Excluir o usuário ${profilePendingRemoval.fullName}? A ação só será concluída se não houver dados vinculados.`
               : ''
