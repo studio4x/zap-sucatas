@@ -16,7 +16,7 @@ import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { sendWelcomeLink, requestPasswordReset } from '@/domains/auth/api'
+import { requestPasswordReset, sendWelcomeLink } from '@/domains/auth/api'
 import { useAuth } from '@/hooks/use-auth'
 import {
   createAdminUser,
@@ -171,6 +171,17 @@ export function AdminUsersPage() {
     },
     onSuccess: async (_data, email) => {
       setSuccessFeedback(`E-mail de redefinição enviado para ${email}.`)
+      await queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] })
+    },
+  })
+
+  const welcomeEmailMutation = useMutation({
+    mutationFn: sendWelcomeLink,
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível enviar o e-mail de boas-vindas.')
+    },
+    onSuccess: async (_data, email) => {
+      setSuccessFeedback(`E-mail de boas-vindas enviado para ${email}.`)
       await queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] })
     },
   })
@@ -862,7 +873,7 @@ export function AdminUsersPage() {
                   {
                     disabled: !profile.email || resetPasswordEmailMutation.isPending,
                     icon: Mail,
-                    label: 'Redefinir e-mail',
+                    label: 'Enviar redefinição',
                     onClick: () => {
                       if (!profile.email) {
                         setErrorFeedback(
@@ -874,6 +885,24 @@ export function AdminUsersPage() {
 
                       clearFeedback()
                       resetPasswordEmailMutation.mutate(profile.email)
+                    },
+                    variant: 'outline',
+                  },
+                  {
+                    disabled: !profile.email || welcomeEmailMutation.isPending,
+                    icon: Mail,
+                    label: 'Enviar boas-vindas',
+                    onClick: () => {
+                      if (!profile.email) {
+                        setErrorFeedback(
+                          new Error('Usuário sem e-mail cadastrado.'),
+                          'Não foi possível enviar o e-mail de boas-vindas.',
+                        )
+                        return
+                      }
+
+                      clearFeedback()
+                      welcomeEmailMutation.mutate(profile.email)
                     },
                     variant: 'outline',
                   },
