@@ -43,6 +43,7 @@ const AdminNotificationsPage = lazyWithRetry(() => import('@/pages/admin/notific
 const AdminSitePagesPage = lazyWithRetry(() => import('@/pages/admin/site-pages-page').then((module) => ({ default: module.AdminSitePagesPage })))
 const AdminSettingsPage = lazyWithRetry(() => import('@/pages/admin/settings-page').then((module) => ({ default: module.AdminSettingsPage })))
 const AdminSupportTicketsPage = lazyWithRetry(() => import('@/pages/admin/support-tickets-page').then((module) => ({ default: module.AdminSupportTicketsPage })))
+const AdminTutorialsPage = lazyWithRetry(() => import('@/pages/admin/tutorials-page').then((module) => ({ default: module.AdminTutorialsPage })))
 const AdminUsersPage = lazyWithRetry(() => import('@/pages/admin/users-page').then((module) => ({ default: module.AdminUsersPage })))
 const AboutPage = lazyWithRetry(() => import('@/pages/public/about-page').then((module) => ({ default: module.AboutPage })))
 const BlogPage = lazyWithRetry(() => import('@/pages/public/blog-page').then((module) => ({ default: module.BlogPage })))
@@ -284,6 +285,10 @@ export const routes: RouteObject[] = [
       {
         path: 'usuarios',
         element: withSuspense(<AdminUsersPage />),
+      },
+      {
+        path: 'tutoriais',
+        element: withSuspense(<AdminTutorialsPage />),
       },
       {
         path: 'paginas',

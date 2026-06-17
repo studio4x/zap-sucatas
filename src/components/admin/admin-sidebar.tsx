@@ -71,7 +71,7 @@ const adminNavGroups: AdminNavGroup[] = [
     key: 'plataforma',
     title: 'Plataforma',
     description: 'Configurações de apoio e administração da conta.',
-    values: [paths.admin.settings, paths.admin.logs],
+    values: [paths.admin.tutorials, paths.admin.settings, paths.admin.logs],
   },
 ]
 
@@ -89,19 +89,21 @@ export function AdminSidebar({ items, onClose }: AdminSidebarProps) {
     staleTime: 30_000,
   })
   const pendingNotifications = (notificationStatsQuery.data?.pending ?? 0) + (notificationStatsQuery.data?.retrying ?? 0)
-  const itemByPath = new Map(items.map((item) => [item.to, item]))
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>(
     () => Object.fromEntries(adminNavGroups.map((group) => [group.key, true])) as Record<string, boolean>,
   )
   const groupedItems = useMemo(
-    () =>
-      adminNavGroups.map((group) => ({
+    () => {
+      const itemByPath = new Map(items.map((item) => [item.to, item]))
+
+      return adminNavGroups.map((group) => ({
         ...group,
         items: group.values
           .map((path) => itemByPath.get(path))
           .filter((item): item is AdminNavItem => Boolean(item)),
-      })),
-    [itemByPath],
+      }))
+    },
+    [items],
   )
 
   return (

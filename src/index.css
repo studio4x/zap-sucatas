@@ -341,6 +341,74 @@ a {
   text-underline-offset: 0.18em;
 }
 
+.tutorial-rich-content {
+  white-space: normal;
+}
+
+.tutorial-rich-content > *:first-child {
+  margin-top: 0;
+}
+
+.tutorial-rich-content > *:last-child {
+  margin-bottom: 0;
+}
+
+.tutorial-rich-content p,
+.tutorial-rich-content ul,
+.tutorial-rich-content ol,
+.tutorial-rich-content blockquote {
+  margin: 0 0 1rem;
+  overflow-wrap: anywhere;
+}
+
+.tutorial-rich-content ul,
+.tutorial-rich-content ol {
+  padding-left: 1.3rem;
+}
+
+.tutorial-rich-content ul {
+  list-style: disc;
+}
+
+.tutorial-rich-content ol {
+  list-style: decimal;
+}
+
+.tutorial-rich-content li + li {
+  margin-top: 0.35rem;
+}
+
+.tutorial-rich-content a {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.tutorial-rich-content blockquote {
+  border-left: 4px solid color-mix(in srgb, var(--primary) 34%, white);
+  padding-left: 1rem;
+}
+
+.tutorial-editor .ql-toolbar.ql-snow {
+  border: 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+}
+
+.tutorial-editor .ql-container.ql-snow {
+  min-height: 200px;
+  border: 0;
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  font-family: "Poppins", sans-serif;
+}
+
+.tutorial-editor .ql-editor {
+  min-height: 200px;
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
 .listing-rich-content blockquote {
   border-left: 4px solid color-mix(in srgb, var(--primary) 45%, white);
   padding-left: 1rem;
