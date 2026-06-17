@@ -16,8 +16,8 @@ import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
+import { sendWelcomeLink, requestPasswordReset } from '@/domains/auth/api'
 import { useAuth } from '@/hooks/use-auth'
-import { requestPasswordReset } from '@/domains/auth/api'
 import {
   createAdminUser,
   deleteAdminUser,
@@ -30,6 +30,27 @@ import type { AdminProfileSummary } from '@/domains/profiles/types'
 import { useOperationFeedback } from '@/hooks/use-operation-feedback'
 
 const PAGE_SIZE = 12
+type BulkEmailActionKind = 'password_reset' | 'welcome'
+
+function getBulkEmailActionMeta(kind: BulkEmailActionKind) {
+  if (kind === 'password_reset') {
+    return {
+      buttonLabel: 'Enviar redefinição',
+      confirmLabel: 'Enviar redefinição',
+      description:
+        'Será enviado um e-mail de redefinição de senha para os usuários selecionados que tiverem e-mail cadastrado.',
+      title: 'Confirmar redefinição em massa',
+    }
+  }
+
+  return {
+    buttonLabel: 'Enviar boas-vindas',
+    confirmLabel: 'Enviar boas-vindas',
+    description:
+      'Será enviado um e-mail de boas-vindas com link de acesso para os usuários selecionados que tiverem e-mail cadastrado.',
+    title: 'Confirmar envio de boas-vindas',
+  }
+}
 
 function getRoleMeta(role: 'admin' | 'user') {
   return role === 'admin'
@@ -68,6 +89,7 @@ export function AdminUsersPage() {
   const [editingProfile, setEditingProfile] = useState<AdminProfileSummary | null>(null)
   const [profilePendingRemoval, setProfilePendingRemoval] = useState<AdminProfileSummary | null>(null)
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
+  const [bulkEmailAction, setBulkEmailAction] = useState<BulkEmailActionKind | null>(null)
   const [selectedProfileSnapshots, setSelectedProfileSnapshots] = useState<Record<string, AdminProfileSummary>>({})
   const [selectionRangeStart, setSelectionRangeStart] = useState(1)
   const [selectionRangeEnd, setSelectionRangeEnd] = useState(1)
@@ -317,6 +339,87 @@ export function AdminUsersPage() {
     },
   })
 
+  const bulkEmailMutation = useMutation({
+    mutationFn: async ({
+      kind,
+      profileIds,
+    }: {
+      kind: BulkEmailActionKind
+      profileIds: string[]
+    }) => {
+      const sentProfiles: AdminProfileSummary[] = []
+      const skippedProfiles: AdminProfileSummary[] = []
+      const failedProfiles: Array<{ message: string; profile: AdminProfileSummary | null }> = []
+
+      for (const profileId of profileIds) {
+        const profile =
+          selectedProfileSnapshots[profileId] ?? profiles.find((item) => item.id === profileId) ?? null
+
+        if (!profile?.email) {
+          if (profile) {
+            skippedProfiles.push(profile)
+          }
+
+          continue
+        }
+
+        try {
+          if (kind === 'password_reset') {
+            await requestPasswordReset(profile.email)
+          } else {
+            await sendWelcomeLink(profile.email)
+          }
+
+          sentProfiles.push(profile)
+        } catch (error) {
+          failedProfiles.push({
+            message:
+              error instanceof Error && error.message.trim().length > 0
+                ? error.message
+                : 'Não foi possível enviar o e-mail.',
+            profile,
+          })
+        }
+      }
+
+      return {
+        failedProfiles,
+        kind,
+        sentProfiles,
+        skippedProfiles,
+      }
+    },
+    onError: (error) => {
+      setErrorFeedback(error, 'Não foi possível enviar os e-mails em massa.')
+    },
+    onSuccess: async ({ failedProfiles, kind, sentProfiles, skippedProfiles }) => {
+      setBulkEmailAction(null)
+
+      const actionLabel = kind === 'password_reset' ? 'Redefinição' : 'Boas-vindas'
+
+      if (sentProfiles.length === 0 && skippedProfiles.length > 0 && failedProfiles.length === 0) {
+        setWarningFeedback(
+          `Nenhum usuário selecionado possui e-mail cadastrado. ${actionLabel} não enviada.`,
+        )
+        setSelectedProfileSnapshots({})
+      } else if (failedProfiles.length > 0) {
+        setWarningFeedback(
+          `${actionLabel} enviada para ${sentProfiles.length} usuário(s). ${skippedProfiles.length} sem e-mail ignorado(s). ${failedProfiles.length} falha(s) no envio em massa.`,
+        )
+      } else if (skippedProfiles.length > 0) {
+        setWarningFeedback(
+          `${actionLabel} enviada para ${sentProfiles.length} usuário(s). ${skippedProfiles.length} sem e-mail foram ignorado(s).`,
+        )
+        setSelectedProfileSnapshots({})
+      } else {
+        setSuccessFeedback(`${actionLabel} enviada para ${sentProfiles.length} usuário(s) com sucesso.`)
+        setSelectedProfileSnapshots({})
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ['profiles', 'admin'] })
+    },
+  })
+
   function replaceSelectedProfiles(profilesToSelect: AdminProfileSummary[]) {
     setSelectedProfileSnapshots(
       Object.fromEntries(
@@ -556,6 +659,28 @@ export function AdminUsersPage() {
               Excluir selecionados
             </Button>
             <Button
+              disabled={selectedProfileIds.length === 0 || bulkEmailMutation.isPending}
+              onClick={() => {
+                clearFeedback()
+                setBulkEmailAction('password_reset')
+              }}
+              type="button"
+              variant="outline"
+            >
+              Enviar redefinição
+            </Button>
+            <Button
+              disabled={selectedProfileIds.length === 0 || bulkEmailMutation.isPending}
+              onClick={() => {
+                clearFeedback()
+                setBulkEmailAction('welcome')
+              }}
+              type="button"
+              variant="outline"
+            >
+              Enviar boas-vindas
+            </Button>
+            <Button
               disabled={selectedProfileIds.length === 0}
               onClick={clearSelectedProfiles}
               type="button"
@@ -782,6 +907,33 @@ export function AdminUsersPage() {
         onPageChange={setPage}
         pageSize={PAGE_SIZE}
         totalItems={totalCount}
+      />
+
+      <ConfirmActionDialog
+        confirmLabel={bulkEmailAction ? getBulkEmailActionMeta(bulkEmailAction).confirmLabel : 'Confirmar'}
+        description={
+          bulkEmailAction
+            ? `${getBulkEmailActionMeta(bulkEmailAction).description} ${selectedProfiles.length} usuário(s) estão selecionados.`
+            : ''
+        }
+        isPending={bulkEmailMutation.isPending}
+        onConfirm={() => {
+          if (bulkEmailAction && selectedProfiles.length > 0) {
+            clearFeedback()
+            bulkEmailMutation.mutate({
+              kind: bulkEmailAction,
+              profileIds: selectedProfiles.map((profile) => profile.id),
+            })
+          }
+        }}
+        onOpenChange={(open) => {
+          if (!open) {
+            setBulkEmailAction(null)
+          }
+        }}
+        open={bulkEmailAction !== null}
+        title={bulkEmailAction ? getBulkEmailActionMeta(bulkEmailAction).title : 'Confirmar ação'}
+        tone="default"
       />
 
       <ConfirmActionDialog

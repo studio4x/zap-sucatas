@@ -101,6 +101,10 @@ export async function sendMagicLink(email: string, redirectPath = '/app') {
   }
 }
 
+export async function sendWelcomeLink(email: string) {
+  return sendMagicLink(email, '/app')
+}
+
 export async function signUp(payload: SignUpPayload, redirectPath = '/app') {
   const client = ensureSupabase()
   const { data, error } = await client.auth.signUp({
