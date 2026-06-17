@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
+import { ADMIN_TUTORIAL_MODULES } from '@/domains/admin-tutorials/modules'
 import type { AdminTutorial } from '@/domains/admin-tutorials/types'
 import { useAdminTutorials } from '@/domains/admin-tutorials/use-admin-tutorials'
 import { useOperationFeedback } from '@/hooks/use-operation-feedback'
@@ -70,6 +71,15 @@ export function AdminTutorialsPage() {
 
   const hasFilters = normalizedSearch.length > 0 || categoryFilter !== 'all'
   const canReorder = !hasFilters
+  const moduleCards = useMemo(
+    () =>
+      ADMIN_TUTORIAL_MODULES.map((module) => ({
+        ...module,
+        count: tutorials.filter((tutorial) => tutorial.category === module.title).length,
+        isActive: categoryFilter === module.title,
+      })),
+    [categoryFilter, tutorials],
+  )
 
   function openCreateModal() {
     clearFeedback()
@@ -137,6 +147,10 @@ export function AdminTutorialsPage() {
                 <p className="text-sm leading-7 text-white/78 md:text-[15px]">
                   Conteúdos rápidos para executar tarefas sem perder tempo. Crie, revise, ordene e abra o mesmo tutorial na página ou no widget global do admin.
                 </p>
+                <div className="inline-flex flex-wrap gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs text-white/80">
+                  <span className="font-semibold uppercase tracking-[0.16em]">Acesso restrito</span>
+                  <span>Esses tutoriais ficam visíveis somente no painel admin, para usuários logados com permissão administrativa.</span>
+                </div>
               </div>
             </div>
 
@@ -149,6 +163,49 @@ export function AdminTutorialsPage() {
                 <Link to={paths.admin.root}>Voltar ao admin</Link>
               </Button>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-[2rem] border border-white/75 bg-white/90 shadow-[0_28px_70px_-52px_rgba(15,23,42,0.85)]">
+        <CardContent className="space-y-5 p-6 md:p-8">
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Módulos de aprendizado</p>
+            <h2 className="font-display text-2xl text-slate-950">Separe a leitura por área do painel</h2>
+            <p className="text-sm leading-7 text-slate-600">
+              Clique em um módulo para filtrar os tutoriais por assunto. Isso ajuda quem está começando a encontrar o caminho sem precisar conhecer a estrutura interna.
+            </p>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {moduleCards.map((module) => (
+              <button
+                className={cn(
+                  'flex h-full flex-col items-start rounded-[1.5rem] border px-4 py-4 text-left transition',
+                  module.isActive
+                    ? 'border-sky-300 bg-sky-50 shadow-[0_18px_40px_-32px_rgba(14,116,144,0.6)]'
+                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
+                )}
+                key={module.key}
+                onClick={() => setCategoryFilter(module.title)}
+                type="button"
+              >
+                <div className="flex w-full items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <p className="text-base font-semibold text-slate-950">{module.title}</p>
+                    <p className="text-sm leading-6 text-slate-600">{module.description}</p>
+                  </div>
+                  <span className="inline-flex min-w-10 items-center justify-center rounded-full bg-slate-950 px-2.5 py-1 text-xs font-semibold text-white">
+                    {module.count}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 rounded-[1.25rem] bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            <span className="font-semibold text-slate-900">Dica operacional:</span>
+            <span>use os módulos para ensinar por tarefa. O admin não precisa aprender o sistema, só o que clicar e em que ordem.</span>
           </div>
         </CardContent>
       </Card>
