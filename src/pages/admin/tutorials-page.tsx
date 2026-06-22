@@ -135,19 +135,19 @@ export function AdminTutorialsPage() {
 
   return (
     <section className="space-y-6">
-      <Card className="overflow-hidden rounded-[2rem] border-0 bg-[linear-gradient(135deg,#0f172a_0%,#144b78_45%,#0d9488_100%)] text-white shadow-[0_38px_120px_-56px_rgba(15,23,42,0.9)]">
+      <Card className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(135deg,#ffffff_0%,#f2f8ff_52%,#eefbf6_100%)] text-slate-950 shadow-[0_38px_120px_-56px_rgba(15,23,42,0.22)]">
         <CardContent className="p-6 md:p-8 lg:p-10">
           <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl space-y-4">
-              <span className="inline-flex items-center rounded-full border border-white/16 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/80">
+              <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-800">
                 Tutoriais do admin
               </span>
               <div className="space-y-3">
                 <h1 className="font-display text-3xl leading-tight md:text-[3rem]">Guias rápidos para operar o painel sem perder contexto</h1>
-                <p className="text-sm leading-7 text-white/78 md:text-[15px]">
+                <p className="text-sm leading-7 text-slate-700 md:text-[15px]">
                   Conteúdos rápidos para executar tarefas sem perder tempo. Crie, revise, ordene e abra o mesmo tutorial na página ou no widget global do admin.
                 </p>
-                <div className="inline-flex flex-wrap gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs text-white/80">
+                <div className="inline-flex flex-wrap gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-xs text-slate-700 shadow-sm backdrop-blur-sm">
                   <span className="font-semibold uppercase tracking-[0.16em]">Acesso restrito</span>
                   <span>Esses tutoriais ficam visíveis somente no painel admin, para usuários logados com permissão administrativa.</span>
                 </div>
@@ -159,7 +159,7 @@ export function AdminTutorialsPage() {
                 <Plus className="size-4" />
                 NOVO TUTORIAL
               </Button>
-              <Button asChild className="border-white/20 bg-white/10 !text-white hover:bg-white/16" type="button" variant="outline">
+              <Button asChild className="border-slate-200 bg-white !text-slate-950 hover:bg-slate-50" type="button" variant="outline">
                 <Link to={paths.admin.root}>Voltar ao admin</Link>
               </Button>
             </div>
