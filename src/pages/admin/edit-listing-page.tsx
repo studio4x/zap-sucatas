@@ -7,6 +7,7 @@ import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { ListingEditor, type ListingEditorSubmitPayload } from '@/components/listings/listing-editor'
 import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
+import { SuccessNoticeDialog } from '@/components/shared/success-notice-dialog'
 import {
   approveListing,
   deleteAdminListing,
@@ -28,6 +29,12 @@ export function AdminEditListingPage() {
   const queryClient = useQueryClient()
   const { user } = useAuth()
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [successNotice, setSuccessNotice] = useState<{
+    actionLabel?: string
+    description: string
+    redirectTo?: string
+    title: string
+  } | null>(null)
 
   const referencesQuery = useQuery({
     queryKey: ['listing-references'],
@@ -105,9 +112,18 @@ export function AdminEditListingPage() {
         queryClient.invalidateQueries({ queryKey: ['listings', 'public'] }),
       ])
 
-      if (payload.submitAfterSave) {
-        navigate(paths.admin.listingDetails(id), { replace: true })
-      }
+      return payload.submitAfterSave
+        ? {
+            actionLabel: 'Ver detalhe',
+            description: 'As alterações foram salvas e o anúncio foi aprovado com sucesso.',
+            redirectTo: paths.admin.listingDetails(id),
+            title: 'Anúncio aprovado',
+          }
+        : {
+            actionLabel: 'Continuar editando',
+            description: 'As alterações foram salvas como rascunho.',
+            title: 'Rascunho salvo',
+          }
     },
   })
 
@@ -121,7 +137,12 @@ export function AdminEditListingPage() {
         queryClient.invalidateQueries({ queryKey: ['listings', 'public'] }),
       ])
       setConfirmingDelete(false)
-      navigate(paths.admin.listings, { replace: true })
+      setSuccessNotice({
+        actionLabel: 'Ir para anúncios',
+        description: 'O anúncio foi excluído permanentemente com sucesso.',
+        redirectTo: paths.admin.listings,
+        title: 'Anúncio excluído',
+      })
     },
   })
 
@@ -208,6 +229,21 @@ export function AdminEditListingPage() {
         open={confirmingDelete}
         title="Confirmar exclusão permanente"
         tone="danger"
+      />
+
+      <SuccessNoticeDialog
+        actionLabel={successNotice?.actionLabel ?? 'Continuar'}
+        description={successNotice?.description ?? ''}
+        onAction={() => {
+          const redirectTo = successNotice?.redirectTo ?? null
+          setSuccessNotice(null)
+
+          if (redirectTo) {
+            navigate(redirectTo, { replace: true })
+          }
+        }}
+        open={Boolean(successNotice)}
+        title={successNotice?.title ?? 'Operação concluída'}
       />
     </section>
   )

@@ -5,11 +5,12 @@ import type { ChangeEvent, DragEvent, ReactNode } from 'react'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import ReactQuill from 'react-quill-new'
 import 'react-quill-new/dist/quill.snow.css'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { DashboardFormSection } from '@/components/dashboard/dashboard-form-section'
 import { DashboardSectionHeader } from '@/components/dashboard/dashboard-section-header'
 import { ListingStatusBadge } from '@/components/listings/listing-status-badge'
+import { SuccessNoticeDialog } from '@/components/shared/success-notice-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
@@ -38,6 +39,13 @@ export type ListingEditorSubmitPayload = {
   values: ListingFormValues
 }
 
+export type ListingEditorSuccessNotice = {
+  actionLabel?: string
+  description: string
+  redirectTo?: string
+  title: string
+}
+
 type ListingEditorProps = {
   cancelTo: string
   categories: ListingCategory[]
@@ -49,7 +57,7 @@ type ListingEditorProps = {
   isSubmitting?: boolean
   materials: ListingMaterial[]
   mode: 'create' | 'edit'
-  onSubmit: (payload: ListingEditorSubmitPayload) => Promise<void>
+  onSubmit: (payload: ListingEditorSubmitPayload) => Promise<ListingEditorSuccessNotice>
   rejectionReason?: string | null
   stateOptions: string[]
   status?: ListingStatus | null
@@ -257,6 +265,7 @@ export function ListingEditor({
   stateOptions,
   status,
 }: ListingEditorProps) {
+  const navigate = useNavigate()
   const resolvedExistingImages = existingImages ?? EMPTY_EXISTING_IMAGES
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
   const [removedImageIds, setRemovedImageIds] = useState<string[]>([])
@@ -268,9 +277,8 @@ export function ListingEditor({
   )
   const [draggingImageKey, setDraggingImageKey] = useState<string | null>(null)
   const draggingImageKeyRef = useRef<string | null>(null)
-  const [feedback, setFeedback] = useState<{ message: string; tone: 'error' | 'success' } | null>(
-    null,
-  )
+  const [feedback, setFeedback] = useState<string | null>(null)
+  const [successNotice, setSuccessNotice] = useState<ListingEditorSuccessNotice | null>(null)
   const [submitAfterSave, setSubmitAfterSave] = useState(false)
   const [descriptionEditorTab, setDescriptionEditorTab] = useState<'html' | 'visual'>('visual')
 
@@ -408,7 +416,7 @@ export function ListingEditor({
       setFeedback(null)
       setSubmitAfterSave(shouldSubmitAfterSave)
 
-      await onSubmit({
+      const successNotice = await onSubmit({
         coverImageKey: resolvedCoverImageKey,
         imageOrderKeys,
         newUploads: orderedImageItems
@@ -429,18 +437,9 @@ export function ListingEditor({
       setPendingFiles([])
       setRemovedImageIds([])
       setSubmitAfterSave(false)
-
-      if (!shouldSubmitAfterSave) {
-        setFeedback({
-          message: 'Rascunho salvo com sucesso.',
-          tone: 'success',
-        })
-      }
+      setSuccessNotice(successNotice)
     } catch (error) {
-      setFeedback({
-        message: error instanceof Error ? error.message : 'Falha ao salvar o anúncio.',
-        tone: 'error',
-      })
+      setFeedback(error instanceof Error ? error.message : 'Falha ao salvar o anúncio.')
     }
   }
 
@@ -1043,13 +1042,7 @@ export function ListingEditor({
             </div>
           </DashboardFormSection>
 
-          {feedback ? (
-            <DashboardAlertCard
-              description={feedback.message}
-              title={feedback.tone === 'success' ? 'Rascunho salvo' : 'Ajuste necessário'}
-              tone={feedback.tone}
-            />
-          ) : null}
+      {feedback ? <DashboardAlertCard description={feedback} title="Ajuste necessário" tone="error" /> : null}
 
           <DashboardFormSection description={resolvedFinalActionDescription} title="Publicação">
             <div className="space-y-3">
@@ -1082,6 +1075,21 @@ export function ListingEditor({
           </DashboardFormSection>
         </div>
       </div>
+
+      <SuccessNoticeDialog
+        actionLabel={successNotice?.actionLabel ?? 'Continuar'}
+        description={successNotice?.description ?? ''}
+        onAction={() => {
+          const redirectTo = successNotice?.redirectTo ?? null
+          setSuccessNotice(null)
+
+          if (redirectTo) {
+            navigate(redirectTo, { replace: true })
+          }
+        }}
+        open={Boolean(successNotice)}
+        title={successNotice?.title ?? 'Anúncio salvo com sucesso'}
+      />
     </form>
   )
 }

@@ -9,6 +9,7 @@ import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
+import { SuccessNoticeDialog } from '@/components/shared/success-notice-dialog'
 import { fetchAdminFeaturedPayments } from '@/domains/featured-payments/api'
 import { blogContentHasHtml } from '@/domains/blog/utils'
 import {
@@ -56,12 +57,20 @@ type FeedbackState = {
   tone: 'error' | 'success' | 'warning'
 }
 
+type SuccessNoticeState = {
+  actionLabel?: string
+  description: string
+  redirectTo?: string
+  title: string
+}
+
 export function AdminListingDetailsPage() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [rejectionReason, setRejectionReason] = useState('')
   const [feedback, setFeedback] = useState<FeedbackState | null>(null)
+  const [successNotice, setSuccessNotice] = useState<SuccessNoticeState | null>(null)
 
   const listingQuery = useQuery({
     queryKey: ['listing', 'admin', id],
@@ -92,7 +101,12 @@ export function AdminListingDetailsPage() {
     },
     onSuccess: async () => {
       await invalidateListing()
-      navigate(paths.admin.listings, { replace: true })
+      setSuccessNotice({
+        actionLabel: 'Ir para anúncios',
+        description: 'O anúncio foi aprovado com sucesso.',
+        redirectTo: paths.admin.listings,
+        title: 'Anúncio aprovado',
+      })
     },
   })
 
@@ -106,7 +120,12 @@ export function AdminListingDetailsPage() {
     },
     onSuccess: async () => {
       await invalidateListing()
-      navigate(paths.admin.listings, { replace: true })
+      setSuccessNotice({
+        actionLabel: 'Ir para anúncios',
+        description: 'O anúncio foi rejeitado com sucesso.',
+        redirectTo: paths.admin.listings,
+        title: 'Anúncio rejeitado',
+      })
     },
   })
 
@@ -119,11 +138,12 @@ export function AdminListingDetailsPage() {
       })
     },
     onSuccess: async () => {
-      setFeedback({
-        message: 'Anúncio pausado com sucesso.',
-        tone: 'success',
-      })
       await invalidateListing()
+      setSuccessNotice({
+        actionLabel: 'Continuar',
+        description: 'O anúncio foi pausado com sucesso.',
+        title: 'Anúncio pausado',
+      })
     },
   })
 
@@ -137,7 +157,12 @@ export function AdminListingDetailsPage() {
     },
     onSuccess: async () => {
       await invalidateListing()
-      navigate(paths.admin.listings, { replace: true })
+      setSuccessNotice({
+        actionLabel: 'Ir para anúncios',
+        description: 'O anúncio foi excluído permanentemente com sucesso.',
+        redirectTo: paths.admin.listings,
+        title: 'Anúncio excluído',
+      })
     },
   })
 
@@ -478,6 +503,21 @@ export function AdminListingDetailsPage() {
           </Card>
         </div>
       </div>
+
+      <SuccessNoticeDialog
+        actionLabel={successNotice?.actionLabel ?? 'Continuar'}
+        description={successNotice?.description ?? ''}
+        onAction={() => {
+          const redirectTo = successNotice?.redirectTo ?? null
+          setSuccessNotice(null)
+
+          if (redirectTo) {
+            navigate(redirectTo, { replace: true })
+          }
+        }}
+        open={Boolean(successNotice)}
+        title={successNotice?.title ?? 'Operação concluída'}
+      />
     </section>
   )
 }

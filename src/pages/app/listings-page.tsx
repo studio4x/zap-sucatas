@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Archive, Eye, FilePlus2, PauseCircle, SendHorizontal, Star } from 'lucide-react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { DashboardEmptyState } from '@/components/dashboard/dashboard-empty-state'
@@ -11,6 +11,7 @@ import { DashboardTableCard } from '@/components/dashboard/dashboard-table-card'
 import { ListingContentPreview } from '@/components/listings/listing-content-preview'
 import { ListingStatusBadge } from '@/components/listings/listing-status-badge'
 import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
+import { SuccessNoticeDialog } from '@/components/shared/success-notice-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
@@ -34,22 +35,20 @@ type FeedbackState = {
   tone: 'error' | 'success' | 'warning'
 }
 
-type ReviewSubmissionState = {
-  reviewSubmission?: {
-    listingId: string
-    listingTitle: string
-  }
+type SuccessNoticeState = {
+  actionLabel?: string
+  description: string
+  title: string
 }
 
 export function AppListingsPage() {
   const queryClient = useQueryClient()
   const { user } = useAuth()
   const { featuredPaymentsEnabled } = useSystemSettings()
-  const location = useLocation()
-  const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<AppListingsStatusFilter>('all')
   const [feedback, setFeedback] = useState<FeedbackState | null>(null)
+  const [successNotice, setSuccessNotice] = useState<SuccessNoticeState | null>(null)
   const [listingPendingArchive, setListingPendingArchive] = useState<{ id: string; title: string } | null>(
     null,
   )
@@ -82,11 +81,12 @@ export function AppListingsPage() {
       })
     },
     onSuccess: async () => {
-      setFeedback({
-        message: 'Anúncio enviado para análise com sucesso.',
-        tone: 'success',
-      })
       await invalidateListings()
+      setSuccessNotice({
+        actionLabel: 'Continuar',
+        description: 'Seu anúncio foi enviado para análise com sucesso.',
+        title: 'Anúncio enviado para análise',
+      })
     },
   })
 
@@ -99,11 +99,12 @@ export function AppListingsPage() {
       })
     },
     onSuccess: async () => {
-      setFeedback({
-        message: 'Anúncio pausado com sucesso.',
-        tone: 'success',
-      })
       await invalidateListings()
+      setSuccessNotice({
+        actionLabel: 'Continuar',
+        description: 'O anúncio foi pausado com sucesso.',
+        title: 'Anúncio pausado',
+      })
     },
   })
 
@@ -116,12 +117,13 @@ export function AppListingsPage() {
       })
     },
     onSuccess: async () => {
-      setFeedback({
-        message: 'Anúncio arquivado com sucesso.',
-        tone: 'warning',
-      })
       await invalidateListings()
       setListingPendingArchive(null)
+      setSuccessNotice({
+        actionLabel: 'Continuar',
+        description: 'O anúncio foi arquivado com sucesso.',
+        title: 'Anúncio arquivado',
+      })
     },
   })
   const createFeaturedPaymentMutation = useMutation({
@@ -133,13 +135,6 @@ export function AppListingsPage() {
       })
     },
     onSuccess: async (payload) => {
-      setFeedback({
-        message: payload.payment.invoiceUrl
-          ? 'Cobrança de destaque gerada. Abra o link para concluir o pagamento.'
-          : 'Cobrança de destaque gerada com sucesso.',
-        tone: 'success',
-      })
-
       if (payload.payment.invoiceUrl) {
         window.open(payload.payment.invoiceUrl, '_blank', 'noopener,noreferrer')
       }
@@ -148,6 +143,13 @@ export function AppListingsPage() {
         queryClient.invalidateQueries({ queryKey: ['listing-featured-payments', 'owner', user?.profileId] }),
         queryClient.invalidateQueries({ queryKey: ['listings', 'owner', user?.profileId] }),
       ])
+      setSuccessNotice({
+        actionLabel: 'Continuar',
+        description: payload.payment.invoiceUrl
+          ? 'A cobrança de destaque foi gerada. O link foi aberto em uma nova aba.'
+          : 'A cobrança de destaque foi gerada com sucesso.',
+        title: 'Cobrança gerada',
+      })
     },
   })
 
@@ -174,7 +176,6 @@ export function AppListingsPage() {
   const requiresAttention = listings.find(
     (listing) => listing.status === 'rejected' || listing.status === 'draft',
   )
-  const reviewSubmission = (location.state as ReviewSubmissionState | null)?.reviewSubmission ?? null
   const isBusy =
     submitMutation.isPending ||
     pauseMutation.isPending ||
@@ -463,31 +464,13 @@ export function AppListingsPage() {
         tone="default"
       />
 
-      {reviewSubmission ? (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center px-4">
-          <button
-            aria-label="Fechar confirmação de envio"
-            className="absolute inset-0 bg-slate-950/45"
-            onClick={() => navigate(location.pathname + location.search, { replace: true, state: null })}
-            type="button"
-          />
-          <div className="relative w-full max-w-md rounded-[1.75rem] border border-border bg-card p-6 shadow-2xl">
-            <p className="text-base font-semibold text-foreground">Anúncio enviado para análise</p>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              Seu anúncio
-              {' '}
-              <span className="font-medium text-foreground">"{reviewSubmission.listingTitle || reviewSubmission.listingId}"</span>
-              {' '}
-              foi enviado com sucesso. Você pode acompanhar o andamento nesta página.
-            </p>
-            <div className="mt-6 flex justify-end">
-              <Button onClick={() => navigate(location.pathname + location.search, { replace: true, state: null })} type="button">
-                Entendi
-              </Button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <SuccessNoticeDialog
+        actionLabel={successNotice?.actionLabel ?? 'Continuar'}
+        description={successNotice?.description ?? ''}
+        onAction={() => setSuccessNotice(null)}
+        open={Boolean(successNotice)}
+        title={successNotice?.title ?? 'Operação concluída'}
+      />
     </section>
   )
 }

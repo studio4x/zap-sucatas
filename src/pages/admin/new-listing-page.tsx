@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminUserForm } from '@/components/admin/admin-user-form'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
@@ -38,7 +37,6 @@ function formatOwnerOption(profile: AdminProfileSummary) {
 }
 
 export function AdminNewListingPage() {
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { status, user } = useAuth()
   const [selectedOwnerProfileId, setSelectedOwnerProfileId] = useState('')
@@ -177,11 +175,19 @@ export function AdminNewListingPage() {
         queryClient.invalidateQueries({ queryKey: ['listings', 'owner', ownerProfileId] }),
       ])
 
-      if (payload.submitAfterSave) {
-        navigate(paths.admin.listings, { replace: true })
-      } else {
-        navigate(paths.admin.editListing(listingId), { replace: true })
-      }
+      return payload.submitAfterSave
+        ? {
+            actionLabel: 'Ir para anúncios',
+            description: 'O anúncio foi criado e aprovado com sucesso.',
+            redirectTo: paths.admin.listings,
+            title: 'Anúncio aprovado',
+          }
+        : {
+            actionLabel: 'Abrir anúncio',
+            description: 'O anúncio foi salvo como rascunho e pode ser editado novamente.',
+            redirectTo: paths.admin.editListing(listingId),
+            title: 'Rascunho criado',
+          }
     },
   })
 

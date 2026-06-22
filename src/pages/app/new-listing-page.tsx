@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { ListingEditor, type ListingEditorSubmitPayload } from '@/components/listings/listing-editor'
@@ -15,7 +14,6 @@ import { createEmptyListingFormValues } from '@/domains/listings/utils'
 import { useAuth } from '@/hooks/use-auth'
 
 export function AppNewListingPage() {
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { user } = useAuth()
 
@@ -77,19 +75,19 @@ export function AppNewListingPage() {
 
       await queryClient.invalidateQueries({ queryKey: ['listings', 'owner', user.profileId] })
 
-      if (payload.submitAfterSave) {
-        navigate(paths.app.listings, {
-          replace: true,
-          state: {
-            reviewSubmission: {
-              listingId,
-              listingTitle: payload.values.title.trim(),
-            },
-          },
-        })
-      } else {
-        navigate(paths.app.editListing(listingId), { replace: true })
-      }
+      return payload.submitAfterSave
+        ? {
+            actionLabel: 'Ir para meus anúncios',
+            description: 'O anúncio foi criado e enviado para análise com sucesso.',
+            redirectTo: paths.app.listings,
+            title: 'Anúncio enviado para análise',
+          }
+        : {
+            actionLabel: 'Abrir anúncio',
+            description: 'O anúncio foi salvo como rascunho e está disponível para continuar a edição.',
+            redirectTo: paths.app.editListing(listingId),
+            title: 'Rascunho criado',
+          }
     },
   })
 

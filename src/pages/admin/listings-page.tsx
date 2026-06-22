@@ -12,6 +12,7 @@ import { AdminStatCard } from '@/components/admin/admin-stat-card'
 import { AdminStatusBadge } from '@/components/admin/admin-status-badge'
 import { ListingContentPreview } from '@/components/listings/listing-content-preview'
 import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
+import { SuccessNoticeDialog } from '@/components/shared/success-notice-dialog'
 import { OperationFeedback } from '@/components/shared/operation-feedback'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,6 +27,12 @@ import {
 } from '@/domains/listings/api'
 import { formatListingDate, listingStatusFilterOptions } from '@/domains/listings/utils'
 import { useOperationFeedback } from '@/hooks/use-operation-feedback'
+
+type SuccessNoticeState = {
+  actionLabel?: string
+  description: string
+  title: string
+}
 
 const PAGE_SIZE = 12
 const BRL_FORMATTER = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -51,7 +58,7 @@ function getListingStatusMeta(status: string) {
 
 export function AdminListingsPage() {
   const queryClient = useQueryClient()
-  const { clearFeedback, feedback, setErrorFeedback, setWarningFeedback } = useOperationFeedback()
+  const { clearFeedback, feedback, setErrorFeedback } = useOperationFeedback()
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] =
     useState<(typeof listingStatusFilterOptions)[number]['value']>('all')
@@ -60,6 +67,7 @@ export function AdminListingsPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [idsPendingDelete, setIdsPendingDelete] = useState<string[]>([])
   const [deleteDialogDescription, setDeleteDialogDescription] = useState('')
+  const [successNotice, setSuccessNotice] = useState<SuccessNoticeState | null>(null)
 
   const listingsQuery = useQuery({
     placeholderData: (previousData) => previousData,
@@ -98,11 +106,6 @@ export function AdminListingsPage() {
       setErrorFeedback(error, 'Não foi possível excluir os anúncios selecionados.')
     },
     onSuccess: async (_, listingIds) => {
-      setWarningFeedback(
-        listingIds.length === 1
-          ? 'Anúncio excluído permanentemente com sucesso.'
-          : `${listingIds.length} anúncios excluídos permanentemente com sucesso.`,
-      )
       setIdsPendingDelete([])
       setSelectedIds([])
       await Promise.all([
@@ -111,6 +114,14 @@ export function AdminListingsPage() {
         queryClient.invalidateQueries({ queryKey: ['listings', 'public'] }),
         queryClient.invalidateQueries({ queryKey: ['listings', 'admin', 'stats'] }),
       ])
+      setSuccessNotice({
+        actionLabel: 'Continuar',
+        description:
+          listingIds.length === 1
+            ? 'O anúncio foi excluído permanentemente com sucesso.'
+            : `${listingIds.length} anúncios foram excluídos permanentemente com sucesso.`,
+        title: 'Exclusão concluída',
+      })
     },
   })
 
@@ -475,6 +486,14 @@ export function AdminListingsPage() {
         open={idsPendingDelete.length > 0}
         title="Confirmar exclusão permanente"
         tone="danger"
+      />
+
+      <SuccessNoticeDialog
+        actionLabel={successNotice?.actionLabel ?? 'Continuar'}
+        description={successNotice?.description ?? ''}
+        onAction={() => setSuccessNotice(null)}
+        open={Boolean(successNotice)}
+        title={successNotice?.title ?? 'Operação concluída'}
       />
     </section>
   )

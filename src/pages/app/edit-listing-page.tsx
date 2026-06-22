@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { DashboardAlertCard } from '@/components/dashboard/dashboard-alert-card'
 import { ListingEditor, type ListingEditorSubmitPayload } from '@/components/listings/listing-editor'
@@ -19,7 +19,6 @@ import { useAuth } from '@/hooks/use-auth'
 export function AppEditListingPage() {
   const { id = '' } = useParams()
   const { user } = useAuth()
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
 
   const referencesQuery = useQuery({
@@ -99,17 +98,18 @@ export function AppEditListingPage() {
         queryClient.invalidateQueries({ queryKey: ['listings', 'public'] }),
       ])
 
-      if (payload.submitAfterSave) {
-        navigate(paths.app.listings, {
-          replace: true,
-          state: {
-            reviewSubmission: {
-              listingId: id,
-              listingTitle: payload.values.title.trim(),
-            },
-          },
-        })
-      }
+      return payload.submitAfterSave
+        ? {
+            actionLabel: 'Ir para meus anúncios',
+            description: 'As alterações foram salvas e o anúncio foi enviado para análise.',
+            redirectTo: paths.app.listings,
+            title: 'Anúncio enviado para análise',
+          }
+        : {
+            actionLabel: 'Continuar editando',
+            description: 'As alterações foram salvas como rascunho.',
+            title: 'Rascunho salvo',
+          }
     },
   })
 
