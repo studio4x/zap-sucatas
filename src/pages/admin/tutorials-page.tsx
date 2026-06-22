@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowUpDown, BookOpen, Eye, GripVertical, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { ArrowUpDown, BookOpen, ChevronDown, Eye, GripVertical, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminTutorialContent } from '@/components/admin/admin-tutorial-content'
@@ -170,36 +170,54 @@ export function AdminTutorialsPage() {
       <Card className="rounded-[2rem] border border-white/75 bg-white/90 shadow-[0_28px_70px_-52px_rgba(15,23,42,0.85)]">
         <CardContent className="space-y-5 p-6 md:p-8">
           <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Módulos de aprendizado</p>
-            <h2 className="font-display text-2xl text-slate-950">Separe a leitura por área do painel</h2>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Categorias de aprendizado</p>
+            <h2 className="font-display text-2xl text-slate-950">Abra cada categoria para ver volume e resumo</h2>
             <p className="text-sm leading-7 text-slate-600">
-              Clique em um módulo para filtrar os tutoriais por assunto. Isso ajuda quem está começando a encontrar o caminho sem precisar conhecer a estrutura interna.
+              Selecione uma categoria para filtrar os tutoriais por assunto. A lista mostra quantos itens existem e um resumo do conteúdo de cada bloco.
             </p>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="space-y-3">
             {moduleCards.map((module) => (
-              <button
+              <details
                 className={cn(
-                  'flex h-full flex-col items-start rounded-[1.5rem] border px-4 py-4 text-left transition',
+                  'group rounded-[1.5rem] border bg-white shadow-[0_18px_40px_-32px_rgba(15,23,42,0.18)] transition',
                   module.isActive
-                    ? 'border-sky-300 bg-sky-50 shadow-[0_18px_40px_-32px_rgba(14,116,144,0.6)]'
-                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
+                    ? 'border-sky-300 bg-sky-50'
+                    : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50',
                 )}
                 key={module.key}
-                onClick={() => setCategoryFilter(module.title)}
-                type="button"
               >
-                <div className="flex w-full items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <p className="text-base font-semibold text-slate-950">{module.title}</p>
+                <summary className="flex cursor-pointer list-none items-start justify-between gap-3 px-4 py-4 [&::-webkit-details-marker]:hidden">
+                  <div className="min-w-0 space-y-1 text-left">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-base font-semibold text-slate-950">{module.title}</p>
+                      <span className="inline-flex items-center rounded-full bg-slate-950 px-2.5 py-1 text-xs font-semibold text-white">
+                        {module.count} {module.count === 1 ? 'tutorial' : 'tutoriais'}
+                      </span>
+                    </div>
                     <p className="text-sm leading-6 text-slate-600">{module.description}</p>
                   </div>
-                  <span className="inline-flex min-w-10 items-center justify-center rounded-full bg-slate-950 px-2.5 py-1 text-xs font-semibold text-white">
-                    {module.count}
-                  </span>
+                  <ChevronDown className="mt-1 size-4 shrink-0 text-slate-400 transition group-open:rotate-180 group-open:text-slate-600" />
+                </summary>
+
+                <div className="border-t border-slate-200/80 px-4 pb-4 pt-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="max-w-3xl text-sm leading-7 text-slate-600">
+                      {module.isActive
+                        ? 'Esta categoria está ativa na listagem. Use o botão abaixo para manter o filtro aplicado.'
+                        : 'Abra esta categoria para filtrar a coleção e concentrar a leitura no assunto escolhido.'}
+                    </p>
+                    <Button
+                      onClick={() => setCategoryFilter(module.title)}
+                      type="button"
+                      variant={module.isActive ? 'default' : 'outline'}
+                    >
+                      {module.isActive ? 'Categoria ativa' : 'Filtrar categoria'}
+                    </Button>
+                  </div>
                 </div>
-              </button>
+              </details>
             ))}
           </div>
 
