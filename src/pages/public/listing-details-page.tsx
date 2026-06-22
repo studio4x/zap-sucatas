@@ -225,6 +225,8 @@ export function ListingDetailsPage() {
   const normalizedDescription = normalizeListingRichText(listing.description)
   const descriptionHasHtml = blogContentHasHtml({ raw: normalizedDescription })
   const descriptionContent = normalizedDescription
+  const hasPrimaryMaterial =
+    Boolean(listing.materialName?.trim()) && listing.materialName?.trim().toLowerCase() !== 'não informado'
   const canOpenQuestionFlow = isAuthenticated && user?.status === 'active'
 
   async function handleInlineLogin() {
@@ -476,14 +478,14 @@ export function ListingDetailsPage() {
                     {listing.categoryName ?? 'Não informada'}
                   </p>
                 </div>
-                <div className="rounded-[1.4rem] border border-border bg-[linear-gradient(180deg,#fafcf9_0%,#f5f8f4_100%)] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    Material principal
-                  </p>
-                  <p className="mt-2 text-sm font-medium text-foreground">
-                    {listing.materialName ?? 'Não informado'}
-                  </p>
-                </div>
+                {hasPrimaryMaterial ? (
+                  <div className="rounded-[1.4rem] border border-border bg-[linear-gradient(180deg,#fafcf9_0%,#f5f8f4_100%)] p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      Material principal
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-foreground">{listing.materialName}</p>
+                  </div>
+                ) : null}
               </div>
 
               {listing.attributes.length > 0 ? (
