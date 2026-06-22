@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowUpDown, BookOpen, ChevronDown, Eye, GripVertical, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { ArrowUpDown, Eye, GripVertical, Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminTutorialContent } from '@/components/admin/admin-tutorial-content'
@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { ADMIN_TUTORIAL_MODULES } from '@/domains/admin-tutorials/modules'
 import type { AdminTutorial } from '@/domains/admin-tutorials/types'
 import { useAdminTutorials } from '@/domains/admin-tutorials/use-admin-tutorials'
 import { useOperationFeedback } from '@/hooks/use-operation-feedback'
@@ -78,9 +77,22 @@ export function AdminTutorialsPage() {
   }, [navigate, selectedTutorialFromUrl, slug, syncTutorialSelection])
 
   const normalizedSearch = search.trim().toLocaleLowerCase('pt-BR')
-  const categories = useMemo(() => {
-    return [...new Set(tutorials.map((tutorial) => tutorial.category.trim()).filter(Boolean))]
-      .sort((left, right) => left.localeCompare(right, 'pt-BR'))
+  const categoryOptions = useMemo(() => {
+    const counts = new Map<string, number>()
+
+    tutorials.forEach((tutorial) => {
+      const category = tutorial.category.trim()
+
+      if (!category) {
+        return
+      }
+
+      counts.set(category, (counts.get(category) ?? 0) + 1)
+    })
+
+    return [...counts.entries()]
+      .map(([category, count]) => ({ category, count }))
+      .sort((left, right) => left.category.localeCompare(right.category, 'pt-BR'))
   }, [tutorials])
   const filteredTutorials = useMemo(() => {
     return tutorials.filter((tutorial) => {
@@ -97,15 +109,6 @@ export function AdminTutorialsPage() {
 
   const hasFilters = normalizedSearch.length > 0 || categoryFilter !== 'all'
   const canReorder = !hasFilters
-  const moduleCards = useMemo(
-    () =>
-      ADMIN_TUTORIAL_MODULES.map((module) => ({
-        ...module,
-        count: tutorials.filter((tutorial) => tutorial.category === module.title).length,
-        isActive: categoryFilter === module.title,
-      })),
-    [categoryFilter, tutorials],
-  )
 
   function openCreateModal() {
     clearFeedback()
@@ -201,60 +204,33 @@ export function AdminTutorialsPage() {
         <CardContent className="space-y-5 p-6 md:p-8">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Categorias de aprendizado</p>
-            <h2 className="font-display text-2xl text-slate-950">Abra cada categoria para ver volume e resumo</h2>
+            <h2 className="font-display text-2xl text-slate-950">Filtre a lista por categoria</h2>
             <p className="text-sm leading-7 text-slate-600">
-              Selecione uma categoria para filtrar os tutoriais por assunto. A lista mostra quantos itens existem e um resumo do conteúdo de cada bloco.
+              Escolha uma categoria na caixa suspensa para atualizar a listagem. A primeira opção mostra todos os tutoriais.
             </p>
           </div>
 
-          <div className="space-y-3">
-            {moduleCards.map((module) => (
-              <details
-                className={cn(
-                  'group rounded-[1.5rem] border bg-white shadow-[0_18px_40px_-32px_rgba(15,23,42,0.18)] transition',
-                  module.isActive
-                    ? 'border-sky-300 bg-sky-50'
-                    : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50',
-                )}
-                key={module.key}
-              >
-                <summary className="flex cursor-pointer list-none items-start justify-between gap-3 px-4 py-4 [&::-webkit-details-marker]:hidden">
-                  <div className="min-w-0 space-y-1 text-left">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-base font-semibold text-slate-950">{module.title}</p>
-                      <span className="inline-flex items-center rounded-full bg-slate-950 px-2.5 py-1 text-xs font-semibold text-white">
-                        {module.count} {module.count === 1 ? 'tutorial' : 'tutoriais'}
-                      </span>
-                    </div>
-                    <p className="text-sm leading-6 text-slate-600">{module.description}</p>
-                  </div>
-                  <ChevronDown className="mt-1 size-4 shrink-0 text-slate-400 transition group-open:rotate-180 group-open:text-slate-600" />
-                </summary>
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <label className="block">
+              <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Categoria</span>
+              <Select onChange={(event) => setCategoryFilter(event.target.value)} value={categoryFilter}>
+                <option value="all">Todos os tutoriais</option>
+                {categoryOptions.map((option) => (
+                  <option key={option.category} value={option.category}>
+                    {option.category} ({option.count})
+                  </option>
+                ))}
+              </Select>
+            </label>
 
-                <div className="border-t border-slate-200/80 px-4 pb-4 pt-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <p className="max-w-3xl text-sm leading-7 text-slate-600">
-                      {module.isActive
-                        ? 'Esta categoria está ativa na listagem. Use o botão abaixo para manter o filtro aplicado.'
-                        : 'Abra esta categoria para filtrar a coleção e concentrar a leitura no assunto escolhido.'}
-                    </p>
-                    <Button
-                      onClick={() => setCategoryFilter(module.title)}
-                      type="button"
-                      variant={module.isActive ? 'default' : 'outline'}
-                    >
-                      {module.isActive ? 'Categoria ativa' : 'Filtrar categoria'}
-                    </Button>
-                  </div>
-                </div>
-              </details>
-            ))}
+            <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-600">
+              <p className="font-semibold text-slate-950">Dica operacional</p>
+              <p className="mt-1">
+                Use a caixa suspensa para navegar entre grupos de conteúdo sem poluir a tela com múltiplos cards de filtro.
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 rounded-[1.25rem] bg-slate-50 px-4 py-3 text-sm text-slate-600">
-            <span className="font-semibold text-slate-900">Dica operacional:</span>
-            <span>use os módulos para ensinar por tarefa. O admin não precisa aprender o sistema, só o que clicar e em que ordem.</span>
-          </div>
         </CardContent>
       </Card>
 
@@ -273,7 +249,7 @@ export function AdminTutorialsPage() {
             </div>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px_auto]">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto]">
             <label className="relative block">
               <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Buscar tutorial</span>
               <Search className="pointer-events-none absolute left-4 top-[3.3rem] size-4 text-slate-400" />
@@ -283,18 +259,6 @@ export function AdminTutorialsPage() {
                 placeholder="Buscar por título, resumo ou categoria"
                 value={search}
               />
-            </label>
-
-            <label className="block">
-              <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Filtrar por categoria</span>
-              <Select onChange={(event) => setCategoryFilter(event.target.value)} value={categoryFilter}>
-                <option value="all">Todas as categorias</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </Select>
             </label>
 
             {hasFilters ? (
@@ -341,10 +305,10 @@ export function AdminTutorialsPage() {
                 return (
                   <article
                     className={cn(
-                      'rounded-[1.75rem] border border-white/80 bg-white p-5 shadow-[0_24px_60px_-44px_rgba(15,23,42,0.65)] transition',
+                      'rounded-[1.4rem] border border-white/80 bg-white p-4 shadow-[0_20px_48px_-38px_rgba(15,23,42,0.52)] transition',
                       isSelected && 'ring-2 ring-sky-300',
                       canReorder && 'cursor-grab',
-                      isDragged && 'scale-[1.01] bg-sky-50 shadow-[0_36px_80px_-46px_rgba(14,116,144,0.62)]',
+                      isDragged && 'scale-[1.01] bg-sky-50 shadow-[0_30px_72px_-44px_rgba(14,116,144,0.48)]',
                       isDropTarget && 'border-sky-300 bg-sky-50/70',
                     )}
                     draggable={canReorder}
@@ -373,47 +337,24 @@ export function AdminTutorialsPage() {
                       handleDrop(tutorial.id)
                     }}
                   >
-                    <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-                      <div className="min-w-0 space-y-4">
-                        <div className="flex flex-wrap items-center gap-2">
-                          {canReorder ? (
-                            <span
-                              aria-label={`Mover tutorial ${tutorial.title}`}
-                              className="inline-flex size-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500"
-                              role="img"
-                            >
-                              <GripVertical className="size-4" />
-                            </span>
-                          ) : null}
-                          <span className="inline-flex items-center rounded-full bg-sky-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-800">
-                            {tutorial.category}
+                    <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                      <div className="flex min-w-0 items-center gap-3">
+                        {canReorder ? (
+                          <span
+                            aria-label={`Mover tutorial ${tutorial.title}`}
+                            className="inline-flex size-9 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500"
+                            role="img"
+                          >
+                            <GripVertical className="size-4" />
                           </span>
-                          <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-                            {tutorial.estimatedMinutes} min
-                          </span>
-                          <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-                            {tutorial.steps.length} passo{tutorial.steps.length > 1 ? 's' : ''}
-                          </span>
-                        </div>
-
-                        <div className="space-y-2">
-                          <h3 className="font-display text-2xl leading-tight text-slate-950">{tutorial.title}</h3>
-                          <p className="max-w-3xl text-sm leading-7 text-slate-600">{tutorial.summary}</p>
-                        </div>
-
-                        <div className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
-                          Categoria: {tutorial.category}
-                        </div>
+                        ) : null}
+                        <h3 className="font-display text-xl leading-tight text-slate-950 md:text-[1.35rem]">{tutorial.title}</h3>
                       </div>
 
-                      <div className="flex flex-wrap gap-2 xl:max-w-[340px] xl:justify-end">
+                      <div className="flex flex-wrap gap-2 xl:justify-end">
                         <Button onClick={() => handleOpenOnPage(tutorial.id)} type="button" variant={isSelected ? 'default' : 'outline'}>
                           <Eye className="size-4" />
                           Na página
-                        </Button>
-                        <Button onClick={() => openTutorial(tutorial.id)} type="button" variant="outline">
-                          <BookOpen className="size-4" />
-                          Widget
                         </Button>
                         <Button onClick={() => openEditModal(tutorial)} type="button" variant="outline">
                           <Pencil className="size-4" />
