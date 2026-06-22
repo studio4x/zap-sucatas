@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowUpDown, Eye, GripVertical, Pencil, Plus, Search, Trash2 } from 'lucide-react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { ArrowUpDown, Eye, GripVertical, Pencil, Search, Trash2 } from 'lucide-react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminTutorialContent } from '@/components/admin/admin-tutorial-content'
 import { AdminTutorialFormModal } from '@/components/admin/admin-tutorial-form-modal'
@@ -110,11 +110,6 @@ export function AdminTutorialsPage() {
   const hasFilters = normalizedSearch.length > 0 || categoryFilter !== 'all'
   const canReorder = !hasFilters
 
-  function openCreateModal() {
-    clearFeedback()
-    setModalState({ open: true, tutorial: null })
-  }
-
   function openEditModal(tutorial: AdminTutorial) {
     clearFeedback()
     setModalState({ open: true, tutorial })
@@ -180,22 +175,9 @@ export function AdminTutorialsPage() {
                 <p className="text-sm leading-7 text-slate-700 md:text-[15px]">
                   Conteúdos rápidos para executar tarefas sem perder tempo. Crie, revise, ordene e abra o mesmo tutorial na página ou no widget global do admin.
                 </p>
-                <div className="inline-flex flex-wrap gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-xs text-slate-700 shadow-sm backdrop-blur-sm">
-                  <span className="font-semibold uppercase tracking-[0.16em]">Acesso restrito</span>
-                  <span>Esses tutoriais ficam visíveis somente no painel admin, para usuários logados com permissão administrativa.</span>
-                </div>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Button className="bg-white !text-slate-950 hover:bg-white/90" onClick={openCreateModal} type="button">
-                <Plus className="size-4" />
-                NOVO TUTORIAL
-              </Button>
-              <Button asChild className="border-slate-200 bg-white !text-slate-950 hover:bg-slate-50" type="button" variant="outline">
-                <Link to={paths.admin.root}>Voltar ao admin</Link>
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -223,12 +205,6 @@ export function AdminTutorialsPage() {
               </Select>
             </label>
 
-            <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-600">
-              <p className="font-semibold text-slate-950">Dica operacional</p>
-              <p className="mt-1">
-                Use a caixa suspensa para navegar entre grupos de conteúdo sem poluir a tela com múltiplos cards de filtro.
-              </p>
-            </div>
           </div>
 
         </CardContent>
@@ -284,10 +260,6 @@ export function AdminTutorialsPage() {
                 ? 'Arraste os cards para reorganizar a ordem dos tutoriais.'
                 : 'A ordenação fica disponível somente sem busca e sem filtro de categoria.'}
             </div>
-            <Button onClick={openCreateModal} type="button" variant="ghost">
-              <Plus className="size-4" />
-              Criar tutorial
-            </Button>
           </div>
 
           {filteredTutorials.length === 0 ? (
