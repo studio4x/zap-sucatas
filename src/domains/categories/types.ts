@@ -4,6 +4,7 @@ export type ListingCategory = {
   id: string
   isActive: boolean
   name: string
+  parentId: string | null
   slug: string
   sortOrder: number
   updatedAt: string
@@ -20,6 +21,8 @@ export type ListingMaterial = {
 
 export type AdminListingCategory = ListingCategory & {
   approvedListings: number
+  depth: number
+  pathLabel: string
   pendingListings: number
   totalListings: number
 }
@@ -32,4 +35,12 @@ export type AdminListingMaterial = ListingMaterial & {
 
 export type PublicListingCategory = ListingCategory & {
   approvedListings: number
+  depth: number
+  pathLabel: string
+  pendingListings: number
+  totalListings: number
+}
+
+export type PublicListingCategoryNode = PublicListingCategory & {
+  children: PublicListingCategoryNode[]
 }

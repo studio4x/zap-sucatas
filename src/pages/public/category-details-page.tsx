@@ -77,6 +77,20 @@ export function CategoryDetailsPage() {
               eyebrow="Categoria"
               title={category.name}
             />
+            {category.children.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  Subcategorias
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {category.children.map((child) => (
+                    <Button key={child.id} asChild size="sm" variant="outline">
+                      <Link to={paths.public.categoryDetails(child.slug)}>{child.name}</Link>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
@@ -93,7 +107,7 @@ export function CategoryDetailsPage() {
                 Descoberta
               </p>
               <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                Página dedicada para leitura setorial e navegação mais rápida.
+                Página dedicada para leitura setorial, navegação hierárquica e descoberta mais rápida.
               </p>
             </div>
             <div className="rounded-[1.5rem] border border-white/85 bg-white/88 p-4 shadow-sm">

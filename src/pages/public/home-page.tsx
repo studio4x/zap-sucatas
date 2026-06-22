@@ -24,7 +24,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { fetchPublicCategories } from '@/domains/categories/api'
-import type { PublicListingCategory } from '@/domains/categories/types'
+import type { PublicListingCategoryNode } from '@/domains/categories/types'
 import { fetchFeaturedPublicListings } from '@/domains/listings/api'
 import type { Listing } from '@/domains/listings/types'
 import { formatListingDate } from '@/domains/listings/utils'
@@ -76,7 +76,7 @@ const categoryIconMap: Record<string, typeof Factory> = {
   plastico: Recycle,
 }
 
-function getCategoryIcon(category: PublicListingCategory) {
+function getCategoryIcon(category: PublicListingCategoryNode) {
   const normalizedSlug = category.slug
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')

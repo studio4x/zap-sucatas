@@ -59,9 +59,13 @@ export type Listing = {
 
 export type ListingCategory = {
   description: string | null
+  depth: number
   id: string
   name: string
+  parentId: string | null
+  pathLabel: string
   slug: string
+  sortOrder: number
 }
 
 export type ListingMaterial = {

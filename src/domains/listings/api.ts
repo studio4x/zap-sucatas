@@ -18,9 +18,24 @@ import type {
   PublicListingSort,
 } from '@/domains/listings/types'
 import { normalizeListingCity, normalizeListingState } from '@/domains/listings/utils'
+import {
+  buildCategoryTree,
+  collectCategoryAndDescendantIds,
+  flattenCategoryTree,
+} from '@/domains/categories/utils'
 
 const LISTING_MEDIA_BUCKET = 'listing-media'
 let brazilLocalitiesPromise: Promise<{ stateCityMap: Record<string, string[]>; states: string[] }> | null = null
+
+type ListingCategoryRow = {
+  created_at: string
+  description: string | null
+  id: string
+  name: string
+  parent_id: string | null
+  slug: string
+  sort_order: number
+}
 
 type ListingRow = {
   category_id: string
@@ -131,6 +146,30 @@ function toPublicImage(row: ListingImageRow): ListingImage {
     sortOrder: row.sort_order,
     storagePath: row.storage_path,
   }
+}
+
+async function resolveCategoryAndDescendantIds(categoryId: string) {
+  const client = ensureSupabase()
+  const { data, error } = await client
+    .from('listing_categories')
+    .select('id, name, parent_id, sort_order')
+    .eq('is_active', true)
+
+  if (error) {
+    throw error
+  }
+
+  const tree = buildCategoryTree(
+    (data ?? []).map((row) => ({
+      id: row.id,
+      name: row.name,
+      parentId: row.parent_id,
+      sortOrder: row.sort_order,
+    })),
+  )
+  const categoryIds = collectCategoryAndDescendantIds(tree, categoryId)
+
+  return categoryIds.length > 0 ? categoryIds : [categoryId]
 }
 
 function sortImages(images: ListingImage[]) {
@@ -274,7 +313,7 @@ export async function fetchListingReferences() {
     await Promise.all([
       client
         .from('listing_categories')
-        .select('id, name, slug, description')
+        .select('id, name, slug, description, parent_id, sort_order')
         .eq('is_active', true)
         .order('sort_order', { ascending: true }),
       client
@@ -340,8 +379,31 @@ export async function fetchListingReferences() {
     stateCityMap[uf] = stateCityMap[uf].slice().sort((left, right) => left.localeCompare(right, 'pt-BR'))
   })
 
+  const categoryTree = buildCategoryTree(
+    (categories ?? []).map((row) => ({
+      description: (row as ListingCategoryRow).description,
+      depth: 0,
+      id: row.id,
+      name: row.name,
+      parentId: (row as ListingCategoryRow).parent_id,
+      pathLabel: row.name,
+      slug: row.slug,
+      sortOrder: (row as ListingCategoryRow).sort_order,
+    })),
+  )
+
   return {
-    categories: (categories ?? []) as ListingCategory[],
+    categories: flattenCategoryTree(categoryTree).map((category) => ({
+      createdAt: '',
+      description: category.description,
+      depth: category.depth,
+      id: category.id,
+      name: category.name,
+      parentId: category.parentId,
+      pathLabel: category.pathLabel,
+      slug: category.slug,
+      sortOrder: category.sortOrder,
+    })) as ListingCategory[],
     cities,
     materials: (materials ?? []) as ListingMaterial[],
     stateCityMap,
@@ -561,7 +623,8 @@ export async function fetchPublicListings(filters: PublicListingFilters = {}) {
   let query = buildBaseListingQuery().eq('status', 'approved')
 
   if (filters.categoryId) {
-    query = query.eq('category_id', filters.categoryId)
+    const categoryIds = await resolveCategoryAndDescendantIds(filters.categoryId)
+    query = query.in('category_id', categoryIds)
   }
 
   if (filters.primaryMaterialId) {
@@ -653,7 +716,8 @@ export async function fetchPublicListingsPage(
     .range(from, to)
 
   if (filters.categoryId) {
-    query = query.eq('category_id', filters.categoryId)
+    const categoryIds = await resolveCategoryAndDescendantIds(filters.categoryId)
+    query = query.in('category_id', categoryIds)
   }
 
   if (filters.primaryMaterialId) {
@@ -727,9 +791,11 @@ export async function fetchRelatedPublicListingsByCategory(input: {
   excludeListingId: string
   limit?: number
 }) {
+  const categoryIds = await resolveCategoryAndDescendantIds(input.categoryId)
+
   const { data, error } = await buildBaseListingQuery()
     .eq('status', 'approved')
-    .eq('category_id', input.categoryId)
+    .in('category_id', categoryIds)
     .neq('id', input.excludeListingId)
     .order('is_featured', { ascending: false })
     .order('published_at', { ascending: false })

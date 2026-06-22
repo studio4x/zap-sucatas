@@ -35,6 +35,7 @@ const emptyCategoryValues: AdminCategoryFormValues = {
   description: '',
   isActive: true,
   name: '',
+  parentId: '',
   slug: '',
 }
 
@@ -49,6 +50,7 @@ function categoryToFormValues(category: AdminListingCategory): AdminCategoryForm
     description: category.description ?? '',
     isActive: category.isActive,
     name: category.name,
+    parentId: category.parentId ?? '',
     slug: category.slug,
   }
 }
@@ -146,6 +148,7 @@ export function AdminCategoriesPage() {
           description: category.description ?? '',
           isActive: !category.isActive,
           name: category.name,
+          parentId: category.parentId ?? '',
           slug: category.slug,
         },
       }),
@@ -165,6 +168,17 @@ export function AdminCategoriesPage() {
   })
 
   const categories = useMemo(() => categoriesQuery.data ?? [], [categoriesQuery.data])
+  const categoriesByParent = useMemo(() => {
+    return categories.reduce<Record<string, AdminListingCategory[]>>((accumulator, category) => {
+      const key = category.parentId ?? '__root__'
+      if (!accumulator[key]) {
+        accumulator[key] = []
+      }
+
+      accumulator[key].push(category)
+      return accumulator
+    }, {})
+  }, [categories])
   const filteredCategories = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
 
@@ -204,7 +218,18 @@ export function AdminCategoriesPage() {
     toggleActiveMutation.isPending
 
   function handleMove(categoryId: string, direction: 'down' | 'up') {
-    const currentIndex = categories.findIndex((category) => category.id === categoryId)
+    const category = categories.find((item) => item.id === categoryId)
+
+    if (!category) {
+      return
+    }
+
+    const siblingIds = (categoriesByParent[category.parentId ?? '__root__'] ?? [])
+      .slice()
+      .sort((left, right) => left.sortOrder - right.sortOrder || left.name.localeCompare(right.name, 'pt-BR'))
+      .map((item) => item.id)
+
+    const currentIndex = siblingIds.indexOf(categoryId)
 
     if (currentIndex < 0) {
       return
@@ -212,14 +237,17 @@ export function AdminCategoriesPage() {
 
     const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
 
-    if (targetIndex < 0 || targetIndex >= categories.length) {
+    if (targetIndex < 0 || targetIndex >= siblingIds.length) {
       return
     }
 
-    const orderedIds = categories.map((category) => category.id)
+    const orderedIds = siblingIds.slice()
     const [movedId] = orderedIds.splice(currentIndex, 1)
     orderedIds.splice(targetIndex, 0, movedId)
-    reorderMutation.mutate(orderedIds)
+    reorderMutation.mutate({
+      orderedIds,
+      parentId: category.parentId,
+    })
   }
 
   return (
@@ -316,26 +344,39 @@ export function AdminCategoriesPage() {
               cell: (category) => (
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-foreground">{category.sortOrder}</span>
-                  <div className="flex gap-1">
-                    <Button
-                      disabled={isBusy || categories[0]?.id === category.id}
-                      onClick={() => handleMove(category.id, 'up')}
-                      size="icon"
-                      type="button"
-                      variant="outline"
-                    >
-                      <ArrowUp className="size-4" />
-                    </Button>
-                    <Button
-                      disabled={isBusy || categories[categories.length - 1]?.id === category.id}
-                      onClick={() => handleMove(category.id, 'down')}
-                      size="icon"
-                      type="button"
-                      variant="outline"
-                    >
-                      <ArrowDown className="size-4" />
-                    </Button>
-                  </div>
+                  {(() => {
+                    const siblingIds = (categoriesByParent[category.parentId ?? '__root__'] ?? [])
+                      .slice()
+                      .sort(
+                        (left, right) =>
+                          left.sortOrder - right.sortOrder ||
+                          left.name.localeCompare(right.name, 'pt-BR'),
+                      )
+                      .map((item) => item.id)
+
+                    return (
+                      <div className="flex gap-1">
+                        <Button
+                          disabled={isBusy || siblingIds[0] === category.id}
+                          onClick={() => handleMove(category.id, 'up')}
+                          size="icon"
+                          type="button"
+                          variant="outline"
+                        >
+                          <ArrowUp className="size-4" />
+                        </Button>
+                        <Button
+                          disabled={isBusy || siblingIds[siblingIds.length - 1] === category.id}
+                          onClick={() => handleMove(category.id, 'down')}
+                          size="icon"
+                          type="button"
+                          variant="outline"
+                        >
+                          <ArrowDown className="size-4" />
+                        </Button>
+                      </div>
+                    )
+                  })()}
                 </div>
               ),
             },
@@ -343,8 +384,16 @@ export function AdminCategoriesPage() {
               header: 'Categoria',
               cell: (category) => (
                 <div className="space-y-1">
-                  <p className="font-medium text-foreground">{category.name}</p>
+                  <p
+                    className="font-medium text-foreground"
+                    style={{ paddingLeft: `${category.depth * 16}px` }}
+                  >
+                    {category.pathLabel}
+                  </p>
                   <p className="text-xs text-muted-foreground">{category.description ?? 'Sem descrição'}</p>
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                    {category.parentId ? 'Subcategoria' : 'Categoria principal'}
+                  </p>
                 </div>
               ),
             },
@@ -402,7 +451,7 @@ export function AdminCategoriesPage() {
                       onClick: () => {
                         if (
                           window.confirm(
-                            'Excluir esta categoria só é permitido quando não houver anúncios vinculados. Deseja continuar?',
+                            'Excluir esta categoria só é permitido quando não houver anúncios vinculados nem subcategorias. Deseja continuar?',
                           )
                         ) {
                           deleteMutation.mutate(category.id)
@@ -451,6 +500,8 @@ export function AdminCategoriesPage() {
             <div className="mt-4">
               <AdminCategoryForm
                 defaultValues={editingCategory ? categoryToFormValues(editingCategory) : emptyCategoryValues}
+                categories={categories}
+                currentCategoryId={editingCategory?.id ?? null}
                 isPending={saveMutation.isPending}
                 onCancel={() => {
                   setEditingCategory(null)

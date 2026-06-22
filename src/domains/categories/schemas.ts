@@ -4,6 +4,7 @@ export const adminCategoryFormSchema = z.object({
   description: z.string().trim(),
   isActive: z.boolean(),
   name: z.string().trim().min(2, 'Informe o nome da categoria.'),
+  parentId: z.string().trim(),
   slug: z.string().trim(),
 })
 

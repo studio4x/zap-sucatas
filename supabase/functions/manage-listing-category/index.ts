@@ -10,6 +10,7 @@ type CreatePayload = {
   description?: string | null
   mode: 'create'
   name?: string
+  parentId?: string | null
   slug?: string
 }
 
@@ -19,6 +20,7 @@ type UpdatePayload = {
   isActive?: boolean
   mode: 'update'
   name?: string
+  parentId?: string | null
   slug?: string
 }
 
@@ -30,9 +32,18 @@ type DeletePayload = {
 type ReorderPayload = {
   mode: 'reorder'
   orderedIds?: string[]
+  parentId?: string | null
 }
 
 type RequestBody = CreatePayload | DeletePayload | ReorderPayload | UpdatePayload
+
+type AdminClient = ReturnType<typeof createAdminClient>
+
+type CategoryRecord = {
+  id: string
+  parent_id: string | null
+  sort_order: number
+}
 
 function normalizeName(value: unknown) {
   if (typeof value !== 'string') {
@@ -50,10 +61,20 @@ function normalizeDescription(value: unknown) {
   return typeof value === 'string' ? value.trim() || null : null
 }
 
+function normalizeParentId(value: unknown) {
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : null
+}
+
 async function buildCategoryPayload(input: {
   currentId?: string | null
   description?: unknown
   name?: unknown
+  parentId?: unknown
   slug?: unknown
 }) {
   const name = normalizeName(input.name)
@@ -65,6 +86,7 @@ async function buildCategoryPayload(input: {
   return {
     description: normalizeDescription(input.description),
     name,
+    parentId: normalizeParentId(input.parentId),
     slug: await generateUniqueSlug({
       currentId: input.currentId,
       fallback: 'categoria',
@@ -72,6 +94,100 @@ async function buildCategoryPayload(input: {
       table: 'listing_categories',
     }),
   }
+}
+
+async function fetchCategoryRecords(admin: AdminClient) {
+  const { data, error } = await admin.from('listing_categories').select('id, parent_id, sort_order')
+
+  if (error) {
+    throw error
+  }
+
+  return (data ?? []) as CategoryRecord[]
+}
+
+function buildChildMap(records: CategoryRecord[]) {
+  const childMap = new Map<string, string[]>()
+
+  for (const record of records) {
+    if (!record.parent_id) {
+      continue
+    }
+
+    const current = childMap.get(record.parent_id) ?? []
+    current.push(record.id)
+    childMap.set(record.parent_id, current)
+  }
+
+  return childMap
+}
+
+function collectDescendants(categoryId: string, childMap: Map<string, string[]>) {
+  const descendants = new Set<string>()
+  const stack = [...(childMap.get(categoryId) ?? [])]
+
+  while (stack.length > 0) {
+    const current = stack.pop()!
+    if (descendants.has(current)) {
+      continue
+    }
+
+    descendants.add(current)
+    stack.push(...(childMap.get(current) ?? []))
+  }
+
+  return descendants
+}
+
+async function resolveParentAndCycleCheck(input: {
+  admin: AdminClient
+  categoryId?: string | null
+  parentId: string | null
+}) {
+  if (!input.parentId) {
+    return
+  }
+
+  if (input.categoryId && input.categoryId === input.parentId) {
+    throw new Error('Uma categoria não pode ser pai de si mesma.')
+  }
+
+  const records = await fetchCategoryRecords(input.admin)
+  const parentExists = records.some((record) => record.id === input.parentId)
+
+  if (!parentExists) {
+    throw new Error('Categoria pai não encontrada.')
+  }
+
+  if (input.categoryId) {
+    const descendants = collectDescendants(input.categoryId, buildChildMap(records))
+
+    if (descendants.has(input.parentId)) {
+      throw new Error('A categoria pai precisa estar fora da própria subárvore.')
+    }
+  }
+}
+
+async function resolveNextSortOrder(admin: AdminClient, parentId: string | null) {
+  let query = admin
+    .from('listing_categories')
+    .select('sort_order')
+    .order('sort_order', { ascending: false })
+    .limit(1)
+
+  if (parentId === null) {
+    query = query.is('parent_id', null)
+  } else {
+    query = query.eq('parent_id', parentId)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    throw error
+  }
+
+  return (data?.[0]?.sort_order ?? -1) + 1
 }
 
 Deno.serve(async (request) => {
@@ -86,23 +202,20 @@ Deno.serve(async (request) => {
 
     if (payload.mode === 'create') {
       const normalized = await buildCategoryPayload(payload)
-      const { data, error } = await admin
-        .from('listing_categories')
-        .select('sort_order')
-        .order('sort_order', { ascending: false })
-        .limit(1)
 
-      if (error) {
-        throw error
-      }
+      await resolveParentAndCycleCheck({
+        admin,
+        parentId: normalized.parentId,
+      })
 
-      const nextSortOrder = (data?.[0]?.sort_order ?? -1) + 1
+      const nextSortOrder = await resolveNextSortOrder(admin, normalized.parentId)
       const { data: category, error: createError } = await admin
         .from('listing_categories')
         .insert({
           description: normalized.description,
           is_active: true,
           name: normalized.name,
+          parent_id: normalized.parentId,
           slug: normalized.slug,
           sort_order: nextSortOrder,
         })
@@ -137,7 +250,7 @@ Deno.serve(async (request) => {
 
       const { data: existing, error: existingError } = await admin
         .from('listing_categories')
-        .select('id, name, slug, description, is_active, sort_order')
+        .select('id, name, slug, description, is_active, parent_id, sort_order')
         .eq('id', id)
         .single()
 
@@ -149,10 +262,22 @@ Deno.serve(async (request) => {
         currentId: id,
         description: payload.description,
         name: payload.name,
+        parentId: payload.parentId,
         slug: payload.slug,
       })
       const nextIsActive =
         typeof payload.isActive === 'boolean' ? payload.isActive : existing.is_active
+
+      await resolveParentAndCycleCheck({
+        admin,
+        categoryId: id,
+        parentId: normalized.parentId,
+      })
+
+      const parentChanged = normalized.parentId !== existing.parent_id
+      const nextSortOrder = parentChanged
+        ? await resolveNextSortOrder(admin, normalized.parentId)
+        : existing.sort_order
 
       const { error: updateError } = await admin
         .from('listing_categories')
@@ -160,7 +285,9 @@ Deno.serve(async (request) => {
           description: normalized.description,
           is_active: nextIsActive,
           name: normalized.name,
+          parent_id: normalized.parentId,
           slug: normalized.slug,
+          sort_order: nextSortOrder,
         })
         .eq('id', id)
 
@@ -177,7 +304,9 @@ Deno.serve(async (request) => {
           description: normalized.description,
           is_active: nextIsActive,
           name: normalized.name,
+          parent_id: normalized.parentId,
           slug: normalized.slug,
+          sort_order: nextSortOrder,
         },
         entityId: id,
         entityType: 'listing_category',
@@ -188,6 +317,7 @@ Deno.serve(async (request) => {
 
     if (payload.mode === 'reorder') {
       const orderedIds = Array.isArray(payload.orderedIds) ? payload.orderedIds : []
+      const parentId = normalizeParentId(payload.parentId)
 
       if (orderedIds.length === 0) {
         return jsonResponse({ error: 'orderedIds é obrigatório.' }, 400)
@@ -195,27 +325,32 @@ Deno.serve(async (request) => {
 
       const { data: categories, error: categoriesError } = await admin
         .from('listing_categories')
-        .select('id')
+        .select('id, parent_id')
         .order('sort_order', { ascending: true })
 
       if (categoriesError) {
         throw categoriesError
       }
 
-      const currentIds = (categories ?? []).map((category) => category.id)
+      const siblingIds = (categories ?? [])
+        .filter((category) => (parentId ? category.parent_id === parentId : category.parent_id === null))
+        .map((category) => category.id)
 
       if (
-        currentIds.length !== orderedIds.length ||
-        currentIds.some((categoryId) => !orderedIds.includes(categoryId))
+        siblingIds.length !== orderedIds.length ||
+        siblingIds.some((categoryId) => !orderedIds.includes(categoryId))
       ) {
-        return jsonResponse({ error: 'orderedIds deve corresponder às categorias atuais.' }, 422)
+        return jsonResponse(
+          { error: 'orderedIds deve corresponder às categorias irmãs do mesmo nível.' },
+          422,
+        )
       }
 
-      for (const [index, id] of orderedIds.entries()) {
+      for (const [index, categoryId] of orderedIds.entries()) {
         const { error: reorderError } = await admin
           .from('listing_categories')
           .update({ sort_order: index })
-          .eq('id', id)
+          .eq('id', categoryId)
 
         if (reorderError) {
           throw reorderError
@@ -227,6 +362,7 @@ Deno.serve(async (request) => {
         actorUserId: actor.id,
         afterData: {
           ordered_ids: orderedIds,
+          parent_id: parentId,
         },
         entityType: 'listing_category',
       })
@@ -242,7 +378,7 @@ Deno.serve(async (request) => {
 
     const { data: existing, error: existingError } = await admin
       .from('listing_categories')
-      .select('id, name, slug, description, is_active, sort_order')
+      .select('id, name, slug, description, is_active, parent_id, sort_order')
       .eq('id', id)
       .single()
 
@@ -250,13 +386,30 @@ Deno.serve(async (request) => {
       return jsonResponse({ error: 'Categoria não encontrada.' }, 404)
     }
 
-    const { count, error: linkedError } = await admin
-      .from('listings')
-      .select('id', { count: 'exact', head: true })
-      .eq('category_id', id)
+    const [{ count, error: linkedError }, { data: children, error: childrenError }] =
+      await Promise.all([
+        admin
+          .from('listings')
+          .select('id', { count: 'exact', head: true })
+          .eq('category_id', id),
+        admin.from('listing_categories').select('id').eq('parent_id', id).limit(1),
+      ])
 
     if (linkedError) {
       throw linkedError
+    }
+
+    if (childrenError) {
+      throw childrenError
+    }
+
+    if ((children?.length ?? 0) > 0) {
+      return jsonResponse(
+        {
+          error: 'Esta categoria possui subcategorias. Realoque ou exclua as filhas antes de remover.',
+        },
+        409,
+      )
     }
 
     if ((count ?? 0) > 0) {
@@ -268,10 +421,7 @@ Deno.serve(async (request) => {
       )
     }
 
-    const { error: deleteError } = await admin
-      .from('listing_categories')
-      .delete()
-      .eq('id', id)
+    const { error: deleteError } = await admin.from('listing_categories').delete().eq('id', id)
 
     if (deleteError) {
       throw deleteError
@@ -291,5 +441,3 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: message }, resolveHttpErrorStatus(error))
   }
 })
-
-

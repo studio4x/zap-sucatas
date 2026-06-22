@@ -4,13 +4,18 @@ import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import type { AdminListingCategory } from '@/domains/categories/types'
+import { buildCategoryTree, collectCategoryAndDescendantIds } from '@/domains/categories/utils'
 import {
   adminCategoryFormSchema,
   type AdminCategoryFormValues,
 } from '@/domains/categories/schemas'
 
 type AdminCategoryFormProps = {
+  categories: AdminListingCategory[]
+  currentCategoryId?: string | null
   defaultValues: AdminCategoryFormValues
   isPending?: boolean
   onCancel?: () => void
@@ -19,12 +24,23 @@ type AdminCategoryFormProps = {
 }
 
 export function AdminCategoryForm({
+  categories,
+  currentCategoryId,
   defaultValues,
   isPending,
   onCancel,
   onSubmit,
   submitLabel,
 }: AdminCategoryFormProps) {
+  const tree = buildCategoryTree(categories)
+  const excludedCategoryIds = currentCategoryId
+    ? new Set(collectCategoryAndDescendantIds(tree, currentCategoryId))
+    : new Set<string>()
+
+  const parentOptions = categories.filter(
+    (category) => category.id !== currentCategoryId && !excludedCategoryIds.has(category.id),
+  )
+
   const form = useForm<AdminCategoryFormValues>({
     defaultValues,
     resolver: zodResolver(adminCategoryFormSchema),
@@ -63,6 +79,23 @@ export function AdminCategoryForm({
               {...form.register('slug')}
               placeholder="Opcional. Se vazio, será gerado a partir do nome."
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground" htmlFor="category-parent">
+              Categoria pai
+            </label>
+            <Select id="category-parent" {...form.register('parentId')}>
+              <option value="">Categoria raiz</option>
+              {parentOptions.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.pathLabel}
+                </option>
+              ))}
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Deixe em branco para criar uma categoria principal. Subcategorias herdam a navegação da categoria pai.
+            </p>
           </div>
 
           <div className="space-y-2">

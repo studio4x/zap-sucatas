@@ -73,7 +73,7 @@ export function ListingFilters({
             <option value="">Todas as categorias</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
-                {category.name}
+                {category.pathLabel || category.name}
               </option>
             ))}
           </select>

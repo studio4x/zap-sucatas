@@ -4,12 +4,18 @@ import type {
   AdminListingMaterial,
   ListingCategory,
   ListingMaterial,
-  PublicListingCategory,
+  PublicListingCategoryNode,
 } from '@/domains/categories/types'
 import type {
   AdminCategoryFormValues,
   AdminMaterialFormValues,
 } from '@/domains/categories/schemas'
+import {
+  buildCategoryTree,
+  findCategoryNodeBySlug,
+  flattenCategoryTree,
+  type CategoryHierarchyMetrics,
+} from '@/domains/categories/utils'
 
 type CategoryRow = {
   created_at: string
@@ -17,6 +23,7 @@ type CategoryRow = {
   id: string
   is_active: boolean
   name: string
+  parent_id: string | null
   slug: string
   sort_order: number
   updated_at: string
@@ -88,6 +95,7 @@ function mapCategory(row: CategoryRow): ListingCategory {
     id: row.id,
     isActive: row.is_active,
     name: row.name,
+    parentId: row.parent_id,
     slug: row.slug,
     sortOrder: row.sort_order,
     updatedAt: row.updated_at,
@@ -106,30 +114,38 @@ function mapMaterial(row: MaterialRow): ListingMaterial {
 }
 
 function buildCountMaps(rows: ListingCountRow[]) {
-  const categoryCounts = new Map<string, { approved: number; pending: number; total: number }>()
-  const materialCounts = new Map<string, { approved: number; pending: number; total: number }>()
+  const categoryCounts = new Map<string, CategoryHierarchyMetrics>()
+  const materialCounts = new Map<string, CategoryHierarchyMetrics>()
 
   rows.forEach((row) => {
     if (row.category_id) {
-      const current = categoryCounts.get(row.category_id) ?? { approved: 0, pending: 0, total: 0 }
-      current.total += 1
+      const current = categoryCounts.get(row.category_id) ?? {
+        approvedListings: 0,
+        pendingListings: 0,
+        totalListings: 0,
+      }
+      current.totalListings += 1
       if (row.status === 'approved') {
-        current.approved += 1
+        current.approvedListings += 1
       }
       if (row.status === 'pending_review') {
-        current.pending += 1
+        current.pendingListings += 1
       }
       categoryCounts.set(row.category_id, current)
     }
 
     if (row.primary_material_id) {
-      const current = materialCounts.get(row.primary_material_id) ?? { approved: 0, pending: 0, total: 0 }
-      current.total += 1
+      const current = materialCounts.get(row.primary_material_id) ?? {
+        approvedListings: 0,
+        pendingListings: 0,
+        totalListings: 0,
+      }
+      current.totalListings += 1
       if (row.status === 'approved') {
-        current.approved += 1
+        current.approvedListings += 1
       }
       if (row.status === 'pending_review') {
-        current.pending += 1
+        current.pendingListings += 1
       }
       materialCounts.set(row.primary_material_id, current)
     }
@@ -140,14 +156,13 @@ function buildCountMaps(rows: ListingCountRow[]) {
 
 export async function fetchAdminCategories() {
   const client = ensureSupabase()
-  const [{ data: categories, error: categoriesError }, { data: listings, error: listingsError }] =
-    await Promise.all([
-      client
-        .from('listing_categories')
-        .select('id, name, slug, description, is_active, sort_order, created_at, updated_at')
-        .order('sort_order', { ascending: true }),
-      client.from('listings').select('category_id, primary_material_id, status'),
-    ])
+  const [{ data: categories, error: categoriesError }, { data: listings, error: listingsError }] = await Promise.all([
+    client
+      .from('listing_categories')
+      .select('id, name, slug, description, parent_id, is_active, sort_order, created_at, updated_at')
+      .order('sort_order', { ascending: true }),
+    client.from('listings').select('category_id, primary_material_id, status'),
+  ])
 
   if (categoriesError) {
     throw categoriesError
@@ -158,18 +173,12 @@ export async function fetchAdminCategories() {
   }
 
   const { categoryCounts } = buildCountMaps((listings ?? []) as ListingCountRow[])
+  const tree = buildCategoryTree(
+    (categories ?? []).map((row) => mapCategory(row as CategoryRow)),
+    categoryCounts,
+  )
 
-  return (categories ?? []).map((row) => {
-    const category = mapCategory(row as CategoryRow)
-    const counts = categoryCounts.get(category.id) ?? { approved: 0, pending: 0, total: 0 }
-
-    return {
-      ...category,
-      approvedListings: counts.approved,
-      pendingListings: counts.pending,
-      totalListings: counts.total,
-    } satisfies AdminListingCategory
-  })
+  return flattenCategoryTree(tree) as AdminListingCategory[]
 }
 
 export async function fetchAdminMaterials() {
@@ -195,28 +204,31 @@ export async function fetchAdminMaterials() {
 
   return (materials ?? []).map((row) => {
     const material = mapMaterial(row as MaterialRow)
-    const counts = materialCounts.get(material.id) ?? { approved: 0, pending: 0, total: 0 }
+    const counts = materialCounts.get(material.id) ?? {
+      approvedListings: 0,
+      pendingListings: 0,
+      totalListings: 0,
+    }
 
     return {
       ...material,
-      approvedListings: counts.approved,
-      pendingListings: counts.pending,
-      totalListings: counts.total,
+      approvedListings: counts.approvedListings,
+      pendingListings: counts.pendingListings,
+      totalListings: counts.totalListings,
     } satisfies AdminListingMaterial
   })
 }
 
 export async function fetchPublicCategories() {
   const client = ensureSupabase()
-  const [{ data: categories, error: categoriesError }, { data: listings, error: listingsError }] =
-    await Promise.all([
-      client
-        .from('listing_categories')
-        .select('id, name, slug, description, is_active, sort_order, created_at, updated_at')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true }),
-      client.from('listings').select('category_id').eq('status', 'approved'),
-    ])
+  const [{ data: categories, error: categoriesError }, { data: listings, error: listingsError }] = await Promise.all([
+    client
+      .from('listing_categories')
+      .select('id, name, slug, description, parent_id, is_active, sort_order, created_at, updated_at')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true }),
+    client.from('listings').select('category_id').eq('status', 'approved'),
+  ])
 
   if (categoriesError) {
     throw categoriesError
@@ -226,29 +238,34 @@ export async function fetchPublicCategories() {
     throw listingsError
   }
 
-  const counts = new Map<string, number>()
+  const counts = new Map<string, CategoryHierarchyMetrics>()
 
   ;((listings ?? []) as Array<{ category_id: string | null }>).forEach((row) => {
     if (!row.category_id) {
       return
     }
 
-    counts.set(row.category_id, (counts.get(row.category_id) ?? 0) + 1)
+    const current = counts.get(row.category_id) ?? {
+      approvedListings: 0,
+      pendingListings: 0,
+      totalListings: 0,
+    }
+    current.approvedListings += 1
+    current.totalListings += 1
+    counts.set(row.category_id, current)
   })
 
-  return (categories ?? []).map((row) => {
-    const category = mapCategory(row as CategoryRow)
+  const tree = buildCategoryTree(
+    (categories ?? []).map((row) => mapCategory(row as CategoryRow)),
+    counts,
+  )
 
-    return {
-      ...category,
-      approvedListings: counts.get(category.id) ?? 0,
-    } satisfies PublicListingCategory
-  })
+  return tree as PublicListingCategoryNode[]
 }
 
 export async function fetchPublicCategoryBySlug(slug: string) {
   const categories = await fetchPublicCategories()
-  const category = categories.find((item) => item.slug === slug)
+  const category = findCategoryNodeBySlug(categories, slug)
 
   if (!category) {
     throw new Error('Categoria não encontrada.')
@@ -263,6 +280,7 @@ export async function createAdminCategory(values: AdminCategoryFormValues) {
       description: values.description,
       mode: 'create',
       name: values.name,
+      parentId: values.parentId || null,
       slug: values.slug,
     },
   })
@@ -285,6 +303,7 @@ export async function updateAdminCategory(input: {
       isActive: input.values.isActive,
       mode: 'update',
       name: input.values.name,
+      parentId: input.values.parentId || null,
       slug: input.values.slug,
     },
   })
@@ -311,11 +330,12 @@ export async function deleteAdminCategory(categoryId: string) {
   return data as { categoryId: string; success: boolean }
 }
 
-export async function reorderAdminCategories(orderedIds: string[]) {
+export async function reorderAdminCategories(input: { orderedIds: string[]; parentId: string | null }) {
   const { data, error } = await ensureSupabase().functions.invoke('manage-listing-category', {
     body: {
       mode: 'reorder',
-      orderedIds,
+      orderedIds: input.orderedIds,
+      parentId: input.parentId,
     },
   })
 
