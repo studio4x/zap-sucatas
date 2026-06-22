@@ -571,7 +571,7 @@ export function ListingEditor({
                     <option value="">Selecione</option>
                     {categories.map((category) => (
                       <option key={category.id} value={category.id}>
-                        {category.pathLabel || category.name}
+                        {category.name}
                       </option>
                     ))}
                   </Select>
