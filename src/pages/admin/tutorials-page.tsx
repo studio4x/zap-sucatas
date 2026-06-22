@@ -182,7 +182,7 @@ export function AdminTutorialsPage() {
         </CardContent>
       </Card>
 
-      <Card className="rounded-[2rem] border border-white/75 bg-white/90 shadow-[0_28px_70px_-52px_rgba(15,23,42,0.85)]">
+      <Card className="w-full rounded-[2rem] border border-white/75 bg-white/90 shadow-[0_28px_70px_-52px_rgba(15,23,42,0.85)]">
         <CardContent className="space-y-5 p-6 md:p-8">
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Categorias de aprendizado</p>
@@ -192,10 +192,10 @@ export function AdminTutorialsPage() {
             </p>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-            <label className="block">
+          <div className="w-full">
+            <label className="block w-full">
               <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Categoria</span>
-              <Select onChange={(event) => setCategoryFilter(event.target.value)} value={categoryFilter}>
+              <Select className="w-full" onChange={(event) => setCategoryFilter(event.target.value)} value={categoryFilter}>
                 <option value="all">Todos os tutoriais</option>
                 {categoryOptions.map((option) => (
                   <option key={option.category} value={option.category}>
@@ -326,7 +326,7 @@ export function AdminTutorialsPage() {
                       <div className="flex flex-wrap gap-2 xl:justify-end">
                         <Button onClick={() => handleOpenOnPage(tutorial.id)} type="button" variant={isSelected ? 'default' : 'outline'}>
                           <Eye className="size-4" />
-                          Na página
+                          Ver Tutorial
                         </Button>
                         <Button onClick={() => openEditModal(tutorial)} type="button" variant="outline">
                           <Pencil className="size-4" />
