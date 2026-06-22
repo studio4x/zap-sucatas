@@ -59,6 +59,7 @@ type ListingEditorProps = {
   mode: 'create' | 'edit'
   onSubmit: (payload: ListingEditorSubmitPayload) => Promise<ListingEditorSuccessNotice>
   rejectionReason?: string | null
+  showHeader?: boolean
   stateOptions: string[]
   status?: ListingStatus | null
 }
@@ -262,6 +263,7 @@ export function ListingEditor({
   mode,
   onSubmit,
   rejectionReason,
+  showHeader = true,
   stateOptions,
   status,
 }: ListingEditorProps) {
@@ -520,18 +522,20 @@ export function ListingEditor({
 
   return (
     <form className="space-y-6" onSubmit={form.handleSubmit((values) => handleSubmit(values, false))}>
-      <DashboardSectionHeader
-        action={
-          <div className="flex flex-wrap items-center gap-3">
-            {status ? <ListingStatusBadge status={status} /> : null}
-            <Button asChild type="button" variant="outline">
-              <Link to={cancelTo}>Voltar</Link>
-            </Button>
-          </div>
-        }
-        description="Preencha os dados do lote, organize as imagens e escolha se quer apenas salvar ou enviar para moderação."
-        title={mode === 'create' ? 'Criar anúncio' : 'Editar anúncio'}
-      />
+      {showHeader ? (
+        <DashboardSectionHeader
+          action={
+            <div className="flex flex-wrap items-center gap-3">
+              {status ? <ListingStatusBadge status={status} /> : null}
+              <Button asChild type="button" variant="outline">
+                <Link to={cancelTo}>Voltar</Link>
+              </Button>
+            </div>
+          }
+          description="Preencha os dados do lote, organize as imagens e escolha se quer apenas salvar ou enviar para moderação."
+          title={mode === 'create' ? 'Criar anúncio' : 'Editar anúncio'}
+        />
+      ) : null}
 
       {rejectionReason ? (
         <DashboardAlertCard

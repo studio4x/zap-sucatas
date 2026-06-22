@@ -203,7 +203,7 @@ export function AdminEditListingPage() {
       ) : null}
 
       <ListingEditor
-        key={`${id}:${listingQuery.data.updatedAt}:${listingQuery.data.images.length}`}
+        key={id}
         cancelTo={paths.admin.listingDetails(id)}
         categories={referencesQuery.data.categories}
         cityOptionsByState={brazilLocalitiesQuery.data.stateCityMap}
@@ -216,6 +216,7 @@ export function AdminEditListingPage() {
         mode="edit"
         onSubmit={updateMutation.mutateAsync}
         rejectionReason={listingQuery.data.rejectionReason}
+        showHeader={false}
         stateOptions={brazilLocalitiesQuery.data.states}
         status={listingQuery.data.status}
       />
