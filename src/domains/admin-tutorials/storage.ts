@@ -131,6 +131,7 @@ function createDefaultState(): AdminTutorialsPersistedState {
   return {
     tutorials,
     activeTutorialId: resolveActiveTutorialId(tutorials, null),
+    activeTutorialPathname: null,
     isDrawerOpen: false,
     isDrawerMinimized: false,
   }
@@ -157,6 +158,7 @@ export function loadAdminTutorialsState(): AdminTutorialsPersistedState {
     return {
       tutorials,
       activeTutorialId: resolveActiveTutorialId(tutorials, normalizeText(parsed.activeTutorialId, null)),
+      activeTutorialPathname: normalizeText(parsed.activeTutorialPathname, null),
       isDrawerOpen: Boolean(parsed.isDrawerOpen),
       isDrawerMinimized: Boolean(parsed.isDrawerMinimized),
     }

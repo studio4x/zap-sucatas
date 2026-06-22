@@ -1,4 +1,5 @@
 import { type PropsWithChildren, useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { AdminTutorialsFloatingPanel } from '@/components/admin/admin-tutorials-floating-panel'
 import { AdminTutorialsContext, type AdminTutorialsContextValue } from '@/domains/admin-tutorials/context'
 import {
@@ -8,19 +9,36 @@ import {
   resolveTutorialFallback,
   saveAdminTutorialsState,
 } from '@/domains/admin-tutorials/storage'
+import { resolveAdminTutorialIdForPathname } from '@/domains/admin-tutorials/route-resolution'
 import { createUniqueTutorialSlug } from '@/domains/admin-tutorials/utils'
 import type { AdminTutorial } from '@/domains/admin-tutorials/types'
 
 export function AdminTutorialsProvider({ children }: PropsWithChildren) {
   const [state, setState] = useState(() => loadAdminTutorialsState())
+  const location = useLocation()
 
   useEffect(() => {
     saveAdminTutorialsState(state)
   }, [state])
 
+  const contextualTutorialId = useMemo(
+    () => resolveAdminTutorialIdForPathname(location.pathname, state.tutorials),
+    [location.pathname, state.tutorials],
+  )
+
+  const activeTutorialId = useMemo(() => {
+    const activeTutorialExists = state.tutorials.some((tutorial) => tutorial.id === state.activeTutorialId)
+
+    if (state.activeTutorialPathname === location.pathname && activeTutorialExists) {
+      return state.activeTutorialId
+    }
+
+    return contextualTutorialId
+  }, [contextualTutorialId, location.pathname, state.activeTutorialId, state.activeTutorialPathname, state.tutorials])
+
   const activeTutorial = useMemo(() => {
-    return state.tutorials.find((tutorial) => tutorial.id === state.activeTutorialId) ?? state.tutorials[0] ?? null
-  }, [state.activeTutorialId, state.tutorials])
+    return state.tutorials.find((tutorial) => tutorial.id === activeTutorialId) ?? state.tutorials[0] ?? null
+  }, [activeTutorialId, state.tutorials])
 
   const value = useMemo<AdminTutorialsContextValue>(() => ({
     tutorials: state.tutorials,
@@ -34,6 +52,7 @@ export function AdminTutorialsProvider({ children }: PropsWithChildren) {
         return {
           ...current,
           activeTutorialId: nextActiveTutorialId,
+          activeTutorialPathname: location.pathname,
           isDrawerOpen: true,
           isDrawerMinimized: false,
         }
@@ -64,6 +83,7 @@ export function AdminTutorialsProvider({ children }: PropsWithChildren) {
       setState((current) => ({
         ...current,
         activeTutorialId: resolveTutorialFallback(current.tutorials, tutorialId),
+        activeTutorialPathname: location.pathname,
         isDrawerOpen: true,
         isDrawerMinimized: false,
       }))
@@ -72,6 +92,7 @@ export function AdminTutorialsProvider({ children }: PropsWithChildren) {
       setState((current) => ({
         ...current,
         activeTutorialId: resolveTutorialFallback(current.tutorials, tutorialId),
+        activeTutorialPathname: location.pathname,
       }))
     },
     saveTutorialDraft(draft) {
@@ -100,6 +121,7 @@ export function AdminTutorialsProvider({ children }: PropsWithChildren) {
         return {
           tutorials,
           activeTutorialId: normalized.id,
+          activeTutorialPathname: location.pathname,
           isDrawerOpen: true,
           isDrawerMinimized: false,
         }
@@ -146,7 +168,7 @@ export function AdminTutorialsProvider({ children }: PropsWithChildren) {
         }
       })
     },
-  }), [activeTutorial, state])
+  }), [activeTutorial, location.pathname, state])
 
   return (
     <AdminTutorialsContext.Provider value={value}>

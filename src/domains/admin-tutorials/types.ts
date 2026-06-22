@@ -20,6 +20,7 @@ export type AdminTutorialDraft = Omit<AdminTutorial, 'id'> & {
 
 export type AdminTutorialsPersistedState = {
   activeTutorialId: string | null
+  activeTutorialPathname: string | null
   isDrawerMinimized: boolean
   isDrawerOpen: boolean
   tutorials: AdminTutorial[]
