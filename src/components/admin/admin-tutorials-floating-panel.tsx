@@ -127,7 +127,10 @@ export function AdminTutorialsFloatingPanel({
 
           <div className="border-t border-slate-200/80 bg-white/92 px-6 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <Link className="text-sm font-medium text-sky-700 transition hover:text-sky-800 hover:underline" to={paths.admin.tutorialsTutorial(activeTutorial.id)}>
+              <Link
+                className="text-sm font-medium text-sky-700 transition hover:text-sky-800 hover:underline"
+                to={paths.admin.tutorialsTutorial(activeTutorial.slug ?? activeTutorial.id)}
+              >
                 Abrir página completa
               </Link>
               <Button onClick={minimizeDrawer} type="button" variant="outline">

@@ -8,6 +8,7 @@ import {
   resolveTutorialFallback,
   saveAdminTutorialsState,
 } from '@/domains/admin-tutorials/storage'
+import { createUniqueTutorialSlug } from '@/domains/admin-tutorials/utils'
 import type { AdminTutorial } from '@/domains/admin-tutorials/types'
 
 export function AdminTutorialsProvider({ children }: PropsWithChildren) {
@@ -75,15 +76,25 @@ export function AdminTutorialsProvider({ children }: PropsWithChildren) {
     },
     saveTutorialDraft(draft) {
       const normalized = normalizeTutorialDraft(draft)
+      let savedTutorial = normalized
 
       setState((current) => {
         const existingIndex = current.tutorials.findIndex((tutorial) => tutorial.id === normalized.id)
         const tutorials = [...current.tutorials]
+        const existingSlugs = current.tutorials.map((tutorial) => tutorial.slug ?? tutorial.title)
 
         if (existingIndex >= 0) {
-          tutorials.splice(existingIndex, 1, normalized)
+          savedTutorial = {
+            ...normalized,
+            slug: current.tutorials[existingIndex]?.slug ?? normalized.slug,
+          }
+          tutorials.splice(existingIndex, 1, savedTutorial)
         } else {
-          tutorials.push(normalized)
+          savedTutorial = {
+            ...normalized,
+            slug: createUniqueTutorialSlug(normalized.title, existingSlugs),
+          }
+          tutorials.push(savedTutorial)
         }
 
         return {
@@ -94,7 +105,7 @@ export function AdminTutorialsProvider({ children }: PropsWithChildren) {
         }
       })
 
-      return normalized
+      return savedTutorial
     },
     deleteTutorial(tutorialId) {
       setState((current) => {

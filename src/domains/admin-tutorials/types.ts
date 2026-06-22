@@ -8,6 +8,7 @@ export type AdminTutorial = {
   estimatedMinutes: number
   id: string
   notes: string[]
+  slug?: string
   steps: AdminTutorialStep[]
   summary: string
   title: string

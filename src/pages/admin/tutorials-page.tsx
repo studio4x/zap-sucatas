@@ -54,7 +54,7 @@ export function AdminTutorialsPage() {
   }, [clearFeedback, feedback])
 
   const selectedTutorialFromUrl = useMemo(() => {
-    return tutorials.find((tutorial) => tutorial.id === slug) ?? null
+    return tutorials.find((tutorial) => tutorial.slug === slug || tutorial.id === slug) ?? null
   }, [slug, tutorials])
 
   const lastAppliedSlugRef = useRef<string | null>(null)
@@ -64,13 +64,18 @@ export function AdminTutorialsPage() {
       return
     }
 
+    if (selectedTutorialFromUrl.slug && selectedTutorialFromUrl.slug !== slug) {
+      navigate(paths.admin.tutorialsTutorial(selectedTutorialFromUrl.slug), { replace: true })
+      return
+    }
+
     lastAppliedSlugRef.current = slug
     syncTutorialSelection(selectedTutorialFromUrl.id)
     previewRef.current?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
     })
-  }, [selectedTutorialFromUrl, slug, syncTutorialSelection])
+  }, [navigate, selectedTutorialFromUrl, slug, syncTutorialSelection])
 
   const normalizedSearch = search.trim().toLocaleLowerCase('pt-BR')
   const categories = useMemo(() => {
@@ -113,7 +118,10 @@ export function AdminTutorialsPage() {
   }
 
   function handleOpenOnPage(tutorialId: string) {
-    navigate(paths.admin.tutorialsTutorial(tutorialId))
+    const targetTutorial = tutorials.find((tutorial) => tutorial.id === tutorialId)
+    const tutorialSlug = targetTutorial?.slug ?? tutorialId
+
+    navigate(paths.admin.tutorialsTutorial(tutorialSlug))
     syncTutorialSelection(tutorialId)
     previewRef.current?.scrollIntoView({
       behavior: 'smooth',

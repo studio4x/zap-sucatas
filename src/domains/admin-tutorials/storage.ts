@@ -1,5 +1,6 @@
 import { ADMIN_TUTORIALS_DEFAULTS, ADMIN_TUTORIALS_STORAGE_KEY } from '@/domains/admin-tutorials/defaults'
 import { sanitizeRichTextHtml } from '@/domains/admin-tutorials/sanitize'
+import { ensureUniqueTutorialSlugs, createTutorialSlug } from '@/domains/admin-tutorials/utils'
 import type { AdminTutorial, AdminTutorialDraft, AdminTutorialStep, AdminTutorialsPersistedState } from '@/domains/admin-tutorials/types'
 
 function normalizeText<T extends string | null>(value: unknown, fallback: T): string | T
@@ -59,6 +60,7 @@ export function normalizeTutorialDraft(draft: AdminTutorialDraft): AdminTutorial
   const normalizedTitle = normalizeText(draft.title, 'Tutorial sem título')
   const normalizedSummary = normalizeText(draft.summary, 'Resumo indisponível.')
   const normalizedCategory = normalizeText(draft.category, 'Geral')
+  const normalizedSlug = normalizeText(draft.slug, '')
   const stepsSource = Array.isArray(draft.steps) ? draft.steps : []
   const steps = stepsSource.length > 0
     ? stepsSource.map((step, index) => normalizeStep(step, index))
@@ -66,6 +68,7 @@ export function normalizeTutorialDraft(draft: AdminTutorialDraft): AdminTutorial
 
   return {
     id: normalizeText(draft.id) || createTutorialId(normalizedTitle),
+    slug: normalizedSlug || createTutorialSlug(normalizedTitle),
     title: normalizedTitle,
     summary: normalizedSummary,
     estimatedMinutes: normalizeMinutes(draft.estimatedMinutes, 3),
@@ -83,6 +86,7 @@ function normalizeStoredTutorial(value: unknown, fallback: AdminTutorial | null 
   const draft = value as Partial<AdminTutorialDraft>
   return normalizeTutorialDraft({
     id: normalizeText(draft.id, fallback?.id),
+    slug: normalizeText(draft.slug, fallback?.slug ?? ''),
     title: normalizeText(draft.title, fallback?.title ?? ''),
     summary: normalizeText(draft.summary, fallback?.summary ?? ''),
     estimatedMinutes: draft.estimatedMinutes ?? fallback?.estimatedMinutes ?? 3,
@@ -106,7 +110,7 @@ function mergeTutorialsWithDefaults(value: unknown) {
     }
   }
 
-  return [...tutorialById.values()]
+  return ensureUniqueTutorialSlugs([...tutorialById.values()])
 }
 
 function resolveActiveTutorialId(tutorials: AdminTutorial[], requestedId: string | null) {
@@ -122,7 +126,7 @@ function resolveActiveTutorialId(tutorials: AdminTutorial[], requestedId: string
 }
 
 function createDefaultState(): AdminTutorialsPersistedState {
-  const tutorials = ADMIN_TUTORIALS_DEFAULTS.map((tutorial) => normalizeTutorialDraft(tutorial))
+  const tutorials = ensureUniqueTutorialSlugs(ADMIN_TUTORIALS_DEFAULTS.map((tutorial) => normalizeTutorialDraft(tutorial)))
 
   return {
     tutorials,
