@@ -168,8 +168,12 @@ export function AdminCategoriesPage() {
   })
 
   const categories = useMemo(() => categoriesQuery.data ?? [], [categoriesQuery.data])
+  const visibleCategories = useMemo(
+    () => categories.filter((category) => category.depth > 0),
+    [categories],
+  )
   const categoriesByParent = useMemo(() => {
-    return categories.reduce<Record<string, AdminListingCategory[]>>((accumulator, category) => {
+    return visibleCategories.reduce<Record<string, AdminListingCategory[]>>((accumulator, category) => {
       const key = category.parentId ?? '__root__'
       if (!accumulator[key]) {
         accumulator[key] = []
@@ -178,11 +182,11 @@ export function AdminCategoriesPage() {
       accumulator[key].push(category)
       return accumulator
     }, {})
-  }, [categories])
+  }, [visibleCategories])
   const filteredCategories = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
 
-    return categories.filter((category) => {
+    return visibleCategories.filter((category) => {
       const matchesStatus =
         statusFilter === 'all'
           ? true
@@ -194,7 +198,7 @@ export function AdminCategoriesPage() {
 
       return matchesStatus && matchesQuery
     })
-  }, [categories, query, statusFilter])
+  }, [query, statusFilter, visibleCategories])
 
   const paginatedCategories = useMemo(
     () => filteredCategories.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
@@ -203,12 +207,12 @@ export function AdminCategoriesPage() {
 
   const stats = useMemo(
     () => ({
-      active: categories.filter((category) => category.isActive).length,
-      pending: categories.filter((category) => category.pendingListings > 0).length,
-      total: categories.length,
-      withListings: categories.filter((category) => category.totalListings > 0).length,
+      active: visibleCategories.filter((category) => category.isActive).length,
+      pending: visibleCategories.filter((category) => category.pendingListings > 0).length,
+      total: visibleCategories.length,
+      withListings: visibleCategories.filter((category) => category.totalListings > 0).length,
     }),
-    [categories],
+    [visibleCategories],
   )
 
   const isBusy =

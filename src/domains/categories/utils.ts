@@ -117,6 +117,12 @@ export function flattenCategoryTree<T extends CategoryHierarchyBase>(
   return flattened
 }
 
+export function getLeafCategoryNodes<T extends CategoryHierarchyBase>(
+  nodes: CategoryHierarchyNode<T>[],
+) {
+  return flattenCategoryTree(nodes).filter((node) => node.depth > 0)
+}
+
 export function findCategoryNodeBySlug<T extends CategoryHierarchyBase & { slug: string }>(
   nodes: CategoryHierarchyNode<T>[],
   slug: string,

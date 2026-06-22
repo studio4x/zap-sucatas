@@ -10,7 +10,6 @@ import { FeaturedListingsSection } from '@/components/public/featured-listings-s
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { buildCategoryTree, collectCategoryAndDescendantIds } from '@/domains/categories/utils'
 import { fetchFeaturedPublicListings, fetchListingReferences, fetchPublicListingsPage } from '@/domains/listings/api'
 import type { PublicListingSort } from '@/domains/listings/types'
 import { useSystemSettings } from '@/hooks/use-system-settings'
@@ -41,21 +40,7 @@ export function ListingsPage() {
     queryKey: ['listing-references'],
     queryFn: fetchListingReferences,
   })
-  const categoryTree = useMemo(
-    () => buildCategoryTree(referencesQuery.data?.categories ?? []),
-    [referencesQuery.data?.categories],
-  )
-  const selectedCategoryIds = useMemo(
-    () => {
-      if (!categoryId) {
-        return []
-      }
-
-      const ids = collectCategoryAndDescendantIds(categoryTree, categoryId)
-      return ids.length > 0 ? ids : [categoryId]
-    },
-    [categoryId, categoryTree],
-  )
+  const leafCategories = useMemo(() => referencesQuery.data?.categories ?? [], [referencesQuery.data?.categories])
 
   const listingsQuery = useQuery({
     placeholderData: (previousData) => previousData,
@@ -74,11 +59,11 @@ export function ListingsPage() {
 
   const featuredListingsQuery = useQuery({
     enabled: featuredPaymentsEnabled,
-    queryKey: ['listings', 'public', 'featured', { categoryId, city, descendantIds: selectedCategoryIds.join(','), state }],
+    queryKey: ['listings', 'public', 'featured', { categoryId, city, state }],
     queryFn: async () => {
       const featured = await fetchFeaturedPublicListings(6)
       return featured.filter((listing) => {
-        if (categoryId && !selectedCategoryIds.includes(listing.categoryId)) {
+        if (categoryId && listing.categoryId !== categoryId) {
           return false
         }
 
@@ -190,40 +175,21 @@ export function ListingsPage() {
                 type="button"
                 variant={categoryId ? 'outline' : 'default'}
               >
-                Todas as categorias
+                Todas as subcategorias
               </Button>
-              {categoryTree.map((category) => (
-                <div key={category.id} className="space-y-2">
-                  <Button
-                    className="justify-start"
-                    onClick={() => {
-                      setPage(1)
-                      setCategoryId(category.id)
-                    }}
-                    type="button"
-                    variant={selectedCategoryIds.includes(category.id) ? 'default' : 'outline'}
-                  >
-                    {category.name}
-                  </Button>
-                  {category.children.length > 0 ? (
-                    <div className="space-y-2 pl-3">
-                      {category.children.map((child) => (
-                        <Button
-                          className="justify-start text-xs"
-                          key={child.id}
-                          onClick={() => {
-                            setPage(1)
-                            setCategoryId(child.id)
-                          }}
-                          type="button"
-                          variant={categoryId === child.id ? 'default' : 'outline'}
-                        >
-                          {child.name}
-                        </Button>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
+              {leafCategories.map((category) => (
+                <Button
+                  className="justify-start"
+                  key={category.id}
+                  onClick={() => {
+                    setPage(1)
+                    setCategoryId(category.id)
+                  }}
+                  type="button"
+                  variant={categoryId === category.id ? 'default' : 'outline'}
+                >
+                  {category.pathLabel}
+                </Button>
               ))}
             </div>
           </ListingSidebarCard>

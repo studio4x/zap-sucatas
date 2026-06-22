@@ -24,7 +24,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { fetchPublicCategories } from '@/domains/categories/api'
-import type { PublicListingCategoryNode } from '@/domains/categories/types'
+import type { PublicListingCategory } from '@/domains/categories/types'
+import { getLeafCategoryNodes } from '@/domains/categories/utils'
 import { fetchFeaturedPublicListings } from '@/domains/listings/api'
 import type { Listing } from '@/domains/listings/types'
 import { formatListingDate } from '@/domains/listings/utils'
@@ -76,7 +77,7 @@ const categoryIconMap: Record<string, typeof Factory> = {
   plastico: Recycle,
 }
 
-function getCategoryIcon(category: PublicListingCategoryNode) {
+function getCategoryIcon(category: PublicListingCategory) {
   const normalizedSlug = category.slug
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -117,7 +118,7 @@ export function HomePage() {
     navigate(trimmed ? `${paths.public.listings}?q=${encodeURIComponent(trimmed)}` : paths.public.listings)
   }
 
-  const highlightedCategories = (categoriesQuery.data ?? [])
+  const highlightedCategories = getLeafCategoryNodes(categoriesQuery.data ?? [])
     .slice()
     .sort((left, right) => right.approvedListings - left.approvedListings)
     .slice(0, 5)

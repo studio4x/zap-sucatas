@@ -21,7 +21,7 @@ import { normalizeListingCity, normalizeListingState } from '@/domains/listings/
 import {
   buildCategoryTree,
   collectCategoryAndDescendantIds,
-  flattenCategoryTree,
+  getLeafCategoryNodes,
 } from '@/domains/categories/utils'
 
 const LISTING_MEDIA_BUCKET = 'listing-media'
@@ -393,7 +393,7 @@ export async function fetchListingReferences() {
   )
 
   return {
-    categories: flattenCategoryTree(categoryTree).map((category) => ({
+    categories: getLeafCategoryNodes(categoryTree).map((category) => ({
       createdAt: '',
       description: category.description,
       depth: category.depth,

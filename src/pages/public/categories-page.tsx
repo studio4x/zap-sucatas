@@ -4,12 +4,14 @@ import { CategoryHighlights } from '@/components/public/category-highlights'
 import { CtaBanner } from '@/components/public/cta-banner'
 import { PublicEmptyState } from '@/components/public/public-empty-state'
 import { fetchPublicCategories } from '@/domains/categories/api'
+import { getLeafCategoryNodes } from '@/domains/categories/utils'
 
 export function CategoriesPage() {
   const categoriesQuery = useQuery({
     queryKey: ['categories', 'public', 'page'],
     queryFn: fetchPublicCategories,
   })
+  const leafCategories = getLeafCategoryNodes(categoriesQuery.data ?? [])
 
   return (
     <div className="space-y-8 lg:space-y-10">
@@ -19,8 +21,8 @@ export function CategoriesPage() {
         </div>
       ) : null}
 
-      {categoriesQuery.data?.length ? (
-        <CategoryHighlights categories={categoriesQuery.data} />
+      {leafCategories.length ? (
+        <CategoryHighlights categories={leafCategories} />
       ) : (
         <PublicEmptyState
           description="As categorias públicas aparecerão aqui quando o catálogo estiver mais preenchido."
