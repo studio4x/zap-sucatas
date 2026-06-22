@@ -287,6 +287,10 @@ export const routes: RouteObject[] = [
         element: withSuspense(<AdminUsersPage />),
       },
       {
+        path: 'tutoriais/:slug',
+        element: withSuspense(<AdminTutorialsPage />),
+      },
+      {
         path: 'tutoriais',
         element: withSuspense(<AdminTutorialsPage />),
       },

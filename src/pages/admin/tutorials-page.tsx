@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowUpDown, BookOpen, ChevronDown, Eye, GripVertical, Pencil, Plus, Search, Trash2 } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { paths } from '@/app/paths'
 import { AdminTutorialContent } from '@/components/admin/admin-tutorial-content'
 import { AdminTutorialFormModal } from '@/components/admin/admin-tutorial-form-modal'
@@ -21,6 +21,8 @@ type ModalState = {
 }
 
 export function AdminTutorialsPage() {
+  const navigate = useNavigate()
+  const { slug = '' } = useParams()
   const {
     activeTutorial,
     activeTutorialId,
@@ -50,6 +52,25 @@ export function AdminTutorialsPage() {
 
     return () => window.clearTimeout(timeout)
   }, [clearFeedback, feedback])
+
+  const selectedTutorialFromUrl = useMemo(() => {
+    return tutorials.find((tutorial) => tutorial.id === slug) ?? null
+  }, [slug, tutorials])
+
+  const lastAppliedSlugRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (!slug || !selectedTutorialFromUrl || lastAppliedSlugRef.current === slug) {
+      return
+    }
+
+    lastAppliedSlugRef.current = slug
+    syncTutorialSelection(selectedTutorialFromUrl.id)
+    previewRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  }, [selectedTutorialFromUrl, slug, syncTutorialSelection])
 
   const normalizedSearch = search.trim().toLocaleLowerCase('pt-BR')
   const categories = useMemo(() => {
@@ -92,6 +113,7 @@ export function AdminTutorialsPage() {
   }
 
   function handleOpenOnPage(tutorialId: string) {
+    navigate(paths.admin.tutorialsTutorial(tutorialId))
     syncTutorialSelection(tutorialId)
     previewRef.current?.scrollIntoView({
       behavior: 'smooth',
