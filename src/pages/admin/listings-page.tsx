@@ -19,7 +19,7 @@ import { Select } from '@/components/ui/select'
 import { fetchAdminFeaturedPayments } from '@/domains/featured-payments/api'
 import type { AdminFeaturedPaymentItem } from '@/domains/featured-payments/types'
 import {
-  archiveListing,
+  deleteAdminListing,
   fetchAdminListingStateOptions,
   fetchAdminListingStats,
   fetchAdminListingsPage,
@@ -58,8 +58,8 @@ export function AdminListingsPage() {
   const [stateFilter, setStateFilter] = useState('all')
   const [page, setPage] = useState(1)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [idsPendingArchive, setIdsPendingArchive] = useState<string[]>([])
-  const [archiveDialogDescription, setArchiveDialogDescription] = useState('')
+  const [idsPendingDelete, setIdsPendingDelete] = useState<string[]>([])
+  const [deleteDialogDescription, setDeleteDialogDescription] = useState('')
 
   const listingsQuery = useQuery({
     placeholderData: (previousData) => previousData,
@@ -88,22 +88,22 @@ export function AdminListingsPage() {
     queryFn: fetchAdminFeaturedPayments,
   })
 
-  const archiveMutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: async (listingIds: string[]) => {
       for (const listingId of listingIds) {
-        await archiveListing(listingId)
+        await deleteAdminListing(listingId)
       }
     },
     onError: (error) => {
-      setErrorFeedback(error, 'Não foi possível remover os anúncios selecionados.')
+      setErrorFeedback(error, 'Não foi possível excluir os anúncios selecionados.')
     },
     onSuccess: async (_, listingIds) => {
       setWarningFeedback(
         listingIds.length === 1
-          ? 'Anúncio removido da operação com sucesso.'
-          : `${listingIds.length} anúncios removidos da operação com sucesso.`,
+          ? 'Anúncio excluído permanentemente com sucesso.'
+          : `${listingIds.length} anúncios excluídos permanentemente com sucesso.`,
       )
-      setIdsPendingArchive([])
+      setIdsPendingDelete([])
       setSelectedIds([])
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['listings', 'admin'] }),
@@ -148,10 +148,7 @@ export function AdminListingsPage() {
     return map
   }, [featuredPaymentsQuery.data])
 
-  const selectableListings = useMemo(
-    () => listings.filter((listing) => listing.status !== 'archived'),
-    [listings],
-  )
+  const selectableListings = useMemo(() => listings, [listings])
   const effectiveSelectedIds = useMemo(
     () => selectedIds.filter((id) => listings.some((listing) => listing.id === id)),
     [listings, selectedIds],
@@ -175,14 +172,14 @@ export function AdminListingsPage() {
     setSelectedIds(checked ? selectableListings.map((listing) => listing.id) : [])
   }
 
-  function requestArchive(listingIds: string[], description: string) {
+  function requestDelete(listingIds: string[], description: string) {
     if (listingIds.length === 0) {
       return
     }
 
     clearFeedback()
-    setArchiveDialogDescription(description)
-    setIdsPendingArchive(listingIds)
+    setDeleteDialogDescription(description)
+    setIdsPendingDelete(listingIds)
   }
 
   return (
@@ -207,7 +204,7 @@ export function AdminListingsPage() {
             </Button>
           </>
         }
-        description="Revise a fila, acompanhe status editoriais e remova da operação os anúncios que precisarem sair do catálogo."
+        description="Revise a fila, acompanhe status editoriais e exclua permanentemente os anúncios que precisarem sair do catálogo."
         eyebrow="Administração / anúncios"
         title="Gestão de anúncios"
       />
@@ -226,20 +223,20 @@ export function AdminListingsPage() {
           <>
             {selectedCount > 0 ? (
               <Button
-                disabled={archiveMutation.isPending}
+                disabled={deleteMutation.isPending}
                 onClick={() =>
-                  requestArchive(
+                  requestDelete(
                     effectiveSelectedIds,
                     effectiveSelectedIds.length === 1
-                      ? 'Remover este anúncio da operação pública? Ele será arquivado e permanecerá apenas no histórico interno.'
-                      : `Remover ${effectiveSelectedIds.length} anúncios da operação pública? Eles serão arquivados e permanecerão apenas no histórico interno.`,
+                      ? 'Excluir permanentemente este anúncio? Ele será removido do banco de dados e suas imagens serão apagadas do armazenamento.'
+                      : `Excluir permanentemente ${effectiveSelectedIds.length} anúncios? Eles serão removidos do banco de dados e suas imagens serão apagadas do armazenamento.`,
                   )
                 }
                 type="button"
-                variant="outline"
+                variant="destructive"
               >
                 <Trash2 className="size-4" />
-                {archiveMutation.isPending ? 'Removendo...' : `Remover selecionados (${selectedCount})`}
+                {deleteMutation.isPending ? 'Excluindo...' : `Excluir selecionados (${selectedCount})`}
               </Button>
             ) : null}
             <Button
@@ -312,16 +309,15 @@ export function AdminListingsPage() {
               </div>
             ) as unknown as string,
             className: 'w-[72px]',
-            cell: (listing) =>
-              listing.status === 'archived' ? null : (
-                <input
-                  aria-label={`Selecionar anúncio ${listing.title}`}
-                  checked={effectiveSelectedIds.includes(listing.id)}
-                  className="size-4 rounded border border-border"
-                  onChange={(event) => toggleSelection(listing.id, event.target.checked)}
-                  type="checkbox"
-                />
-              ),
+            cell: (listing) => (
+              <input
+                aria-label={`Selecionar anúncio ${listing.title}`}
+                checked={effectiveSelectedIds.includes(listing.id)}
+                className="size-4 rounded border border-border"
+                onChange={(event) => toggleSelection(listing.id, event.target.checked)}
+                type="checkbox"
+              />
+            ),
           },
           {
             header: 'Anúncio',
@@ -403,20 +399,16 @@ export function AdminListingsPage() {
                     label: 'Detalhe',
                     to: paths.admin.listingDetails(listing.id),
                   },
-                  ...(listing.status !== 'archived'
-                    ? [
-                        {
-                          icon: Trash2,
-                          label: 'Remover',
-                          onClick: () =>
-                            requestArchive(
-                              [listing.id],
-                              `Remover o anúncio "${listing.title}" da operação pública? Ele será arquivado e permanecerá apenas no histórico interno.`,
-                            ),
-                          variant: 'ghost' as const,
-                        },
-                      ]
-                    : []),
+                  {
+                    icon: Trash2,
+                    label: 'Excluir',
+                    onClick: () =>
+                      requestDelete(
+                        [listing.id],
+                        `Excluir permanentemente o anúncio "${listing.title}"? Ele será removido do banco de dados e suas imagens serão apagadas do armazenamento.`,
+                      ),
+                    variant: 'destructive' as const,
+                  },
                   ...(listing.slug && listing.status === 'approved'
                     ? [
                         {
@@ -464,25 +456,25 @@ export function AdminListingsPage() {
       </div>
 
       <ConfirmActionDialog
-        confirmLabel={idsPendingArchive.length > 1 ? 'Remover anúncios' : 'Remover anúncio'}
-        description={archiveDialogDescription}
-        isPending={archiveMutation.isPending}
+        confirmLabel={idsPendingDelete.length > 1 ? 'Excluir anúncios' : 'Excluir anúncio'}
+        description={deleteDialogDescription}
+        isPending={deleteMutation.isPending}
         onConfirm={() => {
-          if (idsPendingArchive.length === 0) {
+          if (idsPendingDelete.length === 0) {
             return
           }
 
-          archiveMutation.mutate(idsPendingArchive)
+          deleteMutation.mutate(idsPendingDelete)
         }}
         onOpenChange={(open) => {
           if (!open) {
-            setIdsPendingArchive([])
-            setArchiveDialogDescription('')
+            setIdsPendingDelete([])
+            setDeleteDialogDescription('')
           }
         }}
-        open={idsPendingArchive.length > 0}
-        title="Confirmar remoção"
-        tone="default"
+        open={idsPendingDelete.length > 0}
+        title="Confirmar exclusão permanente"
+        tone="danger"
       />
     </section>
   )

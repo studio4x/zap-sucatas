@@ -95,7 +95,7 @@ test('listing lifecycle stays coherent across user, admin and public', async ({ 
       await expect(publicPage.getByRole('heading', { level: 1, name: listingTitle })).toBeVisible()
     })
 
-    await test.step('admin pauses and archives the listing', async () => {
+    await test.step('admin pauses and deletes the listing', async () => {
       await adminPage.goto('/admin/anuncios')
       await searchForText(adminPage, /buscar por t/i, listingTitle)
       const pauseRow = adminPage.locator('tr', { hasText: listingTitle }).first()
@@ -113,33 +113,29 @@ test('listing lifecycle stays coherent across user, admin and public', async ({ 
 
       await adminPage.goto('/admin/anuncios')
       await searchForText(adminPage, /buscar por t/i, listingTitle)
-      const archiveRow = adminPage.locator('tr', { hasText: listingTitle }).first()
-      const archiveDetailsPath =
-        (await archiveRow.getByRole('link', { name: /detalhe/i }).getAttribute('href')) ?? ''
-      expect(archiveDetailsPath).toBeTruthy()
-      await adminPage.goto(archiveDetailsPath)
+      const deleteRow = adminPage.locator('tr', { hasText: listingTitle }).first()
+      const deleteDetailsPath =
+        (await deleteRow.getByRole('link', { name: /detalhe/i }).getAttribute('href')) ?? ''
+      expect(deleteDetailsPath).toBeTruthy()
+      await adminPage.goto(deleteDetailsPath)
 
       adminPage.once('dialog', async (dialog) => {
         await dialog.accept()
       })
-      await adminPage.getByRole('button', { name: /arquivar an/i }).click()
+      await adminPage.getByRole('button', { name: /excluir an/i }).click()
       await expect
         .poll(() => new URL(adminPage.url()).pathname, { timeout: 30000 })
         .toBe('/admin/anuncios')
 
       await searchForText(adminPage, /buscar por t/i, listingTitle)
-      const archivedRow = adminPage.locator('tr', { hasText: listingTitle }).first()
-      await expect(archivedRow).toBeVisible()
-      await expect(archivedRow).toContainText(/arquivad/i)
+      await expect(adminPage.locator('tr', { hasText: listingTitle })).toHaveCount(0)
     })
 
-    await test.step('owner dashboard reflects the archived status', async () => {
+    await test.step('owner dashboard no longer shows the deleted listing', async () => {
       await userPage.goto('/app/anuncios')
       await searchForText(userPage, /buscar por t/i, listingTitle)
 
-      const userRow = userPage.locator('tr', { hasText: listingTitle }).first()
-      await expect(userRow).toBeVisible()
-      await expect(userRow).toContainText(/arquivad/i)
+      await expect(userPage.locator('tr', { hasText: listingTitle })).toHaveCount(0)
     })
   } finally {
     await Promise.allSettled([userContext.close(), adminContext.close(), publicContext.close()])

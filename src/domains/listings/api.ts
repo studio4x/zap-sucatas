@@ -1069,6 +1069,16 @@ export async function archiveListing(listingId: string) {
   )
 }
 
+export async function deleteAdminListing(listingId: string) {
+  return invokeListingFunction<{ action: 'delete'; listingId: string }, { status: string; success: boolean }>(
+    'manage-listing-lifecycle',
+    {
+      action: 'delete',
+      listingId,
+    },
+  )
+}
+
 export async function createFeaturedListingPayment(listingId: string) {
   return invokeListingFunction<
     { listingId: string },

@@ -6,7 +6,9 @@ import { insertAdminAuditLog } from '../_shared/logging.ts'
 import { createAdminClient } from '../_shared/supabase.ts'
 import { enqueueTransactionalNotification } from '../_shared/transactional-notifications.ts'
 
-type LifecycleAction = 'archive' | 'pause'
+const LISTING_MEDIA_BUCKET = 'listing-media'
+
+type LifecycleAction = 'archive' | 'delete' | 'pause'
 
 type RequestBody = {
   action?: LifecycleAction
@@ -48,6 +50,34 @@ function resolveNextStatus(input: {
   }
 }
 
+async function removeListingStorageFiles(admin: ReturnType<typeof createAdminClient>, listingId: string) {
+  const { data: images, error: imagesError } = await admin
+    .from('listing_images')
+    .select('storage_path')
+    .eq('listing_id', listingId)
+
+  if (imagesError) {
+    throw imagesError
+  }
+
+  const storagePaths = (images ?? [])
+    .map((image) => image.storage_path)
+    .filter((storagePath): storagePath is string => typeof storagePath === 'string' && storagePath.length > 0)
+
+  if (storagePaths.length === 0) {
+    return
+  }
+
+  for (let index = 0; index < storagePaths.length; index += 100) {
+    const batch = storagePaths.slice(index, index + 100)
+    const { error: storageError } = await admin.storage.from(LISTING_MEDIA_BUCKET).remove(batch)
+
+    if (storageError) {
+      throw storageError
+    }
+  }
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -57,7 +87,7 @@ Deno.serve(async (request) => {
     const actor = await requireActiveProfile(request)
     const { action, listingId } = (await request.json()) as RequestBody
 
-    if (!listingId || (action !== 'pause' && action !== 'archive')) {
+    if (!listingId || (action !== 'pause' && action !== 'archive' && action !== 'delete')) {
       return jsonResponse({ error: 'listingId e action são obrigatórios.' }, 400)
     }
 
@@ -72,8 +102,51 @@ Deno.serve(async (request) => {
       return jsonResponse({ error: 'Anúncio não encontrado.' }, 404)
     }
 
+    if (action === 'delete' && actor.role !== 'admin') {
+      return jsonResponse({ error: 'A exclusão permanente só pode ser feita por administradores.' }, 403)
+    }
+
     if (actor.role !== 'admin' && listing.user_id !== actor.id) {
       return jsonResponse({ error: 'Você não pode gerenciar este anúncio.' }, 403)
+    }
+
+    if (action === 'delete') {
+      await removeListingStorageFiles(admin, listingId)
+
+      const { error: deleteError } = await admin.from('listings').delete().eq('id', listingId)
+
+      if (deleteError) {
+        throw deleteError
+      }
+
+      await insertAdminAuditLog({
+        action: 'delete_listing',
+        actorUserId: actor.id,
+        afterData: {
+          deleted: true,
+        },
+        beforeData: {
+          rejection_reason: listing.rejection_reason,
+          slug: listing.slug,
+          status: listing.status,
+          title: listing.title,
+        },
+        entityId: listingId,
+        entityType: 'listing',
+      })
+      await enqueueTransactionalNotification({
+        actionUrl: '/app/anuncios',
+        body: `Seu anúncio "${listing.title}" foi excluído permanentemente pela equipe administrativa.`,
+        category: 'listing_status',
+        title: 'Anúncio excluído',
+        userId: listing.user_id,
+      })
+
+      return jsonResponse({
+        listingId,
+        status: 'deleted',
+        success: true,
+      })
     }
 
     const transition = resolveNextStatus({

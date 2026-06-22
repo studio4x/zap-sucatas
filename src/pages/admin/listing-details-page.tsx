@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Archive, Eye, Image as ImageIcon, PauseCircle } from 'lucide-react'
+import { Eye, Image as ImageIcon, PauseCircle, Trash2 } from 'lucide-react'
 import { paths } from '@/app/paths'
 import { AdminDataTable } from '@/components/admin/admin-data-table'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
@@ -13,7 +13,7 @@ import { fetchAdminFeaturedPayments } from '@/domains/featured-payments/api'
 import { blogContentHasHtml } from '@/domains/blog/utils'
 import {
   approveListing,
-  archiveListing,
+  deleteAdminListing,
   fetchListingDetailsForAdmin,
   pauseListing,
   rejectListing,
@@ -127,19 +127,15 @@ export function AdminListingDetailsPage() {
     },
   })
 
-  const archiveMutation = useMutation({
-    mutationFn: () => archiveListing(id),
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteAdminListing(id),
     onError: (error) => {
       setFeedback({
-        message: error instanceof Error ? error.message : 'Não foi possível arquivar o anúncio.',
+        message: error instanceof Error ? error.message : 'Não foi possível excluir o anúncio.',
         tone: 'error',
       })
     },
     onSuccess: async () => {
-      setFeedback({
-        message: 'Anúncio arquivado com sucesso.',
-        tone: 'warning',
-      })
       await invalidateListing()
       navigate(paths.admin.listings, { replace: true })
     },
@@ -170,10 +166,9 @@ export function AdminListingDetailsPage() {
     approveMutation.isPending ||
     rejectMutation.isPending ||
     pauseMutation.isPending ||
-    archiveMutation.isPending
+    deleteMutation.isPending
   const canApproveOrReject = listing.status === 'pending_review'
   const canPause = listing.status === 'approved'
-  const canArchive = listing.status !== 'archived'
   const normalizedDescription = normalizeListingRichText(listing.description)
   const descriptionHasHtml = blogContentHasHtml({ raw: normalizedDescription })
   const descriptionContent = normalizedDescription
@@ -458,29 +453,27 @@ export function AdminListingDetailsPage() {
                 </Button>
               ) : null}
 
-              {canArchive ? (
-                <Button
-                  className="w-full justify-center"
-                  disabled={isBusy}
-                  onClick={() => {
-                    const confirmed = window.confirm(
-                      `Arquivar o anúncio "${listing.title}"? Ele será removido da operação pública e ficará apenas no histórico interno.`,
-                    )
+              <Button
+                className="w-full justify-center"
+                disabled={isBusy}
+                onClick={() => {
+                  const confirmed = window.confirm(
+                    `Excluir permanentemente o anúncio "${listing.title}"? Ele será removido do banco de dados e suas imagens serão apagadas do armazenamento.`,
+                  )
 
-                    if (!confirmed) {
-                      return
-                    }
+                  if (!confirmed) {
+                    return
+                  }
 
-                    setFeedback(null)
-                    archiveMutation.mutate()
-                  }}
-                  type="button"
-                  variant="outline"
-                >
-                  <Archive className="size-4" />
-                  {archiveMutation.isPending ? 'Arquivando...' : 'Arquivar anúncio'}
-                </Button>
-              ) : null}
+                  setFeedback(null)
+                  deleteMutation.mutate()
+                }}
+                type="button"
+                variant="destructive"
+              >
+                <Trash2 className="size-4" />
+                {deleteMutation.isPending ? 'Excluindo...' : 'Excluir anúncio'}
+              </Button>
             </CardContent>
           </Card>
         </div>

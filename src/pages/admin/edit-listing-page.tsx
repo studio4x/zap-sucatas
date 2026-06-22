@@ -9,7 +9,7 @@ import { ListingEditor, type ListingEditorSubmitPayload } from '@/components/lis
 import { ConfirmActionDialog } from '@/components/shared/confirm-action-dialog'
 import {
   approveListing,
-  archiveListing,
+  deleteAdminListing,
   fetchBrazilLocalities,
   fetchListingDetailsForAdmin,
   fetchListingReferences,
@@ -27,7 +27,7 @@ export function AdminEditListingPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { user } = useAuth()
-  const [confirmingArchive, setConfirmingArchive] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   const referencesQuery = useQuery({
     queryKey: ['listing-references'],
@@ -111,8 +111,8 @@ export function AdminEditListingPage() {
     },
   })
 
-  const archiveMutation = useMutation({
-    mutationFn: () => archiveListing(id),
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteAdminListing(id),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['listing', 'admin', id] }),
@@ -120,7 +120,7 @@ export function AdminEditListingPage() {
         queryClient.invalidateQueries({ queryKey: ['listings', 'owner'] }),
         queryClient.invalidateQueries({ queryKey: ['listings', 'public'] }),
       ])
-      setConfirmingArchive(false)
+      setConfirmingDelete(false)
       navigate(paths.admin.listings, { replace: true })
     },
   })
@@ -154,29 +154,27 @@ export function AdminEditListingPage() {
     <section className="space-y-6">
       <AdminPageHeader
         actions={
-          listingQuery.data.status !== 'archived' ? (
-            <Button
-              disabled={updateMutation.isPending || archiveMutation.isPending}
-              onClick={() => setConfirmingArchive(true)}
-              type="button"
-              variant="outline"
-            >
-              <Trash2 className="size-4" />
-              {archiveMutation.isPending ? 'Removendo...' : 'Remover anúncio'}
-            </Button>
-          ) : undefined
+          <Button
+            disabled={updateMutation.isPending || deleteMutation.isPending}
+            onClick={() => setConfirmingDelete(true)}
+            type="button"
+            variant="destructive"
+          >
+            <Trash2 className="size-4" />
+            {deleteMutation.isPending ? 'Excluindo...' : 'Excluir anúncio'}
+          </Button>
         }
         description="Atualize o conteúdo, as imagens e os dados comerciais do anúncio criado pela operação."
         eyebrow="Administração / anúncios"
         title="Editar anúncio"
       />
 
-      {archiveMutation.isError ? (
+      {deleteMutation.isError ? (
         <DashboardAlertCard
           description={
-            archiveMutation.error instanceof Error
-              ? archiveMutation.error.message
-              : 'Não foi possível remover este anúncio da operação.'
+            deleteMutation.error instanceof Error
+              ? deleteMutation.error.message
+              : 'Não foi possível excluir este anúncio.'
           }
           title="Ajuste necessário"
           tone="error"
@@ -202,14 +200,14 @@ export function AdminEditListingPage() {
       />
 
       <ConfirmActionDialog
-        confirmLabel="Remover anúncio"
-        description={`Remover o anúncio "${listingQuery.data.title}" da operação pública? Ele será arquivado e permanecerá apenas no histórico interno.`}
-        isPending={archiveMutation.isPending}
-        onConfirm={() => archiveMutation.mutate()}
-        onOpenChange={setConfirmingArchive}
-        open={confirmingArchive}
-        title="Confirmar remoção"
-        tone="default"
+        confirmLabel="Excluir anúncio"
+        description={`Excluir permanentemente o anúncio "${listingQuery.data.title}"? Ele será removido do banco de dados e suas imagens serão apagadas do armazenamento.`}
+        isPending={deleteMutation.isPending}
+        onConfirm={() => deleteMutation.mutate()}
+        onOpenChange={setConfirmingDelete}
+        open={confirmingDelete}
+        title="Confirmar exclusão permanente"
+        tone="danger"
       />
     </section>
   )
