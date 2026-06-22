@@ -571,7 +571,7 @@ export function ListingEditor({
                     <option value="">Selecione</option>
                     {categories.map((category) => (
                       <option key={category.id} value={category.id}>
-                        {category.name}
+                        {category.pathLabel || category.name}
                       </option>
                     ))}
                   </Select>
@@ -646,24 +646,26 @@ export function ListingEditor({
                       </div>
 
                       {descriptionEditorTab === 'visual' ? (
-                        <ReactQuill
-                          id="listing-description"
-                          modules={{
-                            toolbar: [
-                              [{ header: [2, 3, false] }],
-                              ['bold', 'italic', 'underline', 'strike'],
-                              [{ list: 'ordered' }, { list: 'bullet' }],
-                              ['link', 'blockquote'],
-                              ['clean'],
-                            ],
-                          }}
-                          onChange={field.onChange}
-                          theme="snow"
-                          value={field.value ?? ''}
-                        />
+                        <div className="listing-editor rounded-[1.25rem] border border-border bg-background">
+                          <ReactQuill
+                            id="listing-description"
+                            modules={{
+                              toolbar: [
+                                [{ header: [2, 3, false] }],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{ list: 'ordered' }, { list: 'bullet' }],
+                                ['link', 'blockquote'],
+                                ['clean'],
+                              ],
+                            }}
+                            onChange={field.onChange}
+                            theme="snow"
+                            value={field.value ?? ''}
+                          />
+                        </div>
                       ) : (
                         <Textarea
-                          className="min-h-52 font-mono text-sm"
+                          className="min-h-72 font-mono text-sm"
                           id="listing-description-html"
                           onChange={(event) => field.onChange(event.target.value)}
                           spellCheck={false}

@@ -13,7 +13,7 @@ export function ListingContentPreview({ className, value }: ListingContentPrevie
   const content = value.trim()
 
   if (!content) {
-    return <span className={cn('text-xs text-muted-foreground', className)}>Sem resumo disponível.</span>
+    return <span className={cn('text-xs text-muted-foreground', className)}>Sem resumo comercial disponível.</span>
   }
 
   if (hasHtmlMarkup(content)) {

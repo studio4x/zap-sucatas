@@ -222,6 +222,7 @@ export function ListingDetailsPage() {
 
   const listing = listingQuery.data
   const commercialPrice = parseCommercialPrice(listing.priceLabel)
+  const summaryContent = listing.summary?.trim() ?? ''
   const normalizedDescription = normalizeListingRichText(listing.description)
   const descriptionHasHtml = blogContentHasHtml({ raw: normalizedDescription })
   const descriptionContent = normalizedDescription
@@ -372,10 +373,10 @@ export function ListingDetailsPage() {
             <div className="mt-4 space-y-2 rounded-2xl border border-white/10 bg-white/[0.03] p-3.5">
               <div className="flex items-center gap-2 text-emerald-100">
                 <MessageSquareQuote className="size-4 text-emerald-300" />
-                <p className="text-xs font-semibold uppercase tracking-[0.16em]">Prévia de conteúdo</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em]">Resumo comercial</p>
               </div>
               <p className="line-clamp-4 text-sm leading-6 text-emerald-50/88">
-                {listing.summary || 'Sem resumo comercial preenchido para este anúncio no momento.'}
+                {summaryContent || 'Sem resumo comercial preenchido para este anúncio no momento.'}
               </p>
             </div>
 
@@ -461,6 +462,21 @@ export function ListingDetailsPage() {
 
           <Card className="rounded-[1.9rem] border-[#d8e3d8] bg-white shadow-[0_24px_56px_-44px_rgba(19,33,23,0.28)]">
             <CardContent className="space-y-6 p-6 md:p-7">
+              <div className="space-y-3 rounded-[1.4rem] border border-border bg-[linear-gradient(180deg,#f8fbf7_0%,#f3f7f1_100%)] p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/75">
+                  Resumo comercial
+                </p>
+                {summaryContent ? (
+                  <p className="whitespace-pre-wrap break-words text-sm leading-7 text-foreground/92 [overflow-wrap:anywhere]">
+                    {summaryContent}
+                  </p>
+                ) : (
+                  <p className="text-sm leading-7 text-muted-foreground">
+                    Sem resumo comercial preenchido para este anúncio no momento.
+                  </p>
+                )}
+              </div>
+
               <div className="space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/75">
                   Descrição comercial
@@ -643,10 +659,10 @@ export function ListingDetailsPage() {
 
       {relatedListingsQuery.data?.length ? (
         <FeaturedListingsSection
-          description="Outros anúncios aprovados na mesma categoria para ampliar comparação e navegação comercial."
+          description="Outros anúncios aprovados no mesmo segmento hierárquico para ampliar comparação e navegação comercial."
           eyebrow="Relacionados"
           listings={relatedListingsQuery.data}
-          title="Mais anúncios desta categoria"
+          title="Mais anúncios deste segmento"
         />
       ) : null}
 

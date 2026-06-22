@@ -409,6 +409,27 @@ a {
   line-height: 1.8;
 }
 
+.listing-editor .ql-toolbar.ql-snow {
+  border: 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+}
+
+.listing-editor .ql-container.ql-snow {
+  min-height: 260px;
+  border: 0;
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  font-family: "Poppins", sans-serif;
+}
+
+.listing-editor .ql-editor {
+  min-height: 260px;
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
 .listing-rich-content blockquote {
   border-left: 4px solid color-mix(in srgb, var(--primary) 45%, white);
   padding-left: 1rem;
